@@ -1,1 +1,0 @@
-"use strict";app.directive("headerNotification",["authService",function(authService){return{templateUrl:"scripts/directives/header/header-notification/header-notification.html",restrict:"E",replace:!0,controller:function($scope){$scope.authService=authService}}}]);

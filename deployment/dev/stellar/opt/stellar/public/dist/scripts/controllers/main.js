@@ -1,1 +1,0 @@
-"use strict";angular.module("aerospike.stellar").controller("MainController",["$scope","$position","flash",function(){}]);

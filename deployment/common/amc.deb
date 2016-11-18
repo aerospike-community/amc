@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# amc        Manage the amc app server
+#
+# chkconfig: 2345 95 01
+# description: amc is Aerospike Cloud's Application Server
+# processname: amc
+# config: /etc/amc.conf
+# pidfile: /var/run/amc.pid
+
+### BEGIN INIT INFO
+# Provides:       amc
+# Required-Start: $local_fs $network
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop:  0 1 6
+# Short-Description: Manage the amc app server
+# Description: amc is the Aerospike Cloud Application Server
+### END INIT INFO
+
+# source function library
+#. /etc/init.d/functions
+. /lib/lsb/init-functions
+
+#set -x
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/opt/amc
+
+prog="amc"
+user="root"
+exec="/opt/amc/$prog"
+pidfile="/var/run/$prog.pid"
+logfile="/var/log/$prog.log"
+conffile="/etc/amc.conf"
+confdir="/etc/amc"
+
+# pull in sysconfig settings
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+export GOMAXPROCS=${GOMAXPROCS:-2}
+
+start() {
+    [ -x $exec ] || exit 5
+
+    # [ -f $conffile ] || exit 6
+    # [ -d $confdir ] || exit 6
+
+    umask 077
+    touch $pidfile
+    umask 022
+    touch $logfile
+    chown $user:$user $logfile $pidfile
+
+    echo -n $"Starting $prog: "
+
+    ## holy shell shenanigans, batman!
+    ## daemon can't be backgrounded.  we need the pid of the spawned process,
+    ## which is actually done via runuser thanks to --user.  you can't do "cmd
+    ## &; action" but you can do "{cmd &}; action".
+    ##start-stop-daemon --start –-background –-quiet –-pidfile $pidfile -c $user –-exec $exec —- -config-file=$conffile -config-dir=$confdir >> $logfile
+    start-stop-daemon --start --pidfile $pidfile -c $user --exec $exec --background -C -m -- -config-file=$conffile -config-dir=$confdir >> $logfile 2>/dev/null
+
+    RETVAL=$?
+    echo $RETVAL
+
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    ## graceful shutdown with SIGINT
+    start-stop-daemon --stop --pidfile $pidfile
+    RETVAL=$?
+    echo $RETVAL
+    return $RETVAL
+}
+
+status() {
+    echo -n $"Status of $prog: "
+    start-stop-daemon --status --pidfile $pidfile
+    RETVAL=$?
+    echo $RETVAL
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start)
+        $1
+        ;;
+    stop)
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    status)
+        $1
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart}"
+        exit 2
+esac
+
+exit $?

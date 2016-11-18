@@ -1,1 +1,0 @@
-"use strict";angular.module("aerospike.stellar").controller("LandingController",["$scope","$modal","flash",function($scope,$modal){$scope.login=function(){$modal.open({templateUrl:"/views/login/login.html",controller:"LoginController"})}}]);

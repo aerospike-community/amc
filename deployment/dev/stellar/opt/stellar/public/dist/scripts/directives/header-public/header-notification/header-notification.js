@@ -1,1 +1,0 @@
-"use strict";app.directive("headerNotificationPublic",function(){return{templateUrl:"scripts/directives/header-public/header-notification/header-notification.html",restrict:"E",replace:!0}});

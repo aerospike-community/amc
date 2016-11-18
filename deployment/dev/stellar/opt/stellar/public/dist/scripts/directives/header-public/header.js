@@ -1,1 +1,0 @@
-"use strict";app.directive("headerPublic",function(){return{templateUrl:"scripts/directives/header-public/header.html",restrict:"E",replace:!0}});

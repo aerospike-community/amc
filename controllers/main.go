@@ -45,17 +45,16 @@ func Server(edition, version, build string) {
 	amcBuild = build
 	amcEdition = edition
 
-	// observer := observer.New()
-
 	_defaultClientPolicy.Timeout = 5 * time.Second
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
 	_defaultClientPolicy.ConnectionQueueSize = 2
-	// observer.Register(cp, "ubvm", 3000)
 
 	e := echo.New()
 
-	e.Static("/", "static")
-	e.Static("/static", "static")
+	e.Static("/", "/opt/amc/static")
+	e.Static("/static", "/opt/amc/static")
+	// e.Static("/", "static")
+	// e.Static("/static", "static")
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -91,5 +90,5 @@ func Server(edition, version, build string) {
 	log.Debugf("Starting AMC server, version: %s %s", amcVersion, amcEdition)
 
 	// Start server
-	e.Run(standard.New(":8090"))
+	e.Run(standard.New(":8081"))
 }
