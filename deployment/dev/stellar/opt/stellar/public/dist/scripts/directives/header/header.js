@@ -1,0 +1,1 @@
+"use strict";app.directive("header",["$location","authService",function($location){return{templateUrl:"scripts/directives/header/header.html",restrict:"E",replace:!0,controller:function($scope){$scope.isActive=function(viewLocation){return viewLocation===$location.path()}}}}]);

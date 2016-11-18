@@ -9,7 +9,7 @@ edition=$1
 build=`date -u +%Y%m%d.%H%M%S`
 version=`git describe --tags $(git rev-list --tags --max-count=1)`
 # tag=`git rev-parse --short HEAD`
-version_build="$version-$build"
+version_build="$edition-$version-$build"
 
 # build binary
 godep go build -a -tags $edition -ldflags "-X main.amcEdition=$edition -X main.amcBuild=$build -X main.amcVersion=$version" -o deployment/release/amc/usr/local/bin/amc .
@@ -31,6 +31,5 @@ godep go build -a -tags $edition -ldflags "-X main.amcEdition=$edition -X main.a
 # cd ..
 
 # rm  *.rpm
-# fpm -s dir -t rpm -n "stellar" -v $version_build  -C deployment/release/stellar .
-# fpm -s dir -t rpm -n "ascloud" -v $version_build  -C deployment/release/ascloud .
+# fpm -s dir -t rpm -n "amc" -v $version_build  -C deployment/release/amc .
 
