@@ -1,4 +1,4 @@
-var requireConfig = {
+require.config({
     paths: {
         //Libraries
         jquery: "libs/jquery/consolidated-jquery-functionalities.min",
@@ -17,12 +17,7 @@ var requireConfig = {
             deps: ['underscore', 'jquery'],
         }
     }
-};
-
-if( _AMC_VERSION_.indexOf("DEV") === -1 )
-    requireConfig.urlArgs = ("v=" + ( _AMC_VERSION_ != null ? _AMC_VERSION_ : (new Date()).getTime() ) );
-
-require.config( requireConfig );
+});
 
 require(["onepage"],function(onepage){
     onepage();
