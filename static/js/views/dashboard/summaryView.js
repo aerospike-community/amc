@@ -83,26 +83,32 @@ define(["jquery", "underscore", "backbone", "helper/util", "d3"], function($, _,
         },
 
         updateAlertsSummary : function(activeRedAlerts){
-			var that = this;
-			var imageElement = document.getElementById("summaryAlertsImage");
+          var that = this;
+          var imageElement = document.getElementById("summaryAlertsImage");
+          var elm;
 
+          if(Util.isCommunityEdition()) { // remove alerts
+            $('#alerts_overview').remove();
+            $('#cluster_setup_overview').parent().removeClass().addClass('grid_8');
+          } else {
             if(imageElement !== null){
-                imageElement.innerHTML = "";
-    			if(activeRedAlerts > 0){
-                    $("#summaryAlertsValue").text("Active red alert" + (activeRedAlerts > 1 ? "s" : "") + " : " + activeRedAlerts);
-                    $("#summaryAlertsValue").removeClass("no-alerts");
-                    $("#summaryAlertsImage").removeClass("no-alerts");
-    				$("#summaryAlertsImage").append(that.activeAlertsDiv);
-                } else{
-                    $("#summaryAlertsValue").text("No active red alerts");
-                    $("#summaryAlertsValue").addClass("no-alerts");
-                    $("#summaryAlertsImage").addClass("no-alerts");
-                    $("#summaryAlertsImage").append(that.noAlertsDiv);
-                }
-    			
-    			$("#summaryAlertsImage img").attr("width","100%");
-    			$("#summaryAlertsImage img").attr("height","100%");	
+              imageElement.innerHTML = "";
+              if(activeRedAlerts > 0){
+                $("#summaryAlertsValue").text("Active red alert" + (activeRedAlerts > 1 ? "s" : "") + " : " + activeRedAlerts);
+                $("#summaryAlertsValue").removeClass("no-alerts");
+                $("#summaryAlertsImage").removeClass("no-alerts");
+                $("#summaryAlertsImage").append(that.activeAlertsDiv);
+              } else{
+                $("#summaryAlertsValue").text("No active red alerts");
+                $("#summaryAlertsValue").addClass("no-alerts");
+                $("#summaryAlertsImage").addClass("no-alerts");
+                $("#summaryAlertsImage").append(that.noAlertsDiv);
+              }
+
+              $("#summaryAlertsImage img").attr("width","100%");
+              $("#summaryAlertsImage img").attr("height","100%");	
             }
+          }
         },
 
         bindEvents : function(data){

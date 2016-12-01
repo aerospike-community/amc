@@ -98,6 +98,13 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    		this.hideAllHeaderTab();
 	    		Notification.toastNotification('red',"You don't have access to any module",false,true);
             }
+
+          // remove all elements visible only to enterprise edition users
+          if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]) {
+            _.each(this._enterpriseOnlyElements_, function(elm) {
+              $(elm).remove();
+            });
+          }
         },
     
         showComponentsInActivePage : function(activePage){
@@ -295,9 +302,16 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    	return obj;
 	    },
 
-	    setNonSecureUserServices : function(){
-	    	window.AMCGLOBALS.persistent.serviceList = this._nonSecureUserServiceList_;
-	    },
+      setNonSecureUserServices : function(){
+        if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]) {  // community edition
+          window.AMCGLOBALS.persistent.serviceList = this._communityUserServiceList_;
+        } else { // enterprise edition
+          window.AMCGLOBALS.persistent.serviceList = this._nonSecureUserServiceList_;
+        }
+      },
+
+      // elements visible only in the enterprise edition
+      _enterpriseOnlyElements_: ["#UserDropdownButton", "#AlertDropdownButton", "#amcSettingsButton", "#activityLogger"],
 
 	    _headerTabElements_ : ["ul.tab-list li.tab a#dasboardTabLink",
 	                     "ul.tab-list li.tab a#statTabLink",
@@ -467,6 +481,22 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    					"REMOVE_UDF", 
 	    					"EDIT_CONFIG", 
 	    					"AMC_REFRESH_INTERVAL",
+	    					],
+
+	    _communityUserServiceList_ : [
+	    					"DASHBOARD_PAGE", 
+	    					"DASHBOARD_SUMMARY", 
+	    					"THROUGHPUT", 
+	    					"DASHBOARD_NODE_SECTION", 
+	    					"DASHBOARD_NAMESPACE_SECTION", 
+	    					"DASHBOARD_NODE_ON_OFF", 
+	    					"STATISTIC_PAGE", 
+	    					"DEFINITION_PAGE", 
+	    					"JOBS_PAGE", 
+	    					"CREATE_INDEX", 
+	    					"DROP_INDEX",
+	    					"REGISTER_UDF", 
+	    					"REMOVE_UDF", 
 	    					],
 	    
 	    /* Must not be modified this field anywhere in application except from this location*/

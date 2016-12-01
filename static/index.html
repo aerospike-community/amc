@@ -28,15 +28,15 @@ under the License.
     <link rel="icon" type="image/png" href="/static/images/favicon.png" />
 
     <link rel='stylesheet' href='/static/css/jqueryui/jquery-ui-1.10.4.custom.min.css' />
-<link rel='stylesheet' href='/static/css/timeseries.css' />
-<link rel='stylesheet' href='/static/css/jqgrid/nav.buttons.jquerui.css' />
-<link rel='stylesheet' href='/static/css/vertical-tabs.css' />
-<link rel='stylesheet' href='/static/css/jqgrid/ui.jqgrid.css' />
-<link rel='stylesheet' href='/static/css/grid/960.css' />
-<link rel='stylesheet' href='/static/css/common.css' />
-<link rel='stylesheet' href='/static/css/alerts.css' />
-<link rel='stylesheet' href='/static/css/sprite.css' />
-<link rel='stylesheet' href='/static/css/icons.css' />
+    <link rel='stylesheet' href='/static/css/jqgrid/nav.buttons.jquerui.css' />
+    <link rel='stylesheet' href='/static/css/vertical-tabs.css' />
+    <link rel='stylesheet' href='/static/css/jqgrid/ui.jqgrid.css' />
+    <link rel='stylesheet' href='/static/css/grid/960.css' />
+    <link rel='stylesheet' href='/static/css/timeseries.css' />
+    <link rel='stylesheet' href='/static/css/common.css' />
+    <link rel='stylesheet' href='/static/css/alerts.css' />
+    <link rel='stylesheet' href='/static/css/sprite.css' />
+    <link rel='stylesheet' href='/static/css/icons.css' />
 
 
 </head>
@@ -1174,8 +1174,8 @@ under the License.
             </div>
         </div>
 
-        <div class="grid_4">
-            <div class="card_layout" id="alerts_overview">
+        <div class="grid_4" id="alerts_overview">
+            <div class="card_layout">
                 <div class="title-bar cluster_overview_title">
                     <div class="img-icon-exclamation icon-alerts"></div>
                     <div class="title-bar-header" title="Click to show/hide panel">
@@ -1629,9 +1629,8 @@ under the License.
 </script>
 
 
-    <!-- SCRIPTS -->
-    <script>(function(){ window._AMC_VERSION_ = 'DEV-enterprise-3.6.13_' + ( (new Date()).getTime() ); }).call();</script>
-    <script src="/static/js/libs/jquery/consolidated-jquery-functionalities.min.js" data-main="/static/js/onepage"></script>
+    <!-- load main file -->
+    <script src="/static/js/libs/jquery/consolidated-jquery-functionalities.min.js"></script>
     <script src="/static/js/libs/require/require.js" data-main="/static/js/setup"></script>
 
 </body>

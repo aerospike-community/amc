@@ -19,6 +19,7 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "backbone", "poller", "config/app-config", "underscore","helper/AjaxManager","helper/servicemanager","helper/usermanager","helper/notification" , "helper/overlay"], function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay){
+
     var Util = {
         initAMC: function(){
             Util.EnableCrossBrowserConsole();
@@ -37,6 +38,19 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                     Util.logger.setDefaultValueToDuration();
                 }
             });
+        },
+
+        isCommunityEdition: function() {
+          var edition = window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE 
+          if(!edition || edition === AppConfig.amc_type[0]) {  
+            return true;
+          } else {
+            return false;
+          }
+        },
+
+        isEnterpriseEdition: function() {
+          return !this.isCommunityEdition;
         },
 
         setEnviromentSetupUI : function(){

@@ -17,8 +17,21 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters"],
-    function($, _, Backbone, Util, AppConfig, NodeListView,PopupModel,AjaxManager,AlertModel,AlertView,Poller,ServiceManager,AuthManager,Notification,SessionManager,UserManager,MultiClusters) {
+define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters", 
+    // From the requirejs optimizer docs
+    //  "The optimizer will only combine modules that are specified in arrays of
+    //   string literals that are passed to top-level require and define calls,
+    //   or the require('name') string literal calls in a simplified CommonJS
+    //   wrapping. So, it will not find modules that are loaded via a variable
+    //   name:"
+    //      in util.js require(["models/" + page + "/clustermodel"], function(ClusterModel){
+    //
+    // For the optimizer to work, these clustermodel dependecies should be
+    // required at the module level. But this causes circular dependency with
+    // authmanager. Hence including these models here.
+    'models/latency/clustermodel', 'models/jobs/clustermodel', 'models/configs/clustermodel',
+    'models/definitions/clustermodel', 'models/dashboard/clustermodel', 'models/statistics/clustermodel'
+ ], function($, _, Backbone, Util, AppConfig, NodeListView,PopupModel,AjaxManager,AlertModel,AlertView,Poller,ServiceManager,AuthManager,Notification,SessionManager,UserManager,MultiClusters) {
 
     var onepage = function(){
         window.Util = Util;
@@ -116,7 +129,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
         //Get AMC version info
         that.displayAMCVersion = function(){
-            AjaxManager.sendRequest(AppConfig.urls.GET_AMC_VERSION, {} , function(response){
+            AjaxManager.sendRequest(AppConfig.urls.GET_AMC_VERSION, {async: false} , function(response){
                 Util.createConstant(window.AMCGLOBALS.APP_CONSTANTS,"AMC_TYPE",response.amc_type);
 
                 if(response.amc_version !== 'Error reading AMC version'){
@@ -211,7 +224,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                         AuthManager._resetLogin_();
                         if(multiclusterview !== true){
                             ServiceManager.setNonSecureUserServices();
-                            ServiceManager.showAllHeaderTab();
+                            ServiceManager.showAccessibleModules();
                             window.AMCGLOBALS.persistent.seedNode = response.seed_address;
                             window.AMCGLOBALS.persistent.nodeList = response.nodes;
                         }

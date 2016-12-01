@@ -1,0 +1,19 @@
+{
+  "name": "amc",
+  "version": "3.7.0",
+  "description": "AMC client integrated with the new go server",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tejas@aerospike.com",
+  "license": "AGPLv3",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-requirejs": "^1.0.0",
+    "grunt-filerev": "^2.3.1",
+    "grunt-filerev-replace": "^0.1.5",
+    "grunt-text-replace": "^0.4.0",
+    "requirejs": "^2.3.2"
+  }
+}
