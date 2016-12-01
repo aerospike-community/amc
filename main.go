@@ -3,6 +3,7 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 
+	"github.com/aerospike/aerospike-console/common"
 	"github.com/aerospike/aerospike-console/controllers"
 )
 
@@ -11,11 +12,10 @@ var amcBuild string
 var amcEdition string
 
 func main() {
-	log.Debugf("Starting AMC server, version: %s %s", amcVersion, amcEdition)
+	log.Infof("Starting AMC server, version: %s %s", amcVersion, amcEdition)
 
-	controllers.Server(amcEdition, amcVersion, amcBuild)
-}
+	config := common.Config{}
+	common.InitConfig(&config)
 
-func init() {
-	log.SetLevel(log.DebugLevel)
+	controllers.Server(amcEdition, amcVersion, amcBuild, &config)
 }

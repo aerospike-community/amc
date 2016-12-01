@@ -2,7 +2,10 @@ package controllers
 
 import (
 	// "fmt"
+	// "encoding/json"
 	"errors"
+	"sync"
+	// "math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,6 +23,24 @@ import (
 // Handlers
 //----------
 
+func sessionId(c echo.Context) (string, error) {
+	cookie, err := c.Cookie("session")
+	if err != nil {
+		return "", err
+	}
+	if cookie.Value() == "" {
+		return "", errors.New("Invalid session id")
+	}
+	return cookie.Value(), nil
+}
+
+func errorMap(err string) map[string]interface{} {
+	return map[string]interface{}{
+		"status": "failure",
+		"error":  err,
+	}
+}
+
 func postGetClusterId(c echo.Context) error {
 	log.Info("getClusterId...")
 
@@ -32,36 +53,34 @@ func postGetClusterId(c echo.Context) error {
 
 	c.Bind(&form)
 	if len(form.SeedNode) == 0 {
-		return errors.New("No seed name specified.")
+		return c.JSON(http.StatusNotFound, errorMap("No seed name specified."))
 	}
-
-	// cookie = new(echo.Cookie)
-	// cookie.SetName("panelState")
-	// cookie.SetValue(`dashboard%3B3%2C0%3B%7Cadmin-console%3B%7Clatency%3B; shownAlerts=5%3Af68304f0-14f3-4ead-b13e-74ec7340e490%3B4%3Af68304f0-14f3-4ead-b13e-74ec7340e490%3B3%3Af68304f0-14f3-4ead-b13e-74ec7340e490%3B2%3Af68304f0-14f3-4ead-b13e-74ec7340e490%3B1%3Af68304f0-14f3-4ead-b13e-74ec7340e490%3B2%3Aa552508e-4e8f-40c4-bdcd-45d020a18080%3B1%3Aa552508e-4e8f-40c4-bdcd-45d020a18080%3B1%3Ac5da26f4-8cd6-4bf6-bbf9-181eb562fbed%3B2%3A17c629d3-f096-4f0c-a0cd-b134e724c6c9%3B1%3A17c629d3-f096-4f0c-a0cd-b134e724c6c9%3B3%3Aa76dc6a4-7c9f-4499-bf6a-c40dff4cec0b%3B2%3Aa76dc6a4-7c9f-4499-bf6a-c40dff4cec0b%3B1%3Aa76dc6a4-7c9f-4499-bf6a-c40dff4cec0b%3B3%3Af92fc7bf-d92c-4216-ad8a-00316fe3b0ad%3B2%3Af92fc7bf-d92c-4216-ad8a-00316fe3b0ad%3B1%3Af92fc7bf-d92c-4216-ad8a-00316fe3b0ad%3B3%3A2e419c02-ec5c-4bb6-9c19-9fada35769a2%3B2%3A2e419c02-ec5c-4bb6-9c19-9fada35769a2%3B1%3A2e419c02-ec5c-4bb6-9c19-9fada35769a2%3B2%3Af82f25b7-cca7-438e-b16e-b8446fb19699%3B1%3Af82f25b7-cca7-438e-b16e-b8446fb19699%3B14%3A4032fa69-7310-4816-b5b5-2c8ca5aeb99a%3B13%3A4032fa69-7310-4816-b5b5-2c8ca5aeb99a%3B12%3A4032fa69-7310-4816-b5b5-2c8ca5aeb99a%3B11%3A4032fa69-7310-4816-b5b5-2c8ca5aeb99a%3B7%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B6%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B5%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B4%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B3%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B2%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B1%3A7ca0ba2e-697b-41fc-ba72-d2248ec70362%3B8%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B7%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B6%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B5%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B4%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B3%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B2%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B1%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B9%3Accd16e0f-3298-4392-9e3b-3cf274f293b0%3B40%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B39%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B38%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B35%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B34%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B33%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B32%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B31%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B29%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B28%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B27%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B26%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B25%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B24%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B23%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B22%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B21%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B20%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B19%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B18%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B17%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B16%3Ac9e5d740-ebc8-4391-8721-563d23ddbd17%3B1%3Aa00b5a61-6e1a-4516-9f91-ba8c6a2324eb%3B16%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B15%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B14%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B13%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B12%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B11%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B10%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B9%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B8%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B7%3A9dcc9755-7dbb-46ed-91de-7f313c31bdac%3B`)
-	// cookie.SetExpires(time.Now().Add(24 * time.Hour))
-	// c.SetCookie(cookie)
 
 	host, port, err := common.SplitHostPort(form.SeedNode)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, errorMap(err.Error()))
 	}
 
-	clientPolicy := *_defaultClientPolicy
-	clientPolicy.User = form.Username
-	clientPolicy.Password = form.Password
-	cluster, err := _observer.Register(&clientPolicy, host, uint16(port))
-	if err != nil {
-		if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
-			// create output
-			response := map[string]interface{}{
-				"security_enabled": true,
-				"cluster_id":       nil,
-			}
-			return c.JSON(http.StatusOK, response)
-		}
+	cluster := _observer.FindClusterBySeed(host, port, form.Username)
 
-		log.Error(err)
-		return err
+	if cluster == nil {
+		clientPolicy := *_defaultClientPolicy
+		clientPolicy.User = form.Username
+		clientPolicy.Password = form.Password
+		cluster, err = _observer.Register(&clientPolicy, host, uint16(port))
+		if err != nil {
+			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
+				// create output
+				response := map[string]interface{}{
+					"security_enabled": true,
+					"cluster_id":       nil,
+				}
+				return c.JSON(http.StatusOK, response)
+			}
+
+			log.Error(err)
+			return c.JSON(http.StatusNotFound, errorMap(err.Error()))
+		}
 	}
 
 	cookie := new(echo.Cookie)
@@ -107,6 +126,13 @@ func postGetClusterId(c echo.Context) error {
 }
 
 func getCurrentMonitoringClusters(c echo.Context) error {
+
+	// TODO: fix it here; this is for logins
+	// _, err := sessionId(c)
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, errorMap("invalid session : None"))
+	// }
+
 	return c.JSON(http.StatusOK, _observer.MonitoringClusters())
 
 	// return c.JSONBlob(http.StatusOK, []byte(`[
@@ -192,7 +218,7 @@ func getCluster(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return errors.New("Cluster not found")
+		return c.JSON(http.StatusNotFound, errorMap("cluster not found"))
 	}
 
 	builds := cluster.NodeBuilds()
@@ -235,7 +261,7 @@ func getClusterBasic(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return errors.New("Cluster not found")
+		return c.JSON(http.StatusNotFound, errorMap("cluster not found"))
 	}
 
 	builds := cluster.NodeBuilds()
@@ -340,6 +366,198 @@ func getClusterBasic(c echo.Context) error {
 	// }`))
 }
 
+var opMapper = map[string]string{
+	"read":  "reads",
+	"write": "writes",
+	"query": "query",
+	"scan":  "scan",
+	"udf":   "udf",
+}
+
+func transformLatency(latestLatency map[string]common.Stats) common.Stats {
+	const LTE = "&#x2264;"
+
+	latencies := make(common.Stats, len(latestLatency))
+
+	for op, stats := range latestLatency {
+		buckets := stats["buckets"].([]string)
+		valBuckets := stats["valBuckets"].([]float64)
+
+		totalOver1ms := 0.0
+		for _, v := range valBuckets {
+			totalOver1ms += v
+		}
+
+		tps := stats.TryFloat("tps", 0)
+		tpsCalc := tps
+		if tpsCalc == 0 {
+			tpsCalc = 1
+		}
+
+		timestamp := stats["timestamp"].(string)
+		timestamp = timestamp[:8]
+
+		data := make([]map[common.JsonRawString]interface{}, 0, len(buckets)+1)
+
+		if len(buckets) > 0 {
+			data = append(data, map[common.JsonRawString]interface{}{
+				common.JsonRawString(LTE + buckets[0][1:]): common.Stats{
+					"value": common.Round(tps*(100-totalOver1ms)/100, 0.01, 2),
+					"pct":   common.Round(100.0-totalOver1ms, 0.01, 2),
+				},
+			})
+		}
+
+		for i := range buckets {
+			title := buckets[i]
+			if i < len(buckets)-1 {
+				title += " to " + LTE + buckets[i+1][1:]
+			}
+			data = append(data, map[common.JsonRawString]interface{}{
+				common.JsonRawString(title): common.Stats{
+					"value": valBuckets[i] * tps / 100,
+					"pct":   common.Round(valBuckets[i], 0.01, 2),
+				},
+			})
+		}
+
+		latencies[opMapper[op]] = common.Stats{
+			"timestamp": timestamp,
+			"ops/sec":   tps,
+			"data":      data,
+		}
+	}
+
+	return latencies
+}
+
+func getNodeLatencyHistory(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
+	}
+
+	since := time.Now().Unix() - (31 * 60) // 30 minutes
+	beginStr := c.Param("start_time")
+	if beginStr != "" {
+		sinceUnix, err := strconv.ParseInt(beginStr, 10, 64)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Invalid start_time value"})
+		}
+		since = sinceUnix / 1000
+	}
+
+	node := cluster.FindNodeByAddress(c.Param("nodes"))
+	if node == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"status": "failure", "error": "Node not found"})
+	}
+
+	latencyHistory := []common.Stats{}
+	for _, latency := range node.LatencySince(time.Unix(since, 0)) {
+		latencyHistory = append(latencyHistory, transformLatency(latency))
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"node_status":     node.Status(),
+		"node_build":      node.Build(),
+		"latency_history": latencyHistory,
+		"address":         node.Address(),
+	})
+}
+
+func getNodeLatency(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
+	}
+
+	nodes := cluster.FindNodesByAddress(strings.Split(c.Param("nodes"), ",")...)
+	if len(nodes) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"status": "failure", "error": "Node not found"})
+	}
+
+	res := map[string]interface{}{}
+	for _, node := range nodes {
+		latestLatency := node.LatestLatency()
+		res[node.Address()] = common.Stats{
+			"latency":     transformLatency(latestLatency),
+			"node_status": node.Status(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
+
+	// sres := `{
+	//    "172.16.224.150:3000":{
+	//       "latency":{
+	//          "reads":{
+	//             "timestamp":"17:01:21",
+	//             "data":[
+	//                {
+	//                   "&#x2264;1ms":{
+	//                      "pct":94.58,
+	//                      "value":5397.2077
+	//                   }
+	//                },
+	//                {
+	//                   ">1ms to &#x2264;8ms":{
+	//                      "pct":5.29,
+	//                      "value":301.87385
+	//                   }
+	//                },
+	//                {
+	//                   ">8ms to &#x2264;64ms":{
+	//                      "pct":0.13,
+	//                      "value":7.41845
+	//                   }
+	//                },
+	//                {
+	//                   ">64ms":{
+	//                      "pct":0.0,
+	//                      "value":0.0
+	//                   }
+	//                }
+	//             ],
+	//             "ops/sec":5706.5
+	//          },
+	//          "writes":{
+	//             "timestamp":"17:01:21",
+	//             "data":[
+	//                {
+	//                   "&#x2264;1ms":{
+	//                      "pct":48.97,
+	//                      "value":704.13963
+	//                   }
+	//                },
+	//                {
+	//                   ">1ms to &#x2264;8ms":{
+	//                      "pct":50.580000000000005,
+	//                      "value":727.2898200000001
+	//                   }
+	//                },
+	//                {
+	//                   ">8ms to &#x2264;64ms":{
+	//                      "pct":0.44999999999999996,
+	//                      "value":6.47055
+	//                   }
+	//                },
+	//                {
+	//                   ">64ms":{
+	//                      "pct":0.0,
+	//                      "value":0.0
+	//                   }
+	//                }
+	//             ],
+	//             "ops/sec":1437.9
+	//          }
+	//       },
+	//       "node_status":"on"
+	//    }
+	// }`
+}
+
 func getClusterThroughputHistory(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
@@ -347,14 +565,14 @@ func getClusterThroughputHistory(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
 	}
 
-	since := time.Now().Unix() - 34
+	since := time.Now().Unix() - (31 * 60) // 30 minutes
 	beginStr := c.Param("start_time")
 	if beginStr != "" {
-		sinceUnix, err := strconv.ParseInt(beginStr, 64, 10)
+		sinceUnix, err := strconv.ParseInt(beginStr, 10, 64)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Invalid start_time value"})
 		}
-		since = sinceUnix
+		since = sinceUnix / 1000
 	}
 
 	// make the output. x: timestamp, y: total reqs, y: successful reqs
@@ -393,7 +611,7 @@ func getClusterThroughputHistory(c echo.Context) error {
 		for node, yValuesList := range primaryVals {
 			statList := make([]chartStat, 0, len(yValuesList))
 			for i, yValues := range yValuesList {
-				statList = append(statList, chartStat{X: yValues.TimestampJson(), Y: yValues.Value(), Secondary: secondaryVals[node][i].Value()})
+				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(), Secondary: secondaryVals[node][i].Value()})
 			}
 			statRes[node] = statList
 		}
@@ -408,7 +626,7 @@ func getClusterThroughput(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	// make the output. x: timestamp, y: total reqs, y: successful reqs
@@ -444,7 +662,7 @@ func getClusterThroughput(c echo.Context) error {
 
 		statRes := map[string]chartStat{}
 		for node, yValues := range primaryVals {
-			statRes[node] = chartStat{X: yValues.TimestampJson(), Y: yValues.Value(), Secondary: secondaryVals[node].Value()}
+			statRes[node] = chartStat{X: yValues.TimestampJson(nil), Y: yValues.Value(), Secondary: secondaryVals[node].Value()}
 		}
 
 		res[outStatName] = statRes
@@ -508,253 +726,320 @@ func getClusterThroughput(c echo.Context) error {
 }
 
 func getClusterNodes(c echo.Context) error {
-	// clusterUuid := c.Param("clusterUuid")
-	// nodes := c.Param("nodes")
-	// fmt.Println(clusterUuid, nodes)
-	return c.JSONBlob(http.StatusOK, []byte(`{
-		"172.16.224.150:3030": {
-			"system_free_mem_pct": "34",
-			"nsup-threads": "n/s",
-			"cluster_integrity": "true",
-			"storage_defrag_records": "n/s",
-			"scan-priority": "n/s",
-			"client_connections": "10",
-			"migrate_progress_recv": "0",
-			"replication-fire-and-forget": "n/s",
-			"storage-benchmarks": "n/s",
-			"stat_write_errs": "n/s",
-			"node_status": "on",
-			"objects": "15631",
-			"tombstones": "0",
-			"proto-fd-max": "10000",
-			"system_swapping": "false",
-			"err_write_fail_prole_unknown": "n/s",
-			"disk": {
-				"used-bytes-disk": 0,
-				"free-bytes-disk": 1073741824,
-				"total-bytes-disk": 1073741824
-			},
-			"queue": "0",
-			"uptime": "508426",
-			"err_out_of_space": "n/s",
-			"tsvc_queue": "0",
-			"migrate_progress_send": "0",
-			"client-fd-max": "n/s",
-			"migrate_incoming_remaining": 0,
-			"free-pct-memory": "n/s",
-			"cluster_name": "N/A",
-			"migrate_outgoing_remaining": 0,
-			"cluster_visibility": true,
-			"build": "3.10.0.3",
-			"cluster_size": "4",
-			"memory": {
-				"free-bytes-memory": 2143711433,
-				"total-bytes-memory": 2147483648,
-				"used-bytes-memory": 3772215
-			},
-			"stat_duplicate_operation": "n/s",
-			"free-pct-disk": "n/s",
-			"batch_errors": "n/s",
-			"same_cluster": "True"
-		},
-		"172.16.224.150:3010": {
-			"system_free_mem_pct": "34",
-			"nsup-threads": "n/s",
-			"cluster_integrity": "true",
-			"storage_defrag_records": "n/s",
-			"scan-priority": "n/s",
-			"client_connections": "10",
-			"migrate_progress_recv": "0",
-			"replication-fire-and-forget": "n/s",
-			"storage-benchmarks": "n/s",
-			"stat_write_errs": "n/s",
-			"node_status": "on",
-			"objects": "15624",
-			"tombstones": "0",
-			"proto-fd-max": "10000",
-			"system_swapping": "false",
-			"err_write_fail_prole_unknown": "n/s",
-			"disk": {
-				"used-bytes-disk": 0,
-				"free-bytes-disk": 1073741824,
-				"total-bytes-disk": 1073741824
-			},
-			"queue": "0",
-			"uptime": "508426",
-			"err_out_of_space": "n/s",
-			"tsvc_queue": "0",
-			"migrate_progress_send": "0",
-			"client-fd-max": "n/s",
-			"migrate_incoming_remaining": 0,
-			"free-pct-memory": "n/s",
-			"cluster_name": "N/A",
-			"migrate_outgoing_remaining": 0,
-			"cluster_visibility": true,
-			"build": "3.10.0.3",
-			"cluster_size": "4",
-			"memory": {
-				"free-bytes-memory": 2143730067,
-				"total-bytes-memory": 2147483648,
-				"used-bytes-memory": 3753581
-			},
-			"stat_duplicate_operation": "n/s",
-			"free-pct-disk": "n/s",
-			"batch_errors": "n/s",
-			"same_cluster": "True"
-		},
-		"172.16.224.150:3020": {
-			"system_free_mem_pct": "34",
-			"nsup-threads": "n/s",
-			"cluster_integrity": "true",
-			"storage_defrag_records": "n/s",
-			"scan-priority": "n/s",
-			"client_connections": "10",
-			"migrate_progress_recv": "0",
-			"replication-fire-and-forget": "n/s",
-			"storage-benchmarks": "n/s",
-			"stat_write_errs": "n/s",
-			"node_status": "on",
-			"objects": "15345",
-			"tombstones": "0",
-			"proto-fd-max": "10000",
-			"system_swapping": "false",
-			"err_write_fail_prole_unknown": "n/s",
-			"disk": {"used-bytes-disk": 0,
-			"free-bytes-disk": 1073741824,
-			"total-bytes-disk": 1073741824},
-			"queue": "0",
-			"uptime": "508426",
-			"err_out_of_space": "n/s",
-			"tsvc_queue": "0",
-			"migrate_progress_send": "0",
-			"client-fd-max": "n/s",
-			"migrate_incoming_remaining": 0,
-			"free-pct-memory": "n/s",
-			"cluster_name": "N/A",
-			"migrate_outgoing_remaining": 0,
-			"cluster_visibility": true,
-			"build": "3.10.0.3",
-			"cluster_size": "4",
-			"memory": {
-				"free-bytes-memory": 2143791714,
-				"total-bytes-memory": 2147483648,
-				"used-bytes-memory": 3691934
-			},
-			"stat_duplicate_operation": "n/s",
-			"free-pct-disk": "n/s",
-			"batch_errors": "n/s",
-			"same_cluster": "True"
-		},
-		"172.16.224.150:3000": {
-			"system_free_mem_pct": "34",
-			"nsup-threads": "n/s",
-			"cluster_integrity": "true",
-			"storage_defrag_records": "n/s",
-			"scan-priority": "n/s",
-			"client_connections": "10",
-			"migrate_progress_recv": "0",
-			"replication-fire-and-forget": "n/s",
-			"storage-benchmarks": "n/s",
-			"stat_write_errs": "n/s",
-			"node_status": "on",
-			"objects": "15686",
-			"tombstones": "0",
-			"proto-fd-max": "10000",
-			"system_swapping": "false",
-			"err_write_fail_prole_unknown": "n/s",
-			"disk": {
-				"used-bytes-disk": 0,
-				"free-bytes-disk": 1073741824,
-				"total-bytes-disk": 1073741824
-			},
-			"queue": "0",
-			"uptime": "508427",
-			"err_out_of_space": "n/s",
-			"tsvc_queue": "0",
-			"migrate_progress_send": "0",
-			"client-fd-max": "n/s",
-			"migrate_incoming_remaining": 0,
-			"free-pct-memory": "n/s",
-			"cluster_name": "N/A",
-			"migrate_outgoing_remaining": 0,
-			"cluster_visibility": true,
-			"build": "3.10.0.3",
-			"cluster_size": "4",
-			"memory": {
-				"free-bytes-memory": 2143692839,
-				"total-bytes-memory": 2147483648,
-				"used-bytes-memory": 3790809
-			},
-			"stat_duplicate_operation": "n/s",
-			"free-pct-disk": "n/s",
-			"batch_errors": "n/s",
-			"same_cluster": "True"
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+	nodeList := strings.Split(c.Param("nodes"), ",")
+
+	statKeys := []string{"system_free_mem_pct",
+		"nsup-threads",
+		"cluster_integrity",
+		"storage_defrag_records",
+		"scan-priority",
+		"client_connections",
+		"migrate_progress_recv",
+		"replication-fire-and-forget",
+		"storage-benchmarks",
+		"stat_write_errs",
+		"node_status",
+		"objects",
+		"tombstones",
+		"proto-fd-max",
+		"system_swapping",
+		"err_write_fail_prole_unknown",
+		"queue",
+		"uptime",
+		"err_out_of_space",
+		"tsvc_queue",
+		"migrate_progress_send",
+		"client-fd-max",
+		"migrate_incoming_remaining",
+		"free-pct-memory",
+		"cluster_name",
+		"migrate_outgoing_remaining",
+		"cluster_visibility",
+		"build",
+		"cluster_size",
+		"stat_duplicate_operation",
+		"free-pct-disk",
+		"batch_errors",
+		"same_cluster",
+	}
+
+	res := make(map[string]interface{}, len(nodeList))
+	for _, node := range cluster.Nodes() {
+		for _, nodeName := range nodeList {
+			if node.Address() == nodeName {
+				stats := node.AnyAttrs(statKeys...)
+				stats["cluster_visibility"] = (node.Status() == "on")
+				stats["same_cluster"] = true
+				stats["memory"] = node.Memory()
+				stats["disk"] = node.Disk()
+				stats["node_status"] = node.Status()
+				for _, key := range statKeys {
+					if _, exists := stats[key]; !exists {
+						stats[key] = common.NOT_AVAILABLE
+					}
+				}
+				res[nodeName] = stats
+			}
 		}
-	}`))
+	}
+
+	return c.JSON(http.StatusOK, res)
+
+	// return c.JSONBlob(http.StatusOK, []byte(`{
+	// 	"172.16.224.150:3030": {
+	// 		"system_free_mem_pct": "34",
+	// 		"nsup-threads": "n/s",
+	// 		"cluster_integrity": "true",
+	// 		"storage_defrag_records": "n/s",
+	// 		"scan-priority": "n/s",
+	// 		"client_connections": "10",
+	// 		"migrate_progress_recv": "0",
+	// 		"replication-fire-and-forget": "n/s",
+	// 		"storage-benchmarks": "n/s",
+	// 		"stat_write_errs": "n/s",
+	// 		"node_status": "on",
+	// 		"objects": "15631",
+	// 		"tombstones": "0",
+	// 		"proto-fd-max": "10000",
+	// 		"system_swapping": "false",
+	// 		"err_write_fail_prole_unknown": "n/s",
+	// 		"disk": {
+	// 			"used-bytes-disk": 0,
+	// 			"free-bytes-disk": 1073741824,
+	// 			"total-bytes-disk": 1073741824
+	// 		},
+	// 		"queue": "0",
+	// 		"uptime": "508426",
+	// 		"err_out_of_space": "n/s",
+	// 		"tsvc_queue": "0",
+	// 		"migrate_progress_send": "0",
+	// 		"client-fd-max": "n/s",
+	// 		"migrate_incoming_remaining": 0,
+	// 		"free-pct-memory": "n/s",
+	// 		"cluster_name": "N/A",
+	// 		"migrate_outgoing_remaining": 0,
+	// 		"cluster_visibility": true,
+	// 		"build": "3.10.0.3",
+	// 		"cluster_size": "4",
+	// 		"memory": {
+	// 			"free-bytes-memory": 2143711433,
+	// 			"total-bytes-memory": 2147483648,
+	// 			"used-bytes-memory": 3772215
+	// 		},
+	// 		"stat_duplicate_operation": "n/s",
+	// 		"free-pct-disk": "n/s",
+	// 		"batch_errors": "n/s",
+	// 		"same_cluster": "True"
+	// 	},
+	// 	"172.16.224.150:3010": {
+	// 		"system_free_mem_pct": "34",
+	// 		"nsup-threads": "n/s",
+	// 		"cluster_integrity": "true",
+	// 		"storage_defrag_records": "n/s",
+	// 		"scan-priority": "n/s",
+	// 		"client_connections": "10",
+	// 		"migrate_progress_recv": "0",
+	// 		"replication-fire-and-forget": "n/s",
+	// 		"storage-benchmarks": "n/s",
+	// 		"stat_write_errs": "n/s",
+	// 		"node_status": "on",
+	// 		"objects": "15624",
+	// 		"tombstones": "0",
+	// 		"proto-fd-max": "10000",
+	// 		"system_swapping": "false",
+	// 		"err_write_fail_prole_unknown": "n/s",
+	// 		"disk": {
+	// 			"used-bytes-disk": 0,
+	// 			"free-bytes-disk": 1073741824,
+	// 			"total-bytes-disk": 1073741824
+	// 		},
+	// 		"queue": "0",
+	// 		"uptime": "508426",
+	// 		"err_out_of_space": "n/s",
+	// 		"tsvc_queue": "0",
+	// 		"migrate_progress_send": "0",
+	// 		"client-fd-max": "n/s",
+	// 		"migrate_incoming_remaining": 0,
+	// 		"free-pct-memory": "n/s",
+	// 		"cluster_name": "N/A",
+	// 		"migrate_outgoing_remaining": 0,
+	// 		"cluster_visibility": true,
+	// 		"build": "3.10.0.3",
+	// 		"cluster_size": "4",
+	// 		"memory": {
+	// 			"free-bytes-memory": 2143730067,
+	// 			"total-bytes-memory": 2147483648,
+	// 			"used-bytes-memory": 3753581
+	// 		},
+	// 		"stat_duplicate_operation": "n/s",
+	// 		"free-pct-disk": "n/s",
+	// 		"batch_errors": "n/s",
+	// 		"same_cluster": "True"
+	// 	},
+	// 	"172.16.224.150:3020": {
+	// 		"system_free_mem_pct": "34",
+	// 		"nsup-threads": "n/s",
+	// 		"cluster_integrity": "true",
+	// 		"storage_defrag_records": "n/s",
+	// 		"scan-priority": "n/s",
+	// 		"client_connections": "10",
+	// 		"migrate_progress_recv": "0",
+	// 		"replication-fire-and-forget": "n/s",
+	// 		"storage-benchmarks": "n/s",
+	// 		"stat_write_errs": "n/s",
+	// 		"node_status": "on",
+	// 		"objects": "15345",
+	// 		"tombstones": "0",
+	// 		"proto-fd-max": "10000",
+	// 		"system_swapping": "false",
+	// 		"err_write_fail_prole_unknown": "n/s",
+	// 		"disk": {"used-bytes-disk": 0,
+	// 		"free-bytes-disk": 1073741824,
+	// 		"total-bytes-disk": 1073741824},
+	// 		"queue": "0",
+	// 		"uptime": "508426",
+	// 		"err_out_of_space": "n/s",
+	// 		"tsvc_queue": "0",
+	// 		"migrate_progress_send": "0",
+	// 		"client-fd-max": "n/s",
+	// 		"migrate_incoming_remaining": 0,
+	// 		"free-pct-memory": "n/s",
+	// 		"cluster_name": "N/A",
+	// 		"migrate_outgoing_remaining": 0,
+	// 		"cluster_visibility": true,
+	// 		"build": "3.10.0.3",
+	// 		"cluster_size": "4",
+	// 		"memory": {
+	// 			"free-bytes-memory": 2143791714,
+	// 			"total-bytes-memory": 2147483648,
+	// 			"used-bytes-memory": 3691934
+	// 		},
+	// 		"stat_duplicate_operation": "n/s",
+	// 		"free-pct-disk": "n/s",
+	// 		"batch_errors": "n/s",
+	// 		"same_cluster": "True"
+	// 	},
+	// 	"172.16.224.150:3000": {
+	// 		"system_free_mem_pct": "34",
+	// 		"nsup-threads": "n/s",
+	// 		"cluster_integrity": "true",
+	// 		"storage_defrag_records": "n/s",
+	// 		"scan-priority": "n/s",
+	// 		"client_connections": "10",
+	// 		"migrate_progress_recv": "0",
+	// 		"replication-fire-and-forget": "n/s",
+	// 		"storage-benchmarks": "n/s",
+	// 		"stat_write_errs": "n/s",
+	// 		"node_status": "on",
+	// 		"objects": "15686",
+	// 		"tombstones": "0",
+	// 		"proto-fd-max": "10000",
+	// 		"system_swapping": "false",
+	// 		"err_write_fail_prole_unknown": "n/s",
+	// 		"disk": {
+	// 			"used-bytes-disk": 0,
+	// 			"free-bytes-disk": 1073741824,
+	// 			"total-bytes-disk": 1073741824
+	// 		},
+	// 		"queue": "0",
+	// 		"uptime": "508427",
+	// 		"err_out_of_space": "n/s",
+	// 		"tsvc_queue": "0",
+	// 		"migrate_progress_send": "0",
+	// 		"client-fd-max": "n/s",
+	// 		"migrate_incoming_remaining": 0,
+	// 		"free-pct-memory": "n/s",
+	// 		"cluster_name": "N/A",
+	// 		"migrate_outgoing_remaining": 0,
+	// 		"cluster_visibility": true,
+	// 		"build": "3.10.0.3",
+	// 		"cluster_size": "4",
+	// 		"memory": {
+	// 			"free-bytes-memory": 2143692839,
+	// 			"total-bytes-memory": 2147483648,
+	// 			"used-bytes-memory": 3790809
+	// 		},
+	// 		"stat_duplicate_operation": "n/s",
+	// 		"free-pct-disk": "n/s",
+	// 		"batch_errors": "n/s",
+	// 		"same_cluster": "True"
+	// 	}
+	// }`))
 }
 
 func getClusterNamespaces(c echo.Context) error {
-	// clusterUuid := c.Param("clusterUuid")
-	// namespaces := c.Param("namespaces")
-	// nodes := c.QueryParam("nodes")
-	// fmt.Println(clusterUuid, namespaces, nodes)
-	return c.JSONBlob(http.StatusOK, []byte(`{
-		"test": {
-			"evicted-objects": 0,
-			"repl-factor": 2,
-			"prole_tombstones": 0,
-			"prole-objects-tombstones": "31143, 0",
-			"master-objects-tombstones": "31143, 0",
-			"least_available_pct": {
-				"node": null,
-				"value": null
-			},
-			"prole-objects": 31143,
-			"expired-objects": 0,
-			"master-objects": 31143,
-			"cluster_status": "on",
-			"memory": {
-				"used-bytes-memory": 15008539,
-				"total-bytes-memory": 4294967296
-			},
-			"master_tombstones": 0,
-			"disk": {
-				"used-bytes-disk": 0,
-				"total-bytes-disk": 0
-			}
-		},
-		"bar": {
-			"evicted-objects": 0,
-			"repl-factor": 2,
-			"prole_tombstones": 0,
-			"prole-objects-tombstones": "0, 0",
-			"master-objects-tombstones": "0, 0",
-			"least_available_pct": {
-				"node": "172.16.224.150:3020",
-				"value": 99
-			},
-			"prole-objects": 0,
-			"expired-objects": 0,
-			"master-objects": 0,
-			"cluster_status": "on",
-			"memory": {
-				"used-bytes-memory": 0,
-				"total-bytes-memory": 4294967296
-			},
-			"master_tombstones": 0,
-			"disk": {
-				"used-bytes-disk": 0,
-				"total-bytes-disk": 4294967296
-			}
-		}
-	}`))
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	namespaces := strings.Split(c.Param("namespaces"), ",")
+	res := cluster.NamespaceInfo(namespaces)
+	return c.JSON(http.StatusOK, res)
+
+	// return c.JSONBlob(http.StatusOK, []byte(`{
+	// 	"test": {
+	// 		"evicted-objects": 0,
+	// 		"repl-factor": 2,
+	// 		"prole_tombstones": 0,
+	// 		"prole-objects-tombstones": "31143, 0",
+	// 		"master-objects-tombstones": "31143, 0",
+	// 		"least_available_pct": {
+	// 			"node": null,
+	// 			"value": null
+	// 		},
+	// 		"prole-objects": 31143,
+	// 		"expired-objects": 0,
+	// 		"master-objects": 31143,
+	// 		"cluster_status": "on",
+	// 		"memory": {
+	// 			"used-bytes-memory": 15008539,
+	// 			"total-bytes-memory": 4294967296
+	// 		},
+	// 		"master_tombstones": 0,
+	// 		"disk": {
+	// 			"used-bytes-disk": 0,
+	// 			"total-bytes-disk": 0
+	// 		}
+	// 	},
+	// 	"bar": {
+	// 		"evicted-objects": 0,
+	// 		"repl-factor": 2,
+	// 		"prole_tombstones": 0,
+	// 		"prole-objects-tombstones": "0, 0",
+	// 		"master-objects-tombstones": "0, 0",
+	// 		"least_available_pct": {
+	// 			"node": "172.16.224.150:3020",
+	// 			"value": 99
+	// 		},
+	// 		"prole-objects": 0,
+	// 		"expired-objects": 0,
+	// 		"master-objects": 0,
+	// 		"cluster_status": "on",
+	// 		"memory": {
+	// 			"used-bytes-memory": 0,
+	// 			"total-bytes-memory": 4294967296
+	// 		},
+	// 		"master_tombstones": 0,
+	// 		"disk": {
+	// 			"used-bytes-disk": 0,
+	// 			"total-bytes-disk": 4294967296
+	// 		}
+	// 	}
+	// }`))
 }
 
 func getClusterNamespaceNodes(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	namespace := c.Param("namespace")
@@ -980,7 +1265,7 @@ func getClusterNodeAllStats(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nodeAddress := c.Param("node")
@@ -992,7 +1277,7 @@ func getClusterNodeAllStats(c echo.Context) error {
 	}
 
 	res := node.StatsAttrs()
-	for k, v := range node.ConfigAttrs().ToStats() {
+	for k, v := range node.ConfigAttrs() {
 		res[k] = v
 	}
 	res["node_status"] = node.Status()
@@ -1004,7 +1289,7 @@ func getClusterNamespaceNodeAllStats(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nodeAddress := c.Param("node")
@@ -1033,7 +1318,7 @@ func getClusterNamespaceSindexNodeAllStats(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nodeAddress := c.Param("node")
@@ -1063,7 +1348,7 @@ func getClusterXdrNodeAllStats(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nodeAddress := c.Param("node")
@@ -1087,7 +1372,7 @@ func getClusterNamespaceSindexes(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nsName := c.Param("namespace")
@@ -1109,7 +1394,7 @@ func getClusterNamespaceSets(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nsName := c.Param("namespace")
@@ -1127,7 +1412,7 @@ func getClusterJobsNode(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	nodeAddr := c.Param("node")
@@ -1159,7 +1444,7 @@ func getClusterUserRoles(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
 	}
 
 	res := map[string]interface{}{
@@ -1168,3 +1453,160 @@ func getClusterUserRoles(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func getClusterNodeAllConfig(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	nodeAddr := c.Param("node")
+	node := cluster.FindNodeByAddress(nodeAddr)
+	if node == nil {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"node_status": "off",
+		})
+	}
+
+	res := node.ConfigAttrs()
+	res["address"] = node.Address()
+	res["node_status"] = node.Status()
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func setClusterNodesConfig(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	nodeAddrs := strings.Split(c.Param("nodes"), ",")
+	res := make(common.Stats, len(nodeAddrs))
+	for _, addr := range nodeAddrs {
+		res[addr] = map[string]interface{}{"node_status": "off"}
+	}
+
+	nodes := cluster.FindNodesByAddress(nodeAddrs...)
+	if len(nodes) == 0 {
+		return c.JSON(http.StatusOK, res)
+	}
+
+	config := make(map[string]string, len(c.FormParams()))
+	for k, v := range c.FormParams() {
+		config[k] = ""
+		if len(v) > 0 {
+			config[k] = v[0]
+		}
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(nodes))
+	resChan := make(chan *common.NodeResult, len(nodes))
+
+	for _, node := range nodes {
+		go node.SetServerConfig("service", config, &wg, resChan)
+	}
+
+	wg.Wait()
+	close(resChan)
+
+	for nr := range resChan {
+		if nr.Err != nil {
+			res[nr.Name] = map[string]interface{}{"node_status": "off"}
+		} else {
+			res[nr.Name] = map[string]interface{}{
+				"node_status":      "on",
+				"unset_parameters": []string{},
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func getClusterNamespaceAllConfig(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	nodeAddr := c.Param("node")
+	node := cluster.FindNodeByAddress(nodeAddr)
+	log.Info("((((((((((((((((((((((((((((((((((((((((((((((((1", nodeAddr, node)
+	if node == nil {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"node":        nodeAddr,
+			"node_status": "off",
+		})
+	}
+
+	ns := node.NamespaceByName(c.Param("namespace"))
+	log.Info("((((((((((((((((((((((((((((((((((((((((((((((((2", ns)
+	if ns == nil {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"node":        nodeAddr,
+			"node_status": "off",
+		})
+	}
+
+	res := ns.ConfigAttrs()
+	res["node"] = nodeAddr
+	res["node_status"] = node.Status()
+
+	return c.JSON(http.StatusOK, res)
+}
+
+// func setClusterNamespaceConfig(c echo.Context) error {
+// 	clusterUuid := c.Param("clusterUuid")
+// 	cluster := _observer.FindClusterById(clusterUuid)
+// 	if cluster == nil {
+// 		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+// 	}
+
+// 	nodeAddrs := strings.Split(c.Param("nodes"), ",")
+// 	res := make(common.Stats, len(nodeAddrs))
+// 	for _, addr := range nodeAddrs {
+// 		res[addr] = map[string]interface{}{"node_status": "off"}
+// 	}
+
+// 	nodes := cluster.FindNodesByAddress(nodeAddrs...)
+// 	if len(nodes) == 0 {
+// 		return c.JSON(http.StatusOK, res)
+// 	}
+
+// 	config := make(map[string]string, len(c.FormParams()))
+// 	for k, v := range c.FormParams() {
+// 		config[k] = ""
+// 		if len(v) > 0 {
+// 			config[k] = v[0]
+// 		}
+// 	}
+
+// 	wg := sync.WaitGroup{}
+// 	wg.Add(len(nodes))
+// 	resChan := make(chan *common.NodeResult, len(nodes))
+
+// 	for _, node := range nodes {
+// 		go node.SetServerConfig("service", config, &wg, resChan)
+// 	}
+
+// 	wg.Wait()
+// 	close(resChan)
+
+// 	for nr := range resChan {
+// 		if nr.Err != nil {
+// 			res[nr.Name] = map[string]interface{}{"node_status": "off"}
+// 		} else {
+// 			res[nr.Name] = map[string]interface{}{
+// 				"node_status":      "on",
+// 				"unset_parameters": []string{},
+// 			}
+// 		}
+// 	}
+
+// 	return c.JSON(http.StatusOK, res)
+// }

@@ -3,6 +3,7 @@ package common
 import (
 	"strconv"
 	"strings"
+	"time"
 )
 
 const NOT_SUPPORTED = "n/s"
@@ -33,8 +34,12 @@ func (spv *SinglePointValue) Timestamp(mult int64) *int64 {
 	return spv.timestamp
 }
 
-func (spv *SinglePointValue) TimestampJson() *int64 {
+func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 	if spv == nil {
+		if defVal != nil {
+			val := defVal.Unix() * 1000
+			return &val
+		}
 		return nil
 	}
 
@@ -156,6 +161,16 @@ func (s Info) TryNumericValue(name string, defVal interface{}, aliases ...string
 }
 
 func addValues(v1, v2 interface{}) interface{} {
+	// first check if both are Stats
+	if v1S, ok := v1.(Stats); ok {
+		if v2S, ok := v2.(Stats); ok {
+			res := Stats{}
+			res.AggregateStats(v1S)
+			res.AggregateStats(v2S)
+			return res
+		}
+	}
+
 	v1Vali, v1i := v1.(int64)
 	v2Vali, v2i := v2.(int64)
 

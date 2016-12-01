@@ -2,6 +2,7 @@ package observer
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -28,6 +29,7 @@ type cluster struct {
 	securityEnabled bool
 	updateInterval  int // seconds
 
+	seed  string
 	alias *string
 	user  *string
 	roles *string
@@ -35,12 +37,13 @@ type cluster struct {
 	mutex sync.RWMutex
 }
 
-func newCluster(client *as.Client, user string) *cluster {
+func newCluster(client *as.Client, user, host string, port uint16) *cluster {
 	newCluster := cluster{
 		client:         client,
 		nodes:          map[as.Host]*node{},
 		updateInterval: 5, //seconds
 		uuid:           uuid.NewV4().String(),
+		seed:           host + ":" + strconv.Itoa(int(port)),
 	}
 
 	if user != "" {
@@ -229,7 +232,7 @@ func (c *cluster) NodeCompatibility() string {
 }
 
 func (c *cluster) SeedAddress() string {
-	return ""
+	return c.seed
 }
 
 func (c *cluster) Id() string {
@@ -387,6 +390,62 @@ func (c *cluster) FindNodeByAddress(address string) *node {
 	return nil
 }
 
+func (c *cluster) FindNodesByAddress(addresses ...string) []*node {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	res := make([]*node, 0, len(addresses))
+	for _, addr := range addresses {
+		if node := c.FindNodeByAddress(addr); node != nil {
+			res = append(res, node)
+		}
+	}
+
+	return res
+}
+
+func (c *cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	res := make(map[string]common.Stats, len(namespaces))
+	for _, node := range c.nodes {
+		for _, nsName := range namespaces {
+			ns := node.NamespaceByName(nsName)
+			if ns == nil {
+				continue
+			}
+
+			nsStats := res[nsName]
+			stats := ns.Stats()
+			if nsStats == nil {
+				nsStats = stats
+			} else {
+				nsStats.AggregateStats(stats)
+			}
+
+			leastDiskPct := map[string]interface{}{"node": nil, "value": nil}
+			if availPct := stats.TryFloat("available_pct", -1); availPct >= 0 {
+				if lpct := nsStats["least_available_pct"]; lpct != nil {
+					leastDiskPct = lpct.(map[string]interface{})
+				}
+				if leastDiskPct["value"] == nil || availPct < leastDiskPct["value"].(float64) {
+					leastDiskPct = map[string]interface{}{
+						"node":  node.Address(),
+						"value": availPct,
+					}
+				}
+			}
+
+			nsStats["least_available_pct"] = leastDiskPct
+			nsStats["cluster_status"] = c.Status()
+			res[nsName] = nsStats
+		}
+	}
+
+	return res
+}
+
 func (c *cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string]interface{} {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -440,9 +499,16 @@ func (c *cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 }
 
 func (c *cluster) CurrentUserRoles() []string {
-	list, err := c.client.QueryUsers(nil)
-
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", list, err)
+	// TODO: do this on cluster update
+	var list []*as.UserRoles
+	for i := 0; i < 3; i++ {
+		var err error
+		list, err = c.client.QueryUsers(nil)
+		if err != nil {
+			log.Errorf("Error encountered querying the users: %s", err)
+		}
+		break
+	}
 
 	for _, u := range list {
 		if strings.ToLower(u.User) == *c.user {
