@@ -13,8 +13,8 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 
-	"github.com/aerospike/aerospike-console/common"
-	"github.com/aerospike/aerospike-console/observer"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/observer"
 )
 
 var (
@@ -75,6 +75,7 @@ func Server(edition, version, build string, config *common.Config) {
 	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
 	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
+	e.GET("/aerospike/service/clusters/:clusterUuid/fire_cmd", postClusterFireCmd)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", getClusterThroughput)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", getClusterThroughputHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency/:nodes", getNodeLatency)

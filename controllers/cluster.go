@@ -16,7 +16,7 @@ import (
 	ast "github.com/aerospike/aerospike-client-go/types"
 	"github.com/labstack/echo"
 
-	"github.com/aerospike/aerospike-console/common"
+	"github.com/citrusleaf/amc/common"
 )
 
 //----------
@@ -123,6 +123,19 @@ func postGetClusterId(c echo.Context) error {
 	// 	],
 	// 	"seed_address": "172.16.224.150:3000"
 	// }`))
+}
+
+func postClusterFireCmd(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	node := cluster.RandomActiveNode()
+	if node == nil {
+		return c.JSON(http.StatusNotFound, errorMap("No active nodes found in the cluster"))
+	}
 }
 
 func getCurrentMonitoringClusters(c echo.Context) error {
@@ -1536,16 +1549,16 @@ func getClusterNamespaceAllConfig(c echo.Context) error {
 
 	nodeAddr := c.Param("node")
 	node := cluster.FindNodeByAddress(nodeAddr)
-	log.Info("((((((((((((((((((((((((((((((((((((((((((((((((1", nodeAddr, node)
+	// log.Info("((((((((((((((((((((((((((((((((((((((((((((((((1", nodeAddr, node)
 	if node == nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
 			"node":        nodeAddr,
 			"node_status": "off",
 		})
 	}
 
 	ns := node.NamespaceByName(c.Param("namespace"))
-	log.Info("((((((((((((((((((((((((((((((((((((((((((((((((2", ns)
+	// log.Info("((((((((((((((((((((((((((((((((((((((((((((((((2", ns)
 	if ns == nil {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"node":        nodeAddr,

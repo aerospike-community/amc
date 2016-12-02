@@ -11,8 +11,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
-	"github.com/aerospike/aerospike-console/common"
-	"github.com/aerospike/aerospike-console/rrd"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/rrd"
 )
 
 type NodeStatus string
@@ -281,7 +281,7 @@ func (n *node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "get-config:",
+		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
 	}
 
 	// add namespace stat requests
@@ -304,6 +304,7 @@ func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	defer n.mutex.Unlock()
 	// alias stats
 	stats["queue"] = stats.TryInt("tsvc_queue", 0)
+	stats["cluster_name"] = n.latestInfo.TryString("cluster-name", "")
 	if v := stats.Get("xdr_read_success"); v != nil {
 		stats["xdr_read_reqs"] =
 			stats.TryInt("xdr_read_success", 0) +

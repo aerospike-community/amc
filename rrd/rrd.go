@@ -7,7 +7,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/aerospike/aerospike-console/common"
+	"github.com/citrusleaf/amc/common"
 )
 
 type Bucket struct {

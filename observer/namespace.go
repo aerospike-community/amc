@@ -8,8 +8,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/aerospike/aerospike-console/common"
-	"github.com/aerospike/aerospike-console/rrd"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/rrd"
 )
 
 type namespace struct {

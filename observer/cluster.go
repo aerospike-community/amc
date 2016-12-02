@@ -12,7 +12,7 @@ import (
 	"github.com/mcuadros/go-version"
 	"github.com/satori/go.uuid"
 
-	"github.com/aerospike/aerospike-console/common"
+	"github.com/citrusleaf/amc/common"
 )
 
 type cluster struct {
@@ -68,7 +68,23 @@ func (c *cluster) UpdateInterval() int {
 }
 
 func (c *cluster) OffNodes() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
 	return []string{}
+}
+
+func (c *cluster) RandomActiveNode() *node {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	for _, node := range c.nodes {
+		if node.Status() == nodeStatus.On {
+			return node
+		}
+	}
+
+	return nil
 }
 
 func (c *cluster) Status() string {

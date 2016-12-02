@@ -3,8 +3,8 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/aerospike/aerospike-console/common"
-	"github.com/aerospike/aerospike-console/controllers"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/controllers"
 )
 
 var amcVersion string
