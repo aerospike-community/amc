@@ -121,10 +121,10 @@ define(["jquery", "underscore", "backbone", "d3", "config/app-config", "helper/u
                 //var successWidth = Math.max(Math.floor(successTotal/total*100), 1);
                 //var errorWidth = 100 - successWidth;
                 var html  = "";
-                    html += "<div style='color:#000; padding-bottom:3px;'>Total : " + (total.toFixed(2)) + " TPS</div>";
+                    html += "<div style='color:#000; padding-bottom:3px;'>Total: " + (total.toFixed(2)) + " TPS</div>";
                     //html += "<div style='float:left; background-color:#0DCC24; display:inline-block; height:4px; width:" +successWidth+ "%'></div>";
                     //html += "<div style='float:left; background-color:#EE0000; display:inline-block; height:4px; width:" +errorWidth+ "%'></div>";
-                    html += "<span style='color:#24CE3A; font-weight:bold; display:inline-block; padding:4px 0;'>Successful : " + (successTotal.toFixed(2)) + " TPS</span>";
+                    html += "<span style='color:#24CE3A; font-weight:bold; display:inline-block; padding:4px 0;'>Successful: " + (successTotal.toFixed(2)) + " TPS</span>";
                     //html += "<span style='color:#F53939; font-weight:bold; font-size:10px; display:inline-block; padding:4px; padding-bottom:0;'>Failed : " + (total - successTotal) + "</span>";
 
                 $('#'+container).html(html);
