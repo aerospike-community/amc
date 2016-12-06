@@ -34,8 +34,9 @@ var nodeVisibilityStatus = struct {
 type node struct {
 	cluster  *cluster
 	origNode *as.Node
-	status   NodeStatus
-	visible  NodeVisibilityStatus
+
+	status  NodeStatus
+	visible NodeVisibilityStatus
 
 	namespaces map[string]*namespace
 
@@ -321,7 +322,9 @@ func (n *node) latencyDateTime(ts string) (time.Time, error) {
 	const layout = "2006-1-2 15:04:05"
 
 	// remove the timezone if exists
-	ts = ts[:8]
+	if len(ts) > 8 {
+		ts = ts[:8]
+	}
 
 	// means there is no server time yet
 	st := n.ServerTime()
@@ -347,11 +350,19 @@ func (n *node) latencyDateTime(ts string) (time.Time, error) {
 	return t2, nil
 }
 
+func (n *node) XdrEnabled() bool {
+	return n.StatsAttr("xdr_uptime") != nil
+}
+
 func (n *node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
 		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
+	}
+
+	if n.Enterprise() {
+		res = append(res, "get-dc-config")
 	}
 
 	// add namespace stat requests
@@ -380,7 +391,53 @@ func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 			stats.TryInt("xdr_read_success", 0) +
 				stats.TryInt("xdr_read_error", 0) +
 				stats.TryInt("xdr_read_notfound", 0)
+
+		stats["free_dlog_pct"] = stats.Get("dlog_free_pct")
+		stats["stat_recs_logged"] = stats.Get("dlog_logged")
+		stats["stat_dlog_recs_overwritten"] = stats.Get("dlog_overwritten_error")
+		stats["stat_recs_linkdown_processed"] = stats.Get("dlog_processed_link_down")
+		stats["stat_recs_localprocessed"] = stats.Get("dlog_processed_main")
+		stats["stat_recs_replprocessed"] = stats.Get("dlog_processed_replica")
+		stats["stat_recs_relogged"] = stats.Get("dlog_relogged")
+		stats["used_recs_dlog"] = stats.Get("dlog_used_objects")
+		stats["local_recs_notfound"] = stats.Get("xdr_read_not_found")
+		stats["failednode_sessions_pending"] = stats.Get("xdr_active_failed_node_sessions")
+		stats["linkdown_sessions_pending"] = stats.Get("xdr_active_link_down_sessions")
+		stats["esmt_ship_avg_comp_pct"] = stats.Get("xdr_ship_compression_avg_pct")
+		stats["hotkeys_fetched"] = stats.Get("xdr_hotkey_fetch")
+		stats["noship_recs_hotkey"] = stats.Get("xdr_hotkey_skip")
+		stats["stat_recs_inflight"] = stats.Get("xdr_ship_inflight_objects")
+		stats["stat_recs_outstanding"] = stats.Get("xdr_ship_outstanding_objects")
+		stats["err_recs_dropped"] = stats.Get("xdr_queue_overflow_error")
+		stats["read_threads_avg_processing_time_pct"] = stats.Get("xdr_read_active_avg_pct")
+		stats["local_recs_error"] = stats.Get("xdr_read_error")
+		stats["read_threads_avg_waiting_time_pct"] = stats.Get("xdr_read_idle_avg_pct")
+		stats["local_recs_fetch_avg_latency"] = stats.Get("xdr_read_latency_avg")
+		stats["dispatch_request_queue_used_pct"] = stats.Get("xdr_read_reqq_used_pct")
+		stats["dispatch_request_queue_used"] = stats.Get("xdr_read_reqq_used")
+		stats["dispatch_response_queue_used"] = stats.Get("xdr_read_respq_used")
+		stats["local_recs_fetched"] = stats.Get("xdr_read_success")
+		stats["transaction_queue_used_pct"] = stats.Get("xdr_read_txnq_used_pct")
+		stats["transaction_queue_used"] = stats.Get("xdr_read_txnq_used")
+		stats["stat_recs_relogged_incoming"] = stats.Get("xdr_relogged_incoming")
+		stats["stat_recs_relogged_outgoing"] = stats.Get("xdr_relogged_outgoing")
+		stats["esmt_bytes_shipped"] = stats.Get("xdr_ship_bytes")
+		stats["xdr_deletes_shipped"] = stats.Get("xdr_ship_delete_success")
+		stats["err_ship_server"] = stats.Get("xdr_ship_destination_error")
+		stats["latency_avg_ship"] = stats.Get("xdr_ship_latency_avg")
+		stats["err_ship_client"] = stats.Get("xdr_ship_source_error")
+		stats["stat_recs_shipped_ok"] = stats.Get("xdr_ship_success")
+		stats["stat_recs_shipped"] = stats.Get("xdr_ship_success")
+		stats["cur_throughput"] = stats.Get("xdr_throughput")
+		stats["noship_recs_uninitialized_destination"] = stats.Get("xdr_uninitialized_destination_error")
+		stats["noship_recs_unknown_namespace"] = stats.Get("xdr_unknown_namespace_error")
+
+		stats["esmt-bytes-shipped"] = stats.Get("esmt_bytes_shipped")
+		stats["xdr-uptime"] = stats.Get("xdr_uptime")
+		stats["free-dlog-pct"] = stats.Get("free_dlog_pct")
+		// stats["xdr_timelag"] = stats.Get("timediff_lastship_cur_secs")
 	}
+
 	n.stats = stats
 	n.nsAggStats = nsStats
 	n.nsAggCalcStats = nsCalcStats
@@ -537,6 +594,13 @@ func (n *node) Status() NodeStatus {
 	return n.status
 }
 
+func (n *node) Enterprise() bool {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	return strings.Contains(strings.ToLower(n.latestInfo.TryString("edition", "")), "enterprise")
+}
+
 func (n *node) VisibilityStatus() NodeVisibilityStatus {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
@@ -582,6 +646,32 @@ func (n *node) Memory() common.Stats {
 		"free-bytes-memory":  n.nsAggCalcStats.TryInt("free-bytes-memory", 0),
 		"total-bytes-memory": n.nsAggCalcStats.TryInt("total-bytes-memory", 0),
 	}
+}
+
+func (n *node) DataCenters() map[string]common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	if _, exists := n.latestInfo["get-dc-config"]; !exists {
+		return nil
+	}
+
+	dcs := n.latestInfo.ToStatsMap("get-dc-config", "DC_Name", ":")
+	for k, stats := range dcs {
+		nodes := strings.Split(stats["Nodes"].(string), ",")
+		for i := range nodes {
+			nodes[i] = strings.Replace(nodes[i], "+", ":", -1)
+		}
+		stats["Nodes"] = common.DeleteEmpty(nodes)
+		stats["namespaces"] = common.DeleteEmpty(strings.Split(stats["namespaces"].(string), ","))
+		dcs[k] = stats
+
+		if len(nodes) == 0 {
+			delete(dcs, k)
+		}
+	}
+
+	return dcs
 }
 
 func (n *node) NamespaceList() []string {

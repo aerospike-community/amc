@@ -35,7 +35,10 @@ func (ns *namespace) ServerTime() time.Time {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
-	return time.Unix(ns.latestStats.Int("current_time")+ast.CITRUSLEAF_EPOCH, 0)
+	if v := ns.latestStats.TryInt("current_time", 0); v != 0 {
+		time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)
+	}
+	return time.Time{}
 }
 
 func (ns *namespace) update(info common.Info) error {

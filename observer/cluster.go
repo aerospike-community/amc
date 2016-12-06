@@ -16,8 +16,9 @@ import (
 )
 
 type cluster struct {
-	client *as.Client
-	nodes  map[as.Host]*node
+	observer *observerT
+	client   *as.Client
+	nodes    map[as.Host]*node
 
 	aggNodeStats, aggNodeCalcStats       common.Stats
 	aggNsStats, aggNsCalcStats           map[string]common.Stats
@@ -37,8 +38,9 @@ type cluster struct {
 	mutex sync.RWMutex
 }
 
-func newCluster(client *as.Client, user, host string, port uint16) *cluster {
+func newCluster(observer *observerT, client *as.Client, user, host string, port uint16) *cluster {
 	newCluster := cluster{
+		observer:       observer,
 		client:         client,
 		nodes:          map[as.Host]*node{},
 		updateInterval: 5, //seconds
@@ -566,4 +568,109 @@ func (c *cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	}
 
 	return res
+}
+
+func (c *cluster) DatacenterInfo() common.Stats {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	xdrInfo := map[string]common.Stats{}
+	datacenterList := []string{}
+	nodeStats := common.Stats{}
+	remoteNodeStats := map[string]common.Stats{}
+	for _, node := range c.Nodes() {
+		dcs := node.DataCenters()
+		for dcName, dcStats := range dcs {
+			datacenterList = append(datacenterList, dcName)
+
+			for _, nodeAddr := range dcStats["Nodes"].([]string) {
+				remoteNodeStats[nodeAddr] = c.DiscoverDatacenter(dcStats)
+				oldCluster := c.observer.NodeHasBeenDiscovered(nodeAddr)
+				if oldCluster == nil {
+					xdrInfo[nodeAddr] = common.Stats{"shipping_namespaces": dcStats["namespaces"].([]string)}
+				} else {
+					snIfc := xdrInfo[oldCluster.Id()]["shipping_namespaces"]
+					if snIfc == nil {
+						snIfc = []string{}
+					}
+					if xdrInfo[oldCluster.Id()] == nil {
+						xdrInfo[oldCluster.Id()] = common.Stats{}
+					}
+					xdrInfo[oldCluster.Id()]["shipping_namespaces"] = common.StrUniq(append(snIfc.([]string), dcStats["namespaces"].([]string)...))
+				}
+			}
+		}
+
+		nodeStats[node.Id()] = common.Stats{
+			"status":         node.Status(),
+			"access_ip":      node.Host(),
+			"access_port":    node.Port(),
+			"ip":             node.Host(),
+			"port":           node.Port(),
+			"cur_throughput": 0,
+			"xdr_uptime":     node.StatsAttr("xdr_uptime"),
+			"lag":            node.StatsAttr("xdr_timelag"),
+		}
+	}
+
+	return common.Stats{
+		"seednode": c.seed,
+		"dc_name":  common.StrUniq(datacenterList),
+
+		"xdr_info": xdrInfo,
+
+		"cluster_name": c.alias,
+		"namespaces":   c.NamespaceList(),
+		"discovery":    "complete",
+		"nodes":        nodeStats,
+		"read_tps": common.Stats{
+			"total":   "0",
+			"success": "0",
+		},
+		"write_tps": common.Stats{
+			"total":   "0",
+			"success": "0",
+		},
+
+		"_remotes": remoteNodeStats,
+	}
+}
+
+func (c *cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
+	for _, nodeAddr := range dc["Nodes"].([]string) {
+		host, port, err := common.SplitHostPort(nodeAddr)
+		if err != nil {
+			return nil
+		}
+		if c.observer.NodeHasBeenDiscovered(nodeAddr) == nil {
+			return common.Stats{
+				"dc_name":      []string{dc["DC_Name"].(string)},
+				"discovery":    "secured", // TODO: think about this
+				"seednode":     nodeAddr,
+				"xdr_info":     common.Stats{},
+				"cluster_name": nil,
+				"namespaces":   []struct{}{},
+				"nodes": common.Stats{
+					nodeAddr: common.Stats{
+						"status":         "off",
+						"access_ip":      host,
+						"cur_throughput": nil,
+						"ip":             host,
+						"access_port":    port,
+						"xdr_uptime":     nil,
+						"port":           port,
+						"lag":            nil,
+					},
+				}, "read_tps": common.Stats{
+					"total":   "0",
+					"success": "0",
+				},
+				"write_tps": common.Stats{
+					"total":   "0",
+					"success": "0",
+				},
+			}
+		}
+	}
+	return nil
 }

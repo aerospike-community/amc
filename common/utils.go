@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var hostPortRegexp = regexp.MustCompile(`(?P<host>.+):(?P<port>\d+)`)
@@ -24,6 +25,11 @@ func regexMatchToMap(re *regexp.Regexp, s string) map[string]string {
 }
 
 func SplitHostPort(s string) (host string, port int, err error) {
+	s = strings.Trim(s, "\t\n\r ")
+	if len(s) == 0 {
+		return "", 0, errors.New("Invalid address: " + s)
+	}
+
 	result := regexMatchToMap(hostPortRegexp, s)
 
 	var exists bool
@@ -52,4 +58,14 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	}
 	newVal = round / pow
 	return
+}
+
+func DeleteEmpty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if strings.Trim(str, " ") != "" {
+			r = append(r, str)
+		}
+	}
+	return r
 }

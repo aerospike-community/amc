@@ -162,71 +162,74 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 }
 
 func getMultiClusterView(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, _observer.DatacenterInfo())
+
 	// port := c.Param("port")
 	// fmt.Println(port)
-	return c.JSONBlob(http.StatusOK, []byte(`{
-		"status": "success",
-		"data": {
-			"e84f8ba2-9123-4f4d-86fc-d618b28ff228": {
-				"dc_name": [],
-				"read_tps": {
-					"total": 0,
-					"success": 0
-				},
-				"seednode": "172.16.224.150:3000",
-				"xdr_info": {},
-				"cluster_name": null,
-				"namespaces": ["test", "bar"],
-				"nodes": {
-					"BCDEB6C71290C00": {
-						"status": "on",
-						"access_ip": "172.16.224.150",
-						"cur_throughput": null,
-						"ip": "172.16.224.150",
-						"access_port": "3020",
-						"xdr_uptime": null,
-						"port": "3020",
-						"lag": null
-					},
-					"BD7EB6C71290C00": {
-						"status": "on",
-						"access_ip": "172.16.224.150",
-						"cur_throughput": null,
-						"ip": "172.16.224.150",
-						"access_port": "3030",
-						"xdr_uptime": null,
-						"port": "3030",
-						"lag": null
-					},
-					"BC3EB6C71290C00": {
-						"status": "on",
-						"access_ip": "172.16.224.150",
-						"cur_throughput": null,
-						"ip": "172.16.224.150",
-						"access_port": "3010",
-						"xdr_uptime": null,
-						"port": "3010",
-						"lag": null
-					},
-					"BB9EB6C71290C00": {
-						"status": "on",
-						"access_ip": "172.16.224.150",
-						"cur_throughput": null,
-						"ip": "172.16.224.150",
-						"access_port": "3000",
-						"xdr_uptime": null,
-						"port": "3000",
-						"lag": null
-					}
-				},
-				"write_tps": {
-					"total": 0,
-					"success": 0
-				},
-				"discovery": "complete"
-			}
-		}
-	}`))
+	// return c.JSONBlob(http.StatusOK, []byte(`{
+	// 	"status": "success",
+	// 	"data": {
+	// 		"e84f8ba2-9123-4f4d-86fc-d618b28ff228": {
+	// 			"dc_name": [],
+	// 			"read_tps": {
+	// 				"total": 0,
+	// 				"success": 0
+	// 			},
+	// 			"seednode": "172.16.224.150:3000",
+	// 			"xdr_info": {},
+	// 			"cluster_name": null,
+	// 			"namespaces": ["test", "bar"],
+	// 			"nodes": {
+	// 				"BCDEB6C71290C00": {
+	// 					"status": "on",
+	// 					"access_ip": "172.16.224.150",
+	// 					"cur_throughput": null,
+	// 					"ip": "172.16.224.150",
+	// 					"access_port": "3020",
+	// 					"xdr_uptime": null,
+	// 					"port": "3020",
+	// 					"lag": null
+	// 				},
+	// 				"BD7EB6C71290C00": {
+	// 					"status": "on",
+	// 					"access_ip": "172.16.224.150",
+	// 					"cur_throughput": null,
+	// 					"ip": "172.16.224.150",
+	// 					"access_port": "3030",
+	// 					"xdr_uptime": null,
+	// 					"port": "3030",
+	// 					"lag": null
+	// 				},
+	// 				"BC3EB6C71290C00": {
+	// 					"status": "on",
+	// 					"access_ip": "172.16.224.150",
+	// 					"cur_throughput": null,
+	// 					"ip": "172.16.224.150",
+	// 					"access_port": "3010",
+	// 					"xdr_uptime": null,
+	// 					"port": "3010",
+	// 					"lag": null
+	// 				},
+	// 				"BB9EB6C71290C00": {
+	// 					"status": "on",
+	// 					"access_ip": "172.16.224.150",
+	// 					"cur_throughput": null,
+	// 					"ip": "172.16.224.150",
+	// 					"access_port": "3000",
+	// 					"xdr_uptime": null,
+	// 					"port": "3000",
+	// 					"lag": null
+	// 				}
+	// 			},
+	// 			"write_tps": {
+	// 				"total": 0,
+	// 				"success": 0
+	// 			},
+	// 			"discovery": "complete"
+	// 		}
+	// 	}
+	// }`))
 }
 
 func getCluster(c echo.Context) error {
@@ -1240,27 +1243,56 @@ func getClusterNamespaceNodes(c echo.Context) error {
 }
 
 func getClusterXdrNodes(c echo.Context) error {
-	// clusterUuid := c.Param("clusterUuid")
-	// nodes := c.QueryParam("nodes")
-	// fmt.Println(clusterUuid, nodes)
-	return c.JSONBlob(http.StatusOK, []byte(`{
-		"172.16.224.150:3030": {
-			"xdr_status": "off",
-			"node_status": "on"
-		},
-		"172.16.224.150:3010": {
-			"xdr_status": "off",
-			"node_status": "on"
-		},
-		"172.16.224.150:3020": {
-			"xdr_status": "off",
-			"node_status": "on"
-		},
-		"172.16.224.150:3000": {
-			"xdr_status": "off",
-			"node_status": "on"
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusNotFound, errorMap("Cluster not found"))
+	}
+
+	keys := []string{
+		"stat_recs_outstanding", "timediff_lastship_cur_secs", "xdr_timelag",
+		"esmt_bytes_shipped", "stat_recs_relogged",
+		"stat_recs_shipped", "free_dlog_pct", "xdr_uptime",
+		"cur_throughput", "esmt-bytes-shipped", "free-dlog-pct",
+		"xdr-uptime",
+	}
+
+	res := map[string]common.Stats{}
+	for _, node := range cluster.Nodes() {
+		if node.Status() != "on" && !node.XdrEnabled() {
+			res[node.Address()] = common.Stats{
+				"xdr_status":  "off",
+				"node_status": node.Status(),
+			}
+			continue
 		}
-	}`))
+
+		stats := node.AnyAttrs(keys...)
+		stats["xdr_status"] = "on"
+		stats["node_status"] = node.Status()
+		res[node.Address()] = stats
+	}
+
+	return c.JSON(http.StatusOK, res)
+
+	// return c.JSONBlob(http.StatusOK, []byte(`{
+	// 	"172.16.224.150:3030": {
+	// 		"xdr_status": "off",
+	// 		"node_status": "on"
+	// 	},
+	// 	"172.16.224.150:3010": {
+	// 		"xdr_status": "off",
+	// 		"node_status": "on"
+	// 	},
+	// 	"172.16.224.150:3020": {
+	// 		"xdr_status": "off",
+	// 		"node_status": "on"
+	// 	},
+	// 	"172.16.224.150:3000": {
+	// 		"xdr_status": "off",
+	// 		"node_status": "on"
+	// 	}
+	// }`))
 }
 
 func getClusterAlrets(c echo.Context) error {

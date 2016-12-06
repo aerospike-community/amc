@@ -8,6 +8,8 @@ import (
 	"time"
 
 	as "github.com/aerospike/aerospike-client-go"
+
+	"github.com/citrusleaf/amc/common"
 )
 
 type observerT struct {
@@ -91,7 +93,7 @@ func (o *observerT) Register(policy *as.ClientPolicy, host string, port uint16) 
 	// log.Info(client.Cluster().GetSeeds())
 	// log.Info(client.Cluster().GetAliases())
 
-	cluster := newCluster(client, policy.User, host, port)
+	cluster := newCluster(o, client, policy.User, host, port)
 	o.appendCluster(cluster)
 	o.updateClusters()
 
@@ -117,8 +119,8 @@ func (o *observerT) MonitoringClusters() []map[string]interface{} {
 }
 
 func (o *observerT) FindClusterById(id string) *cluster {
-	o.mutex.Lock()
-	defer o.mutex.Unlock()
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
 
 	for _, cluster := range o.clusters {
 		if cluster.Id() == id {
@@ -128,9 +130,23 @@ func (o *observerT) FindClusterById(id string) *cluster {
 	return nil
 }
 
+func (o *observerT) NodeHasBeenDiscovered(alias string) *cluster {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	for _, cluster := range o.clusters {
+		for host, _ := range cluster.client.Cluster().GetAliases() {
+			if strings.ToLower(host.Name+":"+strconv.Itoa(host.Port)) == strings.ToLower(alias) {
+				return cluster
+			}
+		}
+	}
+	return nil
+}
+
 func (o *observerT) FindClusterBySeed(host string, port int, user string) *cluster {
-	o.mutex.Lock()
-	defer o.mutex.Unlock()
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
 
 	aliases := findAliases(host, port)
 	for _, cluster := range o.clusters {
@@ -145,6 +161,35 @@ func (o *observerT) FindClusterBySeed(host string, port int, user string) *clust
 		}
 	}
 	return nil
+}
+
+func (o *observerT) DatacenterInfo() common.Stats {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	res := map[string]common.Stats{}
+	for _, cluster := range o.clusters {
+		res[cluster.Id()] = cluster.DatacenterInfo()
+	}
+
+	for _, v := range res {
+		remotesIfc := v["_remotes"]
+		if remotesIfc == nil {
+			continue
+		}
+		remotes := remotesIfc.(map[string]common.Stats)
+		for addr, stats := range remotes {
+			if stats != nil {
+				res[addr] = stats
+			}
+		}
+		delete(v, "_remotes")
+	}
+
+	return common.Stats{
+		"status": "success",
+		"data":   res,
+	}
 }
 
 func splitAddr(addr string) (string, int) {
