@@ -46,8 +46,8 @@ func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 			b.values[i] = nil
 		}
 	} else if emptyTicks > 1 {
-		for i := 1; i < emptyTicks; i++ {
-			b.values[(b.offset-i)%b.Size()] = nil
+		for i := b.offset; i <= emptyTicks; i++ {
+			b.values[i%b.Size()] = &val
 		}
 	}
 
@@ -79,7 +79,9 @@ func (b *SimpleBucket) ValuesSince(tm time.Time) []interface{} {
 
 	res := make([]interface{}, 0, count)
 	for i := b.offset - count + 1; i <= b.offset; i++ {
-		res = append(res, b.values[i%b.Size()])
+		if v := b.values[i%b.Size()]; v != nil {
+			res = append(res, v)
+		}
 	}
 
 	return res

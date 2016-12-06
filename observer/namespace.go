@@ -8,6 +8,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	ast "github.com/aerospike/aerospike-client-go/types"
+
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/rrd"
 )
@@ -30,7 +32,10 @@ type namespace struct {
 }
 
 func (ns *namespace) ServerTime() time.Time {
-	return time.Unix(ns.latestStats.Int("current_time"), 0)
+	ns.mutex.RLock()
+	defer ns.mutex.RUnlock()
+
+	return time.Unix(ns.latestStats.Int("current_time")+ast.CITRUSLEAF_EPOCH, 0)
 }
 
 func (ns *namespace) update(info common.Info) error {
@@ -194,6 +199,8 @@ func (ns *namespace) IndexStats(name string) common.Stats {
 }
 
 func (ns *namespace) updateHistory() {
+	tm := ns.ServerTime().Unix()
+
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
 
@@ -218,7 +225,7 @@ func (ns *namespace) updateHistory() {
 			bucket = rrd.NewBucket(ns.node.cluster.UpdateInterval(), 3600, true)
 			ns.statsHistory[stat] = bucket
 		}
-		bucket.Add(ns.ServerTime().Unix(), ns.calcStats.TryFloat(stat, 0))
+		bucket.Add(tm, ns.calcStats.TryFloat(stat, 0))
 	}
 }
 

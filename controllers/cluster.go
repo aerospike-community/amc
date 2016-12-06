@@ -4,11 +4,11 @@ import (
 	// "fmt"
 	// "encoding/json"
 	"errors"
-	"sync"
-	// "math"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	// . "github.com/ahmetalpbalkan/go-linq"
@@ -136,6 +136,8 @@ func postClusterFireCmd(c echo.Context) error {
 	if node == nil {
 		return c.JSON(http.StatusNotFound, errorMap("No active nodes found in the cluster"))
 	}
+
+	return nil
 }
 
 func getCurrentMonitoringClusters(c echo.Context) error {
@@ -413,10 +415,13 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 		data := make([]map[common.JsonRawString]interface{}, 0, len(buckets)+1)
 
 		if len(buckets) > 0 {
+			pct := math.Max(0, 100.0-totalOver1ms)
 			data = append(data, map[common.JsonRawString]interface{}{
 				common.JsonRawString(LTE + buckets[0][1:]): common.Stats{
-					"value": common.Round(tps*(100-totalOver1ms)/100, 0.01, 2),
-					"pct":   common.Round(100.0-totalOver1ms, 0.01, 2),
+					// "value": math.Max(0, common.Round(tps*pct/100, 0.01, 2)),
+					// "pct":   math.Max(0, common.Round(pct, 0.01, 2)),
+					"value": math.Max(0, tps*pct/100),
+					"pct":   math.Max(0, pct),
 				},
 			})
 		}
@@ -428,8 +433,9 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 			}
 			data = append(data, map[common.JsonRawString]interface{}{
 				common.JsonRawString(title): common.Stats{
-					"value": valBuckets[i] * tps / 100,
-					"pct":   common.Round(valBuckets[i], 0.01, 2),
+					"value": valBuckets[i] * tps / 100.0,
+					// "pct":   common.Round(valBuckets[i], 0.01, 2),
+					"pct": valBuckets[i],
 				},
 			})
 		}
@@ -451,23 +457,13 @@ func getNodeLatencyHistory(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
 	}
 
-	since := time.Now().Unix() - (31 * 60) // 30 minutes
-	beginStr := c.Param("start_time")
-	if beginStr != "" {
-		sinceUnix, err := strconv.ParseInt(beginStr, 10, 64)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Invalid start_time value"})
-		}
-		since = sinceUnix / 1000
-	}
-
 	node := cluster.FindNodeByAddress(c.Param("nodes"))
 	if node == nil {
 		return c.JSON(http.StatusNotFound, map[string]string{"status": "failure", "error": "Node not found"})
 	}
 
 	latencyHistory := []common.Stats{}
-	for _, latency := range node.LatencySince(time.Unix(since, 0)) {
+	for _, latency := range node.LatencySince(c.Param("start_time")) {
 		latencyHistory = append(latencyHistory, transformLatency(latency))
 	}
 
@@ -786,7 +782,7 @@ func getClusterNodes(c echo.Context) error {
 		for _, nodeName := range nodeList {
 			if node.Address() == nodeName {
 				stats := node.AnyAttrs(statKeys...)
-				stats["cluster_visibility"] = (node.Status() == "on")
+				stats["cluster_visibility"] = (node.VisibilityStatus())
 				stats["same_cluster"] = true
 				stats["memory"] = node.Memory()
 				stats["disk"] = node.Disk()

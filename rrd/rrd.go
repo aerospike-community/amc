@@ -120,8 +120,12 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	res := make([]*common.SinglePointValue, 0, count)
 	for i := b.offset - count + 1; i <= b.offset; i++ {
 		tm := *b.beginTime + int64(i*b.resolution)
-		v := math.Floor(*b.values[i%b.Size()] / float64(b.resolution))
-		res = append(res, common.NewSinglePointValue(&tm, &v))
+		if b.values[i%b.Size()] != nil {
+			v := math.Floor(*b.values[i%b.Size()] / float64(b.resolution))
+			res = append(res, common.NewSinglePointValue(&tm, &v))
+		} else {
+			res = append(res, common.NewSinglePointValue(&tm, nil))
+		}
 	}
 
 	return res

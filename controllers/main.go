@@ -61,8 +61,8 @@ func Server(edition, version, build string, config *common.Config) {
 
 	// e.Static("/", "/opt/amc/static")
 	// e.Static("/static", "/opt/amc/static")
-	e.Static("/", "static")
-	e.Static("/static", "static")
+	e.Static("/", "build/static")
+	e.Static("/static", "build/static")
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -73,7 +73,9 @@ func Server(edition, version, build string, config *common.Config) {
 	e.GET("/aerospike/service/debug", getDebug)
 	e.GET("/get_amc_version", getAMCVersion)
 	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
+
 	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
+
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
 	e.GET("/aerospike/service/clusters/:clusterUuid/fire_cmd", postClusterFireCmd)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", getClusterThroughput)

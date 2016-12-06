@@ -15,24 +15,15 @@ version_build="$edition-$version"
 godep go build -a -tags $edition -ldflags "-X main.amcEdition=$edition -X main.amcBuild=$build -X main.amcVersion=$version" -o deployment/release/amc/opt/amc/amc .
 
 # build content
-# mkdir -p deployment/release/amc/opt/amc/
-# rm -rf deployment/release/amc/opt/amc/public/dist
-# cd public
-# npm install
-# grunt build:dist
-# cp -R bower_components app/
-# mv dist ../deployment/release/amc/opt/amc/public
-# cd ..
-
-
-# cd ascloud
-# godep go build -o ../deployment/release/ascloud/usr/local/bin/ascloud .
-
-# cd ..
+mkdir -p deployment/release/amc/opt/amc/
+rm -rf deployment/release/amc/opt/amc/public/dist
+cd public
+npm install
+grunt
 
 rm -rf deployment/release/amc/opt/amc/static
 mkdir -p deployment/release/amc/opt/amc/static/
-cp -R static deployment/release/amc/opt/amc/
+cp -R build/static/ deployment/release/amc/opt/amc/
 
 rm -f *.rpm
 rm -f *.deb

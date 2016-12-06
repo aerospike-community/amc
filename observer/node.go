@@ -3,6 +3,7 @@ package observer
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,9 +17,16 @@ import (
 )
 
 type NodeStatus string
+type NodeVisibilityStatus string
 
 var nodeStatus = struct {
 	On, Off NodeStatus
+}{
+	"on", "off",
+}
+
+var nodeVisibilityStatus = struct {
+	On, Off NodeVisibilityStatus
 }{
 	"on", "off",
 }
@@ -27,6 +35,7 @@ type node struct {
 	cluster  *cluster
 	origNode *as.Node
 	status   NodeStatus
+	visible  NodeVisibilityStatus
 
 	namespaces map[string]*namespace
 
@@ -39,6 +48,8 @@ type node struct {
 
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
+
+	serverTime int64
 
 	mutex sync.RWMutex
 }
@@ -81,6 +92,9 @@ func (n *node) update() error {
 		ns.updateIndexInfo(n.Indexes(ns.name))
 		ns.updateLatencyInfo(latencyMap[ns.name])
 		ns.aggStats(nsAggStats, nsAggCalcStats)
+
+		// update node's server time
+		n.setServerTime(ns.ServerTime().Unix())
 	}
 
 	stats := common.Info(info).ToInfo("statistics").ToStats()
@@ -189,14 +203,21 @@ func (n *node) LatestLatency() map[string]common.Stats {
 	return n.latestNodeLatency
 }
 
-func (n *node) LatencySince(tm time.Time) []map[string]common.Stats {
+func (n *node) LatencySince(tms string) []map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
-	vs := n.latencyHistory.ValuesSince(tm)
+	tm := n.ServerTime().Unix() - 30*60
+	if len(tms) > 0 {
+		if v, err := n.latencyDateTime(tms); err == nil {
+			tm = v.Unix()
+		}
+	}
+
+	vs := n.latencyHistory.ValuesSince(time.Unix(tm, 0))
 	vsTyped := make([]map[string]common.Stats, len(vs))
 	for i := range vs {
-		log.Infof("%#v", vs[i])
+		// log.Infof("%#v", vs[i])
 		if vIfc := vs[i]; vIfc != nil {
 			if v, ok := vIfc.(*interface{}); ok {
 				vsTyped[i] = (*v).(map[string]common.Stats)
@@ -246,6 +267,9 @@ func (n *node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 }
 
 func (n *node) updateHistory() {
+	// this uses a RLock, so we put it before the locks to avoid deadlock
+	latestLatencyReport, err := n.latestLatencyReportDateTime()
+
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 
@@ -274,7 +298,53 @@ func (n *node) updateHistory() {
 		bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
 	}
 
-	n.latencyHistory.Add(tm, n.latestNodeLatency)
+	if err == nil && !latestLatencyReport.IsZero() {
+		n.latencyHistory.Add(latestLatencyReport.Unix(), n.latestNodeLatency)
+	}
+}
+
+func (n *node) latestLatencyReportDateTime() (time.Time, error) {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	var latTime string
+	for _, stats := range n.latestNodeLatency {
+		latTime = stats["timestamp"].(string)
+		break
+	}
+
+	return n.latencyDateTime(latTime)
+}
+
+// adds date part to the latency time string
+func (n *node) latencyDateTime(ts string) (time.Time, error) {
+	const layout = "2006-1-2 15:04:05"
+
+	// remove the timezone if exists
+	ts = ts[:8]
+
+	// means there is no server time yet
+	st := n.ServerTime()
+	if st.IsZero() {
+		return st, nil
+	}
+
+	// beginning of day
+	t := st.Truncate(24 * time.Hour)
+	year, month, day := t.Date()
+
+	t2, err := time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day)+ts)
+	if err != nil {
+		log.Error("DATE PARSE ERROR! ", err)
+		return t2, err
+	}
+
+	// must not be in the future
+	if t2.After(st) {
+		// format for yesterday
+		time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day-1)+ts)
+	}
+	return t2, nil
 }
 
 func (n *node) infoKeys() []string {
@@ -467,6 +537,17 @@ func (n *node) Status() NodeStatus {
 	return n.status
 }
 
+func (n *node) VisibilityStatus() NodeVisibilityStatus {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	res := nodeVisibilityStatus.On
+	if n.origNode == nil || !n.origNode.IsActive() {
+		res = nodeVisibilityStatus.Off
+	}
+	return res
+}
+
 func (n *node) setStatus(status NodeStatus) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
@@ -566,6 +647,7 @@ func (n *node) Udfs() map[string]common.Info {
 func (n *node) Address() string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
+
 	h := n.origNode.GetHost()
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
@@ -654,6 +736,21 @@ func parseBinInfo(s string) common.Stats {
 	return res
 }
 
+func (n *node) setServerTime(tm int64) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+
+	if tm > n.serverTime {
+		n.serverTime = tm
+	}
+}
+
+func (n *node) ServerTime() time.Time {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	return time.Unix(n.serverTime, 0)
+}
+
 func (n *node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
 	ip := common.NewInfoParser(s)
 
@@ -717,6 +814,13 @@ func (n *node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 		valBucketsFloat := make([]float64, len(valBuckets))
 		for i := range valBuckets {
 			valBucketsFloat[i], _ = strconv.ParseFloat(valBuckets[i], 64)
+		}
+
+		// calc precise in-between percents
+		lineAggPct := float64(0)
+		for i := len(valBucketsFloat) - 1; i > 0; i-- {
+			lineAggPct += valBucketsFloat[i]
+			valBucketsFloat[i-1] = math.Max(0, valBucketsFloat[i-1]-lineAggPct)
 		}
 
 		if len(buckets) != len(valBuckets) {
