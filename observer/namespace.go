@@ -8,8 +8,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/rrd"
+	"github.com/aerospike/aerospike-console/common"
+	"github.com/aerospike/aerospike-console/rrd"
 )
 
 type namespace struct {
@@ -19,12 +19,10 @@ type namespace struct {
 	latestInfo, oldInfo common.Info
 	indexInfo           common.Info
 
-	latestStats  common.Stats
-	calcStats    common.Stats
-	latencystats common.Stats
+	latestStats common.Stats
+	calcStats   common.Stats
 
-	statsHistory   map[string]*rrd.Bucket
-	latencyHistory *rrd.SimpleBucket
+	statsHistory map[string]*rrd.Bucket
 
 	mutex sync.RWMutex
 }
@@ -61,12 +59,6 @@ func (ns *namespace) updateIndexInfo(indexes map[string]common.Info) error {
 	ns.indexInfo = common.Info(info)
 
 	return nil
-}
-
-func (ns *namespace) updateLatencyInfo(latStats common.Stats) {
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-	ns.latencystats = latStats
 }
 
 func (ns *namespace) setInfo(stats common.Info) {
@@ -143,6 +135,17 @@ func (ns *namespace) aggStats(agg, calcAgg common.Stats) {
 	defer ns.mutex.RUnlock()
 	agg.AggregateStats(ns.latestStats)
 	calcAgg.AggregateStats(ns.calcStats)
+}
+
+func (ns *namespace) SetConfiguration(config map[string]interface{}) error {
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+	cmdList := make([]string, 0, len(config))
+	for k, v := range config {
+		cmdList = append(cmdList, fmt.Sprintf("set-config:context=namespace;id=%s;%s=%v", ns.name, k, v))
+	}
+	_, err := ns.node.requestInfo(3, cmdList...)
+	return err
 }
 
 func (ns *namespace) Disk() common.Stats {
@@ -343,10 +346,6 @@ func (ns *namespace) setAliases() {
 	calcStats["migrate-tx-partitions-imbalance"] = stats.TryInt("migrate_tx_partitions_imbalance", 0)
 	calcStats["migrate-tx-partitions-initial"] = stats.TryInt("migrate_tx_partitions_initial", 0)
 	calcStats["migrate-tx-partitions-remaining"] = stats.TryInt("migrate_tx_partitions_remaining", 0)
-
-	calcStats["migrate_incoming_remaining"] = stats.TryInt("migrate_rx_partitions_remaining", 0)
-	calcStats["migrate_outgoing_remaining"] = stats.TryInt("migrate_tx_partitions_remaining", 0)
-
 	calcStats["non-expirable-objects"] = stats.TryInt("non_expirable_objects", 0)
 	calcStats["nsup-cycle-duration"] = stats.TryInt("nsup_cycle_duration", 0)
 	calcStats["nsup-cycle-sleep-pct"] = stats.TryFloat("nsup_cycle_sleep_pct", 0)
@@ -388,78 +387,4 @@ func (ns *namespace) SetsInfo() map[string]common.Stats {
 	}
 
 	return res
-}
-
-func (ns *namespace) Stats() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
-	res := common.Stats{
-		"memory":                    ns.Memory(),
-		"memory-pct":                ns.MemoryPercent(),
-		"disk":                      ns.Disk(),
-		"disk-pct":                  ns.DiskPercent(),
-		"master-objects-tombstones": fmt.Sprintf("%v, %v", ns.StatsAttr("master-objects"), ns.StatsAttr("master_tombstones")),
-		"prole-objects-tombstones":  fmt.Sprintf("%v, %v", ns.StatsAttr("prole-objects"), ns.StatsAttr("prole_tombstones")),
-		// "least_available_pct":       ns.StatsAttr("available_pct"),
-	}
-
-	subsetOfStats := []string{"expired-objects", "evicted-objects", "repl-factor",
-		"memory-size", "free-pct-memory", "max-void-time", "hwm-breached",
-		"default-ttl", "max-ttl", "max-ttl", "enable-xdr", "stop-writes",
-		"available_pct", "stop-writes-pct", "hwm-breached", "single-bin",
-		"data-in-memory", "type", "master-objects", "prole-objects",
-		"master_tombstones", "prole_tombstones",
-	}
-
-	for k, v := range ns.StatsAttrs(subsetOfStats...) {
-		res[k] = v
-	}
-
-	return res
-}
-
-var _configuration_params = []string{
-	"type",
-	"storage-engine",
-	"file",
-	"storage-engine.file",
-	"filesize",
-	"storage-engine.filesize",
-	"load-at-startup",
-	"data-in-memory",
-	"defrag-period",
-	"defrag-lwm-pct",
-	"storage-engine.defrag-lwm-pct",
-	"defrag-max-blocks",
-	"defrag-startup-minimum",
-	"storage-engine.defrag-startup-minimum",
-	"write-block-size",
-	"storage-engine.write-block-size",
-	"ticker-interval",
-	"replication-factor",
-	"low-water-pct",
-	"high-water-memory-pct",
-	"high-water-disk-pct",
-	"high-water-pct",
-	"evict-pct",
-	"stop-writes-pct",
-	"memory-size",
-	"default-ttl",
-	"max-ttl",
-	"allow-versions",
-	"single-bin",
-	"node_status",
-	"migrate-sleep",
-	"migrate-order",
-}
-
-func (ns *namespace) ConfigAttrs(names ...string) common.Stats {
-	info := ns.InfoAttrs(_configuration_params...)
-
-	if len(names) == 0 {
-		return info.ToStats()
-	}
-
-	return info.ToStats().GetMulti(names...)
 }
