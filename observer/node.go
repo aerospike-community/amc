@@ -1,6 +1,8 @@
 package observer
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -9,8 +11,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
-	"github.com/aerospike/aerospike-console/common"
-	"github.com/aerospike/aerospike-console/rrd"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/rrd"
 )
 
 type NodeStatus string
@@ -29,23 +31,26 @@ type node struct {
 	namespaces map[string]*namespace
 
 	latestInfo, oldInfo common.Info
-	latestConfig        common.Info
+	latestConfig        common.Stats
+	latestNodeLatency   map[string]common.Stats
 
 	stats, nsAggStats common.Stats
 	nsAggCalcStats    common.Stats
 
-	statsHistory map[string]*rrd.Bucket
+	statsHistory   map[string]*rrd.Bucket
+	latencyHistory *rrd.SimpleBucket
 
 	mutex sync.RWMutex
 }
 
 func newNode(cluster *cluster, origNode *as.Node) *node {
 	return &node{
-		cluster:      cluster,
-		origNode:     origNode,
-		status:       nodeStatus.On,
-		namespaces:   map[string]*namespace{},
-		statsHistory: map[string]*rrd.Bucket{},
+		cluster:        cluster,
+		origNode:       origNode,
+		status:         nodeStatus.On,
+		namespaces:     map[string]*namespace{},
+		statsHistory:   map[string]*rrd.Bucket{},
+		latencyHistory: rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600),
 	}
 }
 
@@ -61,16 +66,20 @@ func (n *node) update() error {
 		return err
 	}
 	n.setInfo(common.Info(info))
-	n.setConfig(n.InfoAttrs("get-config:"))
+	n.setConfig(n.InfoAttrs("get-config:").ToInfo("get-config:"))
 
 	n.setStatus(nodeStatus.On)
 	n.notifyAboutChanges()
+
+	latencyMap, nodeLatency := n.parseLatencyInfo(info["latency:"])
+	n.setNodeLatency(nodeLatency)
 
 	nsAggStats := common.Stats{}
 	nsAggCalcStats := common.Stats{}
 	for _, ns := range n.namespaces {
 		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name))
 		ns.updateIndexInfo(n.Indexes(ns.name))
+		ns.updateLatencyInfo(latencyMap[ns.name])
 		ns.aggStats(nsAggStats, nsAggCalcStats)
 	}
 
@@ -167,11 +176,35 @@ func (n *node) updateNamespaceNames() error {
 	defer n.mutex.Unlock()
 	for _, ns := range namespaces {
 		if n.namespaces[ns] == nil {
-			n.namespaces[ns] = &namespace{node: n, name: ns, statsHistory: map[string]*rrd.Bucket{}}
+			n.namespaces[ns] = &namespace{node: n, name: ns, statsHistory: map[string]*rrd.Bucket{}, latencyHistory: rrd.NewSimpleBucket(5, 3600)}
 		}
 	}
 
 	return nil
+}
+
+func (n *node) LatestLatency() map[string]common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	return n.latestNodeLatency
+}
+
+func (n *node) LatencySince(tm time.Time) []map[string]common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	vs := n.latencyHistory.ValuesSince(tm)
+	vsTyped := make([]map[string]common.Stats, len(vs))
+	for i := range vs {
+		log.Infof("%#v", vs[i])
+		if vIfc := vs[i]; vIfc != nil {
+			if v, ok := vIfc.(*interface{}); ok {
+				vsTyped[i] = (*v).(map[string]common.Stats)
+			}
+		}
+	}
+
+	return vsTyped
 }
 
 func (n *node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
@@ -180,8 +213,13 @@ func (n *node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
 	for name, bucket := range n.statsHistory {
+		val := bucket.LastValue()
+		if val == nil {
+			tm := time.Now().Unix()
+			val = common.NewSinglePointValue(&tm, nil)
+		}
 		res[name] = map[string]*common.SinglePointValue{
-			n.Address(): bucket.LastValue(),
+			n.Address(): val,
 		}
 	}
 
@@ -194,8 +232,13 @@ func (n *node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
 	for name, bucket := range n.statsHistory {
+		vs := bucket.ValuesSince(tm)
+		if len(vs) == 0 {
+			tm := time.Now().Unix()
+			vs = []*common.SinglePointValue{common.NewSinglePointValue(&tm, nil)}
+		}
 		res[name] = map[string][]*common.SinglePointValue{
-			n.Address(): bucket.ValuesSince(tm),
+			n.Address(): vs,
 		}
 	}
 
@@ -230,13 +273,15 @@ func (n *node) updateHistory() {
 		}
 		bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
 	}
+
+	n.latencyHistory.Add(tm, n.latestNodeLatency)
 }
 
 func (n *node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "get-config:",
+		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
 	}
 
 	// add namespace stat requests
@@ -257,6 +302,15 @@ func (n *node) NamespaceByName(ns string) *namespace {
 func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
+	// alias stats
+	stats["queue"] = stats.TryInt("tsvc_queue", 0)
+	stats["cluster_name"] = n.latestInfo.TryString("cluster-name", "")
+	if v := stats.Get("xdr_read_success"); v != nil {
+		stats["xdr_read_reqs"] =
+			stats.TryInt("xdr_read_success", 0) +
+				stats.TryInt("xdr_read_error", 0) +
+				stats.TryInt("xdr_read_notfound", 0)
+	}
 	n.stats = stats
 	n.nsAggStats = nsStats
 	n.nsAggCalcStats = nsCalcStats
@@ -265,21 +319,27 @@ func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 func (n *node) setConfig(stats common.Info) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
-	n.latestConfig = stats
+	n.latestConfig = stats.ToStats()
 }
 
-func (n *node) ConfigAttrs(names ...string) common.Info {
+func (n *node) setNodeLatency(stats map[string]common.Stats) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+	n.latestNodeLatency = stats
+}
+
+func (n *node) ConfigAttrs(names ...string) common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
-	var res common.Info
+	var res common.Stats
 	if len(names) == 0 {
-		res = make(common.Info, len(n.latestConfig))
+		res = make(common.Stats, len(n.latestConfig))
 		for name, value := range n.latestConfig {
 			res[name] = value
 		}
 	} else {
-		res = make(common.Info, len(names))
+		res = make(common.Stats, len(names))
 		for _, name := range names {
 			res[name] = n.latestConfig[name]
 		}
@@ -287,10 +347,39 @@ func (n *node) ConfigAttrs(names ...string) common.Info {
 	return res
 }
 
-func (n *node) ConfigAttr(name string) string {
+func (n *node) ConfigAttr(name string) interface{} {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestConfig[name]
+}
+
+func (n *node) SetServerConfig(context string, config map[string]string, wg *sync.WaitGroup, resChan chan *common.NodeResult) {
+	defer wg.Done()
+
+	// to avoid deadlock
+	addr := n.Address()
+
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+
+	cmd := "set-config:context=" + context + ";"
+	for parameter, value := range config {
+		cmd += fmt.Sprintf("%s=%s;", parameter, value)
+	}
+
+	res, err := n.origNode.RequestInfo(cmd)
+	if err != nil {
+		resChan <- &common.NodeResult{Name: addr, Err: err}
+		return
+	}
+
+	errMsg, exists := res[cmd]
+	if exists && strings.ToLower(errMsg) == "ok" {
+		resChan <- &common.NodeResult{Name: addr, Err: nil}
+		return
+	}
+
+	resChan <- &common.NodeResult{Name: addr, Err: errors.New(errMsg)}
 }
 
 func (n *node) setInfo(stats common.Info) {
@@ -323,6 +412,28 @@ func (n *node) InfoAttr(name string) string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestInfo[name]
+}
+
+func (n *node) AnyAttrs(names ...string) common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	var res common.Stats
+	res = make(common.Stats, len(names))
+	for _, name := range names {
+		if v := n.stats.Get(name); v != nil {
+			res[name] = v
+		} else if v := n.nsAggStats.Get(name); v != nil {
+			res[name] = v
+		} else if v := n.nsAggCalcStats.Get(name); v != nil {
+			res[name] = v
+		} else if v := n.latestInfo.Get(name); v != nil {
+			res[name] = v
+		} else if v := n.latestConfig.Get(name); v != nil {
+			res[name] = v
+		}
+	}
+	return res
 }
 
 func (n *node) StatsAttrs(names ...string) common.Stats {
@@ -459,19 +570,19 @@ func (n *node) Address() string {
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
 
-// func (n *node) Address() string {
-// 	n.mutex.RLock()
-// 	defer n.mutex.RUnlock()
-// 	h := n.origNode.GetHost()
-// 	return h.Name
-// }
+func (n *node) Host() string {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	h := n.origNode.GetHost()
+	return h.Name
+}
 
-// func (n *node) Port() uint16 {
-// 	n.mutex.RLock()
-// 	defer n.mutex.RUnlock()
-// 	h := n.origNode.GetHost()
-// 	return uint16(h.Port)
-// }
+func (n *node) Port() uint16 {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	h := n.origNode.GetHost()
+	return uint16(h.Port)
+}
 
 func (n *node) Id() string {
 	return n.InfoAttr("node")
@@ -541,4 +652,117 @@ func parseBinInfo(s string) common.Stats {
 	}
 
 	return res
+}
+
+func (n *node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
+	ip := common.NewInfoParser(s)
+
+	//typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
+
+	nodeStats := map[string]common.Stats{}
+	res := map[string]common.Stats{}
+	for {
+		if err := ip.Expect("{"); err != nil {
+			// it's an error string, read to next section
+			if _, err := ip.ReadUntil(';'); err != nil {
+				break
+			}
+			continue
+		}
+
+		ns, err := ip.ReadUntil('}')
+		if err != nil {
+			break
+		}
+
+		if err := ip.Expect("-"); err != nil {
+			break
+		}
+
+		op, err := ip.ReadUntil(':')
+		if err != nil {
+			break
+		}
+
+		timestamp, err := ip.ReadUntil(',')
+		if err != nil {
+			break
+		}
+
+		if _, err := ip.ReadUntil(','); err != nil {
+			break
+		}
+
+		bucketsStr, err := ip.ReadUntil(';')
+		if err != nil {
+			break
+		}
+		buckets := strings.Split(bucketsStr, ",")
+
+		_, err = ip.ReadUntil(',')
+		if err != nil {
+			break
+		}
+
+		opsCount, err := ip.ReadFloat(',')
+		if err != nil {
+			break
+		}
+
+		valBucketsStr, err := ip.ReadUntil(';')
+		if err != nil {
+			break
+		}
+		valBuckets := strings.Split(valBucketsStr, ",")
+		valBucketsFloat := make([]float64, len(valBuckets))
+		for i := range valBuckets {
+			valBucketsFloat[i], _ = strconv.ParseFloat(valBuckets[i], 64)
+		}
+
+		if len(buckets) != len(valBuckets) {
+			log.Errorf("Error parsing latency values for node: `%s`. Bucket mismatch: buckets: `%s`, values: `%s`.", n.Address(), bucketsStr, valBucketsStr)
+			break
+		}
+
+		stats := common.Stats{
+			"tps":        opsCount,
+			"timestamp":  timestamp,
+			"buckets":    buckets,
+			"valBuckets": valBucketsFloat,
+		}
+
+		if res[ns] == nil {
+			res[ns] = common.Stats{
+				op: stats,
+			}
+		} else {
+			res[ns][op] = stats
+		}
+
+		// calc totals
+		if nstats := nodeStats[op]; nstats == nil {
+			nodeStats[op] = stats
+		} else {
+			// nstats := nstatsIfc.(common.Stats)
+			if timestamp > nstats["timestamp"].(string) {
+				nstats["timestamp"] = timestamp
+			}
+			nstats["tps"] = nstats["tps"].(float64) + opsCount
+			nBuckets := nstats["buckets"].([]string)
+			if len(buckets) > len(nBuckets) {
+				nstats["buckets"] = append(nBuckets, buckets[len(nBuckets):]...)
+				nstats["valBuckets"] = append(nstats["valBuckets"].([]float64), make([]float64, len(nBuckets))...)
+			}
+
+			nValBuckets := nstats["valBuckets"].([]float64)
+			for i := range buckets {
+				nValBuckets[i] += valBucketsFloat[i] * opsCount
+			}
+			nstats["valBuckets"] = nValBuckets
+
+			nodeStats[op] = nstats
+		}
+	}
+
+	return res, nodeStats
 }

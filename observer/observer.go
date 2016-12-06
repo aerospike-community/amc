@@ -1,6 +1,9 @@
 package observer
 
 import (
+	"net"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -8,6 +11,8 @@ import (
 )
 
 type observerT struct {
+	sessions map[string]*cluster
+
 	clusters []*cluster
 	mutex    sync.RWMutex
 
@@ -71,13 +76,22 @@ func (o *observerT) appendCluster(cluster *cluster) {
 	o.clusters = append(o.clusters, cluster)
 }
 
+func (o *observerT) Session(sessionId string) *cluster {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+	return o.sessions[sessionId]
+}
+
 func (o *observerT) Register(policy *as.ClientPolicy, host string, port uint16) (*cluster, error) {
 	client, err := as.NewClientWithPolicy(policy, host, int(port))
 	if err != nil {
 		return nil, err
 	}
 
-	cluster := newCluster(client, policy.User)
+	// log.Info(client.Cluster().GetSeeds())
+	// log.Info(client.Cluster().GetAliases())
+
+	cluster := newCluster(client, policy.User, host, port)
 	o.appendCluster(cluster)
 	o.updateClusters()
 
@@ -112,4 +126,61 @@ func (o *observerT) FindClusterById(id string) *cluster {
 		}
 	}
 	return nil
+}
+
+func (o *observerT) FindClusterBySeed(host string, port int, user string) *cluster {
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	aliases := findAliases(host, port)
+	for _, cluster := range o.clusters {
+		for _, node := range cluster.nodes {
+			for _, alias := range aliases {
+				if node.Address() == alias {
+					if cluster.user == nil || *cluster.user == user {
+						return cluster
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func splitAddr(addr string) (string, int) {
+	index := strings.LastIndex(addr, ":")
+	if index < 0 {
+		return addr, 0
+	}
+
+	port := 0
+	portStr := addr[index:]
+	if len(portStr) > 1 {
+		var err error
+		port, err = strconv.Atoi(portStr)
+		if err != nil {
+			return addr, 0
+		}
+	}
+	return addr[:index], port
+}
+
+func findAliases(address string, port int) []string {
+	portStr := strconv.Itoa(port)
+
+	// IP addresses do not need a lookup
+	ip := net.ParseIP(address)
+	if ip != nil {
+		return []string{address + ":" + portStr}
+	}
+
+	addresses, err := net.LookupHost(address)
+	if err != nil {
+		return nil
+	}
+	aliases := make([]string, 0, len(addresses))
+	for _, addr := range addresses {
+		aliases = append(aliases, addr+":"+portStr)
+	}
+	return aliases
 }

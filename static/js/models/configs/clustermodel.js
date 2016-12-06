@@ -3,7 +3,7 @@
 *THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE. THE COPYRIGHT NOTICE
 *ABOVE DOES NOT EVIDENCE ANY ACTUAL OR INTENDED PUBLICATION.
 ******************************************************************************/
-define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/namespaces", "collections/configs/nodes", "collections/configs/xdr","collections/configs/sindex", "config/app-config", "helper/edit-config", "models/configs/backupmodel", "models/configs/restoremodel","helper/AjaxManager","helper/notification","helper/servicemanager", "models/configs/useradminmodel", "models/configs/roleadminmodel", "helper/authmanager", "helper/servicemanager", "helper/command-line"], 
+define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/namespaces", "collections/configs/nodes", "collections/configs/xdr","collections/configs/sindex", "config/app-config", "helper/edit-config", "models/configs/backupmodel", "models/configs/restoremodel","helper/AjaxManager","helper/notification","helper/servicemanager", "models/configs/useradminmodel", "models/configs/roleadminmodel", "helper/authmanager", "helper/servicemanager", "helper/command-line"],
     function($, _, Backbone, Util, NamespaceCollection, NodeCollection, XDRCollection, SIndexCollection, AppConfig, StatTable, BackupModel, RestoreModel,AjaxManager,Notification,ServiceManager, UserAdminModel, RolesAdminModel, AuthManager, ServiceManager, CommandLine){
     var ClusterModel = Backbone.Model.extend({
         initialize: function(){
@@ -17,7 +17,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             window.AMCGLOBALS.pageSpecific.inputBoxClicked = StatTable.inputBoxInFocus;
             window.AMCGLOBALS.pageSpecific.inputBoxOutOfFocus = StatTable.inputBoxOutOfFocus;
             window.AMCGLOBALS.pageSpecific.configGridSet = false;
-			 
+
 			this.backupModel = new BackupModel();
             this.restoreModel = new RestoreModel();
 			this.availableSets = [];
@@ -45,12 +45,12 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
 
         url: function(){
             return AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID;
-        }, 
+        },
         fetchSuccess: function(response){
 
             Util.setGlobalClusterInfo({type : "clusters", attributes : response.attributes});
             Util.removeEnviromentSetupUI();
-            
+
             if(response.roleAdminModel){
                 response.roleAdminModel.set({namespaces: response.get("namespaces")});
                 response.roleAdminModel.set({cluster_builds : response.get("cluster_builds")});
@@ -67,10 +67,10 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
 			}
 			if(this.clusterID !== window.AMCGLOBALS.persistent.clusterID){
 				this.clusterID = window.AMCGLOBALS.persistent.clusterID;
-			}  
+			}
 			if(typeof response.attributes.error !== 'undefined' && response.attributes.error.indexOf("Invalid cluster id") != -1){
 				delete response.attributes.error;
-				Util.clusterIDReset();				
+				Util.clusterIDReset();
 			}
         },
         fetchError: function(response){
@@ -84,7 +84,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
 			if(AMCGLOBALS.pageSpecific.GlobalPollingActive){
             	if(AppConfig.maxConnectionRequestErrorBeforeAlert <= ++response.connectionReqErrCount){
             		Util.showAMCNEErrorAlert();
-            	} 
+            	}
             }
             var that = this;
 			!AMCGLOBALS.pageSpecific.GlobalPollingActive && Util.updateModelPoller(response, window.AMCGLOBALS.persistent.updateInterval, false);
@@ -102,11 +102,11 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 window.AMCGLOBALS.persistent.nodeList = this.get("nodes");
                 window.AMCGLOBALS.pageSpecific.namespaceList = this.get("namespaces");
                 this.setSelectedNodes();
-                
+
                 if(ServiceManager.isUserHasAccessToService(ServiceManager.serviceComponentMap.MANAGE_PAGE.EDIT_CONFIG.SERVICE_KEY)){
                 	this.onNodeChange();
                 }
-                
+
             });
 			this.on('change:update_interval', function(){
 				Util.setUpdateInterval(this.get("update_interval"));
@@ -123,7 +123,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
 			    		Util.showClusterDivertPopup("Node <strong>" + (differentClusterNodes[0]) + "</strong> cannot be monitored here as it belongs to a different cluster");
 			    	}
 			});
-           
+
 			this.updateIntervalEventHandler();
         },
 		updateIntervalEventHandler: function(){
@@ -136,7 +136,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                     });
                 }
             });
-			
+
 		},
 		updatePollingInterval: function(){
             var that = this;
@@ -163,7 +163,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 				tempSelectedNodes.push(newNodeList[newNode]);
                 			}
                 		}
-                	} 
+                	}
             	}
                 nodeList = _.intersection(window.AMCGLOBALS.persistent.nodeList, tempSelectedNodes);
                 if(nodeList.length === 0){
@@ -181,7 +181,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                     window.AMCGLOBALS.persistent.selectedNodes = nodeList;
                     window.AMCGLOBALS.persistent.unSelectedNodes = [];
                 }
-            
+
 //            Util.setStatUrl();
         },
         onNodeChange: function(){
@@ -211,7 +211,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
         },
         startStats: function(){
             var that = this;
-          
+
             if(window.AMCGLOBALS.persistent.showAttributesFor === 'nodes'){
                 that.initNodeStatCollection();
                 that.focusGridSearchInput();
@@ -265,13 +265,13 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             $('#xdr-attribute-subSelect').html(xdrInputHtml);
 
         },
-        
+
         refreshIntervalInputValidation:function(that){
                 var inputID = '#refreshIntervalInput';
                 var changeBtn = '#refreshIntervalBtn';
                 $(inputID).val(AppConfig.updateInterval.stat/1000);
                 Util.numbericInputValidation(inputID, changeBtn);
-        },        
+        },
         startMonitoringPortChange: function(that){
             var changeXdrBtn = '#changeXdrPortBtn';
             var xdrInput = '#xdrPortInput';
@@ -310,8 +310,8 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             that.hideNamespaceSubSelect();
             that.showSIndexSubSelect();
             that.setAndDisplaySIndexSelectOption(that);
-            that.namespaceSIndexChangeEventListener(that, true);            
-            
+            that.namespaceSIndexChangeEventListener(that, true);
+
             if(_.contains(window.AMCGLOBALS.pageSpecific.namespaceList, window.AMCGLOBALS.persistent.namespaceName)){
                 $('#selectNamespaceSIndex').val(window.AMCGLOBALS.persistent.namespaceName).trigger("change");
                 if(_.contains(window.AMCGLOBALS.pageSpecific.indexes[window.AMCGLOBALS.persistent.namespaceName], window.AMCGLOBALS.persistent.indexName)){
@@ -336,7 +336,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 }else{
                     window.AMCGLOBALS.persistent.namespaceName = selectedNamespace;
                     //that.checkAndCleanStatCollection(that);
-                    Util.updateTabLinks(window.AMCGLOBALS.persistent.seedNode);       
+                    Util.updateTabLinks(window.AMCGLOBALS.persistent.seedNode);
                     that.initSelectedNamespace(that);
                 }
             });
@@ -357,7 +357,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                     that.indexSIndexChangeEventListener(that);
                 }
             });
-            
+
         },
         indexSIndexChangeEventListener: function(that){
             $('#selectIndexSIndex').off('change');
@@ -378,20 +378,20 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             var namespaceList = window.AMCGLOBALS.pageSpecific.namespaceList;
             var selectNamespaceHtml = '';
             selectNamespaceHtml += '<span class="sub_select_label">Select Namespace</span><select id="selectNamespace">';
-            selectNamespaceHtml += '<option value="not-selected">----</option>'; 
-            
+            selectNamespaceHtml += '<option value="not-selected">----</option>';
+
             for(var name in namespaceList){
-                selectNamespaceHtml +='<option value="'+namespaceList[name]+'" >'+namespaceList[name]+'</option>'; 
+                selectNamespaceHtml +='<option value="'+namespaceList[name]+'" >'+namespaceList[name]+'</option>';
             }
             selectNamespaceHtml += '</select>';
             $(subSelectDiv).html(selectNamespaceHtml);
-            
+
 //            if(isSelectFocus){
 //                that.focusNamespaceSelect();
 //            }else{
 //                that.focusGridSearchInput();
 //            }
-            
+
         },
         setAndDisplaySIndexSelectOption: function(that){
             var subSelectDiv = '#sIndex-namespace-attribute-subSelect';
@@ -402,16 +402,16 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 var namespaceList = window.AMCGLOBALS.pageSpecific.namespaceList;
                 var selectNamespaceHtml = '';
                 selectNamespaceHtml += '<span class="sub_select_label"></span><select id="selectNamespaceSIndex">';
-                selectNamespaceHtml += '<option title="not-selected"  value="not-selected">Namespace</option>'; 
+                selectNamespaceHtml += '<option title="not-selected"  value="not-selected">Namespace</option>';
 
                 for(var name in namespaceList){
                     var nbName = namespaceList[name];
-                    selectNamespaceHtml +='<option title="'+nbName+'"  value="'+nbName+'" >'+nbName+'</option>'; 
+                    selectNamespaceHtml +='<option title="'+nbName+'"  value="'+nbName+'" >'+nbName+'</option>';
                 }
                 selectNamespaceHtml += '</select>';
                 selectNamespaceHtml += '<select disabled id="selectIndexSIndex">\n\
                                 <option title="not-selected" value="not-selected">Index</option>\n\
-                                </select>'; 
+                                </select>';
 
                 $(subSelectDiv).html(selectNamespaceHtml);
             }
@@ -420,12 +420,12 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             var indexList = window.AMCGLOBALS.pageSpecific.indexes;
             var namespaceName = window.AMCGLOBALS.persistent.namespaceName;
             var selectedNamespaceIndexList = indexList[namespaceName];
-            var optionHtml = '<option value="not-selected">Select Index</option>'; 
+            var optionHtml = '<option value="not-selected">Select Index</option>';
             for(var name in selectedNamespaceIndexList){
-                optionHtml +='<option value="'+selectedNamespaceIndexList[name]+'" >'+selectedNamespaceIndexList[name]+'</option>'; 
+                optionHtml +='<option value="'+selectedNamespaceIndexList[name]+'" >'+selectedNamespaceIndexList[name]+'</option>';
             }
             $('#selectIndexSIndex').html(optionHtml);
-            
+
         },
         initNodeStatCollection: function(){
             this.statCollection = new NodeCollection();
@@ -433,7 +433,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             this.hideXdrSubSelect();
             this.hideNamespaceSubSelect();
             this.hideSIndexSubSelect();
-            
+
         },
         initXDRStatCollection: function(that){
             that.setAndDisplayXdrPortOption(that);
@@ -465,7 +465,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                     var newStatRefreshInterval = parseInt($('#refreshIntervalInput').val());
                     if(isNaN(newStatRefreshInterval) || newStatRefreshInterval < 0 || newStatRefreshInterval > 3600 || (newStatRefreshInterval === oldStatRefreshInterval) ){
                         //console.info(newStatRefreshInterval)
-                        
+
                         $('#refreshIntervalInput').val(AppConfig.updateInterval['stat']/1000);
                     }else{
                         AppConfig.updateInterval['stat'] = newStatRefreshInterval*1000;
@@ -479,7 +479,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                             Util.startVisibleColPolling(that);
                         }
                     }
-                    
+
                 }catch(e){
                 }
         },
@@ -490,7 +490,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 StatTable.updateConfig();
             });
             this.refreshIntervalInputValidation(this);
-            
+
             $("#nodesCheckBox").off('change').on('change',function(e){
                 e.preventDefault();
                 e.stopPropagation();
@@ -509,7 +509,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 window.AMCGLOBALS.persistent.showAttributesFor = 'namespace';
                 that.reInitializeCollection(that);
             });
-            
+
             $("#sIndexCheckBox").off('click').on('click',function(e){
                 e.preventDefault();
                 e.stopPropagation();
@@ -538,7 +538,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                 $("#nodeListSelectable li").not("#nodeListSelectable li.ui-selected").removeClass("selectable").addClass("unselectable");
                 Util.checkMaxLimitAndResetToDefaultMax(container, that);
                 $(container).find('li').each(function() {
-                    try{  
+                    try{
                         var nodeAddr = $(this).find('.li-node-addr').text();
                         if($(this).hasClass('ui-selected')){
                             if(!(_.contains(window.AMCGLOBALS.persistent.selectedNodes, nodeAddr))){
@@ -558,7 +558,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
                         Util.updateTabLinks();
                         Util.setStatUrl();
                         Util.updateSelectAllToggle();
-                           
+
                     }catch(e){
                         console.info('error in LI iterator');
                     }
@@ -572,12 +572,12 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
         },
         checkAndCleanStatCollection: function(that){
                 try{
-           
+
                     if(that.statCollection){
                         var modelsToBeDeleted = that.getAllModels(that.statCollection.models);
                         that.deleteAndDestroyAllModels(that.statCollection, modelsToBeDeleted);
                     }
-                    
+
                 }catch(e){
                     console.info(e);
                 }
@@ -617,7 +617,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             }
             return modelObjs;
         }
-		
+
     });
     return ClusterModel;
 });

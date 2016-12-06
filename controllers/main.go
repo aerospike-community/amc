@@ -13,7 +13,8 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 
-	"github.com/aerospike/aerospike-console/observer"
+	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/observer"
 )
 
 var (
@@ -26,6 +27,12 @@ var (
 )
 
 func postSessionTerminate(c echo.Context) error {
+	cookie := new(echo.Cookie)
+	cookie.SetName("session")
+	cookie.SetValue("")
+	cookie.SetExpires(time.Now().Add(-time.Hour * 24 * 365))
+	c.SetCookie(cookie)
+
 	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success"}`))
 }
 
@@ -37,7 +44,8 @@ func getAMCVersion(c echo.Context) error {
 	return c.JSONBlob(http.StatusOK, []byte(fmt.Sprintf(`{"amc_version": "%s", "amc_type": "%s"}`, amcVersion, amcEdition)))
 }
 
-func Server(edition, version, build string) {
+func Server(edition, version, build string, config *common.Config) {
+	// TODO: set to the same logger
 	asl.Logger.SetLogger(log.StandardLogger())
 	asl.Logger.SetLevel(asl.DEBUG)
 
@@ -51,10 +59,10 @@ func Server(edition, version, build string) {
 
 	e := echo.New()
 
-	e.Static("/", "/opt/amc/static")
-	e.Static("/static", "/opt/amc/static")
-	// e.Static("/", "static")
-	// e.Static("/static", "static")
+	// e.Static("/", "/opt/amc/static")
+	// e.Static("/static", "/opt/amc/static")
+	e.Static("/", "static")
+	e.Static("/static", "static")
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -67,13 +75,19 @@ func Server(edition, version, build string) {
 	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
 	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
+	e.GET("/aerospike/service/clusters/:clusterUuid/fire_cmd", postClusterFireCmd)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", getClusterThroughput)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", getClusterThroughputHistory)
+	e.GET("/aerospike/service/clusters/:clusterUuid/latency/:nodes", getNodeLatency)
+	e.GET("/aerospike/service/clusters/:clusterUuid/latency_history/:nodes", getNodeLatencyHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/basic", getClusterBasic)
 	e.GET("/aerospike/service/clusters/:clusterUuid/alerts", getClusterAlrets)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", getClusterNodes)
+	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", getClusterNodeAllConfig)
+	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", setClusterNodesConfig)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", getClusterNamespaces)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", getClusterNamespaceNodes)
+	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", getClusterNamespaceAllConfig)
 	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:xdrPort/nodes/:nodes", getClusterXdrNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", getClusterNodeAllStats)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", getClusterNamespaceNodeAllStats)
@@ -90,5 +104,5 @@ func Server(edition, version, build string) {
 	log.Debugf("Starting AMC server, version: %s %s", amcVersion, amcEdition)
 
 	// Start server
-	e.Run(standard.New(":8081"))
+	e.Run(standard.New(config.AMC.Bind))
 }
