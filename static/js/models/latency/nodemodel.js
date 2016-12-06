@@ -177,7 +177,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					}
 
 					if(model.latencyAvailable && !latencyAvailable){
-						latency = model.getNullInfo(new Date((model.latencyData['writes_master'][0].data[0].data[model.latencyData['writes_master'][0].data[0].data.length - 1].x) + 10000));
+						latency = model.getNullInfo(new Date((model.latencyData['writes'][0].data[0].data[model.latencyData['writes'][0].data[0].data.length - 1].x) + 10000));
 						latencyAvailable = true;
 					}
 
