@@ -47,7 +47,7 @@ module.exports = function(grunt) {
         src: 'build/static/index.html',
         overwrite: true,
         replacements: [{
-          // replace data-main with the revisioned file name
+          // 1. replace data-main with the revisioned file name
           from: 'static/js/setup',
           to: function(match) {
             var k, v;

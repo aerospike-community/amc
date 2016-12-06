@@ -1099,9 +1099,6 @@ hr {
     font-weight: bold;
     text-align: center;
 }
-.tps-chart {
-  min-width: 240px;
-}
 .tps {
     position: absolute;
     right: 25px;
