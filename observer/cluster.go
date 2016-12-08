@@ -73,7 +73,14 @@ func (c *cluster) OffNodes() []string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	return []string{}
+	res := []string{}
+	for _, node := range c.nodes {
+		if node.status == nodeStatus.Off {
+			res = append(res, node.Address())
+		}
+	}
+
+	return res
 }
 
 func (c *cluster) RandomActiveNode() *node {

@@ -321,6 +321,11 @@ func (n *node) latestLatencyReportDateTime() (time.Time, error) {
 func (n *node) latencyDateTime(ts string) (time.Time, error) {
 	const layout = "2006-1-2 15:04:05"
 
+	if len(ts) == 0 {
+		// return zero value
+		return time.Time{}, nil
+	}
+
 	// remove the timezone if exists
 	if len(ts) > 8 {
 		ts = ts[:8]
@@ -338,7 +343,7 @@ func (n *node) latencyDateTime(ts string) (time.Time, error) {
 
 	t2, err := time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day)+ts)
 	if err != nil {
-		log.Error("DATE PARSE ERROR! ", err)
+		log.Debug("DATE PARSE ERROR! ", err)
 		return t2, err
 	}
 

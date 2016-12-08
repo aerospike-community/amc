@@ -192,24 +192,6 @@ func (o *observerT) DatacenterInfo() common.Stats {
 	}
 }
 
-func splitAddr(addr string) (string, int) {
-	index := strings.LastIndex(addr, ":")
-	if index < 0 {
-		return addr, 0
-	}
-
-	port := 0
-	portStr := addr[index:]
-	if len(portStr) > 1 {
-		var err error
-		port, err = strconv.Atoi(portStr)
-		if err != nil {
-			return addr, 0
-		}
-	}
-	return addr[:index], port
-}
-
 func findAliases(address string, port int) []string {
 	portStr := strconv.Itoa(port)
 

@@ -3,47 +3,30 @@ package common
 import (
 	"errors"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
-var hostPortRegexp = regexp.MustCompile(`(?P<host>.+):(?P<port>\d+)`)
+func SplitHostPort(addr string) (host string, port int, err error) {
+	addr = strings.Trim(addr, "\t\n\r ")
+	if len(addr) == 0 {
+		return "", 0, errors.New("Invalid address: " + addr)
+	}
 
-func regexMatchToMap(re *regexp.Regexp, s string) map[string]string {
-	match := re.FindStringSubmatch(s)
+	index := strings.LastIndex(addr, ":")
+	if index < 0 || len(addr) < index {
+		return addr, 0, errors.New("Invalid address: " + addr)
+	}
 
-	result := make(map[string]string, 2)
-	for i, name := range re.SubexpNames() {
-		// result[name] = match[i]
-		if i != 0 {
-			result[name] = match[i]
+	portStr := addr[index+1:]
+	if len(portStr) > 0 {
+		var err error
+		port, err = strconv.Atoi(portStr)
+		if err != nil {
+			return addr, 0, err
 		}
 	}
-
-	return result
-}
-
-func SplitHostPort(s string) (host string, port int, err error) {
-	s = strings.Trim(s, "\t\n\r ")
-	if len(s) == 0 {
-		return "", 0, errors.New("Invalid address: " + s)
-	}
-
-	result := regexMatchToMap(hostPortRegexp, s)
-
-	var exists bool
-	if host, exists = result["host"]; !exists {
-		return "", -1, errors.New("Host not found")
-	}
-
-	if strPort, exists := result["port"]; !exists {
-		return "", -1, errors.New("Port not found")
-	} else {
-		port, _ = strconv.Atoi(strPort)
-	}
-
-	return host, port, nil
+	return addr[:index], port, nil
 }
 
 func Round(val float64, roundOn float64, places int) (newVal float64) {
