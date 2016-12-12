@@ -10,7 +10,6 @@ import (
 	asl "github.com/aerospike/aerospike-client-go/logger"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 
 	"github.com/citrusleaf/amc/common"
@@ -20,17 +19,13 @@ import (
 var (
 	_observer            = observer.New()
 	_defaultClientPolicy = as.NewClientPolicy()
-
-	amcVersion string
-	amcBuild   string
-	amcEdition string
 )
 
 func postSessionTerminate(c echo.Context) error {
-	cookie := new(echo.Cookie)
-	cookie.SetName("session")
-	cookie.SetValue("")
-	cookie.SetExpires(time.Now().Add(-time.Hour * 24 * 365))
+	cookie := new(http.Cookie)
+	cookie.Name = "session"
+	cookie.Value = ""
+	cookie.Expires = time.Now().Add(-time.Hour * 24 * 365)
 	c.SetCookie(cookie)
 
 	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success"}`))
@@ -41,31 +36,37 @@ func getDebug(c echo.Context) error {
 }
 
 func getAMCVersion(c echo.Context) error {
-	return c.JSONBlob(http.StatusOK, []byte(fmt.Sprintf(`{"amc_version": "%s", "amc_type": "%s"}`, amcVersion, amcEdition)))
+	return c.JSONBlob(http.StatusOK, []byte(fmt.Sprintf(`{"amc_version": "%s", "amc_type": "%s"}`, common.AMCVersion, common.AMCEdition)))
 }
 
-func Server(edition, version, build string, config *common.Config) {
+func Server(config *common.Config) {
 	// TODO: set to the same logger
 	asl.Logger.SetLogger(log.StandardLogger())
-	asl.Logger.SetLevel(asl.DEBUG)
 
-	amcVersion = version
-	amcBuild = build
-	amcEdition = edition
+	asl.Logger.SetLevel(asl.INFO)
+	if !common.AMCIsProd() {
+		asl.Logger.SetLevel(asl.DEBUG)
+	}
 
 	_defaultClientPolicy.Timeout = 5 * time.Second
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
 	_defaultClientPolicy.ConnectionQueueSize = 2
 
 	e := echo.New()
+	// e.Logger().SetOutput(log.StandardLogger().Writer())
 
-	// e.Static("/", "/opt/amc/static")
-	// e.Static("/static", "/opt/amc/static")
-	e.Static("/", "build/static")
-	e.Static("/static", "build/static")
+	if config.AMC.StaticPath == "" {
+		log.Fatalln("No static dir has been set in the config file. Quiting...")
+	}
+	log.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
+	e.Static("/", config.AMC.StaticPath)
+	e.Static("/static", config.AMC.StaticPath)
 
-	// Middleware
-	e.Use(middleware.Logger())
+	// // Middleware
+	if !common.AMCIsProd() {
+		e.Use(middleware.Logger())
+	}
+
 	e.Use(middleware.Recover())
 
 	// Routes
@@ -87,6 +88,8 @@ func Server(edition, version, build string, config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", getClusterNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", getClusterNodeAllConfig)
 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", setClusterNodesConfig)
+	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_xdr_off", postSwitchXDROff)
+	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_xdr_on", postSwitchXDROn)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", getClusterNamespaces)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", getClusterNamespaceNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", getClusterNamespaceAllConfig)
@@ -103,8 +106,8 @@ func Server(edition, version, build string, config *common.Config) {
 	e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)
 	e.GET("/aerospike/service/clusters/:clusterUuid/get_user_roles", getClusterUserRoles)
 
-	log.Debugf("Starting AMC server, version: %s %s", amcVersion, amcEdition)
+	log.Debugf("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
 
 	// Start server
-	e.Run(standard.New(config.AMC.Bind))
+	e.Start(config.AMC.Bind)
 }

@@ -211,7 +211,12 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			if(typeof latencyHistory !== 'undefined' && latencyHistory !== null){
 				var currentLatencyTimestamp, lastTimestamp;
 				for(var i=0; i<latencyHistory.length; i++){
-					currentLatencyTimestamp = latencyHistory[i][that.attrList[0]].timestamp;
+					for (var attr in that.attrList) {
+						if (attr) {
+							currentLatencyTimestamp = latencyHistory[i][that.attrList[0]].timestamp;
+							break
+						}
+					}
 					if(currentLatencyTimestamp !== lastTimestamp)
 						view.pushLatencyInfo(view,latencyHistory[i]);
 					lastTimestamp = currentLatencyTimestamp;

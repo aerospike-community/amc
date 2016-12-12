@@ -1,21 +1,26 @@
 package main
 
 import (
+	"flag"
+
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/controllers"
 )
 
-var amcVersion string
-var amcBuild string
-var amcEdition string
+var (
+	configFile = flag.String("config-file", "", "Configuration file.")
+	configDir  = flag.String("config-dir", "", "Configuration dir.")
+)
 
 func main() {
-	log.Infof("Starting AMC server, version: %s %s", amcVersion, amcEdition)
+	flag.Parse()
+
+	log.Infof("Trying to start the AMC server...")
 
 	config := common.Config{}
-	common.InitConfig(&config)
+	common.InitConfig(*configFile, *configDir, &config)
 
-	controllers.Server(amcEdition, amcVersion, amcBuild, &config)
+	controllers.Server(&config)
 }

@@ -14,8 +14,8 @@ import (
 	"github.com/citrusleaf/amc/rrd"
 )
 
-type namespace struct {
-	node *node
+type Namespace struct {
+	node *Node
 
 	name                string
 	latestInfo, oldInfo common.Info
@@ -31,7 +31,7 @@ type namespace struct {
 	mutex sync.RWMutex
 }
 
-func (ns *namespace) ServerTime() time.Time {
+func (ns *Namespace) ServerTime() time.Time {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -41,7 +41,7 @@ func (ns *namespace) ServerTime() time.Time {
 	return time.Time{}
 }
 
-func (ns *namespace) update(info common.Info) error {
+func (ns *Namespace) update(info common.Info) error {
 	ns.setInfo(info)
 	ns.setAliases()
 	ns.updateHistory()
@@ -52,7 +52,7 @@ func (ns *namespace) update(info common.Info) error {
 	return nil
 }
 
-func (ns *namespace) updateIndexInfo(indexes map[string]common.Info) error {
+func (ns *Namespace) updateIndexInfo(indexes map[string]common.Info) error {
 	cmdList := make([]string, 0, len(indexes))
 	for idxName, idxMap := range indexes {
 		cmdList = append(cmdList, fmt.Sprintf("sindex/%s/%s", idxMap["ns"], idxName))
@@ -71,13 +71,13 @@ func (ns *namespace) updateIndexInfo(indexes map[string]common.Info) error {
 	return nil
 }
 
-func (ns *namespace) updateLatencyInfo(latStats common.Stats) {
+func (ns *Namespace) updateLatencyInfo(latStats common.Stats) {
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
 	ns.latencystats = latStats
 }
 
-func (ns *namespace) setInfo(stats common.Info) {
+func (ns *Namespace) setInfo(stats common.Info) {
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
 	ns.oldInfo = ns.latestInfo
@@ -85,7 +85,7 @@ func (ns *namespace) setInfo(stats common.Info) {
 	ns.latestStats = stats.ToInfo("namespace/" + ns.name).ToStats()
 }
 
-func (ns *namespace) InfoAttrs(names ...string) common.Info {
+func (ns *Namespace) InfoAttrs(names ...string) common.Info {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -104,13 +104,13 @@ func (ns *namespace) InfoAttrs(names ...string) common.Info {
 	return res
 }
 
-func (ns *namespace) InfoAttr(name string) string {
+func (ns *Namespace) InfoAttr(name string) string {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 	return ns.latestInfo[name]
 }
 
-func (ns *namespace) StatsAttrs(names ...string) common.Stats {
+func (ns *Namespace) StatsAttrs(names ...string) common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -137,7 +137,7 @@ func (ns *namespace) StatsAttrs(names ...string) common.Stats {
 	return res
 }
 
-func (ns *namespace) StatsAttr(name string) interface{} {
+func (ns *Namespace) StatsAttr(name string) interface{} {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 	if val := ns.latestStats.Get(name); val != nil {
@@ -146,14 +146,14 @@ func (ns *namespace) StatsAttr(name string) interface{} {
 	return ns.calcStats.Get(name)
 }
 
-func (ns *namespace) aggStats(agg, calcAgg common.Stats) {
+func (ns *Namespace) aggStats(agg, calcAgg common.Stats) {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 	agg.AggregateStats(ns.latestStats)
 	calcAgg.AggregateStats(ns.calcStats)
 }
 
-func (ns *namespace) Disk() common.Stats {
+func (ns *Namespace) Disk() common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -164,7 +164,7 @@ func (ns *namespace) Disk() common.Stats {
 	}
 }
 
-func (ns *namespace) DiskPercent() common.Stats {
+func (ns *Namespace) DiskPercent() common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -174,7 +174,7 @@ func (ns *namespace) DiskPercent() common.Stats {
 	}
 }
 
-func (ns *namespace) Memory() common.Stats {
+func (ns *Namespace) Memory() common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -185,7 +185,7 @@ func (ns *namespace) Memory() common.Stats {
 	}
 }
 
-func (ns *namespace) MemoryPercent() common.Stats {
+func (ns *Namespace) MemoryPercent() common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -195,13 +195,13 @@ func (ns *namespace) MemoryPercent() common.Stats {
 	}
 }
 
-func (ns *namespace) IndexStats(name string) common.Stats {
+func (ns *Namespace) IndexStats(name string) common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 	return ns.indexInfo.ToInfo("sindex/" + ns.name + "/" + name).ToStats()
 }
 
-func (ns *namespace) updateHistory() {
+func (ns *Namespace) updateHistory() {
 	tm := ns.ServerTime().Unix()
 
 	ns.mutex.Lock()
@@ -232,7 +232,7 @@ func (ns *namespace) updateHistory() {
 	}
 }
 
-func (ns *namespace) setAliases() {
+func (ns *Namespace) setAliases() {
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
 
@@ -296,10 +296,11 @@ func (ns *namespace) setAliases() {
 		stats.TryInt("xdr_write_error", 0) +
 		stats.TryInt("xdr_write_timeout", 0)
 
-	calcStats["xdr_read_success"] = stats.TryInt("xdr_read_success", 0)
-	calcStats["xdr_read_reqs"] = stats.TryInt("xdr_read_success", 0) +
-		stats.TryInt("xdr_read_error", 0) +
-		stats.TryInt("xdr_read_notfound", 0)
+	// This does not yet exists on namespace level
+	// calcStats["xdr_read_success"] = stats.TryInt("xdr_read_success", 0)
+	// calcStats["xdr_read_reqs"] = stats.TryInt("xdr_read_success", 0) +
+	// 	stats.TryInt("xdr_read_error", 0) +
+	// 	stats.TryInt("xdr_read_notfound", 0)
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Aliases
@@ -380,7 +381,7 @@ func (ns *namespace) setAliases() {
 	ns.calcStats = calcStats
 }
 
-func (ns *namespace) SetsInfo() map[string]common.Stats {
+func (ns *Namespace) SetsInfo() map[string]common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -400,7 +401,7 @@ func (ns *namespace) SetsInfo() map[string]common.Stats {
 	return res
 }
 
-func (ns *namespace) Stats() common.Stats {
+func (ns *Namespace) Stats() common.Stats {
 	ns.mutex.RLock()
 	defer ns.mutex.RUnlock()
 
@@ -464,7 +465,7 @@ var _configuration_params = []string{
 	"migrate-order",
 }
 
-func (ns *namespace) ConfigAttrs(names ...string) common.Stats {
+func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
 	info := ns.InfoAttrs(_configuration_params...)
 
 	if len(names) == 0 {

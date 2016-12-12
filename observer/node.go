@@ -18,9 +18,16 @@ import (
 
 type NodeStatus string
 type NodeVisibilityStatus string
+type XDRStatus string
 
 var nodeStatus = struct {
 	On, Off NodeStatus
+}{
+	"on", "off",
+}
+
+var xdrStatus = struct {
+	On, Off XDRStatus
 }{
 	"on", "off",
 }
@@ -31,14 +38,14 @@ var nodeVisibilityStatus = struct {
 	"on", "off",
 }
 
-type node struct {
-	cluster  *cluster
+type Node struct {
+	cluster  *Cluster
 	origNode *as.Node
 
 	status  NodeStatus
 	visible NodeVisibilityStatus
 
-	namespaces map[string]*namespace
+	namespaces map[string]*Namespace
 
 	latestInfo, oldInfo common.Info
 	latestConfig        common.Stats
@@ -55,18 +62,18 @@ type node struct {
 	mutex sync.RWMutex
 }
 
-func newNode(cluster *cluster, origNode *as.Node) *node {
-	return &node{
+func newNode(cluster *Cluster, origNode *as.Node) *Node {
+	return &Node{
 		cluster:        cluster,
 		origNode:       origNode,
 		status:         nodeStatus.On,
-		namespaces:     map[string]*namespace{},
+		namespaces:     map[string]*Namespace{},
 		statsHistory:   map[string]*rrd.Bucket{},
 		latencyHistory: rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600),
 	}
 }
 
-func (n *node) update() error {
+func (n *Node) update() error {
 	if err := n.updateNamespaceNames(); err != nil {
 		return err
 	}
@@ -99,7 +106,6 @@ func (n *node) update() error {
 	}
 
 	stats := common.Info(info).ToInfo("statistics").ToStats()
-	// log.Debugf("%v", stats)
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 	n.updateHistory()
 
@@ -108,18 +114,18 @@ func (n *node) update() error {
 	return nil
 }
 
-func (n *node) notifyAboutChanges() error {
+func (n *Node) notifyAboutChanges() error {
 	return nil
 }
 
-func (n *node) applyStatsToAggregate(stats, calcStats common.Stats) {
+func (n *Node) applyStatsToAggregate(stats, calcStats common.Stats) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	stats.AggregateStats(n.stats)
 	calcStats.AggregateStats(n.nsAggCalcStats)
 }
 
-func (n *node) applyNsStatsToAggregate(stats, calcStats map[string]common.Stats) {
+func (n *Node) applyNsStatsToAggregate(stats, calcStats map[string]common.Stats) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -135,13 +141,12 @@ func (n *node) applyNsStatsToAggregate(stats, calcStats map[string]common.Stats)
 	}
 }
 
-func (n *node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Stats) map[string]map[string]common.Stats {
+func (n *Node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Stats) map[string]map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
 	for nsName, ns := range n.namespaces {
 		setsInfo := ns.SetsInfo()
-		// log.Info("@@@@@@@@@@@@@@@@@@", setsInfo)
 
 		if stats[nsName] == nil {
 			stats[nsName] = setsInfo
@@ -158,11 +163,10 @@ func (n *node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Sta
 		}
 	}
 
-	// log.Info("@@@@@@@@@@@@@@@@@@", stats)
 	return stats
 }
 
-func (n *node) requestInfo(reties int, cmd ...string) (result map[string]string, err error) {
+func (n *Node) requestInfo(reties int, cmd ...string) (result map[string]string, err error) {
 	if len(cmd) == 0 {
 		return map[string]string{}, nil
 	}
@@ -178,7 +182,7 @@ func (n *node) requestInfo(reties int, cmd ...string) (result map[string]string,
 	return result, err
 }
 
-func (n *node) updateNamespaceNames() error {
+func (n *Node) updateNamespaceNames() error {
 	namespaceListMap, err := n.requestInfo(3, "namespaces")
 	if err != nil {
 		return err
@@ -191,20 +195,20 @@ func (n *node) updateNamespaceNames() error {
 	defer n.mutex.Unlock()
 	for _, ns := range namespaces {
 		if n.namespaces[ns] == nil {
-			n.namespaces[ns] = &namespace{node: n, name: ns, statsHistory: map[string]*rrd.Bucket{}, latencyHistory: rrd.NewSimpleBucket(5, 3600)}
+			n.namespaces[ns] = &Namespace{node: n, name: ns, statsHistory: map[string]*rrd.Bucket{}, latencyHistory: rrd.NewSimpleBucket(5, 3600)}
 		}
 	}
 
 	return nil
 }
 
-func (n *node) LatestLatency() map[string]common.Stats {
+func (n *Node) LatestLatency() map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestNodeLatency
 }
 
-func (n *node) LatencySince(tms string) []map[string]common.Stats {
+func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -218,7 +222,6 @@ func (n *node) LatencySince(tms string) []map[string]common.Stats {
 	vs := n.latencyHistory.ValuesSince(time.Unix(tm, 0))
 	vsTyped := make([]map[string]common.Stats, len(vs))
 	for i := range vs {
-		// log.Infof("%#v", vs[i])
 		if vIfc := vs[i]; vIfc != nil {
 			if v, ok := vIfc.(*interface{}); ok {
 				vsTyped[i] = (*v).(map[string]common.Stats)
@@ -229,7 +232,7 @@ func (n *node) LatencySince(tms string) []map[string]common.Stats {
 	return vsTyped
 }
 
-func (n *node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
+func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -248,7 +251,7 @@ func (n *node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 	return res
 }
 
-func (n *node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
+func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -267,7 +270,7 @@ func (n *node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 	return res
 }
 
-func (n *node) updateHistory() {
+func (n *Node) updateHistory() {
 	// this uses a RLock, so we put it before the locks to avoid deadlock
 	latestLatencyReport, err := n.latestLatencyReportDateTime()
 
@@ -296,7 +299,12 @@ func (n *node) updateHistory() {
 			bucket = rrd.NewBucket(n.cluster.UpdateInterval(), 3600, true)
 			n.statsHistory[stat] = bucket
 		}
-		bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
+
+		if n.nsAggCalcStats.Get(stat) != nil {
+			bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
+		} else if n.stats.Get(stat) != nil {
+			bucket.Add(tm, n.stats.TryFloat(stat, 0))
+		}
 	}
 
 	if err == nil && !latestLatencyReport.IsZero() {
@@ -304,7 +312,7 @@ func (n *node) updateHistory() {
 	}
 }
 
-func (n *node) latestLatencyReportDateTime() (time.Time, error) {
+func (n *Node) latestLatencyReportDateTime() (time.Time, error) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -318,7 +326,7 @@ func (n *node) latestLatencyReportDateTime() (time.Time, error) {
 }
 
 // adds date part to the latency time string
-func (n *node) latencyDateTime(ts string) (time.Time, error) {
+func (n *Node) latencyDateTime(ts string) (time.Time, error) {
 	const layout = "2006-1-2 15:04:05"
 
 	if len(ts) == 0 {
@@ -355,11 +363,44 @@ func (n *node) latencyDateTime(ts string) (time.Time, error) {
 	return t2, nil
 }
 
-func (n *node) XdrEnabled() bool {
+func (n *Node) XdrEnabled() bool {
 	return n.StatsAttr("xdr_uptime") != nil
 }
 
-func (n *node) infoKeys() []string {
+func (n *Node) XdrStats() common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	return n.latestInfo.ToInfo("get-config:context=xdr").ToStats()
+}
+
+func (n *Node) XdrStatus() XDRStatus {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	if n.latestConfig.TryString("enable-xdr", "") != "true" {
+		return xdrStatus.Off
+	}
+	return xdrStatus.On
+}
+
+func (n *Node) SwitchXDR(on bool) error {
+	cmd := fmt.Sprintf("set-config:context=xdr;enable-xdr=%v", on)
+
+	res, err := n.origNode.RequestInfo(cmd)
+	if err != nil {
+		return err
+	}
+
+	errMsg, exists := res[cmd]
+	if exists && strings.ToLower(errMsg) != "ok" {
+		return errors.New(errMsg)
+	}
+
+	return nil
+}
+
+func (n *Node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
@@ -367,7 +408,7 @@ func (n *node) infoKeys() []string {
 	}
 
 	if n.Enterprise() {
-		res = append(res, "get-dc-config")
+		res = append(res, "get-dc-config", "get-config:context=xdr")
 	}
 
 	// add namespace stat requests
@@ -379,13 +420,13 @@ func (n *node) infoKeys() []string {
 	return res
 }
 
-func (n *node) NamespaceByName(ns string) *namespace {
+func (n *Node) NamespaceByName(ns string) *Namespace {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.namespaces[ns]
 }
 
-func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
+func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	// alias stats
@@ -448,19 +489,19 @@ func (n *node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	n.nsAggCalcStats = nsCalcStats
 }
 
-func (n *node) setConfig(stats common.Info) {
+func (n *Node) setConfig(stats common.Info) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	n.latestConfig = stats.ToStats()
 }
 
-func (n *node) setNodeLatency(stats map[string]common.Stats) {
+func (n *Node) setNodeLatency(stats map[string]common.Stats) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	n.latestNodeLatency = stats
 }
 
-func (n *node) ConfigAttrs(names ...string) common.Stats {
+func (n *Node) ConfigAttrs(names ...string) common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -479,13 +520,13 @@ func (n *node) ConfigAttrs(names ...string) common.Stats {
 	return res
 }
 
-func (n *node) ConfigAttr(name string) interface{} {
+func (n *Node) ConfigAttr(name string) interface{} {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestConfig[name]
 }
 
-func (n *node) SetServerConfig(context string, config map[string]string, wg *sync.WaitGroup, resChan chan *common.NodeResult) {
+func (n *Node) SetServerConfig(context string, config map[string]string, wg *sync.WaitGroup, resChan chan *common.NodeResult) {
 	defer wg.Done()
 
 	// to avoid deadlock
@@ -514,14 +555,14 @@ func (n *node) SetServerConfig(context string, config map[string]string, wg *syn
 	resChan <- &common.NodeResult{Name: addr, Err: errors.New(errMsg)}
 }
 
-func (n *node) setInfo(stats common.Info) {
+func (n *Node) setInfo(stats common.Info) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	n.oldInfo = n.latestInfo
 	n.latestInfo = stats
 }
 
-func (n *node) InfoAttrs(names ...string) common.Info {
+func (n *Node) InfoAttrs(names ...string) common.Info {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -540,13 +581,13 @@ func (n *node) InfoAttrs(names ...string) common.Info {
 	return res
 }
 
-func (n *node) InfoAttr(name string) string {
+func (n *Node) InfoAttr(name string) string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestInfo[name]
 }
 
-func (n *node) AnyAttrs(names ...string) common.Stats {
+func (n *Node) AnyAttrs(names ...string) common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -568,7 +609,7 @@ func (n *node) AnyAttrs(names ...string) common.Stats {
 	return res
 }
 
-func (n *node) StatsAttrs(names ...string) common.Stats {
+func (n *Node) StatsAttrs(names ...string) common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -587,26 +628,26 @@ func (n *node) StatsAttrs(names ...string) common.Stats {
 	return res
 }
 
-func (n *node) StatsAttr(name string) interface{} {
+func (n *Node) StatsAttr(name string) interface{} {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.stats.Get(name)
 }
 
-func (n *node) Status() NodeStatus {
+func (n *Node) Status() NodeStatus {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.status
 }
 
-func (n *node) Enterprise() bool {
+func (n *Node) Enterprise() bool {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
 	return strings.Contains(strings.ToLower(n.latestInfo.TryString("edition", "")), "enterprise")
 }
 
-func (n *node) VisibilityStatus() NodeVisibilityStatus {
+func (n *Node) VisibilityStatus() NodeVisibilityStatus {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -617,17 +658,17 @@ func (n *node) VisibilityStatus() NodeVisibilityStatus {
 	return res
 }
 
-func (n *node) setStatus(status NodeStatus) {
+func (n *Node) setStatus(status NodeStatus) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	n.status = status
 }
 
-func (n *node) Build() string {
+func (n *Node) Build() string {
 	return n.InfoAttr("build")
 }
 
-func (n *node) Disk() common.Stats {
+func (n *Node) Disk() common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -640,7 +681,7 @@ func (n *node) Disk() common.Stats {
 	}
 }
 
-func (n *node) Memory() common.Stats {
+func (n *Node) Memory() common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -653,7 +694,7 @@ func (n *node) Memory() common.Stats {
 	}
 }
 
-func (n *node) DataCenters() map[string]common.Stats {
+func (n *Node) DataCenters() map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -679,7 +720,7 @@ func (n *node) DataCenters() map[string]common.Stats {
 	return dcs
 }
 
-func (n *node) NamespaceList() []string {
+func (n *Node) NamespaceList() []string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	res := make([]string, 0, len(n.namespaces))
@@ -689,13 +730,13 @@ func (n *node) NamespaceList() []string {
 	return common.StrUniq(res)
 }
 
-func (n *node) Jobs() map[string]common.Stats {
+func (n *Node) Jobs() map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestInfo.ToStatsMap("jobs:", "trid", ":")
 }
 
-func (n *node) Indexes(namespace string) map[string]common.Info {
+func (n *Node) Indexes(namespace string) map[string]common.Info {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	indexes := n.latestInfo.ToInfoMap("sindex", "indexname", ":")
@@ -710,11 +751,10 @@ func (n *node) Indexes(namespace string) map[string]common.Info {
 		}
 	}
 
-	// log.Debug(result)
 	return result
 }
 
-func (n *node) NamespaceIndexes() map[string][]string {
+func (n *Node) NamespaceIndexes() map[string][]string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -733,13 +773,13 @@ func (n *node) NamespaceIndexes() map[string][]string {
 	return result
 }
 
-func (n *node) Udfs() map[string]common.Info {
+func (n *Node) Udfs() map[string]common.Info {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.latestInfo.ToInfoMap("udf-list", "filename", ":")
 }
 
-func (n *node) Address() string {
+func (n *Node) Address() string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -747,33 +787,33 @@ func (n *node) Address() string {
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
 
-func (n *node) Host() string {
+func (n *Node) Host() string {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	h := n.origNode.GetHost()
 	return h.Name
 }
 
-func (n *node) Port() uint16 {
+func (n *Node) Port() uint16 {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	h := n.origNode.GetHost()
 	return uint16(h.Port)
 }
 
-func (n *node) Id() string {
+func (n *Node) Id() string {
 	return n.InfoAttr("node")
 }
 
-func (n *node) ClusterName() string {
+func (n *Node) ClusterName() string {
 	return n.InfoAttr("cluster-name")
 }
 
-func (n *node) Bins() common.Stats {
+func (n *Node) Bins() common.Stats {
 	return parseBinInfo(n.InfoAttr("bins"))
 }
 
-func (n *node) MigrationStats() common.Info {
+func (n *Node) MigrationStats() common.Info {
 	return n.InfoAttrs("migrate_msgs_sent", "migrate_msgs_recv", "migrate_progress_send",
 		"migrate_progress_recv", "migrate_tx_objs", "migrate_rx_objs")
 }
@@ -831,7 +871,7 @@ func parseBinInfo(s string) common.Stats {
 	return res
 }
 
-func (n *node) setServerTime(tm int64) {
+func (n *Node) setServerTime(tm int64) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 
@@ -840,13 +880,13 @@ func (n *node) setServerTime(tm int64) {
 	}
 }
 
-func (n *node) ServerTime() time.Time {
+func (n *Node) ServerTime() time.Time {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return time.Unix(n.serverTime, 0)
 }
 
-func (n *node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
+func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
 	ip := common.NewInfoParser(s)
 
 	//typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
