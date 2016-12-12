@@ -6,6 +6,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/citrusleaf/amc/common"
 )
 
 type SimpleBucket struct {
@@ -19,7 +21,9 @@ type SimpleBucket struct {
 }
 
 func NewSimpleBucket(resolution, size int) *SimpleBucket {
-	log.Info("creating bucket...")
+	if !common.AMCIsProd() {
+		log.Info("creating bucket...")
+	}
 	return &SimpleBucket{
 		resolution: 5,
 		values:     make([]interface{}, size),

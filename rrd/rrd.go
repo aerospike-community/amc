@@ -27,7 +27,9 @@ type Bucket struct {
 }
 
 func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
-	log.Info("creating bucket...")
+	if !common.AMCIsProd() {
+		log.Info("creating bucket...")
+	}
 	return &Bucket{
 		rollingTotal: rollingTotal,
 		resolution:   resolution,

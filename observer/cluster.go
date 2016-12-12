@@ -15,10 +15,10 @@ import (
 	"github.com/citrusleaf/amc/common"
 )
 
-type cluster struct {
+type Cluster struct {
 	observer *observerT
 	client   *as.Client
-	nodes    map[as.Host]*node
+	nodes    map[as.Host]*Node
 
 	aggNodeStats, aggNodeCalcStats       common.Stats
 	aggNsStats, aggNsCalcStats           map[string]common.Stats
@@ -30,19 +30,22 @@ type cluster struct {
 	securityEnabled bool
 	updateInterval  int // seconds
 
-	seed  string
-	alias *string
-	user  *string
-	roles *string
+	seed     string
+	alias    *string
+	user     *string
+	password *string
+
+	users []string
+	roles []string
 
 	mutex sync.RWMutex
 }
 
-func newCluster(observer *observerT, client *as.Client, user, host string, port uint16) *cluster {
-	newCluster := cluster{
+func newCluster(observer *observerT, client *as.Client, user, password, host string, port uint16) *Cluster {
+	newCluster := Cluster{
 		observer:       observer,
 		client:         client,
-		nodes:          map[as.Host]*node{},
+		nodes:          map[as.Host]*Node{},
 		updateInterval: 5, //seconds
 		uuid:           uuid.NewV4().String(),
 		seed:           host + ":" + strconv.Itoa(int(port)),
@@ -50,6 +53,7 @@ func newCluster(observer *observerT, client *as.Client, user, host string, port 
 
 	if user != "" {
 		newCluster.user = &user
+		newCluster.password = &password
 	}
 
 	if client != nil {
@@ -62,14 +66,14 @@ func newCluster(observer *observerT, client *as.Client, user, host string, port 
 	return &newCluster
 }
 
-func (c *cluster) UpdateInterval() int {
+func (c *Cluster) UpdateInterval() int {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.updateInterval
 }
 
-func (c *cluster) OffNodes() []string {
+func (c *Cluster) OffNodes() []string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -83,7 +87,7 @@ func (c *cluster) OffNodes() []string {
 	return res
 }
 
-func (c *cluster) RandomActiveNode() *node {
+func (c *Cluster) RandomActiveNode() *Node {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -96,7 +100,7 @@ func (c *cluster) RandomActiveNode() *node {
 	return nil
 }
 
-func (c *cluster) Status() string {
+func (c *Cluster) Status() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -106,7 +110,7 @@ func (c *cluster) Status() string {
 	return "off"
 }
 
-func (c *cluster) Disk() common.Stats {
+func (c *Cluster) Disk() common.Stats {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -124,7 +128,7 @@ func (c *cluster) Disk() common.Stats {
 	return result
 }
 
-func (c *cluster) Memory() common.Stats {
+func (c *Cluster) Memory() common.Stats {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -142,34 +146,18 @@ func (c *cluster) Memory() common.Stats {
 	return result
 }
 
-func (c *cluster) Users() map[string]interface{} {
+func (c *Cluster) Users() map[string]interface{} {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	users, err := c.client.QueryUsers(nil)
-	if err != nil {
-		return map[string]interface{}{
-			"status": "failure",
-			"error":  err.Error(),
-		}
-	}
-
-	resUsers := []string{}
-	resRoles := []string{}
-
-	for i := range users {
-		resUsers = append(resUsers, users[i].User)
-		resRoles = append(resRoles, users[i].Roles...)
-	}
-
 	return map[string]interface{}{
 		"status": "success",
-		"users":  common.StrUniq(resUsers),
-		"roles":  common.StrUniq(resRoles),
+		"users":  c.users,
+		"roles":  c.roles,
 	}
 }
 
-func (c *cluster) Nodes() (nodes []*node) {
+func (c *Cluster) Nodes() (nodes []*Node) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -180,7 +168,7 @@ func (c *cluster) Nodes() (nodes []*node) {
 	return nodes
 }
 
-func (c *cluster) NodeBuilds() (builds []string) {
+func (c *Cluster) NodeBuilds() (builds []string) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -191,7 +179,7 @@ func (c *cluster) NodeBuilds() (builds []string) {
 	return common.StrUniq(builds)
 }
 
-func (c *cluster) NamespaceList() (result []string) {
+func (c *Cluster) NamespaceList() (result []string) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -204,7 +192,7 @@ func (c *cluster) NamespaceList() (result []string) {
 	return common.StrUniq(result)
 }
 
-func (c *cluster) NamespaceIndexes() map[string][]string {
+func (c *Cluster) NamespaceIndexes() map[string][]string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -222,7 +210,7 @@ func (c *cluster) NamespaceIndexes() map[string][]string {
 	return result
 }
 
-func (c *cluster) NodeList() []string {
+func (c *Cluster) NodeList() []string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -234,7 +222,7 @@ func (c *cluster) NodeList() []string {
 	return nodes
 }
 
-func (c *cluster) NodeCompatibility() string {
+func (c *Cluster) NodeCompatibility() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -256,58 +244,117 @@ func (c *cluster) NodeCompatibility() string {
 	return "compatible"
 }
 
-func (c *cluster) SeedAddress() string {
+func (c *Cluster) SeedAddress() string {
 	return c.seed
 }
 
-func (c *cluster) Id() string {
+func (c *Cluster) Id() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.uuid
 }
 
-func (c *cluster) close() {
+func (c *Cluster) User() *string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if c.user == nil {
+		return nil
+	}
+	u := *c.user
+	return &u
+}
+
+func (c *Cluster) Alias() *string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if c.alias == nil {
+		return nil
+	}
+	alias := *c.alias
+	return &alias
+}
+
+func (c *Cluster) Roles() *string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	if len(c.roles) == 0 {
+		return nil
+	}
+
+	roles := strings.Join(c.roles, ",")
+	return &roles
+}
+
+func (c *Cluster) close() {
 	c.client.Close()
 }
 
-func (c *cluster) IsSet() bool {
+func (c *Cluster) IsSet() bool {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.client != nil
 }
 
-func (c *cluster) setSecurityEnabled() {
+func (c *Cluster) setSecurityEnabled() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	c.securityEnabled = true
 }
 
-func (c *cluster) SecurityEnabled() bool {
+func (c *Cluster) SecurityEnabled() bool {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	return c.securityEnabled
 }
 
-func (c *cluster) update(wg *sync.WaitGroup) error {
+func (c *Cluster) update(wg *sync.WaitGroup) error {
 	defer wg.Done()
 
 	t := time.Now()
-	c.checkHealth()
 	c.updateStats()
-	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
+	c.updateUsers()
+	c.checkHealth()
+	if !common.AMCIsProd() {
+		log.Debugf("Updating stats for cluster took: %s", time.Since(t))
+	}
 
 	return nil
 }
 
-func (c *cluster) checkHealth() error {
+func (c *Cluster) checkHealth() error {
 	return nil
 }
 
-func (c *cluster) updateStats() error {
+func (c *Cluster) updateUsers() error {
+	users, err := c.client.QueryUsers(nil)
+	if err != nil {
+		return nil
+	}
+
+	resUsers := []string{}
+	resRoles := []string{}
+
+	for i := range users {
+		resUsers = append(resUsers, users[i].User)
+		resRoles = append(resRoles, users[i].Roles...)
+	}
+
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.users = common.StrUniq(resUsers)
+	c.roles = common.StrUniq(resRoles)
+
+	return nil
+}
+
+func (c *Cluster) updateStats() error {
 	aggNodeStats := common.Stats{}
 	aggNodeCalcStats := common.Stats{}
 	aggNsStats := map[string]common.Stats{}
@@ -335,12 +382,14 @@ func (c *cluster) updateStats() error {
 	c.aggTotalNsStats = aggTotalNsStats
 	c.aggNsSetStats = aggNsSetStats
 
-	log.Debugf("..., objects in test: %d, total objects in namespaces: %d, total node objects: %d", aggNsStats["test"]["objects"], aggTotalNsStats["objects"], aggNodeStats["objects"])
+	if !common.AMCIsProd() {
+		log.Debugf("..., objects in test: %d, total objects in namespaces: %d, total node objects: %d", aggNsStats["test"]["objects"], aggTotalNsStats["objects"], aggNodeStats["objects"])
+	}
 
 	return nil
 }
 
-func (c *cluster) BuildDetails() map[string]interface{} {
+func (c *Cluster) BuildDetails() map[string]interface{} {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -362,7 +411,7 @@ func (c *cluster) BuildDetails() map[string]interface{} {
 	return result
 }
 
-func (c *cluster) LatestThroughput() map[string]map[string]*common.SinglePointValue {
+func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -382,7 +431,7 @@ func (c *cluster) LatestThroughput() map[string]map[string]*common.SinglePointVa
 	return res
 }
 
-func (c *cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
+func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -402,7 +451,7 @@ func (c *cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	return res
 }
 
-func (c *cluster) FindNodeByAddress(address string) *node {
+func (c *Cluster) FindNodeByAddress(address string) *Node {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -415,11 +464,11 @@ func (c *cluster) FindNodeByAddress(address string) *node {
 	return nil
 }
 
-func (c *cluster) FindNodesByAddress(addresses ...string) []*node {
+func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	res := make([]*node, 0, len(addresses))
+	res := make([]*Node, 0, len(addresses))
 	for _, addr := range addresses {
 		if node := c.FindNodeByAddress(addr); node != nil {
 			res = append(res, node)
@@ -429,7 +478,7 @@ func (c *cluster) FindNodesByAddress(addresses ...string) []*node {
 	return res
 }
 
-func (c *cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
+func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -471,7 +520,7 @@ func (c *cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 	return res
 }
 
-func (c *cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string]interface{} {
+func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string]interface{} {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -523,7 +572,7 @@ func (c *cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 
 }
 
-func (c *cluster) CurrentUserRoles() []string {
+func (c *Cluster) CurrentUserRoles() []string {
 	// TODO: do this on cluster update
 	var list []*as.UserRoles
 	for i := 0; i < 3; i++ {
@@ -543,7 +592,7 @@ func (c *cluster) CurrentUserRoles() []string {
 	return []string{}
 }
 
-func (c *cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
+func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -556,7 +605,7 @@ func (c *cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
 	return map[string]common.Info{}
 }
 
-func (c *cluster) NamespaceSetsInfo(namespace string) []common.Stats {
+func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -577,7 +626,7 @@ func (c *cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	return res
 }
 
-func (c *cluster) DatacenterInfo() common.Stats {
+func (c *Cluster) DatacenterInfo() common.Stats {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -643,7 +692,7 @@ func (c *cluster) DatacenterInfo() common.Stats {
 	}
 }
 
-func (c *cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
+func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
 	for _, nodeAddr := range dc["Nodes"].([]string) {
 		host, port, err := common.SplitHostPort(nodeAddr)
 		if err != nil {

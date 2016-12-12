@@ -31,7 +31,7 @@ exec="/opt/amc/$prog"
 pidfile="/var/run/$prog.pid"
 lockfile="/var/lock/subsys/$prog"
 logfile="/var/log/$prog.log"
-conffile="/etc/amc.conf"
+conffile="/etc/amc/amc.conf"
 confdir="/etc/amc"
 
 # pull in sysconfig settings

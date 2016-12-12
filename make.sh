@@ -3,23 +3,25 @@
 set -x
 set -e
 
-cd $GOPATH/src/github.com/aerospike/aerospike-console
+cd $GOPATH/src/github.com/citrusleaf/amc
 
 edition=$1
+environ=$2
+
 build=`date -u +%Y%m%d.%H%M%S`
 version=`git describe --tags $(git rev-list --tags --max-count=1)`
 # tag=`git rev-parse --short HEAD`
 version_build="$edition-$version"
 
 # build binary
-godep go build -a -tags $edition -ldflags "-X main.amcEdition=$edition -X main.amcBuild=$build -X main.amcVersion=$version" -o deployment/release/amc/opt/amc/amc .
+godep go build -a -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
 
 # build content
-mkdir -p deployment/release/amc/opt/amc/
-rm -rf deployment/release/amc/opt/amc/public/dist
-cd public
+cd static
 npm install
 grunt
+
+cd ..
 
 rm -rf deployment/release/amc/opt/amc/static
 mkdir -p deployment/release/amc/opt/amc/static/

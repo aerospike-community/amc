@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	// "encoding/json"
 	"errors"
+	// "fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -15,8 +16,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	ast "github.com/aerospike/aerospike-client-go/types"
 	"github.com/labstack/echo"
+	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
+	// "github.com/citrusleaf/amc/observer"
 )
 
 //----------
@@ -25,13 +28,50 @@ import (
 
 func sessionId(c echo.Context) (string, error) {
 	cookie, err := c.Cookie("session")
+	if err != nil || cookie.Value == "" {
+		return "", errors.New("Invalid session")
+	}
+
+	return cookie.Value, nil
+}
+
+func manageSession(c echo.Context) string {
+	cookie, err := c.Cookie("session")
+	if err != nil || cookie.Value == "" {
+		return setSession(c)
+	}
+
+	if !_observer.SessionExists(cookie.Value) {
+		return setSession(c)
+	}
+
+	return cookie.Value
+}
+
+// func invalidateSession(c echo.Context) {
+// 	cookie := new(http.Cookie)
+// 	cookie.Name = "session"
+// 	cookie.Value = ""
+// 	cookie.Expires = time.Now().Add(-365 * 24 * time.Hour)
+// 	c.SetCookie(cookie)
+// }
+
+func setSession(c echo.Context) string {
+	sid := "00000000-0000-0000-0000-000000000000"
+	// commonity version is single-session
+	if common.AMCIsEnterprise() {
+		sid = uuid.NewV4().String()
+	}
+
+	cookie, err := c.Cookie("session")
 	if err != nil {
-		return "", err
+		cookie = new(http.Cookie)
 	}
-	if cookie.Value() == "" {
-		return "", errors.New("Invalid session id")
-	}
-	return cookie.Value(), nil
+	cookie.Value = sid
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.SetCookie(cookie)
+
+	return sid
 }
 
 func errorMap(err string) map[string]interface{} {
@@ -61,13 +101,17 @@ func postGetClusterId(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, errorMap(err.Error()))
 	}
 
-	cluster := _observer.FindClusterBySeed(host, port, form.Username)
+	sid := manageSession(c)
+	cluster := _observer.FindClusterBySeed(sid, host, port, form.Username, form.Password)
+	if cluster != nil {
+		_observer.AppendCluster(sid, cluster)
+	}
 
 	if cluster == nil {
 		clientPolicy := *_defaultClientPolicy
 		clientPolicy.User = form.Username
 		clientPolicy.Password = form.Password
-		cluster, err = _observer.Register(&clientPolicy, host, uint16(port))
+		cluster, err = _observer.Register(sid, &clientPolicy, host, uint16(port))
 		if err != nil {
 			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
 				// create output
@@ -82,12 +126,6 @@ func postGetClusterId(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, errorMap(err.Error()))
 		}
 	}
-
-	cookie := new(echo.Cookie)
-	cookie.SetName("session")
-	cookie.SetValue("729552f96ace14ea_581cb181.aEaZDV2xzuMHc63ouE4Wq5pBY-g")
-	cookie.SetExpires(time.Now().Add(24 * time.Hour))
-	c.SetCookie(cookie)
 
 	// create output
 	response := map[string]interface{}{
@@ -142,13 +180,29 @@ func postClusterFireCmd(c echo.Context) error {
 
 func getCurrentMonitoringClusters(c echo.Context) error {
 
-	// TODO: fix it here; this is for logins
-	// _, err := sessionId(c)
+	// sid, err := sessionId(c)
 	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, errorMap("invalid session : None"))
+	// 	// invalidateSession(c)
+	// 	return c.JSON(http.StatusOK, errorMap("invalid session : None"))
 	// }
 
-	return c.JSON(http.StatusOK, _observer.MonitoringClusters())
+	clusters, err := _observer.MonitoringClusters("sid")
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+	}
+
+	result := make([]map[string]interface{}, len(clusters))
+	for i, cluster := range clusters {
+		result[i] = map[string]interface{}{
+			"username":     cluster.User(),
+			"cluster_name": cluster.Alias(),
+			"cluster_id":   cluster.Id(),
+			"roles":        cluster.Roles(),
+			"seed_node":    cluster.SeedAddress(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, result)
 
 	// return c.JSONBlob(http.StatusOK, []byte(`[
 	// 	{
@@ -1261,14 +1315,14 @@ func getClusterXdrNodes(c echo.Context) error {
 	for _, node := range cluster.Nodes() {
 		if node.Status() != "on" && !node.XdrEnabled() {
 			res[node.Address()] = common.Stats{
-				"xdr_status":  "off",
+				"xdr_status":  node.XdrStatus(),
 				"node_status": node.Status(),
 			}
 			continue
 		}
 
 		stats := node.AnyAttrs(keys...)
-		stats["xdr_status"] = "on"
+		stats["xdr_status"] = node.XdrStatus()
 		stats["node_status"] = node.Status()
 		res[node.Address()] = stats
 	}
@@ -1401,10 +1455,9 @@ func getClusterXdrNodeAllStats(c echo.Context) error {
 		})
 	}
 
-	res := map[string]interface{}{
-		"node_status": "on",
-		"xdr_status":  "off",
-	}
+	res := node.XdrStats()
+	res["node_status"] = "on"
+	res["xdr_status"] = node.XdrStatus()
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -1535,8 +1588,12 @@ func setClusterNodesConfig(c echo.Context) error {
 		return c.JSON(http.StatusOK, res)
 	}
 
-	config := make(map[string]string, len(c.FormParams()))
-	for k, v := range c.FormParams() {
+	formParams, err := c.FormParams()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, errorMap("No Parameters found"))
+	}
+	config := make(map[string]string, len(formParams))
+	for k, v := range formParams {
 		config[k] = ""
 		if len(v) > 0 {
 			config[k] = v[0]
@@ -1566,6 +1623,57 @@ func setClusterNodesConfig(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func postSwitchXDR(c echo.Context, on bool) error {
+	nodeAddr := c.Param("node")
+	res := map[string]interface{}{
+		"address": nodeAddr,
+		"status":  "Failure",
+	}
+
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		res["error"] = "Cluster not found"
+		return c.JSON(http.StatusNotFound, res)
+	}
+
+	node := cluster.FindNodeByAddress(nodeAddr)
+	if node == nil {
+		res["node_status"] = "off"
+		res["error"] = "Node not found"
+		return c.JSON(http.StatusBadRequest, res)
+	}
+
+	switch string(node.XdrStatus()) {
+	case "on":
+		if on {
+			res["error"] = "XDR Already On"
+			return c.JSON(http.StatusOK, res)
+		}
+	case "off":
+		if !on {
+			res["error"] = "XDR Already Off"
+			return c.JSON(http.StatusOK, res)
+		}
+	}
+
+	if err := node.SwitchXDR(on); err != nil {
+		res["error"] = err
+		return c.JSON(http.StatusBadRequest, res)
+	}
+
+	res["status"] = "Success"
+	return c.JSON(http.StatusOK, res)
+}
+
+func postSwitchXDROn(c echo.Context) error {
+	return postSwitchXDR(c, true)
+}
+
+func postSwitchXDROff(c echo.Context) error {
+	return postSwitchXDR(c, false)
 }
 
 func getClusterNamespaceAllConfig(c echo.Context) error {
