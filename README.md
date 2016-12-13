@@ -30,7 +30,7 @@ Install reflex to watch files and automatically rebuild server code:
 
 You can have a look inside the `./server-dev.sh` to find out the details. The command inside this file will pass a dev config file to the app server.
 
-`reflex -R node_modules -R static -R build -R deployment -R vendor -r '\.go$' ./server-dev.sh`
+`reflex -R node_modules -R static -R build -R deployment -R vendor -r '\.go$' ./server-dev.sh enterprise`
 
 # Building the UI
 
