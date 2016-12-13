@@ -8,9 +8,6 @@ require.config({
         d3: "libs/d3/d3",
         d3Layout: "libs/d3/d3.layout.min",
         timechart: "libs/timechart/timechart",
-        //Aerospike JS
-        piechart: "helper/piechart",
-        timeseriesChart: "helper/timechart-helper"
     },
     shim: {
         'backbone': {

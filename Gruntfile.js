@@ -1,29 +1,35 @@
 module.exports = function(grunt) {
   grunt.initConfig({
-    // pull in all of the dependencies of setup.js into one file
-    requirejs: {
-      compile: {
-        options: {
-          appDir: 'static',
-          baseUrl: './js',
-          dir: 'build/static',
-          optimize: 'none',
-          mainConfigFile: 'static/js/setup.js',
-          modules: [{
-            name: 'setup',
-          }]
-        }
-      },
+    // clean directory
+    clean:  {
+      build: 'build/'
     },
 
-    // revision setup.js and css files based on content
+    // copy directory
+    copy: {
+      build: {
+        expand: true,
+        src: 'static/**',
+        dest: 'build/'
+      }
+    },
+
+    // revision javascript and css files
     filerev: {
         options: {
           algorithm: 'md5',
           length: 8
         },
         js: {
-          src: 'build/static/js/setup.js',
+          src: [
+            // exclude lib directory
+            'build/static/js/*.js',
+            'build/static/js/collections/**/*.js',
+            'build/static/js/config/**/*.js',
+            'build/static/js/helper/**/*.js',
+            'build/static/js/models/**/*.js',
+            'build/static/js/views/**/*.js',
+          ]
         },
         css: {
           src: 'build/static/css/*.css',
@@ -66,12 +72,50 @@ module.exports = function(grunt) {
 
   });
 
+  // Configure requirejs paths to serve revved files
+  grunt.registerTask('require-paths', '', function() {
+    var config = revvedConfig();
+    var file = findSetupFile();
+    grunt.file.write(file, config);
+
+    // concat revved config and original config
+    function revvedConfig() {
+      var config = 'require.config({ paths: {';
+      var k, v;
+      for(k in grunt.filerev.summary) {
+        v = grunt.filerev.summary[k];
+        if(k.indexOf('.js') !== -1) {
+           // remove prefix 'build/static/js/' and suffix '.js'
+           k = k.slice('build/static/js/'.length, -1*'.js'.length);
+           v = v.slice('build/static/js/'.length, -1*'.js'.length);
+           config += "'" + k + "'" + ":" + "'" + v + "'" + ", \n";
+        }
+      }
+      config += '}});';
+      // add original config
+      config += '\n' + grunt.file.read('static/js/setup.js');
+      return config;
+    }
+
+    // find revved setup file name
+    function findSetupFile() {
+      var k, v;
+      for(k in grunt.filerev.summary) {
+        v = grunt.filerev.summary[k];
+        if(k.indexOf('setup.js') !== -1) {
+          return v;
+        }
+      }
+    }
+  });
+
   // load modules
-  grunt.loadNpmTasks('grunt-contrib-requirejs');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-filerev');
 	grunt.loadNpmTasks('grunt-filerev-replace');
   grunt.loadNpmTasks('grunt-text-replace');
 
-	grunt.registerTask('default', ['requirejs', 'filerev', 'filerev_replace', 'replace']);
+	grunt.registerTask('default', ['clean', 'copy', 'filerev', 'filerev_replace', 'replace', 'require-paths']);
 }
 

@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "piechart", "helper/util", "config/var-details", "helper/bulletchart", "helper/drilldown-charts"], function($, _, Backbone, PieChart, Util, VarDetails, BulletChart, PieChart2){
+define(["jquery", "underscore", "backbone", "helper/piechart", "helper/util", "config/var-details", "helper/bulletchart", "helper/drilldown-charts"], function($, _, Backbone, PieChart, Util, VarDetails, BulletChart, PieChart2){
 
     var JqGridHelper = {
         maintainExpandedState: function(container, ids){

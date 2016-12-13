@@ -140,6 +140,9 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 		sparkLineChartTemplate: function(type){
 			return '<div name="'+type+'" class="sparkline-container"><div class="sparkline-chart"></div><div class="sparkline-chart-title">'+type+'</div></div>';
 		},
+    error: function(model) {
+      model.rowView.spinner.stopOverlay();
+    },
 		render: function(model, latencyData){
 			
 			function renderOnDemand(){

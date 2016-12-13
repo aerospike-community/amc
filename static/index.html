@@ -242,16 +242,14 @@ under the License.
                           <div style="font-size:13px;">Multicluster View is supported with Aerospike builds 3.6.0 or above. </div>
                     </div>
                     <div class="cluster-handling-buttons">
-                        <div class="snapshot" style="float: left;line-height: 0px;margin-right: 0px;">
-                            Select XDR Port :
-                            <input type="text" style="width: 38px; text-align: center;" placeholder="PORT" maxlength="5" value="3004" id="multicluster_xdr_port" />
-                            <button id="multicluster_connect_xdr" class="cluster-button multicluster_connect_xdr blue_btn btn">Connect</button>&nbsp;&nbsp;
-                        </div>
                         <a href="" target="_blank">
                             <div id="addAnotherClusterBtn" class="cluster-button addAnotherClusterBtn blue_btn btn" title="Add new cluster">
                                 Add Cluster
                             </div>
                         </a>
+                    </div>
+                    <div id="multiClusterCloseBtn" title='Close' class="icon-cancel-circle" 
+                      style="position: absolute; right: 15px !important; top: 55px; font-size: 1.2em; color: #8B8B8B; cursor: pointer;">
                     </div>
                 </div>
 
@@ -1572,9 +1570,6 @@ under the License.
                             <span class="toggle-to-state">(Hide)</span>
                         </div>
                         <div class="snapshot">
-                            Port :
-                            <input type="text" style="width: 38px; text-align: center;" placeholder="PORT" maxlength="5" value="3004" id="xdr_port" />
-                            <button id="connect_xdr" class="dialog_button">Connect</button>&nbsp;&nbsp;&nbsp;&nbsp;
                             <a id="allStatsLinkXDR" class="all_stats_links" href="#">View all XDR stats</a>
                         </div>
                     </div>

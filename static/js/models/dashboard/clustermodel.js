@@ -96,8 +96,6 @@ define(["underscore", "backbone", "helper/util", "views/dashboard/pieview", "mod
 
             Util.initAddNewNode("#addNewNodeButton");
 
-            $("#xdr_port").val(window.AMCGLOBALS.persistent.xdrPort);
-
             this.connectionReqErrCount = 0;
 
             if (Util.setGlobalClusterInfoInModel("basic", this)) {
@@ -147,20 +145,6 @@ define(["underscore", "backbone", "helper/util", "views/dashboard/pieview", "mod
         initSelectedNodes: function() {
             var isBookmarked = false;
             var that = this;
-            $("#connect_xdr").off("click").on("click", function(e) {
-                e.stopPropagation();
-                var port = $("#xdr_port").val();
-
-                if (!Util.validatePort(port)) {
-                    $("#xdr_port").val(window.AMCGLOBALS.persistent.xdrPort);
-                }
-
-                window.AMCGLOBALS.persistent.xdrPort = $("#xdr_port").val();
-
-                that.set("xdrPort", window.AMCGLOBALS.persistent.xdrPort);
-                Util.updateAllStatsLinks();
-
-            });
 
             if (window.AMCGLOBALS.persistent.selectedNodesStr !== null) {
                 var tempSelectedNodes = window.AMCGLOBALS.persistent.selectedNodesStr.split(',');

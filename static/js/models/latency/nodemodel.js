@@ -46,7 +46,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 					if(that.latencyAvailable || response.node_status !== "on"){
 						that.rowView.render(that,that.latencyData);
-					}
+					} else {
+            that.rowView.error(that);
+          }
 					that.historyInitialized = true;
                 },
                 function(response) {

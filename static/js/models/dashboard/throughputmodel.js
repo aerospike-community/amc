@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["underscore", "backbone", "poller", "views/dashboard/throughputview", "d3", "timeseriesChart", "config/app-config", "helper/util","helper/AjaxManager","helper/overlay"], function(_, Backbone, Poller, ThroughputView, D3, TimeseriesChart, AppConfig, Util,AjaxManager,Overlay){
+define(["underscore", "backbone", "poller", "views/dashboard/throughputview", "d3", "helper/timechart-helper", "config/app-config", "helper/util","helper/AjaxManager","helper/overlay"], function(_, Backbone, Poller, ThroughputView, D3, TimeseriesChart, AppConfig, Util,AjaxManager,Overlay){
     var ThroughputModel = Backbone.Model.extend({
         maxNumberOfDataPoints : 1800,
         readsDataWithOptions : [],

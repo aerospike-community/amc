@@ -2890,18 +2890,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                     }
                 });
 
-            $("#multicluster_connect_xdr").off("click").on("click",function(e){
-                e.stopPropagation();
-                var port = $("#multicluster_xdr_port").val();
-
-                if (!Util.validatePort(port)) {
-                    $("#multicluster_xdr_port").val(window.AMCGLOBALS.persistent.xdrPort);
-                }
-
-                window.AMCGLOBALS.persistent.xdrPort = $("#multicluster_xdr_port").val();
-                openMulticlusterView();
-            });
-
             $("#UserDropdownButton").off("click").on("click", function() {
                 var container = $("#userLogoutButton");
 
@@ -3050,7 +3038,9 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                         $(document).trigger("mouseup:alerts",[e]);
 
                         var container = $("#rightPanel").add("#rightPanelSlideOut").add("#rightPanelButton").add(".ui-dialog.ui-widget, .ui-widget-overlay.ui-front");
-                        if( document.contains(e.target) && ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) || $("#rightPanelCloseButton").is(target)) ){
+                        if( document.contains(e.target) && 
+                            ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) || 
+                             $("#rightPanelCloseButton").is(target) || $("#multiClusterCloseBtn").is(target)) ){
                             Util.closeRightPanel();
                             $(document).trigger("mouseup:nodeselect",[e]).trigger("mouseup:changecluster",[e]).trigger("mouseup:user-setting",[e]);
                         }
