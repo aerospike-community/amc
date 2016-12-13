@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "d3", "timechart", "timeseriesChart", "config/view-config", "config/app-config"], function($, _, Backbone, D3, TimeChart, TimeseriesChart, ViewConfig, AppConfig){
+define(["jquery", "underscore", "backbone", "d3", "timechart", "helper/timechart-helper", "config/view-config", "config/app-config"], function($, _, Backbone, D3, TimeChart, TimeseriesChart, ViewConfig, AppConfig){
     var ThroughputView = Backbone.View.extend({
         initialize: function(){
             this.el = this.options.el;

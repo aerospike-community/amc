@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["underscore", "backbone", "config/app-config", "helper/util", "timeseriesChart", "views/statistics/stattrackerview"], function(_, Backbone, AppConfig, Util, TimeseriesChart, StatTrackerView){
+define(["underscore", "backbone", "config/app-config", "helper/util", "helper/timechart-helper", "views/statistics/stattrackerview"], function(_, Backbone, AppConfig, Util, TimeseriesChart, StatTrackerView){
 	var StatTrackerModel = Backbone.Model.extend({
 		initialize: function(maxTrack){
 			this.maxTrack = maxTrack;
