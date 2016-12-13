@@ -3038,7 +3038,9 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                         $(document).trigger("mouseup:alerts",[e]);
 
                         var container = $("#rightPanel").add("#rightPanelSlideOut").add("#rightPanelButton").add(".ui-dialog.ui-widget, .ui-widget-overlay.ui-front");
-                        if( document.contains(e.target) && ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) || $("#rightPanelCloseButton").is(target)) ){
+                        if( document.contains(e.target) && 
+                            ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) || 
+                             $("#rightPanelCloseButton").is(target) || $("#multiClusterCloseBtn").is(target)) ){
                             Util.closeRightPanel();
                             $(document).trigger("mouseup:nodeselect",[e]).trigger("mouseup:changecluster",[e]).trigger("mouseup:user-setting",[e]);
                         }
