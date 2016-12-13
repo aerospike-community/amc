@@ -1,0 +1,170 @@
+{
+	"ImportPath": "github.com/citrusleaf/amc",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Deps": [
+		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.2.0-21-g9906417",
+			"Rev": "99064174e013895bbd9b025c31100bd1d9b590ca"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.6.5",
+			"Rev": "c0f7e35ed2e48f188c37581b4b743cf7383f85c6"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/internal/lua",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/internal/lua/resources",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/logger",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/pkg/bcrypt",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/pkg/ripemd160",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/types",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/types/atomic",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/types/particle_type",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/types/rand",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/aerospike/aerospike-client-go/utils/buffer",
+			"Comment": "list-229-gc251ac2",
+			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+		},
+		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v3.0.0-10-g9ed569b",
+			"Rev": "9ed569b5d1ac936e6494082958d63a6aa4fff99a"
+		},
+		{
+			"ImportPath": "github.com/labstack/echo",
+			"Comment": "v3.0.3-11-g70b5cfb",
+			"Rev": "70b5cfbb26c70668255af545f743b2bd99e6e482"
+		},
+		{
+			"ImportPath": "github.com/labstack/echo/middleware",
+			"Comment": "v3.0.3-11-g70b5cfb",
+			"Rev": "70b5cfbb26c70668255af545f743b2bd99e6e482"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/bytes",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/color",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/log",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/random",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6-9-gd228849",
+			"Rev": "d228849504861217f796da67fae4f6e347643f15"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
+		},
+		{
+			"ImportPath": "github.com/mcuadros/go-version",
+			"Rev": "257f7b9a7d87427c8d7f89469a5958d57f8abd7c"
+		},
+		{
+			"ImportPath": "github.com/satori/go.uuid",
+			"Comment": "v1.1.0-6-gb061729",
+			"Rev": "b061729afc07e77a8aa4fad0a2fd840958f1942a"
+		},
+		{
+			"ImportPath": "github.com/tylerb/graceful",
+			"Comment": "v1.2.13-2-g4df1190",
+			"Rev": "4df1190835320af7076dfcf27b3d071fd3612caf"
+		},
+		{
+			"ImportPath": "github.com/valyala/fasttemplate",
+			"Rev": "3b874956e03f1636d171bda64b130f9135f42cff"
+		},
+		{
+			"ImportPath": "github.com/yuin/gopher-lua",
+			"Rev": "7692488a1ad6bd06dc48890f4a149b65a86a767d"
+		},
+		{
+			"ImportPath": "github.com/yuin/gopher-lua/ast",
+			"Rev": "7692488a1ad6bd06dc48890f4a149b65a86a767d"
+		},
+		{
+			"ImportPath": "github.com/yuin/gopher-lua/parse",
+			"Rev": "7692488a1ad6bd06dc48890f4a149b65a86a767d"
+		},
+		{
+			"ImportPath": "github.com/yuin/gopher-lua/pm",
+			"Rev": "7692488a1ad6bd06dc48890f4a149b65a86a767d"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/acme",
+			"Rev": "b07d8c96772f426812d3fc5530710ec1f3b205e7"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/acme/autocert",
+			"Rev": "b07d8c96772f426812d3fc5530710ec1f3b205e7"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "b1a2d6e8c8b5fc8f601ead62536f02a8e1b6217d"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "b1a2d6e8c8b5fc8f601ead62536f02a8e1b6217d"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "c200b10b5d5e122be351b67af224adc6128af5bf"
+		}
+	]
+}
