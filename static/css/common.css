@@ -1099,8 +1099,28 @@ hr {
     font-weight: bold;
     text-align: center;
 }
-.tps-chart {
-  min-width: 240px;
+@media screen and (max-width: 509px) {
+  .tps-chart {
+    min-width: 240px;
+    width: 95% !important;
+  }
+}
+@media screen and (min-width: 510px) and (max-width: 771px) {
+  .tps-chart {
+    min-width: 240px;
+    width: 48% !important;
+  }
+}
+@media screen and (min-width: 772px) and (max-width: 1610px) {
+  .tps-chart {
+    min-width: 240px;
+    width: 32% !important;
+  }
+}
+@media screen and (min-width: 1611px) {
+  .tps-chart {
+    min-width: 240px;
+  }
 }
 .tps {
     position: absolute;
