@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	// log "github.com/Sirupsen/logrus"
 
 	ast "github.com/aerospike/aerospike-client-go/types"
 
@@ -49,7 +49,7 @@ func (ns *Namespace) update(info common.Info) error {
 	// log.Infof("namespace calcStats: %v", ns.calcStats)
 
 	if !common.AMCIsProd() {
-		log.Debugf("\tUpdated namespace: %s, objects: %d", ns.name, ns.latestStats["objects"])
+		// log.Debugf("\tUpdated namespace: %s, objects: %d", ns.name, ns.latestStats["objects"])
 	}
 	return nil
 }

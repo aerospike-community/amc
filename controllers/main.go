@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	_observer            = observer.New()
+	_observer            *observer.ObserverT
 	_defaultClientPolicy = as.NewClientPolicy()
 )
 
@@ -40,6 +40,8 @@ func getAMCVersion(c echo.Context) error {
 }
 
 func Server(config *common.Config) {
+	_observer = observer.New(config)
+
 	// TODO: set to the same logger
 	asl.Logger.SetLogger(log.StandardLogger())
 
@@ -64,7 +66,7 @@ func Server(config *common.Config) {
 
 	// // Middleware
 	if !common.AMCIsProd() {
-		e.Use(middleware.Logger())
+		// e.Use(middleware.Logger())
 	}
 
 	e.Use(middleware.Recover())

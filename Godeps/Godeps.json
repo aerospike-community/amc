@@ -15,58 +15,58 @@
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/internal/lua",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/internal/lua/resources",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/logger",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/pkg/bcrypt",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/pkg/ripemd160",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/types",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/types/atomic",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/types/particle_type",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/types/rand",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/aerospike/aerospike-client-go/utils/buffer",
-			"Comment": "list-229-gc251ac2",
-			"Rev": "c251ac2c33982adf11ef69725abd49bfafe95389"
+			"Comment": "list-231-ge20f69f",
+			"Rev": "e20f69f85e06bf92e980089881bf5b385f1be593"
 		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
 )
@@ -22,7 +22,7 @@ type SimpleBucket struct {
 
 func NewSimpleBucket(resolution, size int) *SimpleBucket {
 	if !common.AMCIsProd() {
-		log.Info("creating bucket...")
+		// log.Info("creating bucket...")
 	}
 	return &SimpleBucket{
 		resolution: 5,
@@ -72,6 +72,10 @@ func (b *SimpleBucket) ValuesSince(tm time.Time) []interface{} {
 		tm = time.Unix(*b.beginTime, 0)
 	}
 	count := int(math.Ceil(float64((*b.beginTime+int64(b.offset*b.resolution))-tm.Unix()) / float64(b.resolution)))
+
+	if count <= 0 {
+		return []interface{}{}
+	}
 
 	if count > b.Size() {
 		count = b.Size()

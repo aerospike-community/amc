@@ -78,17 +78,19 @@ func (n *Node) update() error {
 		return err
 	}
 
+	tm := time.Now()
+
 	// retry 3 times
 	info, err := n.requestInfo(3, n.infoKeys()...)
 	if err != nil {
 		n.setStatus(nodeStatus.Off)
 		return err
 	}
+
 	n.setInfo(common.Info(info))
 	n.setConfig(n.InfoAttrs("get-config:").ToInfo("get-config:"))
 
 	n.setStatus(nodeStatus.On)
-	n.notifyAboutChanges()
 
 	latencyMap, nodeLatency := n.parseLatencyInfo(info["latency:"])
 	n.setNodeLatency(nodeLatency)
@@ -109,8 +111,10 @@ func (n *Node) update() error {
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 	n.updateHistory()
 
+	n.notifyAboutChanges()
+
 	if !common.AMCIsProd() {
-		log.Debugf("Updating Node: %v, objects: %v", n.Id(), stats["objects"])
+		log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats["objects"], time.Since(tm))
 	}
 
 	return nil
@@ -275,6 +279,7 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 func (n *Node) updateHistory() {
 	// this uses a RLock, so we put it before the locks to avoid deadlock
 	latestLatencyReport, err := n.latestLatencyReportDateTime()
+	tm := n.ServerTime().Unix()
 
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
@@ -294,7 +299,6 @@ func (n *Node) updateHistory() {
 		"udf_success", "udf_reqs",
 	}
 
-	tm := time.Now().Unix()
 	for _, stat := range recordedStats {
 		bucket := n.statsHistory[stat]
 		if bucket == nil {

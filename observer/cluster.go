@@ -2,7 +2,7 @@ package observer
 
 import (
 	"fmt"
-	"strconv"
+	// "strconv"
 	"strings"
 	"sync"
 	"time"
@@ -16,7 +16,7 @@ import (
 )
 
 type Cluster struct {
-	observer *observerT
+	observer *ObserverT
 	client   *as.Client
 	nodes    map[as.Host]*Node
 
@@ -30,7 +30,7 @@ type Cluster struct {
 	securityEnabled bool
 	updateInterval  int // seconds
 
-	seed     string
+	seeds    []*as.Host
 	alias    *string
 	user     *string
 	password *string
@@ -41,14 +41,14 @@ type Cluster struct {
 	mutex sync.RWMutex
 }
 
-func newCluster(observer *observerT, client *as.Client, user, password, host string, port uint16) *Cluster {
+func newCluster(observer *ObserverT, client *as.Client, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
 		observer:       observer,
 		client:         client,
 		nodes:          map[as.Host]*Node{},
 		updateInterval: 5, //seconds
 		uuid:           uuid.NewV4().String(),
-		seed:           host + ":" + strconv.Itoa(int(port)),
+		seeds:          seeds,
 	}
 
 	if user != "" {
@@ -230,9 +230,10 @@ func (c *Cluster) NodeCompatibility() string {
 	for _, node := range c.nodes {
 		build := node.Build()
 
-		if version.Compare(build, "3.9.0", "<") {
-			return "incompatible"
-		}
+		// TODO: Decide later to keep it or not; performance problems
+		// if version.Compare(build, "3.9.0", "<") {
+		// 	return "incompatible"
+		// }
 
 		versionList[build] = append(versionList[build], node.Address())
 	}
@@ -245,7 +246,7 @@ func (c *Cluster) NodeCompatibility() string {
 }
 
 func (c *Cluster) SeedAddress() string {
-	return c.seed
+	return c.seeds[0].String()
 }
 
 func (c *Cluster) Id() string {
@@ -355,14 +356,25 @@ func (c *Cluster) updateUsers() error {
 }
 
 func (c *Cluster) updateStats() error {
+	// do the info calls in parallel
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.nodes))
+	for _, node := range c.nodes {
+		go func(node *Node) {
+			defer wg.Done()
+			node.update()
+		}(node)
+	}
+	wg.Wait()
+
 	aggNodeStats := common.Stats{}
 	aggNodeCalcStats := common.Stats{}
 	aggNsStats := map[string]common.Stats{}
 	aggNsCalcStats := map[string]common.Stats{}
 	aggNsSetStats := map[string]map[string]common.Stats{}
 
+	// then do the calculations synchronously, since they are fast and need synchronization anyway
 	for _, node := range c.nodes {
-		node.update()
 		node.applyStatsToAggregate(aggNodeStats, aggNodeCalcStats)
 		node.applyNsStatsToAggregate(aggNsStats, aggNsCalcStats)
 		aggNsSetStats = node.applyNsSetStatsToAggregate(aggNsSetStats)
@@ -381,10 +393,6 @@ func (c *Cluster) updateStats() error {
 	c.aggNsCalcStats = aggNsCalcStats
 	c.aggTotalNsStats = aggTotalNsStats
 	c.aggNsSetStats = aggNsSetStats
-
-	if !common.AMCIsProd() {
-		log.Debugf("..., objects in test: %d, total objects in namespaces: %d, total node objects: %d", aggNsStats["test"]["objects"], aggTotalNsStats["objects"], aggNodeStats["objects"])
-	}
 
 	return nil
 }
@@ -573,23 +581,30 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 }
 
 func (c *Cluster) CurrentUserRoles() []string {
-	// TODO: do this on cluster update
-	var list []*as.UserRoles
-	for i := 0; i < 3; i++ {
-		var err error
-		list, err = c.client.QueryUsers(nil)
-		if err != nil {
-			log.Errorf("Error encountered querying the users: %s", err)
-		}
-		break
-	}
+	// // TODO: do this on cluster update
+	// var list []*as.UserRoles
+	// for i := 0; i < 3; i++ {
+	// 	var err error
+	// 	list, err = c.client.QueryUsers(nil)
+	// 	if err != nil {
+	// 		log.Errorf("Error encountered querying the users: %s", err)
+	// 	}
+	// 	break
+	// }
 
-	for _, u := range list {
-		if strings.ToLower(u.User) == *c.user {
-			return u.Roles
-		}
-	}
-	return []string{}
+	// for _, u := range list {
+	// 	if strings.ToLower(u.User) == *c.user {
+	// 		return u.Roles
+	// 	}
+	// }
+	// return []string{}
+
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	roles := make([]string, len(c.roles))
+	copy(roles, c.roles)
+	return roles
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
@@ -670,7 +685,7 @@ func (c *Cluster) DatacenterInfo() common.Stats {
 	}
 
 	return common.Stats{
-		"seednode": c.seed,
+		"seednode": c.SeedAddress(),
 		"dc_name":  common.StrUniq(datacenterList),
 
 		"xdr_info": xdrInfo,

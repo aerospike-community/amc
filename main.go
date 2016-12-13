@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof"
+	"runtime"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -10,12 +13,22 @@ import (
 )
 
 var (
-	configFile = flag.String("config-file", "", "Configuration file.")
-	configDir  = flag.String("config-dir", "", "Configuration dir.")
+	configFile  = flag.String("config-file", "", "Configuration file.")
+	configDir   = flag.String("config-dir", "", "Configuration dir.")
+	profileMode = flag.Bool("profile", false, "Run benchmarks with profiler active on port 6060.")
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	flag.Parse()
+
+	// launch profiler if in profile mode
+	if *profileMode {
+		go func() {
+			log.Println(http.ListenAndServe(":6060", nil))
+		}()
+	}
 
 	log.Infof("Trying to start the AMC server...")
 

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
 )
@@ -28,7 +28,7 @@ type Bucket struct {
 
 func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
 	if !common.AMCIsProd() {
-		log.Info("creating bucket...")
+		// log.Info("creating bucket...")
 	}
 	return &Bucket{
 		rollingTotal: rollingTotal,
@@ -55,6 +55,12 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 	}
 
 	var newOffset int64 = (timestamp - *b.beginTime) / int64(b.resolution)
+
+	// if same value is sent for the same timestamp, don't add it up for rolling totals
+	if newOffset == int64(b.offset) && val == *b.lastValue && b.rollingTotal {
+		return
+	}
+
 	emptyTicks := int(newOffset) - b.offset
 
 	if !b.rollingTotal {
@@ -110,6 +116,10 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 		tm = time.Unix(*b.beginTime, 0)
 	}
 	count := int(math.Ceil(float64((*b.beginTime+int64(b.offset*b.resolution))-tm.Unix()) / float64(b.resolution)))
+
+	if count <= 0 {
+		return []*common.SinglePointValue{}
+	}
 
 	if count > b.Size() {
 		count = b.Size()

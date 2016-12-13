@@ -12,7 +12,7 @@ import (
 	"github.com/citrusleaf/amc/common"
 )
 
-type observerT struct {
+type ObserverT struct {
 	sessions map[string][]*Cluster
 
 	clusters []*Cluster
@@ -21,27 +21,26 @@ type observerT struct {
 	notifyCloseChan chan struct{}
 }
 
-func New() *observerT {
-	o := &observerT{
+func New(config *common.Config) *ObserverT {
+	o := &ObserverT{
 		sessions: map[string][]*Cluster{},
 		clusters: []*Cluster{},
 	}
-	go o.observe()
+	go o.observe(config)
 
 	return o
 }
 
-func (o *observerT) stop() {
+func (o *ObserverT) stop() {
 	close(o.notifyCloseChan)
 }
 
-func (o *observerT) updateClusters() {
-	o.mutex.Lock()
-	defer o.mutex.Unlock()
+func (o *ObserverT) updateClusters() {
+	clusters := o.Clusters()
 
 	wg := new(sync.WaitGroup)
-	wg.Add(len(o.clusters))
-	for _, c := range o.clusters {
+	wg.Add(len(clusters))
+	for _, c := range clusters {
 		// No need to manage panics here, since update codes are
 		// running in an isolated go routine
 		if c.IsSet() {
@@ -51,14 +50,23 @@ func (o *observerT) updateClusters() {
 	wg.Wait()
 }
 
-func (o *observerT) observe() {
+func (o *ObserverT) Clusters() []*Cluster {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	clusters := make([]*Cluster, len(o.clusters))
+	copy(clusters, o.clusters)
+	return clusters
+}
+
+func (o *ObserverT) observe(config *common.Config) {
 	// update as soon as initiated once
 	o.updateClusters()
 
 	for {
 		select {
 
-		case <-time.After(time.Second * 5):
+		case <-time.After(time.Duration(config.AMC.UpdateInterval) * time.Second):
 			o.updateClusters()
 
 		case <-o.notifyCloseChan:
@@ -74,7 +82,7 @@ func (o *observerT) observe() {
 	}
 }
 
-func (o *observerT) AppendCluster(sessionId string, cluster *Cluster) {
+func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
@@ -100,20 +108,26 @@ func (o *observerT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.sessions[sessionId] = append(o.sessions[sessionId], cluster)
 }
 
-func (o *observerT) Register(sessionId string, policy *as.ClientPolicy, host string, port uint16) (*Cluster, error) {
-	client, err := as.NewClientWithPolicy(policy, host, int(port))
+func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, host string, port uint16) (*Cluster, error) {
+	hostAddrs := strings.Split(host, ",")
+	hosts := make([]*as.Host, 0, len(hostAddrs))
+	for _, addr := range hostAddrs {
+		hosts = append(hosts, as.NewHost(addr, int(port)))
+	}
+
+	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
 	if err != nil {
 		return nil, err
 	}
 
-	cluster := newCluster(o, client, policy.User, policy.Password, host, port)
+	cluster := newCluster(o, client, policy.User, policy.Password, hosts)
 	o.AppendCluster(sessionId, cluster)
 	o.updateClusters()
 
 	return cluster, nil
 }
 
-func (o *observerT) SessionExists(sessionId string) bool {
+func (o *ObserverT) SessionExists(sessionId string) bool {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
@@ -121,7 +135,7 @@ func (o *observerT) SessionExists(sessionId string) bool {
 	return exists
 }
 
-func (o *observerT) MonitoringClusters(sessionId string) ([]*Cluster, error) {
+func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, error) {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
@@ -140,7 +154,7 @@ func (o *observerT) MonitoringClusters(sessionId string) ([]*Cluster, error) {
 	return clusters, nil
 }
 
-func (o *observerT) FindClusterById(id string) *Cluster {
+func (o *ObserverT) FindClusterById(id string) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
@@ -152,7 +166,7 @@ func (o *observerT) FindClusterById(id string) *Cluster {
 	return nil
 }
 
-func (o *observerT) NodeHasBeenDiscovered(alias string) *Cluster {
+func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
@@ -166,17 +180,20 @@ func (o *observerT) NodeHasBeenDiscovered(alias string) *Cluster {
 	return nil
 }
 
-func (o *observerT) FindClusterBySeed(sessionId string, host string, port int, user, password string) *Cluster {
+func (o *ObserverT) FindClusterBySeed(sessionId string, host string, port int, user, password string) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
-	aliases := findAliases(host, port)
-	for _, cluster := range o.clusters {
-		for _, node := range cluster.nodes {
-			for _, alias := range aliases {
-				if node.Address() == alias {
-					if cluster.user == nil || (*cluster.user == user && *cluster.password == password) {
-						return cluster
+	hostAddrs := strings.Split(host, ",")
+	for _, host := range hostAddrs {
+		aliases := findAliases(host, port)
+		for _, cluster := range o.clusters {
+			for _, node := range cluster.nodes {
+				for _, alias := range aliases {
+					if node.Address() == alias {
+						if cluster.user == nil || (*cluster.user == user && *cluster.password == password) {
+							return cluster
+						}
 					}
 				}
 			}
@@ -185,7 +202,7 @@ func (o *observerT) FindClusterBySeed(sessionId string, host string, port int, u
 	return nil
 }
 
-func (o *observerT) DatacenterInfo() common.Stats {
+func (o *ObserverT) DatacenterInfo() common.Stats {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 

@@ -59,12 +59,6 @@ func (spv *SinglePointValue) Value() *float64 {
 	return spv.value
 }
 
-// type CompositePointValue struct {
-// 	Timestamp     int64   `json:"x"`
-// 	PrimaryValue  float64 `json:"y"`
-// 	SecondayValue float64 `json:"secondary"`
-// }
-
 type Info map[string]string
 type Stats map[string]interface{}
 
