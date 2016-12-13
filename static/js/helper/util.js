@@ -2890,18 +2890,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                     }
                 });
 
-            $("#multicluster_connect_xdr").off("click").on("click",function(e){
-                e.stopPropagation();
-                var port = $("#multicluster_xdr_port").val();
-
-                if (!Util.validatePort(port)) {
-                    $("#multicluster_xdr_port").val(window.AMCGLOBALS.persistent.xdrPort);
-                }
-
-                window.AMCGLOBALS.persistent.xdrPort = $("#multicluster_xdr_port").val();
-                openMulticlusterView();
-            });
-
             $("#UserDropdownButton").off("click").on("click", function() {
                 var container = $("#userLogoutButton");
 

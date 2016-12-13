@@ -235,15 +235,9 @@ define(["underscore", "backbone", "helper/util", "collections/statistics/namespa
             $('#xdr-attribute-subSelect').show();
         },
         setAndDisplayXdrPortOption: function(that){
-            var xdrInputHtml = '';
-            xdrInputHtml += '<span class="sub_select_label"> Select XDR Port </span>';
-            xdrInputHtml += '<input type="text" id="xdrPortInput" maxlength="5"/>';
-            xdrInputHtml += '<button type="submit" id="changeXdrPortBtn">Connect</button';
             that.hideNamespaceSubSelect();
-            that.showXdrSubSelect();
             that.hideSIndexSubSelect();
-            $('#xdr-attribute-subSelect').html(xdrInputHtml);
-
+            that.hideXdrSubSelect();
         },
         
         refreshIntervalInputValidation:function(that){
@@ -509,7 +503,7 @@ define(["underscore", "backbone", "helper/util", "collections/statistics/namespa
             	window.AMCGLOBALS.persistent.showAttributesFor = 'nodes';
                 that.reInitializeCollection(that);
             });
-            
+
             $("#namespaceCheckBox").off("change").on("change",function(){
             	$("#nodeStatListGrid").removeClass("statNotInitialized").removeAttr("data-noInitText");
             	window.AMCGLOBALS.persistent.showAttributesFor = 'namespace';
@@ -522,10 +516,11 @@ define(["underscore", "backbone", "helper/util", "collections/statistics/namespa
 				that.reInitializeCollection(that);
             });
           
-			$("#xdrCheckBox").off("change").on("change",function(){
-				window.AMCGLOBALS.persistent.showAttributesFor = 'xdr';
-                that.reInitializeCollection(that);
-	        });
+            $("#xdrCheckBox").off("change").on("change",function(){
+              $("#nodeStatListGrid").removeClass("statNotInitialized").removeAttr("data-noInitText");
+              window.AMCGLOBALS.persistent.showAttributesFor = 'xdr';
+              that.reInitializeCollection(that);
+            });
 
             $('#attribute-search').off('keydown').on('keydown', function(event){
                  window.setTimeout(that.statSearch,500);

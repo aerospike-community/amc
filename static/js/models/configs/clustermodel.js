@@ -255,15 +255,9 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             $('#xdr-attribute-subSelect').show();
         },
         setAndDisplayXdrPortOption: function(that){
-            var xdrInputHtml = '';
-            xdrInputHtml += '<span class="sub_select_label"> Select XDR Port </span>';
-            xdrInputHtml += '<input type="text" id="xdrPortInput" maxlength="5"/>';
-            xdrInputHtml += '<button type="submit" id="changeXdrPortBtn">Connect</button';
             that.hideNamespaceSubSelect();
-            that.showXdrSubSelect();
+            that.hideXdrSubSelect();
             that.hideSIndexSubSelect();
-            $('#xdr-attribute-subSelect').html(xdrInputHtml);
-
         },
 
         refreshIntervalInputValidation:function(that){
