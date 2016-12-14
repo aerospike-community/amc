@@ -70,16 +70,32 @@ module.exports = function(grunt) {
       },
     },
 
+    // uglify
+    uglify: {
+      options: {
+        sourceMap: true,
+        sourceMapIncludeSources: true,
+      },
+      js: {
+        files: [{
+          expand: true,
+          src: ['build/static/js/**/*.js'],
+          dest: '',
+        }]
+      },
+    },
+
   });
 
   // Configure requirejs paths to serve revved files
   grunt.registerTask('require-paths', '', function() {
-    var config = revvedConfig();
-    var file = findSetupFile();
+    var config = concatConfig();
+    var file = findMainConfigFile();
     grunt.file.write(file, config);
+    return;
 
     // concat revved config and original config
-    function revvedConfig() {
+    function concatConfig() {
       var config = 'require.config({ paths: {';
       var k, v;
       for(k in grunt.filerev.summary) {
@@ -97,11 +113,12 @@ module.exports = function(grunt) {
       return config;
     }
 
-    // find revved setup file name
-    function findSetupFile() {
+    // find the main config file for requirejs
+    function findMainConfigFile() {
       var k, v;
       for(k in grunt.filerev.summary) {
         v = grunt.filerev.summary[k];
+        // setup.js is the main config file for requirejs
         if(k.indexOf('setup.js') !== -1) {
           return v;
         }
@@ -112,10 +129,11 @@ module.exports = function(grunt) {
   // load modules
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-filerev');
 	grunt.loadNpmTasks('grunt-filerev-replace');
   grunt.loadNpmTasks('grunt-text-replace');
 
-	grunt.registerTask('default', ['clean', 'copy', 'filerev', 'filerev_replace', 'replace', 'require-paths']);
+	grunt.registerTask('default', ['clean', 'copy', 'filerev', 'filerev_replace', 'replace', 'require-paths', 'uglify']);
 }
 
