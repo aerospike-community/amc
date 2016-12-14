@@ -32,7 +32,7 @@ module.exports = function(grunt) {
           ]
         },
         css: {
-          src: 'build/static/css/*.css',
+          src: 'build/static/css/**/*.css',
         },
     },
 
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
       },
     },
 
-    // uglify
+    // minify javascript files
     uglify: {
       options: {
         sourceMap: true,
@@ -80,9 +80,20 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           src: ['build/static/js/**/*.js'],
-          dest: '',
+          dest: '', // overwrite original files
         }]
       },
+    },
+
+    // minify css files
+    cssmin: {
+      css: {
+        files: [{
+          expand: true,
+          src: ['build/static/css/**/*.css'],
+          dest: '', // overwrite original files
+        }]
+      }
     },
 
   });
@@ -127,6 +138,7 @@ module.exports = function(grunt) {
   });
 
   // load modules
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -134,6 +146,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-filerev-replace');
   grunt.loadNpmTasks('grunt-text-replace');
 
-	grunt.registerTask('default', ['clean', 'copy', 'filerev', 'filerev_replace', 'replace', 'require-paths', 'uglify']);
+	grunt.registerTask('default', ['clean', 'copy', 'filerev', 'filerev_replace', 'replace', 'require-paths', 'uglify', 'cssmin']);
 }
 
