@@ -36,7 +36,7 @@ func (ns *Namespace) ServerTime() time.Time {
 	defer ns.mutex.RUnlock()
 
 	if v := ns.latestStats.TryInt("current_time", 0); v != 0 {
-		time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)
+		return time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)
 	}
 	return time.Time{}
 }
