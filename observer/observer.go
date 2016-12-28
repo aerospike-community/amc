@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
 	"github.com/citrusleaf/amc/common"
@@ -95,6 +96,7 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	}
 
 	if !cExists {
+		log.Info("Appending cluster " + cluster.Id() + " to the observer...")
 		o.clusters = append(o.clusters, cluster)
 	}
 
@@ -105,10 +107,11 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 		}
 	}
 
+	log.Info("Appending cluster " + cluster.Id() + " to session " + sessionId)
 	o.sessions[sessionId] = append(o.sessions[sessionId], cluster)
 }
 
-func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, host string, port uint16) (*Cluster, error) {
+func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, host string, port uint16) (*Cluster, error) {
 	hostAddrs := strings.Split(host, ",")
 	hosts := make([]*as.Host, 0, len(hostAddrs))
 	for _, addr := range hostAddrs {
@@ -120,7 +123,7 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, host str
 		return nil, err
 	}
 
-	cluster := newCluster(o, client, policy.User, policy.Password, hosts)
+	cluster := newCluster(o, client, alias, policy.User, policy.Password, hosts)
 	o.AppendCluster(sessionId, cluster)
 	o.updateClusters()
 
@@ -135,23 +138,15 @@ func (o *ObserverT) SessionExists(sessionId string) bool {
 	return exists
 }
 
-func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, error) {
+func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
-	var clusters []*Cluster
-	// var exist bool
+	log.Info("====================== SessionId", sessionId)
+	clusters, sessionExists := o.sessions[sessionId]
+	log.Info("====================== Clusters", clusters)
 
-	// if !common.AMCIsEnterprise() {
-	clusters = o.clusters
-	// } else {
-	// 	clusters, exist = o.sessions[sessionId]
-	// 	if !exist {
-	// 		return nil, errors.New("Invalid session")
-	// 	}
-	// }
-
-	return clusters, nil
+	return clusters, sessionExists
 }
 
 func (o *ObserverT) FindClusterById(id string) *Cluster {
@@ -180,20 +175,46 @@ func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 	return nil
 }
 
-func (o *ObserverT) FindClusterBySeed(sessionId string, host string, port int, user, password string) *Cluster {
+// Checks for the cluster; If the cluster exists in the session, it won't check the user/pass since it has already been checked
+// Otherwise, will search for the cluster in all the list and check user/pass in case the cluster exists
+func (o *ObserverT) FindClusterBySeed(sid string, host string, port int, user, password string) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
 	hostAddrs := strings.Split(host, ",")
 	for _, host := range hostAddrs {
 		aliases := findAliases(host, port)
-		for _, cluster := range o.clusters {
-			for _, node := range cluster.nodes {
-				for _, alias := range aliases {
-					if node.Address() == alias {
-						if cluster.user == nil || (*cluster.user == user && *cluster.password == password) {
-							return cluster
-						}
+
+		// try to find the cluster in current session by seed
+		// DONT check for user/pass
+		clusters, sessionExists := o.MonitoringClusters(sid)
+		if sessionExists && len(clusters) > 0 {
+			if cluster := o.findClusterBySeed(clusters, aliases, host, port, user, password, false); cluster != nil {
+				return cluster
+			}
+		}
+
+		// try to find the cluster in all monitored clusters
+		// CHECK for user/pass
+		if len(o.clusters) > 0 {
+			if cluster := o.findClusterBySeed(o.clusters, aliases, host, port, user, password, true); cluster != nil {
+				return cluster
+			}
+		}
+	}
+	return nil
+}
+
+func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []string, host string, port int, user, password string, checkUserPass bool) *Cluster {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	for _, cluster := range clusters {
+		for _, node := range cluster.nodes {
+			for _, alias := range aliases {
+				if node.Address() == alias {
+					if !checkUserPass || (cluster.User() == nil || (*cluster.user == user && *cluster.password == password)) {
+						return cluster
 					}
 				}
 			}

@@ -41,6 +41,7 @@ var nodeVisibilityStatus = struct {
 type Node struct {
 	cluster  *Cluster
 	origNode *as.Node
+	origHost *as.Host
 
 	status  NodeStatus
 	visible NodeVisibilityStatus
@@ -63,17 +64,37 @@ type Node struct {
 }
 
 func newNode(cluster *Cluster, origNode *as.Node) *Node {
+	var host *as.Host
+	if origNode != nil {
+		host = origNode.GetHost()
+	}
+
+	lh := rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600)
+
 	return &Node{
 		cluster:        cluster,
 		origNode:       origNode,
+		origHost:       host,
 		status:         nodeStatus.On,
 		namespaces:     map[string]*Namespace{},
 		statsHistory:   map[string]*rrd.Bucket{},
-		latencyHistory: rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600),
+		latencyHistory: lh,
 	}
 }
 
+func (n *Node) valid() bool {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	return n.origNode != nil && n.origNode.IsActive()
+}
+
 func (n *Node) update() error {
+	if !n.valid() {
+		log.Warning("Node %s is not active.", n.origHost)
+		return nil
+	}
+
 	if err := n.updateNamespaceNames(); err != nil {
 		return err
 	}
@@ -81,7 +102,7 @@ func (n *Node) update() error {
 	tm := time.Now()
 
 	// retry 3 times
-	info, err := n.requestInfo(3, n.infoKeys()...)
+	info, err := n.RequestInfo(3, n.infoKeys()...)
 	if err != nil {
 		n.setStatus(nodeStatus.Off)
 		return err
@@ -98,7 +119,7 @@ func (n *Node) update() error {
 	nsAggStats := common.Stats{}
 	nsAggCalcStats := common.Stats{}
 	for _, ns := range n.namespaces {
-		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name))
+		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name))
 		ns.updateIndexInfo(n.Indexes(ns.name))
 		ns.updateLatencyInfo(latencyMap[ns.name])
 		ns.aggStats(nsAggStats, nsAggCalcStats)
@@ -172,7 +193,7 @@ func (n *Node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Sta
 	return stats
 }
 
-func (n *Node) requestInfo(reties int, cmd ...string) (result map[string]string, err error) {
+func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string, err error) {
 	if len(cmd) == 0 {
 		return map[string]string{}, nil
 	}
@@ -189,7 +210,7 @@ func (n *Node) requestInfo(reties int, cmd ...string) (result map[string]string,
 }
 
 func (n *Node) updateNamespaceNames() error {
-	namespaceListMap, err := n.requestInfo(3, "namespaces")
+	namespaceListMap, err := n.RequestInfo(3, "namespaces")
 	if err != nil {
 		return err
 	}
@@ -373,11 +394,18 @@ func (n *Node) XdrEnabled() bool {
 	return n.StatsAttr("xdr_uptime") != nil
 }
 
-func (n *Node) XdrStats() common.Stats {
+func (n *Node) XdrConfig() common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
 	return n.latestInfo.ToInfo("get-config:context=xdr").ToStats()
+}
+
+func (n *Node) XdrStats() common.Stats {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	return n.latestInfo.ToInfo("statistics/xdr").ToStats()
 }
 
 func (n *Node) XdrStatus() XDRStatus {
@@ -391,7 +419,11 @@ func (n *Node) XdrStatus() XDRStatus {
 }
 
 func (n *Node) SwitchXDR(on bool) error {
-	cmd := fmt.Sprintf("set-config:context=xdr;enable-xdr=%v", on)
+	return n.SetXDRConfig("enable-xdr", "on")
+}
+
+func (n *Node) SetXDRConfig(name string, value interface{}) error {
+	cmd := fmt.Sprintf("set-config:context=xdr;%s=%v", name, value)
 
 	res, err := n.origNode.RequestInfo(cmd)
 	if err != nil {
@@ -414,13 +446,14 @@ func (n *Node) infoKeys() []string {
 	}
 
 	if n.Enterprise() {
-		res = append(res, "get-dc-config", "get-config:context=xdr")
+		res = append(res, "get-dc-config", "get-config:context=xdr", "statistics/xdr")
 	}
 
 	// add namespace stat requests
 	for ns, _ := range n.namespaces {
 		res = append(res, "namespace/"+ns)
 		res = append(res, "sets/"+ns)
+		res = append(res, "get-config:context=namespace;id="+ns)
 	}
 
 	return res
@@ -532,33 +565,26 @@ func (n *Node) ConfigAttr(name string) interface{} {
 	return n.latestConfig[name]
 }
 
-func (n *Node) SetServerConfig(context string, config map[string]string, wg *sync.WaitGroup, resChan chan *common.NodeResult) {
-	defer wg.Done()
-
-	// to avoid deadlock
-	addr := n.Address()
-
+func (n *Node) SetServerConfig(context string, config map[string]string) error {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 
-	cmd := "set-config:context=" + context + ";"
+	cmd := "set-config:context=" + context
 	for parameter, value := range config {
-		cmd += fmt.Sprintf("%s=%s;", parameter, value)
+		cmd += fmt.Sprintf(";%s=%s", parameter, value)
 	}
 
-	res, err := n.origNode.RequestInfo(cmd)
+	res, err := n.RequestInfo(3, cmd)
 	if err != nil {
-		resChan <- &common.NodeResult{Name: addr, Err: err}
-		return
+		return err
 	}
 
 	errMsg, exists := res[cmd]
 	if exists && strings.ToLower(errMsg) == "ok" {
-		resChan <- &common.NodeResult{Name: addr, Err: nil}
-		return
+		return nil
 	}
 
-	resChan <- &common.NodeResult{Name: addr, Err: errors.New(errMsg)}
+	return errors.New(errMsg)
 }
 
 func (n *Node) setInfo(stats common.Info) {
@@ -779,10 +805,10 @@ func (n *Node) NamespaceIndexes() map[string][]string {
 	return result
 }
 
-func (n *Node) Udfs() map[string]common.Info {
+func (n *Node) UDFs() map[string]common.Stats {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
-	return n.latestInfo.ToInfoMap("udf-list", "filename", ":")
+	return n.latestInfo.ToStatsMap("udf-list", "filename", ",")
 }
 
 func (n *Node) Address() string {

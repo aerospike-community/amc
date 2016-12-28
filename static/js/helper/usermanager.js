@@ -3,7 +3,7 @@
 *THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE. THE COPYRIGHT NOTICE
 *ABOVE DOES NOT EVIDENCE ANY ACTUAL OR INTENDED PUBLICATION.
 ******************************************************************************/
-define(["jquery","helper/servicemanager","helper/notification","config/app-config","helper/AjaxManager"], 
+define(["jquery","helper/servicemanager","helper/notification","config/app-config","helper/AjaxManager"],
 	function($,ServiceManager,Notification,AppConfig,AjaxManager){
 
     var usermanager = {
@@ -26,16 +26,16 @@ define(["jquery","helper/servicemanager","helper/notification","config/app-confi
         		Notification.toastNotification("red","You don't have access to any module",false,true);
         	}
         },
-        
+
         getUserHomePageByRoles : function(roles){
-        	var url = window.location.protocol + "//"+window.location.host; 
+        	var url = window.location.protocol + "//"+window.location.host;
         	if(roles.length === 1 && roles.indexOf("user-admin") !== -1){
         		return url + "/#admin-console";
         	} else {
         		return url + "/#dashboard";
         	}
         },
-        
+
         getDefaultActivePageByRoles : function(roles){
         	if(roles.length === 1 && roles.indexOf("user-admin") !== -1){
         		return "admin-console";
@@ -43,7 +43,7 @@ define(["jquery","helper/servicemanager","helper/notification","config/app-confi
         		return "dashboard";
         	}
         },
-        
+
         /*
          * This method will fetch all currently monitoring cluster information in current session
          */

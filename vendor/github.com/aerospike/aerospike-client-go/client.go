@@ -471,6 +471,7 @@ func (clnt *Client) scanNode(policy *ScanPolicy, node *Node, recordset *Recordse
 //
 // This method is only supported by Aerospike 3 servers.
 // If the policy is nil, the default relevant policy will be used.
+// NOTICE: DEPRECATED ON SERVER. Will be removed in future. Use CDT operations instead.
 func (clnt *Client) GetLargeList(policy *WritePolicy, key *Key, binName string, userModule string) *LargeList {
 	policy = clnt.getUsableWritePolicy(policy)
 	return NewLargeList(clnt, policy, key, binName, userModule)
@@ -482,7 +483,7 @@ func (clnt *Client) GetLargeList(policy *WritePolicy, key *Key, binName string, 
 //
 // This method is only supported by Aerospike 3 servers.
 // If the policy is nil, the default relevant policy will be used.
-// NOTICE: DEPRECATED ON SERVER. Will be removed in future.
+// NOTICE: DEPRECATED ON SERVER. Will be removed in future. Use CDT operations instead.
 func (clnt *Client) GetLargeMap(policy *WritePolicy, key *Key, binName string, userModule string) *LargeMap {
 	policy = clnt.getUsableWritePolicy(policy)
 	return NewLargeMap(clnt, policy, key, binName, userModule)
@@ -1219,6 +1220,54 @@ func (clnt *Client) QueryUsers(policy *AdminPolicy) ([]*UserRoles, error) {
 
 	command := newAdminCommand(nil)
 	return command.queryUsers(clnt.cluster, policy)
+}
+
+// QueryRole retrieves privileges for a given role.
+func (clnt *Client) QueryRole(policy *AdminPolicy, role string) (*Role, error) {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.queryRole(clnt.cluster, policy, role)
+}
+
+// QueryRoles retrieves all roles and their privileges.
+func (clnt *Client) QueryRoles(policy *AdminPolicy) ([]*Role, error) {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.queryRoles(clnt.cluster, policy)
+}
+
+// Create user defined role.
+func (clnt *Client) CreateRole(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.createRole(clnt.cluster, policy, roleName, privileges)
+}
+
+// Drop user defined role.
+func (clnt *Client) DropRole(policy *AdminPolicy, roleName string) error {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.dropRole(clnt.cluster, policy, roleName)
+}
+
+// Grant privileges to an user defined role.
+func (clnt *Client) GrantPrivileges(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.grantPrivileges(clnt.cluster, policy, roleName, privileges)
+}
+
+// Revoke privileges from an user defined role.
+func (clnt *Client) RevokePrivileges(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+	policy = clnt.getUsableAdminPolicy(policy)
+
+	command := newAdminCommand(nil)
+	return command.revokePrivileges(clnt.cluster, policy, roleName, privileges)
 }
 
 // Cluster exposes the cluster object to the user

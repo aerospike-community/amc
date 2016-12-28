@@ -80,13 +80,29 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
 
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
-	e.GET("/aerospike/service/clusters/:clusterUuid/fire_cmd", postClusterFireCmd)
+
+	e.GET("/aerospike/service/clusters/:clusterUuid/udfs", getClusterUDFs)
+	e.POST("/aerospike/service/clusters/:clusterUuid/drop_udf", postClusterDropUDF)
+	e.POST("/aerospike/service/clusters/:clusterUuid/add_udf", postClusterAddUDF)
+
+	e.POST("/aerospike/service/clusters/:clusterUuid/fire_cmd", postClusterFireCmd)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get_all_users", getClusterAllUsers)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get_all_roles", getClusterAllRoles)
+	e.POST("/aerospike/service/clusters/:clusterUuid/add_user", postClusterAddUser)
+	e.POST("/aerospike/service/clusters/:clusterUuid/user/:user/remove", postClusterDropUser)
+	e.POST("/aerospike/service/clusters/:clusterUuid/user/:user/update", postClusterUpdateUser)
+	e.POST("/aerospike/service/clusters/:clusterUuid/roles/:role/add_role", postClusterAddRole)
+	e.POST("/aerospike/service/clusters/:clusterUuid/roles/:role/update", postClusterUpdateRole)
+	e.POST("/aerospike/service/clusters/:clusterUuid/roles/:role/drop_role", postClusterDropRole)
+
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", getClusterThroughput)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", getClusterThroughputHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency/:nodes", getNodeLatency)
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency_history/:nodes", getNodeLatencyHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/basic", getClusterBasic)
+	e.POST("/aerospike/service/clusters/:clusterUuid/change_password", postClusterChangePassword)
 	e.GET("/aerospike/service/clusters/:clusterUuid/alerts", getClusterAlrets)
+	e.POST("/aerospike/service/clusters/:clusterUuid/add_node", postAddClusterNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", getClusterNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", getClusterNodeAllConfig)
 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", setClusterNodesConfig)
@@ -95,7 +111,10 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", getClusterNamespaces)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", getClusterNamespaceNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", getClusterNamespaceAllConfig)
+	e.POST("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/setconfig", setClusterNamespaceConfig)
 	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:xdrPort/nodes/:nodes", getClusterXdrNodes)
+	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:xdrPort/nodes/:nodes/allconfig", getClusterXdrNodesAllConfig)
+	e.POST("/aerospike/service/clusters/:clusterUuid/xdr/:xdrPort/nodes/:nodes/setconfig", setClusterXdrNodesConfig)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", getClusterNodeAllStats)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", getClusterNamespaceNodeAllStats)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", getClusterNamespaceSindexNodeAllStats)
@@ -103,9 +122,11 @@ func Server(config *common.Config) {
 
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", getClusterNamespaceSindexes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", getClusterNamespaceSets)
+	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/storage", getClusterNamespaceStorage)
 	e.GET("/aerospike/service/clusters/:clusterUuid/jobs/nodes/:node", getClusterJobsNode)
 
 	e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get-current-user", getClusterCurrentUser)
 	e.GET("/aerospike/service/clusters/:clusterUuid/get_user_roles", getClusterUserRoles)
 
 	log.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)

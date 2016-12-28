@@ -49,12 +49,29 @@ func errToTimeoutErr(err error) error {
 	return err
 }
 
+func shouldClose(err error) bool {
+	if err == io.EOF {
+		return true
+	}
+
+	if err, ok := err.(net.Error); ok && err.Timeout() {
+		return true
+	}
+
+	return false
+}
+
 // NewConnection creates a connection on the network and returns the pointer
 // A minimum timeout of 2 seconds will always be applied.
 // If the connection is not established in the specified timeout,
 // an error will be returned
 func NewConnection(address string, timeout time.Duration) (*Connection, error) {
 	newConn := &Connection{dataBuffer: make([]byte, 1024)}
+
+	// don't wait indefinitely
+	if timeout == 0 {
+		timeout = 5 * time.Second
+	}
 
 	conn, err := net.DialTimeout("tcp", address, timeout)
 	if err != nil {
@@ -76,24 +93,25 @@ func NewConnection(address string, timeout time.Duration) (*Connection, error) {
 // an error will be returned
 func NewSecureConnection(policy *ClientPolicy, host *Host) (*Connection, error) {
 	address := host.Name + ":" + strconv.Itoa(host.Port)
-	if policy.TlsConfig == nil {
-		return NewConnection(address, policy.Timeout)
-	}
-
-	newConn := &Connection{}
-
-	conn, err := tls.Dial("tcp", address, policy.TlsConfig)
+	conn, err := NewConnection(address, policy.Timeout)
 	if err != nil {
-		Logger.Error("Connection to address `" + address + "` failed to establish with error: " + err.Error())
-		return nil, errToTimeoutErr(err)
-	}
-	newConn.conn = conn
-
-	// set timeout at the last possible moment
-	if err := newConn.SetTimeout(policy.Timeout); err != nil {
 		return nil, err
 	}
-	return newConn, nil
+
+	if policy.TlsConfig == nil {
+		return conn, nil
+	}
+
+	sconn := tls.Client(conn.conn, policy.TlsConfig)
+	if host.TLSName != "" {
+		if err := sconn.VerifyHostname(host.TLSName); err != nil {
+			Logger.Error("Connection to address `" + address + "` failed to establish with error: " + err.Error())
+			return nil, errToTimeoutErr(err)
+		}
+	}
+
+	conn.conn = sconn
+	return conn, nil
 }
 
 // Write writes the slice to the connection buffer.
@@ -115,7 +133,7 @@ func (ctn *Connection) Write(buf []byte) (total int, err error) {
 	return total, errToTimeoutErr(err)
 }
 
-// ReadN reads N bytes from connection buffer to the provided slice.
+// ReadN reads N bytes from connection buffer to the provided Writer.
 func (ctn *Connection) ReadN(buf io.Writer, length int64) (total int64, err error) {
 	// if all bytes are not read, retry until successful
 	// Don't worry about the loop; we've already set the timeout elsewhere
@@ -124,10 +142,13 @@ func (ctn *Connection) ReadN(buf io.Writer, length int64) (total int64, err erro
 	if err == nil && total == length {
 		return total, nil
 	} else if err != nil {
+		if shouldClose(err) {
+			ctn.Close()
+		}
 		return total, errToTimeoutErr(err)
-	} else {
-		return total, NewAerospikeError(SERVER_ERROR)
 	}
+	ctn.Close()
+	return total, NewAerospikeError(SERVER_ERROR)
 }
 
 // Read reads from connection buffer to the provided slice.
@@ -146,10 +167,13 @@ func (ctn *Connection) Read(buf []byte, length int) (total int, err error) {
 	if err == nil && total == length {
 		return total, nil
 	} else if err != nil {
+		if shouldClose(err) {
+			ctn.Close()
+		}
 		return total, errToTimeoutErr(err)
-	} else {
-		return total, NewAerospikeError(SERVER_ERROR)
 	}
+	ctn.Close()
+	return total, NewAerospikeError(SERVER_ERROR)
 }
 
 // IsConnected returns true if the connection is not closed yet.

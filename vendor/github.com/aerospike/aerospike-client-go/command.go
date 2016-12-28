@@ -280,6 +280,10 @@ func (cmd *baseCommand) setReadHeader(policy *BasePolicy, key *Key) error {
 
 // Implements different command operations
 func (cmd *baseCommand) setOperate(policy *WritePolicy, key *Key, operations []*Operation) error {
+	if len(operations) == 0 {
+		return NewAerospikeError(PARAMETER_ERROR, "No operations were passed.")
+	}
+
 	cmd.begin()
 	fieldCount := 0
 	readAttr := 0
@@ -326,7 +330,7 @@ func (cmd *baseCommand) setOperate(policy *WritePolicy, key *Key, operations []*
 	fieldCount += ksz
 
 	if err := cmd.sizeBuffer(); err != nil {
-		return nil
+		return err
 	}
 
 	if readHeader && !readBin {
@@ -1130,6 +1134,25 @@ func (cmd *baseCommand) sizeBuffer() error {
 	return cmd.sizeBufferSz(cmd.dataOffset)
 }
 
+func (cmd *baseCommand) validateHeader(header int64) error {
+	msgVersion := (uint64(header) & 0xFF00000000000000) >> 56
+	if msgVersion != 2 {
+		return NewAerospikeError(PARSE_ERROR, fmt.Sprintf("Invalid Message Header: Expected version to be 2, but got %v", msgVersion))
+	}
+
+	msgType := uint64((uint64(header) & 0x00FF000000000000)) >> 49
+	if !(msgType == 1 || msgType == 3) {
+		return NewAerospikeError(PARSE_ERROR, fmt.Sprintf("Invalid Message Header: Expected type to be 1 or 3, but got %v", msgType))
+	}
+
+	msgSize := int64((header & 0x0000FFFFFFFFFFFF))
+	if msgSize > int64(MaxBufferSize) {
+		return NewAerospikeError(PARSE_ERROR, fmt.Sprintf("Invalid Message Header: Expected size to be under 10MiB, but got %v", msgSize))
+	}
+
+	return nil
+}
+
 var (
 	// MaxBufferSize protects against allocating massive memory blocks
 	// for buffers. Tweak this number if you are returning a lot of
@@ -1173,31 +1196,31 @@ func SetCommandBufferPool(poolSize, initBufSize, maxBufferSize int) {
 
 func (cmd *baseCommand) execute(ifc command) (err error) {
 	policy := ifc.getPolicy(ifc).GetBasePolicy()
-	iterations := 0
+	iterations := -1
 
 	// set timeout outside the loop
-	limit := time.Now().Add(policy.Timeout)
+	deadline := time.Now().Add(policy.Timeout)
 
 	// Execute command until successful, timed out or maximum iterations have been reached.
 	for {
 		// too many retries
-		if iterations++; (policy.MaxRetries > 0) && (iterations > policy.MaxRetries+1) {
+		if iterations++; (policy.MaxRetries <= 0 && iterations > 0) || (policy.MaxRetries > 0 && iterations > policy.MaxRetries) {
 			return NewAerospikeError(TIMEOUT, fmt.Sprintf("command execution timed out: Exceeded number of retries. See `Policy.MaxRetries`. (last error: %s)", err))
 		}
 
 		// Sleep before trying again, after the first iteration
-		if iterations > 1 && policy.SleepBetweenRetries > 0 {
+		if iterations > 0 && policy.SleepBetweenRetries > 0 {
 			time.Sleep(policy.SleepBetweenRetries)
 		}
 
 		// check for command timeout
-		if policy.Timeout > 0 && time.Now().After(limit) {
+		if policy.Timeout > 0 && time.Now().After(deadline) {
 			break
 		}
 
 		// set command node, so when you return a record it has the node
 		cmd.node, err = ifc.getNode(ifc)
-		if err != nil {
+		if cmd.node == nil || !cmd.node.IsActive() || err != nil {
 			// Node is currently inactive. Retry.
 			continue
 		}
@@ -1254,7 +1277,7 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 			// cancelling/closing the batch/multi commands will return an error, which will
 			// close the connection to throw away its data and signal the server about the
 			// situation. We will not put back the connection in the buffer.
-			if KeepConnection(err) {
+			if cmd.conn.IsConnected() && KeepConnection(err) {
 				// Put connection back in pool.
 				cmd.node.PutConnection(cmd.conn)
 			} else {

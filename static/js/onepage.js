@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters", 
+define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters",
     // From the requirejs optimizer docs
     //  "The optimizer will only combine modules that are specified in arrays of
     //   string literals that are passed to top-level require and define calls,

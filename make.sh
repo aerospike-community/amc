@@ -17,6 +17,7 @@ version_build="$edition-$version"
 godep go build -a -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
 
 # build content
+rm -rf build/static
 cd static
 npm install
 grunt

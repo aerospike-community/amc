@@ -214,7 +214,8 @@ func AggregateInfo(s Info, other Info) Stats {
 // this function never panics
 func (s Info) ToInfo(name string) Info {
 	res := Info{}
-	statsPairStr := strings.Split(s[name], ";")
+	name = strings.Trim(s[name], ";")
+	statsPairStr := strings.Split(name, ";")
 	for _, sp := range statsPairStr {
 		statsPair := strings.SplitN(sp, "=", 2)
 		switch len(statsPair) {
@@ -234,7 +235,8 @@ func (s Info) ToInfo(name string) Info {
 func (s Info) ToInfoMap(name string, alias string, delim string) map[string]Info {
 	infoMap := map[string]Info{}
 
-	statsFrags := strings.Split(s[name], ";")
+	statsFragsTrimmed := strings.Trim(s[name], ";")
+	statsFrags := strings.Split(statsFragsTrimmed, ";")
 	for _, frag := range statsFrags {
 		res := Info{}
 		statsPairStr := strings.Split(frag, delim)
@@ -261,7 +263,8 @@ func (s Info) ToInfoMap(name string, alias string, delim string) map[string]Info
 func (s Info) ToStatsMap(name string, alias string, delim string) map[string]Stats {
 	statsMap := map[string]Stats{}
 
-	statsFrags := strings.Split(s[name], ";")
+	statsFragsTrimmed := strings.Trim(s[name], ";")
+	statsFrags := strings.Split(statsFragsTrimmed, ";")
 	for _, frag := range statsFrags {
 		res := Info{}
 		statsPairStr := strings.Split(frag, delim)

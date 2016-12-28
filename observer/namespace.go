@@ -1,8 +1,10 @@
 package observer
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -61,7 +63,7 @@ func (ns *Namespace) updateIndexInfo(indexes map[string]common.Info) error {
 	}
 
 	// retry 3 times
-	info, err := ns.node.requestInfo(3, cmdList...)
+	info, err := ns.node.RequestInfo(3, cmdList...)
 	if err != nil {
 		return err
 	}
@@ -432,47 +434,64 @@ func (ns *Namespace) Stats() common.Stats {
 	return res
 }
 
-var _configuration_params = []string{
-	"type",
-	"storage-engine",
-	"file",
-	"storage-engine.file",
-	"filesize",
-	"storage-engine.filesize",
-	"load-at-startup",
-	"data-in-memory",
-	"defrag-period",
-	"defrag-lwm-pct",
-	"storage-engine.defrag-lwm-pct",
-	"defrag-max-blocks",
-	"defrag-startup-minimum",
-	"storage-engine.defrag-startup-minimum",
-	"write-block-size",
-	"storage-engine.write-block-size",
-	"ticker-interval",
-	"replication-factor",
-	"low-water-pct",
-	"high-water-memory-pct",
-	"high-water-disk-pct",
-	"high-water-pct",
-	"evict-pct",
-	"stop-writes-pct",
-	"memory-size",
-	"default-ttl",
-	"max-ttl",
-	"allow-versions",
-	"single-bin",
-	"node_status",
-	"migrate-sleep",
-	"migrate-order",
-}
+// var _configuration_params = []string{
+// 	"type",
+// 	"storage-engine",
+// 	"file",
+// 	"storage-engine.file",
+// 	"filesize",
+// 	"storage-engine.filesize",
+// 	"load-at-startup",
+// 	"data-in-memory",
+// 	"defrag-period",
+// 	"defrag-lwm-pct",
+// 	"storage-engine.defrag-lwm-pct",
+// 	"defrag-max-blocks",
+// 	"defrag-startup-minimum",
+// 	"storage-engine.defrag-startup-minimum",
+// 	"write-block-size",
+// 	"storage-engine.write-block-size",
+// 	"ticker-interval",
+// 	"replication-factor",
+// 	"low-water-pct",
+// 	"high-water-memory-pct",
+// 	"high-water-disk-pct",
+// 	"high-water-pct",
+// 	"evict-pct",
+// 	"stop-writes-pct",
+// 	"memory-size",
+// 	"default-ttl",
+// 	"max-ttl",
+// 	"allow-versions",
+// 	"single-bin",
+// 	"node_status",
+// 	"migrate-sleep",
+// 	"migrate-order",
+// }
 
 func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
-	info := ns.InfoAttrs(_configuration_params...)
+	ns.mutex.RLock()
+	defer ns.mutex.RUnlock()
 
-	if len(names) == 0 {
-		return info.ToStats()
+	info := ns.latestInfo.ToInfo("get-config:context=namespace;id=" + ns.name).ToStats()
+	return info
+}
+
+func (ns *Namespace) SetConfig(config common.Info) error {
+	cmd := "set-config:context=namespace;id=" + ns.name
+	for parameter, value := range config {
+		cmd += fmt.Sprintf(";%s=%s", parameter, value)
 	}
 
-	return info.ToStats().GetMulti(names...)
+	res, err := ns.node.RequestInfo(3, cmd)
+	if err != nil {
+		return err
+	}
+
+	errMsg, exists := res[cmd]
+	if exists && strings.ToLower(errMsg) == "ok" {
+		return nil
+	}
+
+	return errors.New(errMsg)
 }

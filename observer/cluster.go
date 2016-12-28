@@ -3,7 +3,8 @@ package observer
 import (
 	"fmt"
 	// "strconv"
-	"strings"
+	"errors"
+	// "strings"
 	"sync"
 	"time"
 
@@ -35,18 +36,19 @@ type Cluster struct {
 	user     *string
 	password *string
 
-	users []string
-	roles []string
+	users []*as.UserRoles
+	roles []*as.Role
 
 	mutex sync.RWMutex
 }
 
-func newCluster(observer *ObserverT, client *as.Client, user, password string, seeds []*as.Host) *Cluster {
+func newCluster(observer *ObserverT, client *as.Client, alias *string, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
 		observer:       observer,
 		client:         client,
 		nodes:          map[as.Host]*Node{},
-		updateInterval: 5, //seconds
+		alias:          alias, //seconds
+		updateInterval: 5,     //seconds
 		uuid:           uuid.NewV4().String(),
 		seeds:          seeds,
 	}
@@ -64,6 +66,27 @@ func newCluster(observer *ObserverT, client *as.Client, user, password string, s
 	}
 
 	return &newCluster
+}
+
+func (c *Cluster) AddNode(address string, port int) error {
+	host := as.NewHost(address, port)
+	if _, exists := c.nodes[*host]; exists {
+		return errors.New("Node already exists")
+	}
+
+	// This is to make sure the client will have the seed for this node
+	// In case ALL nodes are removed
+	c.client.Cluster().AddSeeds([]*as.Host{host})
+
+	// Node will be automatically assigned when available on cluster
+	newNode := newNode(c, nil)
+	newNode.origHost = host
+
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.nodes[*host] = newNode
+
+	return nil
 }
 
 func (c *Cluster) UpdateInterval() int {
@@ -146,15 +169,75 @@ func (c *Cluster) Memory() common.Stats {
 	return result
 }
 
-func (c *Cluster) Users() map[string]interface{} {
+func (c *Cluster) Users() []*as.UserRoles {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	return map[string]interface{}{
-		"status": "success",
-		"users":  c.users,
-		"roles":  c.roles,
+	res := make([]*as.UserRoles, len(c.users))
+	copy(res, c.users)
+	return res
+}
+
+func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
+	if currentPass == newPass {
+		return errors.New("New password cannot be same as current password")
 	}
+
+	if c.password != nil && currentPass != *c.password {
+		return errors.New("Invalid current password")
+	}
+
+	if c.user != nil && user != *c.user {
+		return errors.New("Invalid current user")
+	}
+
+	return c.client.ChangePassword(nil, user, newPass)
+}
+
+func (c *Cluster) ChangeUserPassword(user, pass string) error {
+	return c.client.ChangePassword(nil, user, pass)
+}
+
+func (c *Cluster) CreateUser(user, password string, roles []string) error {
+	return c.client.CreateUser(nil, user, password, roles)
+}
+
+func (c *Cluster) DropUser(user string) error {
+	return c.client.DropUser(nil, user)
+}
+
+func (c *Cluster) GrantRoles(user string, roles []string) error {
+	return c.client.GrantRoles(nil, user, roles)
+}
+
+func (c *Cluster) RevokeRoles(user string, roles []string) error {
+	return c.client.RevokeRoles(nil, user, roles)
+}
+
+func (c *Cluster) CreateRole(role string, privileges []*as.Privilege) error {
+	return c.client.CreateRole(nil, role, privileges)
+}
+
+func (c *Cluster) DropRole(role string) error {
+	return c.client.DropRole(nil, role)
+}
+
+func (c *Cluster) AddPrivileges(role string, privileges []*as.Privilege) error {
+	return c.client.GrantPrivileges(nil, role, privileges)
+}
+
+func (c *Cluster) RemovePrivileges(role string, privileges []*as.Privilege) error {
+	return c.client.RevokePrivileges(nil, role, privileges)
+}
+
+func (c *Cluster) CreateUDF(name, body string) error {
+	_, err := c.client.RegisterUDF(nil, []byte(body), name, as.LUA)
+	return err
+}
+
+func (c *Cluster) DropUDF(udf string) error {
+	_, err := c.client.RemoveUDF(nil, udf)
+	return err
 }
 
 func (c *Cluster) Nodes() (nodes []*Node) {
@@ -260,7 +343,7 @@ func (c *Cluster) User() *string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	if c.user == nil {
+	if c.user == nil || *c.user == "" {
 		return nil
 	}
 	u := *c.user
@@ -278,7 +361,7 @@ func (c *Cluster) Alias() *string {
 	return &alias
 }
 
-func (c *Cluster) Roles() *string {
+func (c *Cluster) Roles() []*as.Role {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
@@ -286,9 +369,27 @@ func (c *Cluster) Roles() *string {
 		return nil
 	}
 
-	roles := strings.Join(c.roles, ",")
-	return &roles
+	res := make([]*as.Role, len(c.roles))
+	copy(res, c.roles)
+	return res
 }
+
+// func (c *Cluster) Roles() *string {
+// 	c.mutex.RLock()
+// 	defer c.mutex.RUnlock()
+
+// 	if len(c.roles) == 0 {
+// 		return nil
+// 	}
+
+// 	res := make([]string, 0, len(c.roles))
+// 	for _, r := range c.roles {
+// 		res = append(res, r.Name)
+// 	}
+
+// 	roles := strings.Join(res, ",")
+// 	return &roles
+// }
 
 func (c *Cluster) close() {
 	c.client.Close()
@@ -301,18 +402,11 @@ func (c *Cluster) IsSet() bool {
 	return c.client != nil
 }
 
-func (c *Cluster) setSecurityEnabled() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.securityEnabled = true
-}
-
 func (c *Cluster) SecurityEnabled() bool {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	return c.securityEnabled
+	return c.user != nil && len(*c.user) > 0
 }
 
 func (c *Cluster) update(wg *sync.WaitGroup) error {
@@ -339,18 +433,16 @@ func (c *Cluster) updateUsers() error {
 		return nil
 	}
 
-	resUsers := []string{}
-	resRoles := []string{}
-
-	for i := range users {
-		resUsers = append(resUsers, users[i].User)
-		resRoles = append(resRoles, users[i].Roles...)
+	roles, err := c.client.QueryRoles(nil)
+	if err != nil {
+		return nil
 	}
 
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	c.users = common.StrUniq(resUsers)
-	c.roles = common.StrUniq(resRoles)
+
+	c.users = users
+	c.roles = roles
 
 	return nil
 }
@@ -581,30 +673,25 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 }
 
 func (c *Cluster) CurrentUserRoles() []string {
-	// // TODO: do this on cluster update
-	// var list []*as.UserRoles
-	// for i := 0; i < 3; i++ {
-	// 	var err error
-	// 	list, err = c.client.QueryUsers(nil)
-	// 	if err != nil {
-	// 		log.Errorf("Error encountered querying the users: %s", err)
-	// 	}
-	// 	break
-	// }
-
-	// for _, u := range list {
-	// 	if strings.ToLower(u.User) == *c.user {
-	// 		return u.Roles
-	// 	}
-	// }
-	// return []string{}
-
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	roles := make([]string, len(c.roles))
-	copy(roles, c.roles)
-	return roles
+	if c.user == nil {
+		return nil
+	}
+
+	var user *as.UserRoles
+	for _, u := range c.users {
+		if u.User == *c.user {
+			user = u
+			break
+		}
+	}
+
+	if user == nil {
+		return nil
+	}
+	return user.Roles
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
@@ -639,6 +726,34 @@ func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	}
 
 	return res
+}
+
+func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	storageTypes := map[string][]string{}
+	storageDevices := map[string][]string{}
+
+	for _, node := range c.nodes {
+		ns := node.NamespaceByName(namespace)
+		storageType := ns.StatsAttr("type")
+		if storageType != nil {
+			storageTypes[storageType.(string)] = append(storageTypes[storageType.(string)], node.Address())
+		}
+		storageDevice := ns.StatsAttr("storage-engine")
+		if storageDevice != nil {
+			storageDevices[storageDevice.(string)] = append(storageDevices[storageDevice.(string)], node.Address())
+		}
+	}
+
+	syncedStatus := len(storageTypes) <= 1
+	return common.Stats{
+		"cluster_status": "on",
+		"synced":         syncedStatus,
+		"storage":        storageTypes,
+		"devices":        storageDevices,
+	}
 }
 
 func (c *Cluster) DatacenterInfo() common.Stats {
@@ -690,7 +805,7 @@ func (c *Cluster) DatacenterInfo() common.Stats {
 
 		"xdr_info": xdrInfo,
 
-		"cluster_name": c.alias,
+		"cluster_name": c.Alias(),
 		"namespaces":   c.NamespaceList(),
 		"discovery":    "complete",
 		"nodes":        nodeStats,

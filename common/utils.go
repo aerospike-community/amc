@@ -52,3 +52,33 @@ func DeleteEmpty(s []string) []string {
 	}
 	return r
 }
+
+func StrDiff(o, n []string) (added, removed []string) {
+	for _, sn := range n {
+		exists := false
+		for _, so := range o {
+			if sn == so {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			added = append(added, sn)
+		}
+	}
+
+	for _, so := range o {
+		exists := false
+		for _, sn := range n {
+			if sn == so {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			removed = append(removed, so)
+		}
+	}
+
+	return added, removed
+}

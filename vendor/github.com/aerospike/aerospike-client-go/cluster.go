@@ -192,6 +192,7 @@ Loop:
 		select {
 		case <-clstr.tendChannel:
 			// tend channel closed
+			Logger.Debug("Tend channel closed. Shutting down the cluster...")
 			break Loop
 		case <-time.After(tendInterval):
 			if err := clstr.tend(policy.FailIfNotConnected); err != nil {
@@ -222,6 +223,7 @@ func (clstr *Cluster) AddSeeds(hosts []*Host) {
 
 // Updates cluster state
 func (clstr *Cluster) tend(failIfNotConnected bool) error {
+
 	nodes := clstr.GetNodes()
 	nodes_before_tend := len(nodes)
 
@@ -254,11 +256,13 @@ func (clstr *Cluster) tend(failIfNotConnected bool) error {
 	}
 
 	for _, node := range nodes {
-		node.Refresh(peers)
+		if err := node.Refresh(peers); err != nil {
+			Logger.Debug("Error occured while refreshing node: %s", node.String())
+		}
 	}
 
 	// Refresh peers when necessary.
-	if peers.genChanged {
+	if peers.usePeers && peers.genChanged {
 		// Refresh peers for all nodes that responded the first time even if only one node's peers changed.
 		peers.refreshCount = 0
 
@@ -280,6 +284,9 @@ func (clstr *Cluster) tend(failIfNotConnected bool) error {
 
 		// Remove nodes in a batch.
 		if len(removeList) > 0 {
+			for _, n := range removeList {
+				Logger.Debug("The following nodes will be removed: %s", n)
+			}
 			clstr.removeNodes(removeList)
 		}
 	}
@@ -489,8 +496,9 @@ func (clstr *Cluster) findNodesToRemove(refreshCount int) []*Node {
 			}
 
 		default:
-			// Multi-node clusters require at least one successful refresh before removing.
-			if refreshCount >= 1 && node.referenceCount.Get() == 0 {
+			// Multi-node clusters require at least one successful refresh before removing
+			// or alternatively, if connection to the whle cluster has been cut.
+			if (refreshCount >= 1 && node.referenceCount.Get() == 0) || (refreshCount == 0 && node.failures.Get() > 5) {
 				// Node is not referenced by other nodes.
 				// Check if node responded to info request.
 				if node.failures.Get() == 0 {
@@ -553,6 +561,7 @@ func (clstr *Cluster) addNodes(nodesToAdd map[string]*Node) {
 }
 
 func (clstr *Cluster) removeNodes(nodesToRemove []*Node) {
+
 	// There is no need to delete nodes from partitionWriteMap because the nodes
 	// have already been set to inactive.
 
@@ -580,18 +589,20 @@ func (clstr *Cluster) removeNodes(nodesToRemove []*Node) {
 	// Remove all nodes at once to avoid copying entire array multiple times.
 	clstr.nodes.Update(func(val interface{}) (interface{}, error) {
 		nodes := val.([]*Node)
-		for i := range nodes {
-			for j := range nodesToRemove {
-				if nodesToRemove[j].Equals(nodes[i]) {
-					nodes[i] = nil
+		nlist := make([]*Node, 0, len(nodes))
+		nlist = append(nlist, nodes...)
+		for i, n := range nlist {
+			for _, ntr := range nodesToRemove {
+				if ntr.Equals(n) {
+					nlist[i] = nil
 				}
 			}
 		}
 
-		newNodes := make([]*Node, 0, len(nodes)-len(nodesToRemove))
-		for i := range nodes {
-			if nodes[i] != nil {
-				newNodes = append(newNodes, nodes[i])
+		newNodes := make([]*Node, 0, len(nlist))
+		for i := range nlist {
+			if nlist[i] != nil {
+				newNodes = append(newNodes, nlist[i])
 			}
 		}
 
@@ -660,7 +671,7 @@ func (clstr *Cluster) GetRandomNode() (*Node, error) {
 		index := int(math.Abs(float64(clstr.nodeIndex.IncrementAndGet() % length)))
 		node := nodeArray[index]
 
-		if node.IsActive() {
+		if node != nil && node.IsActive() {
 			// Logger.Debug("Node `%s` is active. index=%d", node, index)
 			return node, nil
 		}
