@@ -112,10 +112,9 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
             
             if(model.expanded === true){
                 var expandContainer = AppConfig.node.nodeTableDiv.substr(1)+'_'+ rowID;
-                var tableHtmlStr = GridHelper.create2LevelTable("node","nodeExpanded_"+ rowID, "expandDynamic", model.data);
+                var tableHtmlStr = NodeTable.nodePropsHtml(model, rowID);
                 $("#" + expandContainer).html(tableHtmlStr); 
             }
-            //Util.updateVisibilityBtnSize();
         },
         booleanToIcon :function(container, rowID, data, colIndex){
             var cellContainer = container+' tr#'+rowID+' td:nth-child('+(colIndex+1)+')' ;

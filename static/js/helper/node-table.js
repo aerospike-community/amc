@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config"], function($, _, Backbone, D3, GridHelper, Util, AppConfig){
+define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config", "config/var-details"], function($, _, Backbone, D3, GridHelper, Util, AppConfig, VarDetails){
     var NodeTable = {
         nodeTableIds: [],
         updateRowData: function(container, data, rowID, isError, prefix, viewPosition){
@@ -44,6 +44,38 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 }
                //NodeTable.nodeTableIds = GridHelper.maintainExpandedState(container, NodeTable.nodeTableIds);
                //$(container).trigger("reloadGrid");
+        },
+        nodePropsHtml: function(model, rowID) {
+          var rowData = model.data;
+          var tableName = 'node';
+          var html = '<div style="width: 95%;" id="nodeExpanded_' + rowID + '" class="expandDynamic">'
+          var value, varName;
+          for(varName in VarDetails[tableName]){
+              description = VarDetails[tableName][varName][0];
+              formatType = VarDetails[tableName][varName][1];
+              if(typeof rowData[varName] === 'undefined'  || rowData[varName] ==='N/A' || rowData[varName] === null){
+                  value = 'N/A';
+              }else if(rowData[varName] ==='N/E'){
+                  value = 'N/E';
+              }else if(formatType === false || rowData[varName] === 'n/s'){
+                  value = rowData[varName];
+              }else{
+                if(varName === 'write_master' || varName ==='write_prole'){
+                  value = rowData[varName];
+                } else {
+                  value = GridHelper.formatExpandRow(rowData[varName], formatType);
+                }
+              }
+              html += '<div style="float: left; width: 210px; margin-right: 20px; border-bottom: 1px solid #f0f0f0" title="' + description + '">' +
+                        '<span style="width: 160px; float: left">' +
+                          varName +
+                        '</span>' +
+                          value + 
+                      '</div>';
+          }
+
+          html += '<div style="clear: both"></div> </div>';
+          return html;
         },
         getNodeListData: function(json){
             var newData = json;
@@ -100,7 +132,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             }
             return newData;
         },
-        initNodeGrid: function(container, pieConfig, collection){
+        initNodeGrid: function(container, pieConfig, collection, subGridHtml){
             var containerWidth = $(container).parent().width();
 			var prefix = AppConfig.node.nodeTablePrefix;
             var timeoutHandle = null;
@@ -128,7 +160,11 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 						var model = collection.findWhere({"row_id": modelId});
                         model.expanded = true;
                         var tableHtmlStr = "";
-                        tableHtmlStr = GridHelper.create2LevelTable("node","nodeExpanded_"+row_id,"expandDynamic",model.data);
+                        if(typeof(subGridHtml) === 'function') {
+                          tableHtmlStr = subGridHtml(model, row_id);
+                        } else {
+                          tableHtmlStr = GridHelper.create2LevelTable("node","nodeExpanded_"+row_id,"expandDynamic",model.data);
+                        }
                         subGridEl.html(tableHtmlStr).slideDown(100);
                     },
                     subGridRowColapsed: function(subgrid_id, row_id) {

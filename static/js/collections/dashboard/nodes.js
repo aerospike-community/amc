@@ -29,7 +29,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "models/dashboard/nod
                 this.initVariables();
                 
                 // Initialize Views specific common functions
-                NodeTable.initNodeGrid(AppConfig.node.nodeTableDiv, ViewConfig.nodePieConfig, this);
+                NodeTable.initNodeGrid(AppConfig.node.nodeTableDiv, ViewConfig.nodePieConfig, this, NodeTable.nodePropsHtml);
                 Util.initAddNewNode("#addNewNodeButton");
 
                 // Initialize events on whole collection
