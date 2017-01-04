@@ -60,6 +60,9 @@ type Node struct {
 
 	serverTime int64
 
+	alertStates common.Stats
+	alerts      *common.AlertBucket
+
 	mutex sync.RWMutex
 }
 
@@ -79,6 +82,8 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 		namespaces:     map[string]*Namespace{},
 		statsHistory:   map[string]*rrd.Bucket{},
 		latencyHistory: lh,
+		alertStates:    common.Stats{},
+		alerts:         common.NewAlertBucket(db, 50),
 	}
 }
 
@@ -90,10 +95,14 @@ func (n *Node) valid() bool {
 }
 
 func (n *Node) update() error {
+	defer n.notifyAboutChanges()
+
 	if !n.valid() {
-		log.Warning("Node %s is not active.", n.origHost)
+		n.setStatus(nodeStatus.Off)
+		log.Warningf("Node %s is not active.", n.origHost)
 		return nil
 	}
+	n.setStatus(nodeStatus.On)
 
 	if err := n.updateNamespaceNames(); err != nil {
 		return err
@@ -132,8 +141,6 @@ func (n *Node) update() error {
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 	n.updateHistory()
 
-	n.notifyAboutChanges()
-
 	if !common.AMCIsProd() {
 		log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats["objects"], time.Since(tm))
 	}
@@ -141,8 +148,8 @@ func (n *Node) update() error {
 	return nil
 }
 
-func (n *Node) notifyAboutChanges() error {
-	return nil
+func (n *Node) notifyAboutChanges() {
+	go n.updateNotifications()
 }
 
 func (n *Node) applyStatsToAggregate(stats, calcStats common.Stats) {
@@ -684,7 +691,7 @@ func (n *Node) VisibilityStatus() NodeVisibilityStatus {
 	defer n.mutex.RUnlock()
 
 	res := nodeVisibilityStatus.On
-	if n.origNode == nil || !n.origNode.IsActive() {
+	if n.Status() == nodeStatus.On && (n.origNode == nil || !n.origNode.IsActive()) {
 		res = nodeVisibilityStatus.Off
 	}
 	return res
@@ -1036,4 +1043,15 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 	}
 
 	return res, nodeStats
+}
+
+func (n *Node) updateNotifications() error {
+	n.CheckStatus()
+	n.CheckClusterVisibility()
+	n.CheckTransactionQueue()
+	n.CheckFileDescriptors()
+	n.CheckDiskSpace()
+	n.CheckMemory()
+
+	return nil
 }

@@ -1,12 +1,15 @@
 package common
 
 import (
+	"database/sql"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
+
+	_ "github.com/gwenn/gosqlite"
 )
 
 var AMCVersion string
@@ -28,6 +31,8 @@ type Config struct {
 		CertFile       string `toml:"certfile"`
 		KeyFile        string `toml:"keyfile"`
 		StaticPath     string `toml:"static_dir"`
+
+		Database string `toml:"database"`
 
 		Bind     string `toml:"bind"`
 		LogLevel string `toml:"loglevel"`
@@ -59,6 +64,32 @@ func InitConfig(configFile, configDir string, config *Config) {
 
 	// setLogFile(config.AMC.ErrorLog)
 	setLogLevel(config.AMC.LogLevel)
+	openDB(config.AMC.Database)
+}
+
+func openDB(filepath string) {
+	var schema = `
+CREATE TABLE alerts (
+	Id          integer,
+	Type        integer,
+	ClusterId   text,
+	NodeAddress text,
+	Desc        text,
+	Created     datetime,
+	LastOccured datetime,
+	Resolved    datetime,
+	Recurrence  integer,
+	Status      text);
+`
+	db, err := sql.Open("sqlite3", filepath)
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %s", err.Error())
+	}
+	defer db.Close()
+
+	// exec the schema or fail; multi-statement Exec behavior varies between
+	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
+	db.Exec(schema)
 }
 
 func setLogFile(filepath string) {

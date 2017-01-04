@@ -1,6 +1,7 @@
 package observer
 
 import (
+	"database/sql"
 	"net"
 	"strconv"
 	"strings"
@@ -13,6 +14,9 @@ import (
 	"github.com/citrusleaf/amc/common"
 )
 
+// sqlite3 database
+var db *sql.DB
+
 type ObserverT struct {
 	sessions map[string][]*Cluster
 
@@ -23,6 +27,16 @@ type ObserverT struct {
 }
 
 func New(config *common.Config) *ObserverT {
+	// try to connect to the database
+	if db != nil {
+		db.Close()
+	}
+
+	var err error
+	if db, err = sql.Open("sqlite3", config.AMC.Database); err != nil {
+		log.Errorln("Cannot connect to the database: %s", err.Error())
+	}
+
 	o := &ObserverT{
 		sessions: map[string][]*Cluster{},
 		clusters: []*Cluster{},

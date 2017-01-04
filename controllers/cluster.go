@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -452,10 +453,34 @@ func getClusterNamespaceNodes(c echo.Context) error {
 }
 
 func getClusterAlrets(c echo.Context) error {
-	// clusterUuid := c.Param("clusterUuid")
-	// lastId := c.QueryParam("last_id")
-	// fmt.Println(clusterUuid, lastId)
-	return c.JSONBlob(http.StatusOK, []byte(`[]`))
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	strLastId := c.QueryParam("last_id")
+	lastId, err := strconv.ParseInt(strLastId, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap("Invalid last_id"))
+	}
+
+	alerts := common.AlertsById(cluster.AlertsFrom(int64(lastId)))
+	sort.Sort(alerts)
+
+	res := [][]interface{}{}
+	for _, alert := range alerts {
+		res = append(res, []interface{}{
+			strconv.FormatInt(alert.Id, 10),
+			alert.ClusterId,
+			alert.Desc,
+			alert.Status,
+			"alert",
+			alert.LastOccured.UnixNano() / 1e6,
+		})
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func getClusterNodeAllStats(c echo.Context) error {

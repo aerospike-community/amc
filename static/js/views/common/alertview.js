@@ -25,16 +25,16 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
             }
 
             this.model.off('change').on('change', function(model) {
-            	that.showAlerts(model, model.attributes);	
+            	that.showAlerts(model, model.attributes);
             });
             this.model.off('destroy').on('destroy', function(model) {
             	console.log("model destroy");
             	$("#alertNotifyList").empty();
             	$("#alertNotifyList").append('<li class="alert-notify-no-alerts">No Alerts</li>');
-            	var alertNotifyCountEl = $("span.alert-notify-count");  
+            	var alertNotifyCountEl = $("span.alert-notify-count");
             	alertNotifyCountEl.html("0").css("display", "none");
             });
-            
+
         },
         initDesktopNotification: function(){
             window.AMCGLOBALS.persistent.desktopNotification = {};
@@ -47,7 +47,7 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                         $("#mirrorBrowserType input").removeAttr("disabled");
                         window.AMCGLOBALS.persistent.desktopNotification.permission = "granted";
                         window.AMCGLOBALS.persistent.desktopNotification.type = "Red";
-                        
+
                         if(userSetting === "All"){
                             window.AMCGLOBALS.persistent.desktopNotification.type = "All";
                             $("#mirrorBrowserType input[value='All']").prop("checked", true);
@@ -110,7 +110,7 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                           $("#alertSettingsButton").css("border-radius", "0 0 7px 7px");
                      }
              	});
-            
+
             });
 
             $("#desktopNotification").off("click").on("click", function() {
@@ -158,16 +158,16 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                     }
                 }
             });
-           
+
         },
-        
+
         showAlerts: function(model, incomingAlerts) {
             var that = this;
 
             var newAlerts = [];
             var lastAlertID = 0;
             for (var i = 0; i < incomingAlerts.length; i++) {
-                lastAlertID = Math.max(lastAlertID, +incomingAlerts[i][0]);
+                lastAlertID = incomingAlerts[i][0] > lastAlertID ? incomingAlerts[i][0] : lastAlertID;
                 if (incomingAlerts[i][4] === 'alert')
                     newAlerts.push(incomingAlerts[i]);
             }
@@ -179,7 +179,7 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 var startIndex = totalAlerts - AppConfig.maxNumberOfAlerts;
                 startIndex = 0;
                 //model.lastAlertID = newAlerts[totalAlerts-1][0];
-                
+
                 if(model.lastAlertID > 0 && !document.hasFocus()){
                     that.desktopNotification(newAlerts);
                 }
@@ -243,9 +243,9 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 }
 
                 model.attributes = [];
-            } 
+            }
 
-            model.lastAlertID = Math.max(lastAlertID, model.lastAlertID);
+            model.lastAlertID = lastAlertID  > model.lastAlertID ? lastAlertID : model.lastAlertID;
         },
         desktopNotification: function(newAlerts) {
             /* Replicating for desktop notification here */
@@ -273,9 +273,9 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                             tag: "AMC_alert_" + newAlerts[counter][0]
                         });
 
-                    } else if(FF && counter === newAlerts.length - 1 && 
+                    } else if(FF && counter === newAlerts.length - 1 &&
                                 (window.AMCGLOBALS.persistent.desktopNotification.type === "All" || (type === "Alert" && red > 0))){
-                                        
+
                         var bodyText = "You have " + newAlerts.length + " new Alerts";
                         var iconType = "yellow";
 
@@ -323,7 +323,7 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 	notification && notification.close();
                 }, timeout);
             }
-                        
+
         },
 
         addAlert: function(container, timeStamp, alertMsg, alertType, clusterId, alertId) {
@@ -355,8 +355,8 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
             var shown = "";
             if ((this.shownAlerts !== null && this.shownAlerts.indexOf(clusterId + ":" + alertId) !== -1) || $('#alert-notify-list-container').css('display') === 'block')
                 shown = "alert-notify-shown";
-            
-            
+
+
             var alertHtml = '<li class="alert alert-notify-li ' + shown + '" name="' + clusterId + ':' + alertId + '">' +
                 '<span class="' + alertClassName + ' alert-status-icon alert-notify-li-icon"></span>' +
                 '<span class="alert-notify-li-message">' +
@@ -381,27 +381,27 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 lastLI.remove();
             }
         },
-               
+
         getUTCDate : function(timestamp){
            	var offset = new Date().getTimezoneOffset();
             var localNow =  new Date(timestamp);
             localNow.setMinutes(localNow.getMinutes() + offset);
-              
+
             var date = localNow.getDate();
             var month = localNow.getMonth()+1;
             var hours = localNow.getHours();
             var minutes = localNow.getMinutes();
             var seconds = localNow.getSeconds();
-            
+
             var monthMM = ((month < 10)? "0" : "" ) + month;
             var dd = ((date < 10)? "0" : "" ) + date;
             var hh = ((hours < 10)? "0" : "" ) + hours;
             var mm = ((minutes < 10)? "0" : "" ) + minutes;
             var ss = ((seconds < 10)? "0" : "" ) + seconds;
-                      
+
             return localNow.getFullYear() + "/"+(monthMM) + "/"+dd + " " + hh + ":" + mm + ":" +ss + " GMT";
         }
-               
+
     });
 
     return AlertView;

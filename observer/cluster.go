@@ -413,6 +413,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	defer wg.Done()
 
 	t := time.Now()
+	c.updateCluster()
 	c.updateStats()
 	c.updateUsers()
 	c.checkHealth()
@@ -443,6 +444,34 @@ func (c *Cluster) updateUsers() error {
 
 	c.users = users
 	c.roles = roles
+
+	return nil
+}
+
+func (c *Cluster) registerNode(h *as.Host, n *Node) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.nodes[*h] = n
+}
+
+func (c *Cluster) updateCluster() error {
+	for _, n := range c.client.GetNodes() {
+		node := c.FindNodeByAddress(n.GetHost().String())
+		if node == nil {
+			node = c.FindNodeById(n.GetName())
+		}
+
+		if node != nil {
+			if node.origNode != n {
+				if node.origNode != nil {
+					node.origNode.Close()
+				}
+				node.origNode = n
+			}
+		} else {
+			c.registerNode(n.GetHost(), newNode(c, n))
+		}
+	}
 
 	return nil
 }
@@ -549,6 +578,19 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	}
 
 	return res
+}
+
+func (c *Cluster) FindNodeById(id string) *Node {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	for _, node := range c.nodes {
+		if node.Id() == id {
+			return node
+		}
+	}
+
+	return nil
 }
 
 func (c *Cluster) FindNodeByAddress(address string) *Node {
@@ -859,4 +901,20 @@ func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
 		}
 	}
 	return nil
+}
+
+func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
+	nodes := c.Nodes()
+
+	alerts := []*common.Alert{}
+	for _, node := range nodes {
+		alerts = append(alerts, node.AlertsFrom(id)...)
+	}
+
+	cid := c.Id()
+	for _, alert := range alerts {
+		alert.ClusterId = cid
+	}
+
+	return alerts
 }
