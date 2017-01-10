@@ -9,7 +9,7 @@ import (
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
 
-	_ "github.com/gwenn/gosqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var AMCVersion string

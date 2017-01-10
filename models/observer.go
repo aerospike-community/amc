@@ -168,8 +168,6 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *s
 			return nil, err
 		}
 
-		log.Warn("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ", resolved)
-
 		for _, ip := range resolved {
 			hosts = append(hosts, as.NewHost(ip, int(port)))
 		}
