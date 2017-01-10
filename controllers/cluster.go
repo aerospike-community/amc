@@ -22,6 +22,9 @@ import (
 func postGetClusterId(c echo.Context) error {
 	form := struct {
 		SeedNode     string `form:"seed_node"`
+		TLSName      string `form:"tls_name"`
+		CertFile     string `form:"cert_file"`
+		KeyFile      string `form:"key_file"`
 		Username     string `form:"username"`
 		Password     string `form:"password"`
 		ClusterAlias string `form:"cluster_name"`
@@ -67,14 +70,6 @@ func postGetClusterId(c echo.Context) error {
 	// update the session cookie
 	sid = manageSession(c)
 	log.Info("====================================== get-cluter-id session after manage is " + sid)
-
-	// make sure the cookie is set again
-	if s, err := sessionId(c); err != nil || s == "" {
-		session := new(http.Cookie)
-		session.Name = "session"
-		session.Value = sid
-		c.SetCookie(session)
-	}
 
 	// create output
 	response := map[string]interface{}{
@@ -205,7 +200,11 @@ func getClusterThroughputHistory(c echo.Context) error {
 		for node, yValuesList := range primaryVals {
 			statList := make([]chartStat, 0, len(yValuesList))
 			for i, yValues := range yValuesList {
-				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(), Secondary: secondaryVals[node][i].Value()})
+				var Secondary *float64
+				if len(secondaryVals[node]) > i {
+					Secondary = secondaryVals[node][i].Value()
+				}
+				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(), Secondary: Secondary})
 			}
 			statRes[node] = statList
 		}
@@ -254,7 +253,7 @@ func getClusterThroughput(c echo.Context) error {
 		primaryVals := throughput[aliases[0]]
 		secondaryVals := throughput[aliases[1]]
 
-		statRes := map[string]chartStat{}
+		statRes := make(map[string]chartStat, len(primaryVals))
 		for node, yValues := range primaryVals {
 			statRes[node] = chartStat{X: yValues.TimestampJson(nil), Y: yValues.Value(), Secondary: secondaryVals[node].Value()}
 		}
@@ -452,7 +451,7 @@ func getClusterNamespaceNodes(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func getClusterAlrets(c echo.Context) error {
+func getClusterAlerts(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
@@ -652,4 +651,32 @@ func getClusterJobsNode(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func setClusterUpdateInterval(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	intervalStr := c.FormValue("update_interval")
+	if len(intervalStr) == 0 {
+		return c.JSON(http.StatusOK, errorMap("Invalid interval value"))
+	}
+
+	interval, err := strconv.Atoi(intervalStr)
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap("Invalid interval value"))
+	}
+
+	if interval > 10 || interval < 1 {
+		return c.JSON(http.StatusOK, errorMap("Invalid interval value; must be between 1 and 10"))
+	}
+
+	cluster.SetUpdateInterval(interval)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
 }

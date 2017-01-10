@@ -28,6 +28,10 @@ rm -rf deployment/release/amc/opt/amc/static
 mkdir -p deployment/release/amc/opt/amc/static/
 cp -R build/static/ deployment/release/amc/opt/amc/
 
+rm -rf deployment/release/amc/opt/amc/mailer
+mkdir -p deployment/release/amc/opt/amc/mailer
+cp -R templates/ deployment/release/amc/opt/amc/mailer/
+
 rm -f *.rpm
 rm -f *.deb
 

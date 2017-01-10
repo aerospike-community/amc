@@ -13,21 +13,17 @@ import (
 	"github.com/labstack/echo/middleware"
 
 	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/observer"
+	"github.com/citrusleaf/amc/controllers/middleware/sessions"
+	"github.com/citrusleaf/amc/models"
 )
 
 var (
-	_observer            *observer.ObserverT
+	_observer            *models.ObserverT
 	_defaultClientPolicy = as.NewClientPolicy()
 )
 
 func postSessionTerminate(c echo.Context) error {
-	cookie := new(http.Cookie)
-	cookie.Name = "session"
-	cookie.Value = ""
-	cookie.Expires = time.Now().Add(-time.Hour * 24 * 365)
-	c.SetCookie(cookie)
-
+	invalidateSession(c)
 	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success"}`))
 }
 
@@ -40,7 +36,7 @@ func getAMCVersion(c echo.Context) error {
 }
 
 func Server(config *common.Config) {
-	_observer = observer.New(config)
+	_observer = models.New(config)
 
 	// TODO: set to the same logger
 	asl.Logger.SetLogger(log.StandardLogger())
@@ -55,7 +51,9 @@ func Server(config *common.Config) {
 	_defaultClientPolicy.ConnectionQueueSize = 2
 
 	e := echo.New()
-	// e.Logger().SetOutput(log.StandardLogger().Writer())
+
+	store := sessions.NewCookieStore([]byte("amc-secret-key"))
+	e.Use(sessions.Sessions(sessions.DefaultKey, store))
 
 	if config.AMC.StaticPath == "" {
 		log.Fatalln("No static dir has been set in the config file. Quiting...")
@@ -64,12 +62,15 @@ func Server(config *common.Config) {
 	e.Static("/", config.AMC.StaticPath)
 	e.Static("/static", config.AMC.StaticPath)
 
-	// // Middleware
+	// Middleware
 	if !common.AMCIsProd() {
-		// e.Use(middleware.Logger())
+		e.Logger.SetOutput(log.StandardLogger().Writer())
+		e.Use(middleware.Logger())
 	}
 
-	e.Use(middleware.Recover())
+	if common.AMCIsProd() {
+		e.Use(middleware.Recover())
+	}
 
 	// Routes
 	e.POST("/session-terminate", postSessionTerminate)
@@ -79,6 +80,7 @@ func Server(config *common.Config) {
 
 	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
 
+	e.POST("/set-update-interval/:clusterUuid", setClusterUpdateInterval)
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
 
 	e.GET("/aerospike/service/clusters/:clusterUuid/udfs", getClusterUDFs)
@@ -95,13 +97,21 @@ func Server(config *common.Config) {
 	e.POST("/aerospike/service/clusters/:clusterUuid/roles/:role/update", postClusterUpdateRole)
 	e.POST("/aerospike/service/clusters/:clusterUuid/roles/:role/drop_role", postClusterDropRole)
 
+	e.POST("/aerospike/service/clusters/:clusterUuid/initiate_backup", postInitiateBackup)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get_backup_progress", getBackupProgress)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get_successful_backups", getSuccessfulBackups)
+	e.POST("/aerospike/service/clusters/:clusterUuid/get_available_backups", getAvailableBackups)
+
+	e.POST("/aerospike/service/clusters/:clusterUuid/initiate_restore", postInitiateRestore)
+	e.GET("/aerospike/service/clusters/:clusterUuid/get_restore_progress", getRestoreProgress)
+
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", getClusterThroughput)
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", getClusterThroughputHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency/:nodes", getNodeLatency)
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency_history/:nodes", getNodeLatencyHistory)
 	e.GET("/aerospike/service/clusters/:clusterUuid/basic", getClusterBasic)
 	e.POST("/aerospike/service/clusters/:clusterUuid/change_password", postClusterChangePassword)
-	e.GET("/aerospike/service/clusters/:clusterUuid/alerts", getClusterAlrets)
+	e.GET("/aerospike/service/clusters/:clusterUuid/alerts", getClusterAlerts)
 	e.POST("/aerospike/service/clusters/:clusterUuid/add_node", postAddClusterNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", getClusterNodes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", getClusterNodeAllConfig)
@@ -130,7 +140,12 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/get_user_roles", getClusterUserRoles)
 
 	log.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
-
 	// Start server
-	e.Start(config.AMC.Bind)
+	if config.AMC.CertFile != "" {
+		log.Infof("In HTTPS (secure) Mode")
+		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
+	} else {
+		log.Infof("In HTTP (unsecure) Mode.")
+		e.Start(config.AMC.Bind)
+	}
 }
