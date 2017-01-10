@@ -63,11 +63,15 @@ type (
 		Debug            bool
 		HTTPErrorHandler HTTPErrorHandler
 		Binder           Binder
+		Validator        Validator
 		Renderer         Renderer
 		AutoTLSManager   autocert.Manager
+		ReadTimeout      time.Duration
+		WriteTimeout     time.Duration
 		ShutdownTimeout  time.Duration
 		Color            *color.Color
 		Logger           Logger
+		stdLogger        *slog.Logger
 		server           *graceful.Server
 		tlsServer        *graceful.Server
 		premiddleware    []MiddlewareFunc
@@ -102,7 +106,7 @@ type (
 
 	// Validator is the interface that wraps the Validate function.
 	Validator interface {
-		Validate() error
+		Validate(i interface{}) error
 	}
 
 	// Renderer is the interface that wraps the Render function.
@@ -152,7 +156,7 @@ const (
 )
 
 const (
-	charsetUTF8 = "charset=utf-8"
+	charsetUTF8 = "charset=UTF-8"
 )
 
 // Headers
@@ -217,9 +221,10 @@ var (
 	ErrUnauthorized                = NewHTTPError(http.StatusUnauthorized)
 	ErrMethodNotAllowed            = NewHTTPError(http.StatusMethodNotAllowed)
 	ErrStatusRequestEntityTooLarge = NewHTTPError(http.StatusRequestEntityTooLarge)
-	ErrRendererNotRegistered       = errors.New("renderer not registered")
-	ErrInvalidRedirectCode         = errors.New("invalid redirect status code")
-	ErrCookieNotFound              = errors.New("cookie not found")
+	ErrValidatorNotRegistered      = errors.New("Validator not registered")
+	ErrRendererNotRegistered       = errors.New("Renderer not registered")
+	ErrInvalidRedirectCode         = errors.New("Invalid redirect status code")
+	ErrCookieNotFound              = errors.New("Cookie not found")
 )
 
 // Error handlers
@@ -247,6 +252,7 @@ func New() (e *Echo) {
 	e.HTTPErrorHandler = e.DefaultHTTPErrorHandler
 	e.Binder = &DefaultBinder{}
 	e.Logger.SetLevel(log.OFF)
+	e.stdLogger = slog.New(e.Logger.Output(), e.Logger.Prefix()+": ", 0)
 	e.pool.New = func() interface{} {
 		return e.NewContext(nil, nil)
 	}
@@ -283,9 +289,9 @@ func (e *Echo) DefaultHTTPErrorHandler(err error, c Context) {
 		code = he.Code
 		msg = he.Message
 	} else {
-		msg = err.Error()
+		msg = http.StatusText(code)
 	}
-	if reflect.TypeOf(msg).Kind() != reflect.Ptr {
+	if _, ok := msg.(string); ok {
 		msg = Map{"message": msg}
 	}
 
@@ -517,7 +523,12 @@ func (e *Echo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Start starts the HTTP server.
 func (e *Echo) Start(address string) error {
-	return e.StartServer(&http.Server{Addr: address})
+	return e.StartServer(&http.Server{
+		Addr:         address,
+		ReadTimeout:  e.ReadTimeout,
+		WriteTimeout: e.WriteTimeout,
+		ErrorLog:     e.stdLogger,
+	})
 }
 
 // StartTLS starts the HTTPS server.
@@ -546,8 +557,11 @@ func (e *Echo) startTLS(address string, config *tls.Config) error {
 		config.NextProtos = append(config.NextProtos, "h2")
 	}
 	return e.StartServer(&http.Server{
-		Addr:      address,
-		TLSConfig: config,
+		Addr:         address,
+		ReadTimeout:  e.ReadTimeout,
+		WriteTimeout: e.WriteTimeout,
+		TLSConfig:    config,
+		ErrorLog:     e.stdLogger,
 	})
 }
 
@@ -557,7 +571,7 @@ func (e *Echo) StartServer(s *http.Server) error {
 	gs := &graceful.Server{
 		Server:  s,
 		Timeout: e.ShutdownTimeout,
-		Logger:  slog.New(e.Logger.Output(), e.Logger.Prefix()+": ", 0),
+		Logger:  e.stdLogger,
 	}
 	if s.TLSConfig == nil {
 		e.server = gs

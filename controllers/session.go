@@ -2,44 +2,46 @@ package controllers
 
 import (
 	"errors"
-	"net/http"
-	"time"
 
 	// . "github.com/ahmetalpbalkan/go-linq"
+	// log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
+	"github.com/citrusleaf/amc/controllers/middleware/sessions"
 )
 
 func sessionId(c echo.Context) (string, error) {
-	cookie, err := c.Cookie("session")
-	if err != nil || cookie.Value == "" {
+	session := sessions.Default(c)
+	id := session.Get("id")
+
+	if id == nil || id.(string) == "" {
 		return "", errors.New("Invalid session")
 	}
 
-	return cookie.Value, nil
+	return id.(string), nil
 }
 
 func manageSession(c echo.Context) string {
-	cookie, err := c.Cookie("session")
-	if err != nil || cookie.Value == "" {
+	id, err := sessionId(c)
+	if err != nil || id == "" {
 		return setSession(c)
 	}
 
-	if !_observer.SessionExists(cookie.Value) {
+	if !_observer.SessionExists(id) {
 		return setSession(c)
 	}
 
-	return cookie.Value
+	return id
 }
 
 func invalidateSession(c echo.Context) {
-	cookie := new(http.Cookie)
-	cookie.Name = "session"
-	cookie.Value = ""
-	cookie.Expires = time.Unix(0, 0).Add(time.Duration(-1 * time.Hour))
-	c.SetCookie(cookie)
+	session := sessions.Default(c)
+	session.Clear()
+	if err := session.Save(); err != nil {
+		panic(err)
+	}
 }
 
 func setSession(c echo.Context) string {
@@ -49,15 +51,20 @@ func setSession(c echo.Context) string {
 		sid = uuid.NewV4().String()
 	}
 
-	cookie, err := c.Cookie("session")
-	if err != nil {
-		cookie = new(http.Cookie)
+	session := sessions.Default(c)
+	session.Options(
+		sessions.Options{
+			Path: "/",
+			// Domain:   options.Domain,
+			// MaxAge:   30 * 60,
+			Secure:   false,
+			HttpOnly: true,
+		})
+	session.Clear()
+	session.Set("id", sid)
+	if err := session.Save(); err != nil {
+		panic(err)
 	}
-	cookie.Value = sid
-	cookie.Path = "/"
-	cookie.HttpOnly = true
-	// cookie.Expires = time.Now().Add(24 * time.Hour)
-	c.SetCookie(cookie)
 
 	return sid
 }

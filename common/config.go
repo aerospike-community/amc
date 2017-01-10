@@ -17,12 +17,23 @@ var AMCBuild string
 var AMCEdition string
 var AMCEnv string
 
+var db *sql.DB
+
 func AMCIsProd() bool {
 	return AMCEnv == "prod"
 }
 
 func AMCIsEnterprise() bool {
 	return AMCEdition == "enterprise"
+}
+
+type Cluster struct {
+	Host     string `toml:"host"`
+	TLSName  string `toml:"tls_name"`
+	Port     uint16 `toml:"port"`
+	User     string `toml:"user"`
+	Password string `toml:"password"`
+	Alias    string `toml:"alias"`
 }
 
 type Config struct {
@@ -32,13 +43,29 @@ type Config struct {
 		KeyFile        string `toml:"keyfile"`
 		StaticPath     string `toml:"static_dir"`
 
+		// BackupHost         string `toml:"backup_host"`
+		// BackupHostUser     string `toml:"backup_host_user"`
+		// BackupHostPassword string `toml:"backup_host_password"`
+		BackupHostKeyFile string `toml:"backup_host_public_key_file"`
+
 		Database string `toml:"database"`
+
+		Clusters map[string]Cluster `toml:"clusters"`
 
 		Bind     string `toml:"bind"`
 		LogLevel string `toml:"loglevel"`
 		ErrorLog string `toml:"errorlog"`
 		Chdir    string `toml:"chdir"`
 		Timeout  int    `toml:"timeout"`
+	}
+
+	Mailer struct {
+		TemplatePath string `toml:"template_path"`
+		Host         string `toml:"host"`
+		Port         uint16 `toml:"port"`
+		User         string `toml:"user"`
+		Password     string `toml:"password"`
+		SendTo       string `toml:"send_to"`
 	}
 }
 
@@ -68,28 +95,59 @@ func InitConfig(configFile, configDir string, config *Config) {
 }
 
 func openDB(filepath string) {
-	var schema = `
-CREATE TABLE alerts (
-	Id          integer,
-	Type        integer,
-	ClusterId   text,
-	NodeAddress text,
-	Desc        text,
-	Created     datetime,
-	LastOccured datetime,
-	Resolved    datetime,
-	Recurrence  integer,
-	Status      text);
-`
-	db, err := sql.Open("sqlite3", filepath)
+	var schema = []string{`
+		CREATE TABLE alerts (
+			Id          integer,
+			Type        integer,
+			ClusterId   text,
+			NodeAddress text,
+			Desc        text,
+			Created     datetime,
+			LastOccured datetime,
+			Resolved    datetime,
+			Recurrence  integer,
+			Status      text
+		);`,
+		`CREATE TABLE backups (
+			Type      text,
+			Id        text primary key,
+			ClusterId text,
+			Namespace          text,
+			DestinationAddress text,
+			Username           text,
+			Password           text,
+			DestinationPath    text,
+			Sets               text,
+			MetadataOnly       boolean,
+			ProgressFile       text,
+			TerminateOnClusterChange boolean,
+			ScanPriority       integer,
+			Created            datetime,
+			Finished           datetime,
+			Status             text,
+
+			Progress integer,
+			Error	 text
+		);`,
+	}
+
+	log.Infof("Database path is: %s", filepath)
+
+	var err error
+	db, err = sql.Open("sqlite3", filepath)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %s", err.Error())
 	}
-	defer db.Close()
 
 	// exec the schema or fail; multi-statement Exec behavior varies between
 	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
-	db.Exec(schema)
+	for _, ddl := range schema {
+		// ignore error
+		_, err := db.Exec(ddl)
+		if err != nil && !AMCIsProd() {
+			log.Warn(err)
+		}
+	}
 }
 
 func setLogFile(filepath string) {

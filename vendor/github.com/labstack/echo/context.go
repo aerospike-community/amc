@@ -25,7 +25,7 @@ type (
 		// SetRequest sets `*http.Request`.
 		SetRequest(r *http.Request)
 
-		// Request returns `*Response`.
+		// Response returns `*Response`.
 		Response() *Response
 
 		// IsTLS returns true if HTTP connection is TLS otherwise false.
@@ -99,8 +99,12 @@ type (
 		// does it based on Content-Type header.
 		Bind(i interface{}) error
 
+		// Validate validates provided `i`. It is usually called after `Context#Bind()`.
+		// Validator must be registered using `Echo#Validator`.
+		Validate(i interface{}) error
+
 		// Render renders a template with data and sends a text/html response with status
-		// code. Templates can be registered using `Echo.Renderer`.
+		// code. Renderer must be registered using `Echo.Renderer`.
 		Render(code int, name string, data interface{}) error
 
 		// HTML sends an HTTP response with status code.
@@ -135,7 +139,7 @@ type (
 		// XMLPretty sends a pretty-print XML with status code.
 		XMLPretty(code int, i interface{}, indent string) error
 
-		// XMLBlob sends a XML blob response with status code.
+		// XMLBlob sends an XML blob response with status code.
 		XMLBlob(code int, b []byte) error
 
 		// Blob sends a blob response with status code and content type.
@@ -157,7 +161,7 @@ type (
 		// NoContent sends a response with no body and a status code.
 		NoContent(code int) error
 
-		// Redirect redirects the request with status code.
+		// Redirect redirects the request to a provided URL with status code.
 		Redirect(code int, url string) error
 
 		// Error invokes the registered HTTP error handler. Generally used by middleware.
@@ -350,6 +354,13 @@ func (c *context) Bind(i interface{}) error {
 	return c.echo.Binder.Bind(i, c)
 }
 
+func (c *context) Validate(i interface{}) error {
+	if c.echo.Validator == nil {
+		return ErrValidatorNotRegistered
+	}
+	return c.echo.Validator.Validate(i)
+}
+
 func (c *context) Render(code int, name string, data interface{}) (err error) {
 	if c.echo.Renderer == nil {
 		return ErrRendererNotRegistered
@@ -374,6 +385,9 @@ func (c *context) String(code int, s string) (err error) {
 }
 
 func (c *context) JSON(code int, i interface{}) (err error) {
+	if c.echo.Debug {
+		return c.JSONPretty(code, i, "  ")
+	}
 	b, err := json.Marshal(i)
 	if err != nil {
 		return
@@ -415,6 +429,9 @@ func (c *context) JSONPBlob(code int, callback string, b []byte) (err error) {
 }
 
 func (c *context) XML(code int, i interface{}) (err error) {
+	if c.echo.Debug {
+		return c.XMLPretty(code, i, "  ")
+	}
 	b, err := xml.Marshal(i)
 	if err != nil {
 		return

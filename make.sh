@@ -14,7 +14,7 @@ version=`git describe --tags $(git rev-list --tags --max-count=1)`
 version_build="$edition-$version"
 
 # build binary
-godep go build -a -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
+go build -a -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
 
 # build content
 rm -rf build/static
@@ -26,7 +26,11 @@ cd ..
 
 rm -rf deployment/release/amc/opt/amc/static
 mkdir -p deployment/release/amc/opt/amc/static/
-cp -R build/static/ deployment/release/amc/opt/amc/
+cp -R build/static/ deployment/release/amc/opt/amc/static
+
+rm -rf deployment/release/amc/opt/amc/mailer
+mkdir -p deployment/release/amc/opt/amc/mailer/templaes
+cp -R mailer/templates/ deployment/release/amc/opt/amc/mailer/templates
 
 rm -f *.rpm
 rm -f *.deb

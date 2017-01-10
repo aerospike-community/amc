@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/observer"
+	"github.com/citrusleaf/amc/models"
 )
 
 func getClusterXdrNodes(c echo.Context) error {
@@ -106,7 +106,7 @@ func setClusterXdrNodesConfig(c echo.Context) error {
 	resChan := make(chan *NodeResult, len(nodes))
 
 	for _, node := range nodes {
-		go func(node *observer.Node) {
+		go func(node *models.Node) {
 			defer wg.Done()
 
 			err := node.SetServerConfig("xdr", config)

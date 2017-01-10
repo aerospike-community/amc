@@ -47,11 +47,13 @@ type Alert struct {
 }
 
 type AlertBucket struct {
-	db *sql.DB
-
 	alertQueue []*Alert
 	pos        int
-	mutex      sync.RWMutex
+
+	// Alerts which should be sent for notification system
+	newAlerts []*Alert
+
+	mutex sync.RWMutex
 }
 
 // AlertsById implements sort.Interface for []*Alert based on
@@ -64,56 +66,62 @@ func (a AlertsById) Less(i, j int) bool { return a[i].Id < a[j].Id }
 
 func NewAlertBucket(db *sql.DB, size int) *AlertBucket {
 	return &AlertBucket{
-		db:         db,
 		alertQueue: make([]*Alert, size),
 	}
+}
+
+func (ad *AlertBucket) DrainNewAlerts() []*Alert {
+	ad.mutex.Lock()
+	defer ad.mutex.Unlock()
+
+	res := make([]*Alert, len(ad.newAlerts))
+	if len(ad.newAlerts) > 0 {
+		copy(res, ad.newAlerts)
+		ad.newAlerts = ad.newAlerts[:1]
+	}
+
+	return res
 }
 
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 	ad.mutex.RLock()
 	defer ad.mutex.RUnlock()
 
-	if ad.db == nil {
-		for _, a := range ad.alertQueue {
-			if a.Type == alert.Type &&
-				a.Status == alert.Status &&
-				a.NodeAddress == alert.NodeAddress &&
-				!a.Resolved.Valid() {
-				return a
-			}
+	latest := Alert{}
+	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? And Resolved IS NULL ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress)
+	if err := latest.fromSQLRow(row); err != nil {
+		if err == sql.ErrNoRows {
+			return nil
 		}
-	} else {
-		latest := Alert{}
-		row := ad.db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? And Resolved IS NULL ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress)
-		if err := latest.fromSQLRow(row); err != nil {
-			if err == sql.ErrNoRows {
-				return nil
-			}
-			log.Errorf("Error retrieving alert from the database: %s", err.Error())
-		}
+		log.Errorf("Error retrieving alert from the database: %s", err.Error())
+	}
 
-		if !latest.Resolved.Valid() {
-			return &latest
-		}
+	if !latest.Resolved.Valid() {
+		return &latest
 	}
 
 	return nil
 }
 
-func (ad *AlertBucket) Register(alert *Alert) {
+func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 	if recurrAlert := ad.Recurring(alert); recurrAlert != nil {
-		log.Warnf("The issue is recurring...", recurrAlert)
 		if alert.Status == AlertStatusGreen && recurrAlert.Status != AlertStatusGreen {
-			log.Warn("The issue is resolved...")
+			// Recurring issue which is resolved
 			ad.ResolveAlert(recurrAlert)
-			ad.saveAlert(alert)
 		} else {
+			// The issue is recurring
 			ad.updateRecurrence(recurrAlert)
+			return true
 		}
-		return
 	}
 
 	ad.saveAlert(alert)
+
+	ad.mutex.Lock()
+	defer ad.mutex.Unlock()
+	ad.newAlerts = append(ad.newAlerts, alert)
+
+	return false
 }
 
 func (ad *AlertBucket) saveAlert(alert *Alert) {
@@ -139,10 +147,8 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 	ad.alertQueue[ad.pos%len(ad.alertQueue)] = alert
 	ad.pos++
 
-	if ad.db != nil {
-		if _, err := ad.db.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
-			log.Errorf("Error registering the alert in the DB: %s", err.Error())
-		}
+	if _, err := db.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
+		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 }
 
@@ -152,10 +158,8 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 
 	alert.LastOccured = time.Now()
 	alert.Recurrence++
-	if ad.db != nil {
-		if _, err := ad.db.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ? WHERE Id = ?", alert.LastOccured, alert.Id); err != nil {
-			log.Errorf("Error registering the alert in the DB: %s", err.Error())
-		}
+	if _, err := db.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ? WHERE Id = ?", alert.LastOccured, alert.Id); err != nil {
+		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 }
 
@@ -164,13 +168,10 @@ func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 	alert.Resolved.Set(time.Now())
 
 	// Mark the old alert resolved in the DB
-	if ad.db != nil {
-		// Resolve all older alerts
-
-		log.Warn("Marking the issue as resolved...")
-		if _, err := ad.db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ?", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
-			log.Error(err)
-		}
+	// Resolve all older alerts
+	log.Warn("Marking the issue as resolved...")
+	if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ?", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
+		log.Error(err)
 	}
 }
 
@@ -179,41 +180,23 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 	defer ad.mutex.RUnlock()
 
 	res := []*Alert{}
-	if ad.db == nil {
-		if ad.pos <= 0 {
-			return res
-		}
+	var rows *sql.Rows
+	var err error
 
-		begin := ad.pos - len(ad.alertQueue)
-		if begin < 0 {
-			begin = 0
-		}
-
-		for i := ad.pos - 1; i >= begin; i-- {
-			alert := ad.alertQueue[i%len(ad.alertQueue)]
-			if alert.Id > id {
-				res = append(res, alert)
-			}
-		}
+	if id == 0 {
+		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where NodeAddress = ? ORDER BY Id DESC LIMIT 20", _alertFields), nodeAddress)
 	} else {
-		var rows *sql.Rows
-		var err error
+		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ? AND NodeAddress = ? ORDER BY Id DESC", _alertFields), id, nodeAddress)
+	}
 
-		if id == 0 {
-			rows, err = ad.db.Query(fmt.Sprintf("SELECT %s FROM alerts where NodeAddress = ? ORDER BY Id DESC LIMIT 20", _alertFields), nodeAddress)
-		} else {
-			rows, err = ad.db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ? AND NodeAddress = ? ORDER BY Id DESC", _alertFields), id, nodeAddress)
-		}
+	if err != nil {
+		log.Errorf("Error retrieving alerts from the database: %s", err.Error())
+		return res
+	}
 
-		if err != nil {
-			log.Errorf("Error retrieving alerts from the database: %s", err.Error())
-			return res
-		}
-
-		res, err = fromSQLRows(rows)
-		if err != nil {
-			log.Errorf("Error retrieving alerts from the database: %s", err.Error())
-		}
+	res, err = fromSQLRows(rows)
+	if err != nil {
+		log.Errorf("Error retrieving alerts from the database: %s", err.Error())
 	}
 
 	return res
@@ -234,36 +217,6 @@ func fromSQLRows(rows *sql.Rows) ([]*Alert, error) {
 	}
 
 	return res, nil
-}
-
-type NullTime struct {
-	time  time.Time
-	valid bool // Valid is true if Time is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (nt *NullTime) Set(t time.Time) {
-	nt.time = t
-	nt.valid = true
-}
-
-// Scan implements the Scanner interface.
-func (nt *NullTime) Valid() bool {
-	return nt.valid
-}
-
-// Scan implements the Scanner interface.
-func (nt *NullTime) Scan(value interface{}) error {
-	nt.time, nt.valid = value.(time.Time)
-	return nil
-}
-
-// Value implements the driver Valuer interface.
-func (nt NullTime) Value() (driver.Value, error) {
-	if !nt.valid {
-		return nil, nil
-	}
-	return nt.time, nil
 }
 
 // Scan implements the Scanner interface.

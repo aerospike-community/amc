@@ -96,7 +96,6 @@ func privilegeFrom(code uint8) privilegeCode {
 	// User can read and write data through user defined functions.
 	case 12:
 		return ReadWriteUDF
-
 	}
 
 	panic(fmt.Sprintf("invalid privilege code: %v", code))

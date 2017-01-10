@@ -8,10 +8,11 @@ import (
 	"sync"
 
 	// log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
 	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/observer"
+	"github.com/citrusleaf/amc/models"
 )
 
 func postClusterFireCmd(c echo.Context) error {
@@ -27,7 +28,7 @@ func postClusterFireCmd(c echo.Context) error {
 	}
 
 	type nodeCommand struct {
-		Node *observer.Node
+		Node *models.Node
 		Res  map[string]string
 		Err  error
 	}
@@ -39,7 +40,7 @@ func postClusterFireCmd(c echo.Context) error {
 	for _, node := range nodes {
 		if node != nil {
 			wg.Add(1)
-			go func(node *observer.Node) {
+			go func(node *models.Node) {
 				defer wg.Done()
 
 				result, err := node.RequestInfo(1, cmd)
@@ -65,12 +66,12 @@ func postClusterFireCmd(c echo.Context) error {
 }
 
 func getCurrentMonitoringClusters(c echo.Context) error {
-
-	sid, _ := sessionId(c)
-	// if err != nil {
-	// 	invalidateSession(c)
-	// 	return c.JSON(http.StatusOK, errorMap("invalid session : None"))
-	// }
+	sid, err := sessionId(c)
+	log.Error("================================= CURRENT MONITORING CLUSTERS: ", sid)
+	if err != nil {
+		invalidateSession(c)
+		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+	}
 
 	clusters, _ := _observer.MonitoringClusters(sid)
 
@@ -268,7 +269,7 @@ func setClusterNodesConfig(c echo.Context) error {
 	resChan := make(chan *NodeResult, len(nodes))
 
 	for _, node := range nodes {
-		go func(node *observer.Node) {
+		go func(node *models.Node) {
 			defer wg.Done()
 
 			err := node.SetServerConfig("service", config)
@@ -362,7 +363,7 @@ func setClusterNamespaceConfig(c echo.Context) error {
 		ns := node.NamespaceByName(namespaceName)
 		if ns != nil {
 			wg.Add(1)
-			go func(node *observer.Node, ns *observer.Namespace) {
+			go func(node *models.Node, ns *models.Namespace) {
 				defer wg.Done()
 
 				err := ns.SetConfig(config)

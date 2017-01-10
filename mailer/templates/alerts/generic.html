@@ -1,0 +1,13 @@
+{{define "content"}}
+    <h1>
+      {{.Title}}
+    </h1>
+      <p>
+        <p><strong>Cluster</strong>: {{.Cluster}}</p>
+        <p><strong>Node</strong>:  {{.Node}}</p>
+        <p><strong>Status</strong>:  {{.Status}}</p>
+        <p><strong>Message</strong>: {{.Message}}</p>
+      </p>
+{{end}}
+
+{{template "base" .}}
