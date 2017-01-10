@@ -161,8 +161,18 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, host string, port uint16) (*Cluster, error) {
 	hostAddrs := strings.Split(host, ",")
 	hosts := make([]*as.Host, 0, len(hostAddrs))
+
 	for _, addr := range hostAddrs {
-		hosts = append(hosts, as.NewHost(addr, int(port)))
+		resolved, err := resolveHost(addr)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Warn("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ", resolved)
+
+		for _, ip := range resolved {
+			hosts = append(hosts, as.NewHost(ip, int(port)))
+		}
 	}
 
 	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
@@ -213,9 +223,11 @@ func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 	defer o.mutex.RUnlock()
 
 	for _, cluster := range o.clusters {
-		for host, _ := range cluster.client.Cluster().GetAliases() {
-			if strings.ToLower(host.Name+":"+strconv.Itoa(host.Port)) == strings.ToLower(alias) {
-				return cluster
+		for _, node := range cluster.client.Cluster().GetNodes() {
+			for _, host := range node.GetAliases() {
+				if strings.ToLower(host.Name+":"+strconv.Itoa(host.Port)) == strings.ToLower(alias) {
+					return cluster
+				}
 			}
 		}
 	}
@@ -320,4 +332,14 @@ func findAliases(address string, port int) []string {
 		aliases = append(aliases, addr+":"+portStr)
 	}
 	return aliases
+}
+
+func resolveHost(address string) ([]string, error) {
+	// IP addresses do not need a lookup
+	ip := net.ParseIP(address)
+	if ip != nil {
+		return []string{address}, nil
+	}
+
+	return net.LookupHost(address)
 }

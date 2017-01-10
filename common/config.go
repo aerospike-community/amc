@@ -89,7 +89,9 @@ func InitConfig(configFile, configDir string, config *Config) {
 		}
 	}
 
-	// setLogFile(config.AMC.ErrorLog)
+	if AMCIsProd() {
+		setLogFile(config.AMC.ErrorLog)
+	}
 	setLogLevel(config.AMC.LogLevel)
 	openDB(config.AMC.Database)
 }
