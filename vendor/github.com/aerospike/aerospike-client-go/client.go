@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1238,15 +1238,15 @@ func (clnt *Client) QueryRoles(policy *AdminPolicy) ([]*Role, error) {
 	return command.queryRoles(clnt.cluster, policy)
 }
 
-// Create user defined role.
-func (clnt *Client) CreateRole(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+// CreateRole creates a user-defined role.
+func (clnt *Client) CreateRole(policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	policy = clnt.getUsableAdminPolicy(policy)
 
 	command := newAdminCommand(nil)
 	return command.createRole(clnt.cluster, policy, roleName, privileges)
 }
 
-// Drop user defined role.
+// DropRole removes a user-defined role.
 func (clnt *Client) DropRole(policy *AdminPolicy, roleName string) error {
 	policy = clnt.getUsableAdminPolicy(policy)
 
@@ -1254,16 +1254,16 @@ func (clnt *Client) DropRole(policy *AdminPolicy, roleName string) error {
 	return command.dropRole(clnt.cluster, policy, roleName)
 }
 
-// Grant privileges to an user defined role.
-func (clnt *Client) GrantPrivileges(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+// GrantPrivileges grant privileges to a user-defined role.
+func (clnt *Client) GrantPrivileges(policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	policy = clnt.getUsableAdminPolicy(policy)
 
 	command := newAdminCommand(nil)
 	return command.grantPrivileges(clnt.cluster, policy, roleName, privileges)
 }
 
-// Revoke privileges from an user defined role.
-func (clnt *Client) RevokePrivileges(policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+// RevokePrivileges revokes privileges from a user-defined role.
+func (clnt *Client) RevokePrivileges(policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	policy = clnt.getUsableAdminPolicy(policy)
 
 	command := newAdminCommand(nil)

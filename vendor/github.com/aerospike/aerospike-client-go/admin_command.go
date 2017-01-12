@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use acmd file except in compliance with the License.
@@ -147,7 +147,7 @@ func (acmd *adminCommand) revokeRoles(cluster *Cluster, policy *AdminPolicy, use
 	return acmd.executeCommand(cluster, policy)
 }
 
-func (acmd *adminCommand) createRole(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+func (acmd *adminCommand) createRole(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	acmd.writeHeader(_CREATE_ROLE, 2)
 	acmd.writeFieldStr(_ROLE, roleName)
 	if err := acmd.writePrivileges(privileges); err != nil {
@@ -162,7 +162,7 @@ func (acmd *adminCommand) dropRole(cluster *Cluster, policy *AdminPolicy, roleNa
 	return acmd.executeCommand(cluster, policy)
 }
 
-func (acmd *adminCommand) grantPrivileges(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+func (acmd *adminCommand) grantPrivileges(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	acmd.writeHeader(_GRANT_PRIVILEGES, 2)
 	acmd.writeFieldStr(_ROLE, roleName)
 	if err := acmd.writePrivileges(privileges); err != nil {
@@ -171,7 +171,7 @@ func (acmd *adminCommand) grantPrivileges(cluster *Cluster, policy *AdminPolicy,
 	return acmd.executeCommand(cluster, policy)
 }
 
-func (acmd *adminCommand) revokePrivileges(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []*Privilege) error {
+func (acmd *adminCommand) revokePrivileges(cluster *Cluster, policy *AdminPolicy, roleName string, privileges []Privilege) error {
 	acmd.writeHeader(_REVOKE_PRIVILEGES, 2)
 	acmd.writeFieldStr(_ROLE, roleName)
 	if err := acmd.writePrivileges(privileges); err != nil {
@@ -260,7 +260,7 @@ func (acmd *adminCommand) writeRoles(roles []string) {
 	acmd.dataOffset = offset
 }
 
-func (acmd *adminCommand) writePrivileges(privileges []*Privilege) error {
+func (acmd *adminCommand) writePrivileges(privileges []Privilege) error {
 	offset := acmd.dataOffset + int(_FIELD_HEADER_SIZE)
 	acmd.dataBuffer[offset] = byte(len(privileges))
 	offset++
@@ -273,9 +273,8 @@ func (acmd *adminCommand) writePrivileges(privileges []*Privilege) error {
 
 		if privilege.canScope() {
 
-			if !(len(privilege.SetName) == 0) &&
-				(len(privilege.Namespace) == 0) {
-				return NewAerospikeError(INVALID_PRIVILEGE, fmt.Sprintf("Admin privilege '%v' has a set scope with an empty namespace.", privilege.code()))
+			if len(privilege.SetName) > 0 && len(privilege.Namespace) == 0 {
+				return NewAerospikeError(INVALID_PRIVILEGE, fmt.Sprintf("Admin privilege '%v' has a set scope with an empty namespace.", privilege))
 			}
 
 			acmd.dataBuffer[offset] = byte(len(privilege.Namespace))
@@ -288,9 +287,8 @@ func (acmd *adminCommand) writePrivileges(privileges []*Privilege) error {
 			copy(acmd.dataBuffer[offset:], privilege.SetName)
 			offset += len(privilege.SetName)
 		} else {
-			if !(len(privilege.Namespace) == 0) ||
-				!(len(privilege.SetName) == 0) {
-				return NewAerospikeError(INVALID_PRIVILEGE, fmt.Sprintf("Admin privilege '%v' has a set scope with an empty namespace.", privilege.code()))
+			if len(privilege.Namespace) > 0 || len(privilege.SetName) > 0 {
+				return NewAerospikeError(INVALID_PRIVILEGE, fmt.Sprintf("Admin global rivilege '%v' can't have a namespace or set.", privilege))
 			}
 		}
 	}

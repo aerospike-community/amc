@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -376,7 +376,7 @@ func (cmd *baseCommand) setUdf(policy *WritePolicy, key *Key, packageName string
 		return nil
 	}
 
-	cmd.writeHeader(&policy.BasePolicy, 0, _INFO2_WRITE, fieldCount, 0)
+	cmd.writeHeaderWithPolicy(policy, 0, _INFO2_WRITE, fieldCount, 0)
 	cmd.writeKey(key, policy.SendKey)
 	cmd.writeFieldString(packageName, UDF_PACKAGE_NAME)
 	cmd.writeFieldString(functionName, UDF_FUNCTION)

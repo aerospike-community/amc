@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -102,8 +102,12 @@ func NewSecureConnection(policy *ClientPolicy, host *Host) (*Connection, error) 
 		return conn, nil
 	}
 
-	sconn := tls.Client(conn.conn, policy.TlsConfig)
-	if host.TLSName != "" {
+	// To be on the safe side
+	tlsConfig := *policy.TlsConfig
+	tlsConfig.ServerName = host.TLSName
+
+	sconn := tls.Client(conn.conn, &tlsConfig)
+	if host.TLSName != "" && !tlsConfig.InsecureSkipVerify {
 		if err := sconn.VerifyHostname(host.TLSName); err != nil {
 			Logger.Error("Connection to address `" + address + "` failed to establish with error: " + err.Error())
 			return nil, errToTimeoutErr(err)

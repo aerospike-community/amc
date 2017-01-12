@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -83,6 +83,8 @@ type ClientPolicy struct {
 	RequestProleReplicas bool // false
 
 	// TlsConfig specifies TLS secure connection policy for TLS enabled servers.
+	// For better performance, we suggest prefering the server-side ciphers by
+	// setting PreferServerCipherSuites = true.
 	TlsConfig *tls.Config //= nil
 }
 
