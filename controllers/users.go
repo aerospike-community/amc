@@ -255,8 +255,8 @@ func privilegeFromString(s string) *as.Privilege {
 	return nil
 }
 
-func parsePrivilegeString(s string) []*as.Privilege {
-	var res []*as.Privilege
+func parsePrivilegeString(s string) []as.Privilege {
+	var res []as.Privilege
 
 	l := strings.Split(s, ",")
 	for _, ps := range l {
@@ -274,7 +274,7 @@ func parsePrivilegeString(s string) []*as.Privilege {
 			p.SetName = parts[2]
 		}
 
-		res = append(res, p)
+		res = append(res, *p)
 	}
 
 	return res

@@ -237,7 +237,7 @@ func (c *Cluster) RevokeRoles(user string, roles []string) error {
 	return c.client.RevokeRoles(nil, user, roles)
 }
 
-func (c *Cluster) CreateRole(role string, privileges []*as.Privilege) error {
+func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	return c.client.CreateRole(nil, role, privileges)
 }
 
@@ -245,11 +245,11 @@ func (c *Cluster) DropRole(role string) error {
 	return c.client.DropRole(nil, role)
 }
 
-func (c *Cluster) AddPrivileges(role string, privileges []*as.Privilege) error {
+func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 	return c.client.GrantPrivileges(nil, role, privileges)
 }
 
-func (c *Cluster) RemovePrivileges(role string, privileges []*as.Privilege) error {
+func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error {
 	return c.client.RevokePrivileges(nil, role, privileges)
 }
 

@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -66,10 +67,28 @@ func Server(config *common.Config) {
 	if !common.AMCIsProd() {
 		e.Logger.SetOutput(log.StandardLogger().Writer())
 		e.Use(middleware.Logger())
+	} else {
+		e.Use(middleware.Recover())
 	}
 
-	if common.AMCIsProd() {
-		e.Use(middleware.Recover())
+	// Basic Authentication Middleware Setup
+	basicAuthUser := os.Getenv("AMC_AUTH_USER")
+	if basicAuthUser == "" {
+		basicAuthUser = config.BasicAuth.User
+	}
+
+	basicAuthPassword := os.Getenv("AMC_AUTH_PASSWORD")
+	if basicAuthPassword == "" {
+		basicAuthPassword = config.BasicAuth.Password
+	}
+
+	if basicAuthUser != "" {
+		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) bool {
+			if username == basicAuthUser && password == basicAuthPassword {
+				return true
+			}
+			return false
+		}))
 	}
 
 	// Routes

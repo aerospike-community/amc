@@ -27,15 +27,6 @@ func AMCIsEnterprise() bool {
 	return AMCEdition == "enterprise"
 }
 
-type Cluster struct {
-	Host     string `toml:"host"`
-	TLSName  string `toml:"tls_name"`
-	Port     uint16 `toml:"port"`
-	User     string `toml:"user"`
-	Password string `toml:"password"`
-	Alias    string `toml:"alias"`
-}
-
 type Config struct {
 	AMC struct {
 		UpdateInterval int    `toml:"update_interval"`
@@ -50,7 +41,14 @@ type Config struct {
 
 		Database string `toml:"database"`
 
-		Clusters map[string]Cluster `toml:"clusters"`
+		Clusters map[string]struct {
+			Host     string `toml:"host"`
+			TLSName  string `toml:"tls_name"`
+			Port     uint16 `toml:"port"`
+			User     string `toml:"user"`
+			Password string `toml:"password"`
+			Alias    string `toml:"alias"`
+		} `toml:"clusters"`
 
 		Bind     string `toml:"bind"`
 		LogLevel string `toml:"loglevel"`
@@ -66,7 +64,12 @@ type Config struct {
 		User         string `toml:"user"`
 		Password     string `toml:"password"`
 		SendTo       string `toml:"send_to"`
-	}
+	} `toml:"mailer"`
+
+	BasicAuth struct {
+		User     string `toml:"user"`
+		Password string `toml:"password"`
+	} `toml:"basic_auth"`
 }
 
 func InitConfig(configFile, configDir string, config *Config) {
