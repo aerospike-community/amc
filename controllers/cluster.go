@@ -42,8 +42,6 @@ func postGetClusterId(c echo.Context) error {
 
 	sid, _ := sessionId(c)
 
-	log.Info("====================================== get-cluter-id session is " + sid)
-
 	cluster := _observer.FindClusterBySeed(sid, host, port, form.Username, form.Password)
 	if cluster != nil {
 		cluster.SetAlias(form.ClusterAlias)
@@ -70,7 +68,6 @@ func postGetClusterId(c echo.Context) error {
 
 	// update the session cookie
 	sid = manageSession(c)
-	log.Info("====================================== get-cluter-id session after manage is " + sid)
 
 	// create output
 	response := map[string]interface{}{
@@ -85,6 +82,23 @@ func postGetClusterId(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func postRemoveClusterFromSession(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("cluster not found"))
+	}
+
+	sid, _ := sessionId(c)
+	if remainingClusterCount := _observer.RemoveCluster(sid, cluster); remainingClusterCount <= 0 {
+		invalidateSession(c)
+	}
+
+	return c.JSON(http.StatusOK, common.Stats{
+		"status": "success",
+	})
 }
 
 func getCluster(c echo.Context) error {

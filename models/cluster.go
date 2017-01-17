@@ -31,6 +31,7 @@ type Cluster struct {
 	//pinged by user
 	lastPing time.Time
 
+	_datacenterInfo                      common.SyncStats
 	aggNodeStats, aggNodeCalcStats       common.Stats
 	aggNsStats, aggNsCalcStats           map[string]common.Stats
 	aggTotalNsStats, aggTotalNsCalcStats common.Stats
@@ -50,6 +51,8 @@ type Cluster struct {
 	// They will not removed automatically after a period of inactivity
 	permanent bool
 
+	alerts *common.AlertBucket
+
 	users []*as.UserRoles
 	roles []*as.Role
 
@@ -61,13 +64,15 @@ type Cluster struct {
 
 func newCluster(observer *ObserverT, client *as.Client, alias *string, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
-		observer:       observer,
-		client:         client,
-		nodes:          map[as.Host]*Node{},
-		alias:          alias,                              //seconds
-		updateInterval: observer.config.AMC.UpdateInterval, //seconds
-		uuid:           uuid.NewV4().String(),
-		seeds:          seeds,
+		observer:        observer,
+		client:          client,
+		nodes:           map[as.Host]*Node{},
+		alias:           alias,                              //seconds
+		updateInterval:  observer.config.AMC.UpdateInterval, //seconds
+		uuid:            uuid.NewV4().String(),
+		seeds:           seeds,
+		_datacenterInfo: *common.NewSyncStats(nil),
+		alerts:          common.NewAlertBucket(db, 50),
 	}
 
 	if user != "" {
@@ -86,10 +91,20 @@ func newCluster(observer *ObserverT, client *as.Client, alias *string, user, pas
 }
 
 func (c *Cluster) AddNode(address string, port int) error {
-	host := as.NewHost(address, port)
-	if _, exists := c.nodes[*host]; exists {
-		return errors.New("Node already exists")
+
+	hostAddrList, err := resolveHost(address)
+	if err != nil || len(hostAddrList) == 0 {
+		return err
 	}
+
+	for _, address := range hostAddrList {
+		host := as.NewHost(address, port)
+		if _, exists := c.nodes[*host]; exists {
+			return errors.New("Node already exists")
+		}
+	}
+
+	host := as.NewHost(hostAddrList[0], port)
 
 	// This is to make sure the client will have the seed for this node
 	// In case ALL nodes are removed
@@ -145,7 +160,7 @@ func (c *Cluster) Status() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	if c.client.IsConnected() {
+	if c.client != nil && c.client.IsConnected() {
 		return "on"
 	}
 	return "off"
@@ -310,12 +325,6 @@ func (c *Cluster) NodeCompatibility() string {
 	versionList := map[string][]string{}
 	for _, node := range c.Nodes() {
 		build := node.Build()
-
-		// TODO: Decide later to keep it or not; performance problems
-		// if version.Compare(build, "3.9.0", "<") {
-		// 	return "incompatible"
-		// }
-
 		versionList[build] = append(versionList[build], node.Address())
 	}
 
@@ -387,25 +396,28 @@ func (c *Cluster) Roles() []*as.Role {
 	return res
 }
 
-// func (c *Cluster) Roles() *string {
-// 	c.mutex.RLock()
-// 	defer c.mutex.RUnlock()
+func (c *Cluster) RoleNames() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 
-// 	if len(c.roles) == 0 {
-// 		return nil
-// 	}
+	if len(c.roles) == 0 {
+		return []string{}
+	}
 
-// 	res := make([]string, 0, len(c.roles))
-// 	for _, r := range c.roles {
-// 		res = append(res, r.Name)
-// 	}
+	res := make([]string, 0, len(c.roles))
+	for _, r := range c.roles {
+		res = append(res, r.Name)
+	}
 
-// 	roles := strings.Join(res, ",")
-// 	return &roles
-// }
+	return common.SortStrings(res)
+}
 
 func (c *Cluster) close() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	c.client.Close()
+	c.client = nil
 }
 
 func (c *Cluster) IsSet() bool {
@@ -437,7 +449,9 @@ func (c *Cluster) updatedAt(tm time.Time) {
 }
 
 func (c *Cluster) update(wg *sync.WaitGroup) error {
-	defer wg.Done()
+	if wg != nil {
+		defer wg.Done()
+	}
 	defer func() { go c.SendEmailNotifications() }()
 
 	// update only on update intervals
@@ -449,6 +463,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateCluster()
 	c.updateStats()
 	c.updateUsers()
+	c.updateDatacenterInfo()
 	c.checkHealth()
 	if !common.AMCIsProd() {
 		log.Debugf("Updating stats for cluster took: %s", time.Since(t))
@@ -460,14 +475,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 }
 
 func (c *Cluster) SendEmailNotifications() {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	nodes := c.Nodes()
-	newAlerts := []*common.Alert{}
-	for _, node := range nodes {
-		newAlerts = append(newAlerts, node.alerts.DrainNewAlerts()...)
-	}
+	newAlerts := c.alerts.DrainNewAlerts()
 
 	// only try to send notifications if the mailer settings are set
 	if len(c.observer.Config().Mailer.Host) == 0 {
@@ -847,7 +855,15 @@ func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 	}
 }
 
+func (c *Cluster) updateDatacenterInfo() {
+	c._datacenterInfo.SetStats(c.datacenterInfo())
+}
+
 func (c *Cluster) DatacenterInfo() common.Stats {
+	return c._datacenterInfo.Clone()
+}
+
+func (c *Cluster) datacenterInfo() common.Stats {
 	xdrInfo := map[string]common.Stats{}
 	datacenterList := []string{}
 	nodeStats := common.Stats{}

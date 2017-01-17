@@ -11,7 +11,7 @@ import (
 )
 
 func (n *Node) AlertsFrom(id int64) []*common.Alert {
-	return n.alerts.AlertsFrom(n.Address(), id)
+	return n.alerts().AlertsFrom(n.Address(), id)
 }
 
 func (n *Node) CheckStatus(latestState common.Stats) {
@@ -34,7 +34,7 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 			Status:      common.AlertStatusRed,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case nodeStatus.On:
 		if latestState.TryString("status", "") == string(nodeStatus.Off) {
 			alert := common.Alert{
@@ -45,7 +45,7 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 
 	}
@@ -73,7 +73,7 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 			Status:      common.AlertStatusRed,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case nodeVisibilityStatus.On:
 		if latestState.TryString("visibility", "") == string(nodeVisibilityStatus.Off) {
 			alert := common.Alert{
@@ -84,7 +84,7 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 
 	}
@@ -124,7 +124,7 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 			Status:      common.AlertStatusRed,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case "off":
 		if latestState.TryString("queueAlert", "") == "on" {
 			alert := common.Alert{
@@ -135,7 +135,7 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address(), queueLimit),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 	}
 
@@ -186,7 +186,7 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 			Status:      status,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case "off":
 		if latestState.TryString("fdAlert", "") == "on" {
 			alert := common.Alert{
@@ -197,7 +197,7 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 	}
 
@@ -240,7 +240,7 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 			Status:      status,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case "off":
 		if latestState.TryString("diskSpaceAlert", "") == "on" {
 			alert := common.Alert{
@@ -251,7 +251,7 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 	}
 
@@ -294,7 +294,7 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 			Status:      status,
 		}
 
-		n.alerts.Register(&alert)
+		n.alerts().Register(&alert)
 	case "off":
 		if latestState.TryString("memSpaceAlert", "") == "on" {
 			alert := common.Alert{
@@ -305,7 +305,7 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
 				Status:      common.AlertStatusGreen,
 			}
-			n.alerts.Register(&alert)
+			n.alerts().Register(&alert)
 		}
 	}
 

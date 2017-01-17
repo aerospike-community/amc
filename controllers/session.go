@@ -3,8 +3,7 @@ package controllers
 import (
 	"errors"
 
-	// . "github.com/ahmetalpbalkan/go-linq"
-	// log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
 
@@ -40,7 +39,7 @@ func invalidateSession(c echo.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	if err := session.Save(); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
 
@@ -63,7 +62,7 @@ func setSession(c echo.Context) string {
 	session.Clear()
 	session.Set("id", sid)
 	if err := session.Save(); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	return sid

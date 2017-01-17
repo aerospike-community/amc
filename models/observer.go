@@ -160,6 +160,49 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.sessions[sessionId] = append(o.sessions[sessionId], cluster)
 }
 
+func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	// Remove cluster from the session
+	newClusters := make([]*Cluster, 0, len(o.sessions[sessionId]))
+	for _, c := range o.sessions[sessionId] {
+		if c != cluster {
+			newClusters = append(newClusters, cluster)
+		}
+	}
+	o.sessions[sessionId] = newClusters
+
+	// check if cluster exists in any session
+	if !cluster.permanent {
+		exists := false
+		for _, session := range o.sessions {
+			for _, c := range session {
+				if c == cluster {
+					exists = true
+					break
+				}
+			}
+		}
+
+		// if the cluster does not exist in any other session remove it
+		if !exists {
+			newClusters = make([]*Cluster, 0, len(o.clusters))
+			for _, c := range o.clusters {
+				if c != cluster {
+					newClusters = append(newClusters, cluster)
+				} else {
+					c.close()
+				}
+			}
+			o.clusters = newClusters
+		}
+	}
+
+	log.Info("Removing cluster " + cluster.Id() + " from session " + sessionId)
+	return len(o.sessions[sessionId])
+}
+
 func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, host string, port uint16) (*Cluster, error) {
 	hostAddrs := strings.Split(host, ",")
 	hosts := make([]*as.Host, 0, len(hostAddrs))
@@ -182,7 +225,9 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *s
 
 	cluster := newCluster(o, client, alias, policy.User, policy.Password, hosts)
 	o.AppendCluster(sessionId, cluster)
-	o.updateClusters()
+	if cluster.IsSet() {
+		cluster.update(nil)
+	}
 
 	return cluster, nil
 }
@@ -199,10 +244,7 @@ func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
-	log.Info("====================== SessionId", sessionId)
 	clusters, sessionExists := o.sessions[sessionId]
-	log.Info("====================== Clusters", clusters)
-
 	return clusters, sessionExists
 }
 
