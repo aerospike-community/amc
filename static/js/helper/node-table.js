@@ -67,10 +67,12 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 }
               }
               html += '<div style="float: left; width: 210px; margin-right: 20px; border-bottom: 1px solid #f0f0f0" title="' + description + '">' +
-                        '<span style="width: 160px; float: left">' +
+                        '<span style="float: left">' +
                           varName +
                         '</span>' +
+                        '<span style="float: right">' +
                           value + 
+                        '</span>' +
                       '</div>';
           }
 
