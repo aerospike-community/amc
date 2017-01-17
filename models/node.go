@@ -339,7 +339,7 @@ func (n *Node) updateHistory() {
 	}
 
 	if err == nil && !latestLatencyReport.IsZero() {
-		n.latencyHistory.Add(latestLatencyReport.Unix(), n.latestNodeLatency)
+		n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
 	}
 }
 

@@ -686,7 +686,8 @@ func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 
 func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 	res := make(map[string]common.Stats, len(namespaces))
-	for _, node := range c.Nodes() {
+	nodes := c.Nodes()
+	for _, node := range nodes {
 		for _, nsName := range namespaces {
 			ns := node.NamespaceByName(nsName)
 			if ns == nil {
@@ -722,6 +723,10 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 
 			res[nsName] = nsStats
 		}
+	}
+
+	for _, stats := range res {
+		stats["repl-factor"] = stats.TryInt("repl-factor", 0) / int64(len(nodes))
 	}
 
 	return res
