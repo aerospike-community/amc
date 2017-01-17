@@ -65,7 +65,6 @@ type Node struct {
 	serverTime int64
 
 	_alertStates common.SyncStats
-	alerts       *common.AlertBucket
 
 	mutex deadlock.RWMutex
 }
@@ -101,7 +100,6 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 		namespaces:     atomic.Value{},
 		latencyHistory: lh,
 		_alertStates:   *common.NewSyncStats(common.Stats{}),
-		alerts:         common.NewAlertBucket(db, 50),
 	}
 
 	statsHistory := make(map[string]*rrd.Bucket, len(_recordedNodeStats))
@@ -1002,4 +1000,8 @@ func (n *Node) updateNotifications() error {
 	n.CheckMemory(latestState)
 
 	return nil
+}
+
+func (n *Node) alerts() *common.AlertBucket {
+	return n.cluster.alerts
 }

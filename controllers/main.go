@@ -60,9 +60,12 @@ func Server(config *common.Config) {
 	_defaultClientPolicy.ConnectionQueueSize = 1
 
 	e := echo.New()
+	// Avoid stale connections
+	e.ReadTimeout = 30 * time.Second
+	e.WriteTimeout = 30 * time.Second
 
 	store := sessions.NewCookieStore([]byte("amc-secret-key"))
-	e.Use(sessions.Sessions(sessions.DefaultKey, store))
+	e.Use(sessions.Sessions("amc_session", store))
 
 	if config.AMC.StaticPath == "" {
 		log.Fatalln("No static dir has been set in the config file. Quiting...")
@@ -109,6 +112,7 @@ func Server(config *common.Config) {
 
 	e.POST("/set-update-interval/:clusterUuid", setClusterUpdateInterval)
 	e.GET("/aerospike/service/clusters/:clusterUuid", getCluster)
+	e.POST("/aerospike/service/clusters/:clusterUuid/logout", postRemoveClusterFromSession)
 
 	e.GET("/aerospike/service/clusters/:clusterUuid/udfs", getClusterUDFs)
 	e.POST("/aerospike/service/clusters/:clusterUuid/drop_udf", postClusterDropUDF)

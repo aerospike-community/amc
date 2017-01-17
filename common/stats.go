@@ -53,7 +53,7 @@ func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 }
 
 func (spv *SinglePointValue) Value(defVal *float64) *float64 {
-	if spv == nil {
+	if spv == nil || spv.value == nil {
 		return defVal
 	}
 

@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	// log "github.com/Sirupsen/logrus"
-	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
 	"github.com/citrusleaf/amc/common"
@@ -67,7 +66,6 @@ func postClusterFireCmd(c echo.Context) error {
 
 func getCurrentMonitoringClusters(c echo.Context) error {
 	sid, err := sessionId(c)
-	log.Error("================================= CURRENT MONITORING CLUSTERS: ", sid)
 	if err != nil {
 		invalidateSession(c)
 		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
@@ -81,7 +79,7 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 			"username":     cluster.User(),
 			"cluster_name": cluster.Alias(),
 			"cluster_id":   cluster.Id(),
-			"roles":        cluster.Roles(),
+			"roles":        cluster.RoleNames(),
 			"seed_node":    cluster.SeedAddress(),
 		}
 	}
@@ -397,8 +395,11 @@ func setClusterNamespaceConfig(c echo.Context) error {
 }
 
 func postAddClusterNodes(c echo.Context) error {
-	// TODO: Discuss this
-	return c.JSON(http.StatusNotImplemented, errorMap("Not implemented yet..."))
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("cluster not found"))
+	}
 
 	form := struct {
 		Address string `form:"address"`
@@ -406,36 +407,21 @@ func postAddClusterNodes(c echo.Context) error {
 
 	c.Bind(&form)
 	if len(form.Address) == 0 {
-		return c.JSON(http.StatusNotAcceptable, errorMap("No seed name specified."))
+		return c.JSON(http.StatusOK, errorMap("No seed name specified."))
 	}
 
 	host, port, err := common.SplitHostPort(form.Address)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, errorMap(err.Error()))
-	}
-
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
-	if cluster == nil {
-		return c.JSON(http.StatusNotAcceptable, errorMap("cluster not found"))
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
 	err = cluster.AddNode(host, port)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, err)
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
 	// create output
-	response := map[string]interface{}{
-		"status":              "success",
-		"security_enabled":    cluster.SecurityEnabled(),
-		"build_details":       cluster.BuildDetails(),
-		"nodes_compatibility": cluster.NodeCompatibility(),
-		"cluster_id":          cluster.Id(),
-		"update_interval":     cluster.UpdateInterval(),
-		"nodes":               cluster.NodeList(),
-		"seed_address":        cluster.SeedAddress(),
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
 }

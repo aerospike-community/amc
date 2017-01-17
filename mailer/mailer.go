@@ -16,7 +16,6 @@ func processTemplate(config *common.Config, tplName string, context interface{})
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("Sending email failed with a panic: ", r)
-			panic(r)
 		}
 	}()
 

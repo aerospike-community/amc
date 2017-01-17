@@ -2,19 +2,21 @@ package sessions
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 )
 
 const (
+	DefaultKey  = "session_key"
 	errorFormat = "[sessions] ERROR! %s\n"
 )
 
 var (
-	DefaultKey                               = "session"
 	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered!")
 )
 
@@ -66,18 +68,18 @@ func Sessions(name string, store Store) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			request := c.Request()
 
-			// w := c.Response().Writer
-			// // allow cross domain AJAX requests
-			// w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
-			// w.Header().Set("Access-Control-Allow-Credentials", "true")
-			// w.Header().Set("Access-Control-Allow-Methods", "GET")
-			// w.Header().Set("Access-Control-Allow-Origin", "*")
-			// w.Header().Set("Access-Control-Max-Age", "10")
-			// w.Header().Set("Cache-Control", "must-revalidate, post-check=0, pre-check=0, no-cache")
+			w := c.Response().Writer
+			// allow cross domain AJAX requests
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Max-Age", "10")
+			w.Header().Set("Cache-Control", "must-revalidate, post-check=0, pre-check=0, no-cache")
 
 			s := &session{name: name, request: request, store: store, session: nil, hasChanged: false, writer: c.Response().Writer}
 			c.Set(DefaultKey, s)
 
+			defer context.Clear(request)
 			return next(c)
 		}
 	}
@@ -97,6 +99,7 @@ func (s *session) Get(key interface{}) interface{} {
 }
 
 func (s *session) Set(key interface{}, val interface{}) {
+	fmt.Println(s.Session().Values)
 	s.Session().Values[key] = val
 	s.hasChanged = true
 }
