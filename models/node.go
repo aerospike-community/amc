@@ -6,11 +6,12 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	"github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/rrd"
@@ -39,31 +40,49 @@ var nodeVisibilityStatus = struct {
 }
 
 type Node struct {
-	cluster  *Cluster
-	origNode *as.Node
-	origHost *as.Host
+	cluster   *Cluster
+	_origNode *as.Node
+	origHost  *as.Host
 
 	status  NodeStatus
 	visible NodeVisibilityStatus
 
-	namespaces map[string]*Namespace
+	namespaces atomic.Value //map[string]*Namespace
 
-	latestInfo, oldInfo common.Info
-	latestConfig        common.Stats
-	latestNodeLatency   map[string]common.Stats
+	// latestInfo, oldInfo common.SyncInfo
+	latestInfo        common.SyncInfo
+	latestConfig      common.SyncStats
+	latestNodeLatency atomic.Value //map[string]common.SyncStats
 
-	stats, nsAggStats common.Stats
-	nsAggCalcStats    common.Stats
+	stats, nsAggStats common.SyncStats
+	nsAggCalcStats    common.SyncStats
 
+	// statsHistory is allocated on new and never written to.
+	// hence it does not need syncronization.
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
 
 	serverTime int64
 
-	alertStates common.Stats
-	alerts      *common.AlertBucket
+	_alertStates common.SyncStats
+	alerts       *common.AlertBucket
 
-	mutex sync.RWMutex
+	mutex deadlock.RWMutex
+}
+
+var _recordedNodeStats = [...]string{
+	"stat_read_success", "stat_read_reqs",
+	"stat_write_success", "stat_write_reqs",
+
+	"batch_read_success", "batch_read_reqs",
+
+	"scan_success", "scan_reqs",
+	"query_success", "query_reqs",
+
+	"xdr_read_success", "xdr_read_reqs",
+	"xdr_write_success", "xdr_write_reqs",
+
+	"udf_success", "udf_reqs",
 }
 
 func newNode(cluster *Cluster, origNode *as.Node) *Node {
@@ -74,24 +93,31 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 
 	lh := rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600)
 
-	return &Node{
+	node := &Node{
 		cluster:        cluster,
-		origNode:       origNode,
+		_origNode:      origNode,
 		origHost:       host,
 		status:         nodeStatus.On,
-		namespaces:     map[string]*Namespace{},
-		statsHistory:   map[string]*rrd.Bucket{},
+		namespaces:     atomic.Value{},
 		latencyHistory: lh,
-		alertStates:    common.Stats{},
+		_alertStates:   common.SyncStats{Stats: common.Stats{}},
 		alerts:         common.NewAlertBucket(db, 50),
 	}
+
+	statsHistory := make(map[string]*rrd.Bucket, len(_recordedNodeStats))
+	for _, stat := range _recordedNodeStats {
+		statsHistory[stat] = rrd.NewBucket(node.cluster.UpdateInterval(), 3600, true)
+	}
+	node.statsHistory = statsHistory
+
+	return node
 }
 
 func (n *Node) valid() bool {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
-	return n.origNode != nil && n.origNode.IsActive()
+	return n._origNode != nil && n._origNode.IsActive()
 }
 
 func (n *Node) update() error {
@@ -104,11 +130,13 @@ func (n *Node) update() error {
 	}
 	n.setStatus(nodeStatus.On)
 
+	tm := time.Now()
+
 	if err := n.updateNamespaceNames(); err != nil {
+		n.setStatus(nodeStatus.Off)
+		log.Warningf("Node %s is not active.", n.origHost)
 		return err
 	}
-
-	tm := time.Now()
 
 	// retry 3 times
 	info, err := n.RequestInfo(3, n.infoKeys()...)
@@ -127,7 +155,7 @@ func (n *Node) update() error {
 
 	nsAggStats := common.Stats{}
 	nsAggCalcStats := common.Stats{}
-	for _, ns := range n.namespaces {
+	for _, ns := range n.Namespaces() {
 		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name))
 		ns.updateIndexInfo(n.Indexes(ns.name))
 		ns.updateLatencyInfo(latencyMap[ns.name])
@@ -153,17 +181,12 @@ func (n *Node) notifyAboutChanges() {
 }
 
 func (n *Node) applyStatsToAggregate(stats, calcStats common.Stats) {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	stats.AggregateStats(n.stats)
-	calcStats.AggregateStats(n.nsAggCalcStats)
+	n.stats.AggregateStatsTo(stats)
+	n.nsAggCalcStats.AggregateStatsTo(calcStats)
 }
 
 func (n *Node) applyNsStatsToAggregate(stats, calcStats map[string]common.Stats) {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	for k, ns := range n.namespaces {
+	for k, ns := range n.Namespaces() {
 		if stats[k] == nil {
 			stats[k] = common.Stats{}
 		}
@@ -176,10 +199,7 @@ func (n *Node) applyNsStatsToAggregate(stats, calcStats map[string]common.Stats)
 }
 
 func (n *Node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Stats) map[string]map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	for nsName, ns := range n.namespaces {
+	for nsName, ns := range n.Namespaces() {
 		setsInfo := ns.SetsInfo()
 
 		if stats[nsName] == nil {
@@ -206,7 +226,7 @@ func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string,
 	}
 
 	for i := 0; i < reties; i++ {
-		result, err = n.origNode.RequestInfo(cmd...)
+		result, err = n._origNode.RequestInfo(cmd...)
 		if err == nil {
 			return result, nil
 		}
@@ -225,27 +245,29 @@ func (n *Node) updateNamespaceNames() error {
 	namespacesStr := namespaceListMap["namespaces"]
 	namespaces := strings.Split(namespacesStr, ";")
 
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-	for _, ns := range namespaces {
-		if n.namespaces[ns] == nil {
-			n.namespaces[ns] = &Namespace{node: n, name: ns, statsHistory: map[string]*rrd.Bucket{}, latencyHistory: rrd.NewSimpleBucket(5, 3600)}
+	namespaceMap := make(map[string]*Namespace, len(namespaces))
+	currentNamespaces := n.Namespaces()
+	for _, nsName := range namespaces {
+		if namespace := currentNamespaces[nsName]; namespace == nil {
+			namespaceMap[nsName] = NewNamespace(n, nsName)
+		} else {
+			namespaceMap[nsName] = namespace
 		}
 	}
+	n.namespaces.Store(namespaceMap)
 
 	return nil
 }
 
 func (n *Node) LatestLatency() map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.latestNodeLatency
+	res := n.latestNodeLatency.Load()
+	if res == nil {
+		return nil
+	}
+	return res.(map[string]common.Stats)
 }
 
 func (n *Node) LatencySince(tms string) []map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	tm := n.ServerTime().Unix() - 30*60
 	if len(tms) > 0 {
 		if v, err := n.latencyDateTime(tms); err == nil {
@@ -267,9 +289,7 @@ func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 }
 
 func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
+	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
 	for name, bucket := range n.statsHistory {
 		val := bucket.LastValue()
@@ -286,9 +306,7 @@ func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 }
 
 func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
+	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
 	for name, bucket := range n.statsHistory {
 		vs := bucket.ValuesSince(tm)
@@ -304,36 +322,17 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 	return res
 }
 
+func (n *Node) getStatsHistory(stat string) *rrd.Bucket {
+	// statsHistory is not written to, so it doesn't need synchronization
+	return n.statsHistory[stat]
+}
 func (n *Node) updateHistory() {
 	// this uses a RLock, so we put it before the locks to avoid deadlock
 	latestLatencyReport, err := n.latestLatencyReportDateTime()
 	tm := n.ServerTime().Unix()
 
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-
-	recordedStats := []string{
-		"stat_read_success", "stat_read_reqs",
-		"stat_write_success", "stat_write_reqs",
-
-		"batch_read_success", "batch_read_reqs",
-
-		"scan_success", "scan_reqs",
-		"query_success", "query_reqs",
-
-		"xdr_read_success", "xdr_read_reqs",
-		"xdr_write_success", "xdr_write_reqs",
-
-		"udf_success", "udf_reqs",
-	}
-
-	for _, stat := range recordedStats {
-		bucket := n.statsHistory[stat]
-		if bucket == nil {
-			bucket = rrd.NewBucket(n.cluster.UpdateInterval(), 3600, true)
-			n.statsHistory[stat] = bucket
-		}
-
+	for _, stat := range _recordedNodeStats {
+		bucket := n.getStatsHistory(stat)
 		if n.nsAggCalcStats.Get(stat) != nil {
 			bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
 		} else if n.stats.Get(stat) != nil {
@@ -347,12 +346,9 @@ func (n *Node) updateHistory() {
 }
 
 func (n *Node) latestLatencyReportDateTime() (time.Time, error) {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	var latTime string
-	for _, stats := range n.latestNodeLatency {
-		latTime = stats["timestamp"].(string)
+	for _, stats := range n.LatestLatency() {
+		latTime = stats.TryString("timestamp", "")
 		break
 	}
 
@@ -402,23 +398,14 @@ func (n *Node) XdrEnabled() bool {
 }
 
 func (n *Node) XdrConfig() common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	return n.latestInfo.ToInfo("get-config:context=xdr").ToStats()
+	return n.InfoAttrs("get-config:context=xdr").ToInfo("get-config:context=xdr").ToStats()
 }
 
 func (n *Node) XdrStats() common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	return n.latestInfo.ToInfo("statistics/xdr").ToStats()
+	return n.InfoAttrs("statistics/xdr").ToInfo("statistics/xdr").ToStats()
 }
 
 func (n *Node) XdrStatus() XDRStatus {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	if n.latestConfig.TryString("enable-xdr", "") != "true" {
 		return xdrStatus.Off
 	}
@@ -432,7 +419,7 @@ func (n *Node) SwitchXDR(on bool) error {
 func (n *Node) SetXDRConfig(name string, value interface{}) error {
 	cmd := fmt.Sprintf("set-config:context=xdr;%s=%v", name, value)
 
-	res, err := n.origNode.RequestInfo(cmd)
+	res, err := n.RequestInfo(3, cmd)
 	if err != nil {
 		return err
 	}
@@ -457,7 +444,7 @@ func (n *Node) infoKeys() []string {
 	}
 
 	// add namespace stat requests
-	for ns, _ := range n.namespaces {
+	for ns, _ := range n.Namespaces() {
 		res = append(res, "namespace/"+ns)
 		res = append(res, "sets/"+ns)
 		res = append(res, "get-config:context=namespace;id="+ns)
@@ -467,17 +454,14 @@ func (n *Node) infoKeys() []string {
 }
 
 func (n *Node) NamespaceByName(ns string) *Namespace {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.namespaces[ns]
+	res := n.Namespaces()
+	return res[ns]
 }
 
 func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
 	// alias stats
 	stats["queue"] = stats.TryInt("tsvc_queue", 0)
-	stats["cluster_name"] = n.latestInfo.TryString("cluster-name", "")
+	stats["cluster_name"] = n.InfoAttrs("cluster-name").TryString("cluster-name", "")
 	stats["xdr_read_reqs"] =
 		stats.TryInt("xdr_read_success", 0) +
 			stats.TryInt("xdr_read_error", 0) +
@@ -529,52 +513,35 @@ func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 		// stats["xdr_timelag"] = stats.Get("timediff_lastship_cur_secs")
 	}
 
-	n.stats = stats
-	n.nsAggStats = nsStats
-	n.nsAggCalcStats = nsCalcStats
+	n.stats.SetStats(stats)
+	n.nsAggStats.SetStats(nsStats)
+	n.nsAggCalcStats.SetStats(nsCalcStats)
 }
 
 func (n *Node) setConfig(stats common.Info) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-	n.latestConfig = stats.ToStats()
+	lc := stats.ToStats()
+	n.latestConfig.SetStats(lc)
 }
 
 func (n *Node) setNodeLatency(stats map[string]common.Stats) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-	n.latestNodeLatency = stats
+	n.latestNodeLatency.Store(stats)
 }
 
 func (n *Node) ConfigAttrs(names ...string) common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	var res common.Stats
 	if len(names) == 0 {
-		res = make(common.Stats, len(n.latestConfig))
-		for name, value := range n.latestConfig {
-			res[name] = value
-		}
+		res = n.latestConfig.Clone()
 	} else {
-		res = make(common.Stats, len(names))
-		for _, name := range names {
-			res[name] = n.latestConfig[name]
-		}
+		res = n.latestConfig.GetMulti(names...)
 	}
 	return res
 }
 
 func (n *Node) ConfigAttr(name string) interface{} {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.latestConfig[name]
+	return n.latestConfig.Get(name)
 }
 
 func (n *Node) SetServerConfig(context string, config map[string]string) error {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-
 	cmd := "set-config:context=" + context
 	for parameter, value := range config {
 		cmd += fmt.Sprintf(";%s=%s", parameter, value)
@@ -594,41 +561,29 @@ func (n *Node) SetServerConfig(context string, config map[string]string) error {
 }
 
 func (n *Node) setInfo(stats common.Info) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-	n.oldInfo = n.latestInfo
-	n.latestInfo = stats
+	// n.oldInfo = n.latestInfo
+	n.latestInfo.SetInfo(stats)
 }
 
 func (n *Node) InfoAttrs(names ...string) common.Info {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	var res common.Info
 	if len(names) == 0 {
-		res = make(common.Info, len(n.latestInfo))
-		for name, value := range n.latestInfo {
-			res[name] = value
-		}
+		res = n.latestInfo.Clone()
 	} else {
-		res = make(common.Info, len(names))
-		for _, name := range names {
-			res[name] = n.latestInfo[name]
-		}
+		res = n.latestInfo.GetMulti(names...)
 	}
 	return res
 }
 
 func (n *Node) InfoAttr(name string) string {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.latestInfo[name]
+	res := n.latestInfo.Get(name)
+	if res != nil {
+		return res.(string)
+	}
+	return common.NOT_AVAILABLE
 }
 
 func (n *Node) AnyAttrs(names ...string) common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	var res common.Stats
 	res = make(common.Stats, len(names))
 	for _, name := range names {
@@ -648,27 +603,16 @@ func (n *Node) AnyAttrs(names ...string) common.Stats {
 }
 
 func (n *Node) StatsAttrs(names ...string) common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	var res common.Stats
 	if len(names) == 0 {
-		res = make(common.Stats, len(n.stats))
-		for name, value := range n.stats {
-			res[name] = value
-		}
+		res = n.stats.Clone()
 	} else {
-		res = make(common.Stats, len(names))
-		for _, name := range names {
-			res[name] = n.stats.Get(name)
-		}
+		res = n.stats.GetMulti(names...)
 	}
 	return res
 }
 
 func (n *Node) StatsAttr(name string) interface{} {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	return n.stats.Get(name)
 }
 
@@ -679,18 +623,12 @@ func (n *Node) Status() NodeStatus {
 }
 
 func (n *Node) Enterprise() bool {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	return strings.Contains(strings.ToLower(n.latestInfo.TryString("edition", "")), "enterprise")
 }
 
 func (n *Node) VisibilityStatus() NodeVisibilityStatus {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	res := nodeVisibilityStatus.On
-	if n.Status() == nodeStatus.On && (n.origNode == nil || !n.origNode.IsActive()) {
+	if n.Status() == nodeStatus.On && !n.valid() {
 		res = nodeVisibilityStatus.Off
 	}
 	return res
@@ -707,12 +645,9 @@ func (n *Node) Build() string {
 }
 
 func (n *Node) Disk() common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	return common.Stats{
-		"used":             n.nsAggCalcStats["used-bytes-disk"],
-		"free":             n.nsAggCalcStats["free-bytes-disk"],
+		"used":             n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
+		"free":             n.nsAggCalcStats.TryInt("free-bytes-disk", 0),
 		"used-bytes-disk":  n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
 		"free-bytes-disk":  n.nsAggCalcStats.TryInt("free-bytes-disk", 0),
 		"total-bytes-disk": n.nsAggCalcStats.TryInt("total-bytes-disk", 0),
@@ -720,12 +655,9 @@ func (n *Node) Disk() common.Stats {
 }
 
 func (n *Node) Memory() common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	return common.Stats{
-		"used":               n.nsAggCalcStats["used-bytes-memory"],
-		"free":               n.nsAggCalcStats["free-bytes-memory"],
+		"used":               n.nsAggCalcStats.TryInt("used-bytes-memory", 0),
+		"free":               n.nsAggCalcStats.TryInt("free-bytes-memory", 0),
 		"used-bytes-memory":  n.nsAggCalcStats.TryInt("used-bytes-memory", 0),
 		"free-bytes-memory":  n.nsAggCalcStats.TryInt("free-bytes-memory", 0),
 		"total-bytes-memory": n.nsAggCalcStats.TryInt("total-bytes-memory", 0),
@@ -733,10 +665,7 @@ func (n *Node) Memory() common.Stats {
 }
 
 func (n *Node) DataCenters() map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	if _, exists := n.latestInfo["get-dc-config"]; !exists {
+	if exists := n.latestInfo.Get("get-dc-config"); exists == nil {
 		return nil
 	}
 
@@ -758,25 +687,28 @@ func (n *Node) DataCenters() map[string]common.Stats {
 	return dcs
 }
 
+func (n *Node) Namespaces() map[string]*Namespace {
+	res := n.namespaces.Load()
+	if res == nil {
+		return map[string]*Namespace{}
+	}
+	return res.(map[string]*Namespace)
+}
+
 func (n *Node) NamespaceList() []string {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	res := make([]string, 0, len(n.namespaces))
-	for ns, _ := range n.namespaces {
+	namespaces := n.Namespaces()
+	res := make([]string, 0, len(namespaces))
+	for ns, _ := range namespaces {
 		res = append(res, ns)
 	}
 	return common.StrUniq(res)
 }
 
 func (n *Node) Jobs() map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	return n.latestInfo.ToStatsMap("jobs:", "trid", ":")
 }
 
 func (n *Node) Indexes(namespace string) map[string]common.Info {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	indexes := n.latestInfo.ToInfoMap("sindex", "indexname", ":")
 	if namespace == "" {
 		return indexes
@@ -793,9 +725,6 @@ func (n *Node) Indexes(namespace string) map[string]common.Info {
 }
 
 func (n *Node) NamespaceIndexes() map[string][]string {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
 	indexes := n.latestInfo.ToInfoMap("sindex", "indexname", ":")
 	result := map[string][]string{}
 	for idxName, idxInfo := range indexes {
@@ -812,30 +741,21 @@ func (n *Node) NamespaceIndexes() map[string][]string {
 }
 
 func (n *Node) UDFs() map[string]common.Stats {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	return n.latestInfo.ToStatsMap("udf-list", "filename", ",")
 }
 
 func (n *Node) Address() string {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	h := n.origNode.GetHost()
+	h := *n.origHost
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
 
 func (n *Node) Host() string {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	h := n.origNode.GetHost()
+	h := *n.origHost
 	return h.Name
 }
 
 func (n *Node) Port() uint16 {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	h := n.origNode.GetHost()
+	h := *n.origHost
 	return uint16(h.Port)
 }
 
@@ -854,6 +774,23 @@ func (n *Node) Bins() common.Stats {
 func (n *Node) MigrationStats() common.Info {
 	return n.InfoAttrs("migrate_msgs_sent", "migrate_msgs_recv", "migrate_progress_send",
 		"migrate_progress_recv", "migrate_tx_objs", "migrate_rx_objs")
+}
+
+func (n *Node) setOrigNode(node *as.Node) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+
+	if n._origNode != nil {
+		n._origNode.Close()
+	}
+	n._origNode = node
+}
+
+func (n *Node) origNode() *as.Node {
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+
+	return n._origNode
 }
 
 func parseBinInfo(s string) common.Stats {
@@ -912,7 +849,6 @@ func parseBinInfo(s string) common.Stats {
 func (n *Node) setServerTime(tm int64) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
-
 	if tm > n.serverTime {
 		n.serverTime = tm
 	}
@@ -1044,13 +980,26 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 	return res, nodeStats
 }
 
+func (n *Node) setAlertState(name string, value interface{}) {
+	n._alertStates.Set(name, value)
+}
+
+// func (n *Node) alertState(namee string) interface{} {
+// 	n.mutex.RLock()
+// 	defer n.mutex.RUnlock()
+
+// 	return n._alertStates[name]
+// }
+
 func (n *Node) updateNotifications() error {
-	n.CheckStatus()
-	n.CheckClusterVisibility()
-	n.CheckTransactionQueue()
-	n.CheckFileDescriptors()
-	n.CheckDiskSpace()
-	n.CheckMemory()
+	latestState := n._alertStates.Clone()
+
+	n.CheckStatus(latestState)
+	n.CheckClusterVisibility(latestState)
+	n.CheckTransactionQueue(latestState)
+	n.CheckFileDescriptors(latestState)
+	n.CheckDiskSpace(latestState)
+	n.CheckMemory(latestState)
 
 	return nil
 }

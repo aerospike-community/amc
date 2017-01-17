@@ -11,6 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	"github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
 )
@@ -23,7 +24,7 @@ type ObserverT struct {
 	config   *common.Config
 
 	clusters []*Cluster
-	mutex    sync.RWMutex
+	mutex    deadlock.RWMutex
 
 	notifyCloseChan chan struct{}
 }
@@ -39,6 +40,7 @@ func New(config *common.Config) *ObserverT {
 	if db, err = sql.Open("sqlite3", config.AMC.Database); err != nil {
 		log.Errorln("Cannot connect to the database: %s", err.Error())
 	}
+	db.SetMaxOpenConns(1)
 
 	o := &ObserverT{
 		sessions: map[string][]*Cluster{},

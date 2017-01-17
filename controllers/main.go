@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bytes"
 	"fmt"
+	log1 "log"
 	"net/http"
 	"os"
 	"time"
@@ -47,9 +49,15 @@ func Server(config *common.Config) {
 		asl.Logger.SetLevel(asl.DEBUG)
 	}
 
-	_defaultClientPolicy.Timeout = 5 * time.Second
+	var buf bytes.Buffer
+	logger := log1.New(&buf, "", log1.LstdFlags|log1.Lshortfile)
+	logger.SetOutput(os.Stdout)
+	asl.Logger.SetLogger(logger)
+	asl.Logger.SetLevel(asl.DEBUG)
+
+	_defaultClientPolicy.Timeout = 10 * time.Second
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
-	_defaultClientPolicy.ConnectionQueueSize = 2
+	_defaultClientPolicy.ConnectionQueueSize = 1
 
 	e := echo.New()
 
@@ -65,8 +73,8 @@ func Server(config *common.Config) {
 
 	// Middleware
 	if !common.AMCIsProd() {
-		e.Logger.SetOutput(log.StandardLogger().Writer())
-		e.Use(middleware.Logger())
+		// e.Logger.SetOutput(log.StandardLogger().Writer())
+		// e.Use(middleware.Logger())
 	} else {
 		e.Use(middleware.Recover())
 	}

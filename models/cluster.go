@@ -13,6 +13,7 @@ import (
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/kennygrant/sanitize"
 	"github.com/mcuadros/go-version"
+	"github.com/sasha-s/go-deadlock"
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
@@ -55,7 +56,7 @@ type Cluster struct {
 	activeBackup  *Backup
 	activeRestore *Restore
 
-	mutex sync.RWMutex
+	mutex deadlock.RWMutex
 }
 
 func newCluster(observer *ObserverT, client *as.Client, alias *string, user, password string, seeds []*as.Host) *Cluster {
@@ -120,12 +121,9 @@ func (c *Cluster) SetUpdateInterval(val int) {
 }
 
 func (c *Cluster) OffNodes() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := []string{}
-	for _, node := range c.nodes {
-		if node.status == nodeStatus.Off {
+	for _, node := range c.Nodes() {
+		if node.Status() == nodeStatus.Off {
 			res = append(res, node.Address())
 		}
 	}
@@ -134,10 +132,7 @@ func (c *Cluster) OffNodes() []string {
 }
 
 func (c *Cluster) RandomActiveNode() *Node {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		if node.Status() == nodeStatus.On {
 			return node
 		}
@@ -157,16 +152,13 @@ func (c *Cluster) Status() string {
 }
 
 func (c *Cluster) Disk() common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	result := common.Stats{
 		"used": c.aggNodeCalcStats["used-bytes-disk"],
 		"free": c.aggNodeCalcStats["free-bytes-disk"],
 	}
 
 	details := common.Stats{}
-	for _, n := range c.nodes {
+	for _, n := range c.Nodes() {
 		details[n.Address()] = n.Disk()
 	}
 
@@ -175,16 +167,13 @@ func (c *Cluster) Disk() common.Stats {
 }
 
 func (c *Cluster) Memory() common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	result := common.Stats{
 		"used": c.aggNodeCalcStats["used-bytes-memory"],
 		"free": c.aggNodeCalcStats["free-bytes-memory"],
 	}
 
 	details := common.Stats{}
-	for _, n := range c.nodes {
+	for _, n := range c.Nodes() {
 		details[n.Address()] = n.Memory()
 	}
 
@@ -275,10 +264,7 @@ func (c *Cluster) Nodes() (nodes []*Node) {
 }
 
 func (c *Cluster) NodeBuilds() (builds []string) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		builds = append(builds, node.Build())
 	}
 
@@ -286,10 +272,7 @@ func (c *Cluster) NodeBuilds() (builds []string) {
 }
 
 func (c *Cluster) NamespaceList() (result []string) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		for _, ns := range node.NamespaceList() {
 			result = append(result, ns)
 		}
@@ -299,11 +282,8 @@ func (c *Cluster) NamespaceList() (result []string) {
 }
 
 func (c *Cluster) NamespaceIndexes() map[string][]string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	result := map[string][]string{}
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		for ns, list := range node.NamespaceIndexes() {
 			result[ns] = append(result[ns], list...)
 		}
@@ -317,11 +297,9 @@ func (c *Cluster) NamespaceIndexes() map[string][]string {
 }
 
 func (c *Cluster) NodeList() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	nodes := make([]string, 0, len(c.nodes))
-	for _, node := range c.nodes {
+	clusterNodes := c.Nodes()
+	nodes := make([]string, 0, len(clusterNodes))
+	for _, node := range clusterNodes {
 		nodes = append(nodes, node.Address())
 	}
 
@@ -329,11 +307,8 @@ func (c *Cluster) NodeList() []string {
 }
 
 func (c *Cluster) NodeCompatibility() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	versionList := map[string][]string{}
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		build := node.Build()
 
 		// TODO: Decide later to keep it or not; performance problems
@@ -352,6 +327,9 @@ func (c *Cluster) NodeCompatibility() string {
 }
 
 func (c *Cluster) SeedAddress() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
 	return c.seeds[0].String()
 }
 
@@ -451,6 +429,13 @@ func (c *Cluster) shouldUpdate() bool {
 	return time.Since(c.lastUpdate) >= time.Second*time.Duration(c.updateInterval)
 }
 
+func (c *Cluster) updatedAt(tm time.Time) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.lastUpdate = tm
+}
+
 func (c *Cluster) update(wg *sync.WaitGroup) error {
 	defer wg.Done()
 	defer func() { go c.SendEmailNotifications() }()
@@ -469,7 +454,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 		log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 	}
 
-	c.lastUpdate = time.Now()
+	c.updatedAt(time.Now())
 
 	return nil
 }
@@ -551,11 +536,11 @@ func (c *Cluster) updateCluster() error {
 		}
 
 		if node != nil {
-			if node.origNode != n {
-				if node.origNode != nil {
-					node.origNode.Close()
+			if origNode := node.origNode(); origNode != n {
+				if origNode != nil {
+					origNode.Close()
 				}
-				node.origNode = n
+				node.setOrigNode(n)
 			}
 		} else {
 			c.registerNode(n.GetHost(), newNode(c, n))
@@ -608,14 +593,11 @@ func (c *Cluster) updateStats() error {
 }
 
 func (c *Cluster) BuildDetails() map[string]interface{} {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	result := map[string]interface{}{}
 
 	versionList := map[string][]string{}
 	latestBuild := ""
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		build := node.Build()
 		versionList[build] = append(versionList[build], node.Address())
 		if version.Compare(build, latestBuild, ">") {
@@ -630,11 +612,8 @@ func (c *Cluster) BuildDetails() map[string]interface{} {
 }
 
 func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointValue {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := map[string]map[string]*common.SinglePointValue{}
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		for statName, valueMap := range node.LatestThroughput() {
 			if res[statName] == nil {
 				res[statName] = valueMap
@@ -650,11 +629,8 @@ func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointVa
 }
 
 func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := map[string]map[string][]*common.SinglePointValue{}
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		for statName, valueMap := range node.ThroughputSince(tm) {
 			if res[statName] == nil {
 				res[statName] = valueMap
@@ -670,10 +646,7 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 }
 
 func (c *Cluster) FindNodeById(id string) *Node {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		if node.Id() == id {
 			return node
 		}
@@ -683,10 +656,7 @@ func (c *Cluster) FindNodeById(id string) *Node {
 }
 
 func (c *Cluster) FindNodeByAddress(address string) *Node {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		if node.Address() == address {
 			return node
 		}
@@ -696,9 +666,6 @@ func (c *Cluster) FindNodeByAddress(address string) *Node {
 }
 
 func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := make([]*Node, 0, len(addresses))
 	for _, addr := range addresses {
 		if node := c.FindNodeByAddress(addr); node != nil {
@@ -710,11 +677,8 @@ func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 }
 
 func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := make(map[string]common.Stats, len(namespaces))
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		for _, nsName := range namespaces {
 			ns := node.NamespaceByName(nsName)
 			if ns == nil {
@@ -756,9 +720,6 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 }
 
 func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string]interface{} {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	res := make(map[string]interface{}, len(nodeAddrs))
 	for _, nodeAddress := range nodeAddrs {
 		node := c.FindNodeByAddress(nodeAddress)
@@ -777,14 +738,15 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 			continue
 		}
 
+		nsStats := ns.StatsAttrs("master-objects", "master_tombstones", "prole-objects", "prole_tombstones")
 		nodeInfo := common.Stats{
 			"memory":                    ns.Memory(),
 			"memory-pct":                ns.MemoryPercent(),
 			"disk":                      ns.Disk(),
 			"disk-pct":                  ns.DiskPercent(),
 			"node_status":               node.Status(),
-			"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(ns.StatsAttr("master-objects").(int64), "'"), common.Comma(ns.StatsAttr("master_tombstones").(int64), "'")),
-			"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(ns.StatsAttr("prole-objects").(int64), "'"), common.Comma(ns.StatsAttr("prole_tombstones").(int64), "'")),
+			"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("master-objects", 0), "'"), common.Comma(nsStats.TryInt("master_tombstones", 0), "'")),
+			"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("prole-objects", 0), "'"), common.Comma(nsStats.TryInt("prole_tombstones", 0), "'")),
 			"least_available_pct":       ns.StatsAttr("available_pct"),
 		}
 
@@ -830,10 +792,7 @@ func (c *Cluster) CurrentUserRoles() []string {
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		if node.Status() == "on" {
 			return node.Indexes(namespace)
 		}
@@ -864,13 +823,10 @@ func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 }
 
 func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	storageTypes := map[string][]string{}
 	storageDevices := map[string][]string{}
 
-	for _, node := range c.nodes {
+	for _, node := range c.Nodes() {
 		ns := node.NamespaceByName(namespace)
 		storageType := ns.StatsAttr("type")
 		if storageType != nil {
@@ -892,9 +848,6 @@ func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 }
 
 func (c *Cluster) DatacenterInfo() common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	xdrInfo := map[string]common.Stats{}
 	datacenterList := []string{}
 	nodeStats := common.Stats{}
@@ -1028,10 +981,9 @@ func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
 }
 
 func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
-	nodes := c.Nodes()
-
 	alerts := []*common.Alert{}
-	for _, node := range nodes {
+	return alerts
+	for _, node := range c.Nodes() {
 		alerts = append(alerts, node.AlertsFrom(id)...)
 	}
 

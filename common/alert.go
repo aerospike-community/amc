@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"sync"
+	// "sync"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/sasha-s/go-deadlock"
 	// "github.com/satori/go.uuid"
 	// "github.com/jmoiron/sqlx"
 )
@@ -53,7 +54,7 @@ type AlertBucket struct {
 	// Alerts which should be sent for notification system
 	newAlerts []*Alert
 
-	mutex sync.RWMutex
+	mutex deadlock.RWMutex
 }
 
 // AlertsById implements sort.Interface for []*Alert based on
@@ -71,6 +72,7 @@ func NewAlertBucket(db *sql.DB, size int) *AlertBucket {
 }
 
 func (ad *AlertBucket) DrainNewAlerts() []*Alert {
+	return []*Alert{}
 	ad.mutex.Lock()
 	defer ad.mutex.Unlock()
 
@@ -84,6 +86,7 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 }
 
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
+	return nil
 	ad.mutex.RLock()
 	defer ad.mutex.RUnlock()
 
@@ -104,6 +107,7 @@ func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 }
 
 func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
+	return
 	if recurrAlert := ad.Recurring(alert); recurrAlert != nil {
 		if alert.Status == AlertStatusGreen && recurrAlert.Status != AlertStatusGreen {
 			// Recurring issue which is resolved
@@ -125,6 +129,7 @@ func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 }
 
 func (ad *AlertBucket) saveAlert(alert *Alert) {
+	return
 	ad.mutex.Lock()
 	defer ad.mutex.Unlock()
 
@@ -153,6 +158,7 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 }
 
 func (ad *AlertBucket) updateRecurrence(alert *Alert) {
+	return
 	ad.mutex.Lock()
 	defer ad.mutex.Unlock()
 
@@ -164,6 +170,7 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 }
 
 func (ad *AlertBucket) ResolveAlert(alert *Alert) {
+	return
 	// Mark the old alert resolved
 	alert.Resolved.Set(time.Now())
 
@@ -176,6 +183,8 @@ func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 }
 
 func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
+	return []*Alert{}
+
 	ad.mutex.RLock()
 	defer ad.mutex.RUnlock()
 
@@ -194,6 +203,7 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 		return res
 	}
 
+	defer rows.Close()
 	res, err = fromSQLRows(rows)
 	if err != nil {
 		log.Errorf("Error retrieving alerts from the database: %s", err.Error())

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
+	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
 	ast "github.com/aerospike/aerospike-client-go/types"
@@ -16,27 +16,52 @@ import (
 	"github.com/citrusleaf/amc/rrd"
 )
 
+var _recordedNamespaceStats = []string{
+	"stat_read_success", "stat_read_reqs",
+	"stat_write_success", "stat_write_reqs",
+
+	"batch_read_success", "batch_read_reqs",
+
+	"scan_success", "scan_reqs",
+	"query_success", "query_reqs",
+
+	"xdr_read_success", "xdr_read_reqs",
+	"xdr_write_success", "xdr_write_reqs",
+
+	"udf_success", "udf_reqs",
+}
+
 type Namespace struct {
 	node *Node
 
-	name                string
-	latestInfo, oldInfo common.Info
-	indexInfo           common.Info
+	name       string
+	latestInfo common.SyncInfo
+	indexInfo  common.SyncInfo
 
-	latestStats  common.Stats
-	calcStats    common.Stats
-	latencystats common.Stats
+	latestStats  common.SyncStats
+	calcStats    common.SyncStats
+	latencystats common.SyncStats
 
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
+}
 
-	mutex sync.RWMutex
+func NewNamespace(node *Node, name string) *Namespace {
+	ns := &Namespace{
+		node:           node,
+		name:           name,
+		statsHistory:   map[string]*rrd.Bucket{},
+		latencyHistory: rrd.NewSimpleBucket(5, 3600),
+	}
+
+	for _, stat := range _recordedNamespaceStats {
+		ns.statsHistory[stat] = rrd.NewBucket(ns.node.cluster.UpdateInterval(), 3600, true)
+	}
+
+	return ns
 }
 
 func (ns *Namespace) ServerTime() time.Time {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	if v := ns.latestStats.TryInt("current_time", 0); v != 0 {
 		return time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)
 	}
@@ -47,12 +72,6 @@ func (ns *Namespace) update(info common.Info) error {
 	ns.setInfo(info)
 	ns.setAliases()
 	ns.updateHistory()
-	// log.Infof("namespace info: %v", ns.latestInfo)
-	// log.Infof("namespace calcStats: %v", ns.calcStats)
-
-	if !common.AMCIsProd() {
-		// log.Debugf("\tUpdated namespace: %s, objects: %d", ns.name, ns.latestStats["objects"])
-	}
 	return nil
 }
 
@@ -68,66 +87,38 @@ func (ns *Namespace) updateIndexInfo(indexes map[string]common.Info) error {
 		return err
 	}
 
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-	ns.indexInfo = common.Info(info)
-
+	ns.indexInfo.SetInfo(common.Info(info))
 	return nil
 }
 
 func (ns *Namespace) updateLatencyInfo(latStats common.Stats) {
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-	ns.latencystats = latStats
+	ns.latencystats.SetStats(latStats)
 }
 
 func (ns *Namespace) setInfo(stats common.Info) {
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-	ns.oldInfo = ns.latestInfo
-	ns.latestInfo = stats
-	ns.latestStats = stats.ToInfo("namespace/" + ns.name).ToStats()
+	ns.latestInfo.SetInfo(stats)
+	ns.latestStats.SetStats(stats.ToInfo("namespace/" + ns.name).ToStats())
 }
 
 func (ns *Namespace) InfoAttrs(names ...string) common.Info {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	var res common.Info
 	if len(names) == 0 {
-		res = make(common.Info, len(ns.latestInfo))
-		for name, value := range ns.latestInfo {
-			res[name] = value
-		}
+		res = ns.latestInfo.Clone()
 	} else {
-		res = make(common.Info, len(names))
-		for _, name := range names {
-			res[name] = ns.latestInfo[name]
-		}
+		res = ns.latestInfo.GetMulti(names...)
 	}
 	return res
 }
 
 func (ns *Namespace) InfoAttr(name string) string {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-	return ns.latestInfo[name]
+	return ns.latestInfo.TryString(name, "")
 }
 
 func (ns *Namespace) StatsAttrs(names ...string) common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	var res common.Stats
 	if len(names) == 0 {
-		res = make(common.Stats, len(ns.calcStats)+len(ns.latestStats))
-		for name, value := range ns.latestStats {
-			res[name] = value
-		}
-
-		for name, value := range ns.calcStats {
-			res[name] = value
-		}
+		res = ns.latestStats.Clone()
+		ns.calcStats.CloneInto(res)
 	} else {
 		res = make(common.Stats, len(names))
 		for _, name := range names {
@@ -142,8 +133,6 @@ func (ns *Namespace) StatsAttrs(names ...string) common.Stats {
 }
 
 func (ns *Namespace) StatsAttr(name string) interface{} {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
 	if val := ns.latestStats.Get(name); val != nil {
 		return val
 	}
@@ -151,16 +140,11 @@ func (ns *Namespace) StatsAttr(name string) interface{} {
 }
 
 func (ns *Namespace) aggStats(agg, calcAgg common.Stats) {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-	agg.AggregateStats(ns.latestStats)
-	calcAgg.AggregateStats(ns.calcStats)
+	ns.latestStats.AggregateStatsTo(agg)
+	ns.calcStats.AggregateStatsTo(calcAgg)
 }
 
 func (ns *Namespace) Disk() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	return common.Stats{
 		"used-bytes-disk":  ns.calcStats.TryInt("used-bytes-disk", 0),
 		"free-bytes-disk":  ns.calcStats.TryInt("free-bytes-disk", 0),
@@ -169,9 +153,6 @@ func (ns *Namespace) Disk() common.Stats {
 }
 
 func (ns *Namespace) DiskPercent() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	return common.Stats{
 		"free-pct-disk":       strconv.Itoa(int(ns.calcStats.TryInt("free-pct-disk", 0))),
 		"high-water-disk-pct": strconv.Itoa(int(ns.latestStats.TryInt("high-water-disk-pct", 0))),
@@ -179,9 +160,6 @@ func (ns *Namespace) DiskPercent() common.Stats {
 }
 
 func (ns *Namespace) Memory() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	return common.Stats{
 		"used-bytes-memory":  ns.calcStats.TryInt("used-bytes-memory", 0),
 		"free-bytes-memory":  ns.calcStats.TryInt("free-bytes-memory", 0),
@@ -190,9 +168,6 @@ func (ns *Namespace) Memory() common.Stats {
 }
 
 func (ns *Namespace) MemoryPercent() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	return common.Stats{
 		"free-pct-memory":       strconv.Itoa(int(ns.calcStats.TryInt("free-pct-memory", 0))),
 		"high-water-memory-pct": strconv.Itoa(int(ns.latestStats.TryInt("high-water-memory-pct", 0))),
@@ -200,46 +175,19 @@ func (ns *Namespace) MemoryPercent() common.Stats {
 }
 
 func (ns *Namespace) IndexStats(name string) common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
 	return ns.indexInfo.ToInfo("sindex/" + ns.name + "/" + name).ToStats()
 }
 
 func (ns *Namespace) updateHistory() {
 	tm := ns.ServerTime().Unix()
 
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-
-	recordedStats := []string{
-		"stat_read_success", "stat_read_reqs",
-		"stat_write_success", "stat_write_reqs",
-
-		"batch_read_success", "batch_read_reqs",
-
-		"scan_success", "scan_reqs",
-		"query_success", "query_reqs",
-
-		"xdr_read_success", "xdr_read_reqs",
-		"xdr_write_success", "xdr_write_reqs",
-
-		"udf_success", "udf_reqs",
-	}
-
-	for _, stat := range recordedStats {
+	for _, stat := range _recordedNamespaceStats {
 		bucket := ns.statsHistory[stat]
-		if bucket == nil {
-			bucket = rrd.NewBucket(ns.node.cluster.UpdateInterval(), 3600, true)
-			ns.statsHistory[stat] = bucket
-		}
 		bucket.Add(tm, ns.calcStats.TryFloat(stat, 0))
 	}
 }
 
 func (ns *Namespace) setAliases() {
-	ns.mutex.Lock()
-	defer ns.mutex.Unlock()
-
 	stats := ns.latestStats
 	calcStats := common.Stats{}
 
@@ -318,7 +266,7 @@ func (ns *Namespace) setAliases() {
 	calcStats["write-block-size"] = stats.TryInt("storage-engine.write-block-size", 0)
 
 	calcStats["free-pct-disk"] = stats.TryFloat("device_free_pct", 100)
-	if _, exists := stats["device_total_bytes"]; exists {
+	if exists := stats.Get("device_total_bytes"); exists != nil {
 		calcStats["used-bytes-disk"] = stats.TryInt("device_used_bytes", 0)
 		calcStats["total-bytes-disk"] = stats.TryInt("device_total_bytes", 0)
 		calcStats["free-bytes-disk"] = calcStats.TryInt("total-bytes-disk", 0) - calcStats.TryInt("device_used_bytes", 0)
@@ -382,13 +330,10 @@ func (ns *Namespace) setAliases() {
 	calcStats["write-block-size"] = stats.TryInt("storage-engine.write-block-size", 0)
 	calcStats["sub-objects"] = stats.TryInt("sub_objects", 0)
 
-	ns.calcStats = calcStats
+	ns.calcStats.SetStats(calcStats)
 }
 
 func (ns *Namespace) SetsInfo() map[string]common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	res := ns.latestInfo.ToStatsMap("sets/"+ns.name, "set", ":")
 	for k, v := range res {
 		// alias the keys
@@ -406,16 +351,14 @@ func (ns *Namespace) SetsInfo() map[string]common.Stats {
 }
 
 func (ns *Namespace) Stats() common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
+	nsStats := ns.StatsAttrs("master-objects", "master_tombstones", "prole-objects", "prole_tombstones")
 	res := common.Stats{
 		"memory":                    ns.Memory(),
 		"memory-pct":                ns.MemoryPercent(),
 		"disk":                      ns.Disk(),
 		"disk-pct":                  ns.DiskPercent(),
-		"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(ns.StatsAttr("master-objects").(int64), "'"), common.Comma(ns.StatsAttr("master_tombstones").(int64), "'")),
-		"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(ns.StatsAttr("prole-objects").(int64), "'"), common.Comma(ns.StatsAttr("prole_tombstones").(int64), "'")),
+		"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("master-objects", 0), "'"), common.Comma(nsStats.TryInt("master_tombstones", 0), "'")),
+		"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("prole-objects", 0), "'"), common.Comma(nsStats.TryInt("prole_tombstones", 0), "'")),
 		// "least_available_pct":       ns.StatsAttr("available_pct"),
 	}
 
@@ -470,9 +413,6 @@ func (ns *Namespace) Stats() common.Stats {
 // }
 
 func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
-	ns.mutex.RLock()
-	defer ns.mutex.RUnlock()
-
 	info := ns.latestInfo.ToInfo("get-config:context=namespace;id=" + ns.name).ToStats()
 	return info
 }

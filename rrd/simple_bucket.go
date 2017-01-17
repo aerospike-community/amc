@@ -2,9 +2,10 @@ package rrd
 
 import (
 	"math"
-	"sync"
+	// "sync"
 	"time"
 
+	"github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
@@ -17,7 +18,7 @@ type SimpleBucket struct {
 	values []interface{}
 	offset int // determines the offset from beginTime in resolution steps
 
-	mutex sync.RWMutex
+	mutex deadlock.RWMutex
 }
 
 func NewSimpleBucket(resolution, size int) *SimpleBucket {

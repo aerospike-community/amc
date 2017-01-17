@@ -3,6 +3,7 @@ package common
 import (
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -82,6 +83,19 @@ func (s Info) Get(name string, aliases ...string) interface{} {
 	}
 
 	return nil
+}
+
+func (s Info) GetMulti(names ...string) Info {
+	res := make(Info, len(names))
+	for _, name := range names {
+		if val, exists := s[name]; exists {
+			res[name] = val
+		} else {
+			res[name] = NOT_AVAILABLE
+		}
+	}
+
+	return res
 }
 
 // Value MUST exist, and MUST be an int64 or a convertible string.
@@ -419,4 +433,204 @@ func (s Stats) TryString(name string, defValue string, aliases ...string) string
 		}
 	}
 	return defValue
+}
+
+/**********************************************************************
+
+					Type SyncInfo
+
+***********************************************************************/
+type SyncInfo struct {
+	Info
+
+	mutex sync.RWMutex
+}
+
+func (s *SyncInfo) SetInfo(info Info) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	s.Info = info
+}
+
+func (s *SyncInfo) Clone() Info {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	return s.Info.Clone()
+}
+
+func (s *SyncInfo) Len() int {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return len(s.Info)
+}
+
+func (s *SyncInfo) Get(name string, aliases ...string) interface{} {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.Get(name, aliases...)
+}
+
+func (s *SyncInfo) GetMulti(names ...string) Info {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.GetMulti(names...)
+}
+
+// Value MUST exist, and MUST be an int64 or a convertible string.
+// Panics if the above constraints are not met
+func (s *SyncInfo) Int(name string, aliases ...string) int64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.Int(name, aliases...)
+}
+
+// Value should be an int64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s *SyncInfo) TryInt(name string, defValue int64, aliases ...string) int64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.TryInt(name, defValue, aliases...)
+}
+
+// Value MUST exist, and MUST be an float64 or a convertible string.
+// Panics if the above constraints are not met
+func (s *SyncInfo) Float(name string, aliases ...string) float64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.Float(name, aliases...)
+}
+
+// Value should be an float64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s *SyncInfo) TryFloat(name string, defValue float64, aliases ...string) float64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.TryFloat(name, defValue, aliases...)
+}
+
+// Value should be a string; otherwise defValue is returned
+// this function never panics
+func (s *SyncInfo) TryString(name string, defValue string, aliases ...string) string {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.TryString(name, defValue, aliases...)
+}
+
+// Value should be an float64, int64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s *SyncInfo) TryNumericValue(name string, defVal interface{}, aliases ...string) interface{} {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Info.TryNumericValue(name, defVal, aliases...)
+}
+
+/**********************************************************************
+
+					Type SyncStats
+
+***********************************************************************/
+type SyncStats struct {
+	Stats
+
+	mutex sync.RWMutex
+}
+
+func (s *SyncStats) SetStats(info Stats) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	s.Stats = info
+}
+
+func (s *SyncStats) Set(name string, value interface{}) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	s.Stats[name] = value
+}
+
+func (s *SyncStats) Clone() Stats {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.Clone()
+}
+
+func (s *SyncStats) CloneInto(res Stats) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	for k, v := range s.Stats {
+		res[k] = v
+	}
+}
+
+func (s *SyncStats) Get(name string, aliases ...string) interface{} {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.Get(name, aliases...)
+}
+
+func (s *SyncStats) GetMulti(names ...string) Stats {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.GetMulti(names...)
+}
+
+// Value MUST exist, and MUST be an int64 or a convertible string.
+// Panics if the above constraints are not met
+func (s *SyncStats) Int(name string, aliases ...string) int64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.Int(name, aliases...)
+}
+
+// Value should be an int64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s *SyncStats) TryInt(name string, defValue int64, aliases ...string) int64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.TryInt(name, defValue, aliases...)
+}
+
+// Value should be an float64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s *SyncStats) TryFloat(name string, defValue float64, aliases ...string) float64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.TryFloat(name, defValue, aliases...)
+}
+
+// Value should be a string; otherwise defValue is returned
+// this function never panics
+func (s *SyncStats) TryString(name string, defValue string, aliases ...string) string {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Stats.TryString(name, defValue, aliases...)
+}
+
+// Value should be an float64 or a convertible string
+// this function never panics
+func (s *SyncStats) AggregateStatsTo(other Stats) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	other.AggregateStats(s.Stats)
 }
