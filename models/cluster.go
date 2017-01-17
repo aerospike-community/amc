@@ -268,7 +268,7 @@ func (c *Cluster) NodeBuilds() (builds []string) {
 		builds = append(builds, node.Build())
 	}
 
-	return common.StrUniq(builds)
+	return common.SortStrings(common.StrUniq(builds))
 }
 
 func (c *Cluster) NamespaceList() (result []string) {
@@ -278,7 +278,7 @@ func (c *Cluster) NamespaceList() (result []string) {
 		}
 	}
 
-	return common.StrUniq(result)
+	return common.SortStrings(common.StrUniq(result))
 }
 
 func (c *Cluster) NamespaceIndexes() map[string][]string {
@@ -303,7 +303,7 @@ func (c *Cluster) NodeList() []string {
 		nodes = append(nodes, node.Address())
 	}
 
-	return nodes
+	return common.SortStrings(nodes)
 }
 
 func (c *Cluster) NodeCompatibility() string {

@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -112,4 +113,9 @@ func Comma(v int64, sep string) string {
 	}
 	parts[j] = strconv.Itoa(int(v))
 	return sign + strings.Join(parts[j:], sep)
+}
+
+func SortStrings(s []string) []string {
+	sort.Strings(s)
+	return s
 }
