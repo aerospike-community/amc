@@ -52,9 +52,9 @@ func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 	return spv.timestamp
 }
 
-func (spv *SinglePointValue) Value() *float64 {
+func (spv *SinglePointValue) Value(defVal *float64) *float64 {
 	if spv == nil {
-		return nil
+		return defVal
 	}
 
 	return spv.value
@@ -441,44 +441,43 @@ func (s Stats) TryString(name string, defValue string, aliases ...string) string
 
 ***********************************************************************/
 type SyncInfo struct {
-	Info
+	_Info Info
 
 	mutex sync.RWMutex
+}
+
+func NewSyncInfo(info Info) *SyncInfo {
+	return &SyncInfo{
+		_Info: info,
+	}
 }
 
 func (s *SyncInfo) SetInfo(info Info) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.Info = info
+	s._Info = info
 }
 
 func (s *SyncInfo) Clone() Info {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	return s.Info.Clone()
-}
-
-func (s *SyncInfo) Len() int {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return len(s.Info)
+	return s._Info.Clone()
 }
 
 func (s *SyncInfo) Get(name string, aliases ...string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.Get(name, aliases...)
+	return s._Info.Get(name, aliases...)
 }
 
 func (s *SyncInfo) GetMulti(names ...string) Info {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.GetMulti(names...)
+	return s._Info.GetMulti(names...)
 }
 
 // Value MUST exist, and MUST be an int64 or a convertible string.
@@ -487,7 +486,7 @@ func (s *SyncInfo) Int(name string, aliases ...string) int64 {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.Int(name, aliases...)
+	return s._Info.Int(name, aliases...)
 }
 
 // Value should be an int64 or a convertible string; otherwise defValue is returned
@@ -496,7 +495,7 @@ func (s *SyncInfo) TryInt(name string, defValue int64, aliases ...string) int64 
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.TryInt(name, defValue, aliases...)
+	return s._Info.TryInt(name, defValue, aliases...)
 }
 
 // Value MUST exist, and MUST be an float64 or a convertible string.
@@ -505,7 +504,7 @@ func (s *SyncInfo) Float(name string, aliases ...string) float64 {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.Float(name, aliases...)
+	return s._Info.Float(name, aliases...)
 }
 
 // Value should be an float64 or a convertible string; otherwise defValue is returned
@@ -514,7 +513,7 @@ func (s *SyncInfo) TryFloat(name string, defValue float64, aliases ...string) fl
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.TryFloat(name, defValue, aliases...)
+	return s._Info.TryFloat(name, defValue, aliases...)
 }
 
 // Value should be a string; otherwise defValue is returned
@@ -523,7 +522,7 @@ func (s *SyncInfo) TryString(name string, defValue string, aliases ...string) st
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.TryString(name, defValue, aliases...)
+	return s._Info.TryString(name, defValue, aliases...)
 }
 
 // Value should be an float64, int64 or a convertible string; otherwise defValue is returned
@@ -532,7 +531,30 @@ func (s *SyncInfo) TryNumericValue(name string, defVal interface{}, aliases ...s
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Info.TryNumericValue(name, defVal, aliases...)
+	return s._Info.TryNumericValue(name, defVal, aliases...)
+}
+
+func (s *SyncInfo) ToInfo(name string) Info {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Info.ToInfo(name)
+}
+
+// Value should be an stats or a convertible string; otherwise nil is returns
+// this function never panics
+func (s *SyncInfo) ToInfoMap(name string, alias string, delim string) map[string]Info {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Info.ToInfoMap(name, alias, delim)
+}
+
+func (s *SyncInfo) ToStatsMap(name string, alias string, delim string) map[string]Stats {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Info.ToStatsMap(name, alias, delim)
 }
 
 /**********************************************************************
@@ -541,37 +563,43 @@ func (s *SyncInfo) TryNumericValue(name string, defVal interface{}, aliases ...s
 
 ***********************************************************************/
 type SyncStats struct {
-	Stats
+	_Stats Stats
 
 	mutex sync.RWMutex
+}
+
+func NewSyncStats(stats Stats) *SyncStats {
+	return &SyncStats{
+		_Stats: stats,
+	}
 }
 
 func (s *SyncStats) SetStats(info Stats) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.Stats = info
+	s._Stats = info
 }
 
 func (s *SyncStats) Set(name string, value interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.Stats[name] = value
+	s._Stats[name] = value
 }
 
 func (s *SyncStats) Clone() Stats {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.Clone()
+	return s._Stats.Clone()
 }
 
 func (s *SyncStats) CloneInto(res Stats) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	for k, v := range s.Stats {
+	for k, v := range s._Stats {
 		res[k] = v
 	}
 }
@@ -580,14 +608,14 @@ func (s *SyncStats) Get(name string, aliases ...string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.Get(name, aliases...)
+	return s._Stats.Get(name, aliases...)
 }
 
 func (s *SyncStats) GetMulti(names ...string) Stats {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.GetMulti(names...)
+	return s._Stats.GetMulti(names...)
 }
 
 // Value MUST exist, and MUST be an int64 or a convertible string.
@@ -596,7 +624,7 @@ func (s *SyncStats) Int(name string, aliases ...string) int64 {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.Int(name, aliases...)
+	return s._Stats.Int(name, aliases...)
 }
 
 // Value should be an int64 or a convertible string; otherwise defValue is returned
@@ -605,7 +633,7 @@ func (s *SyncStats) TryInt(name string, defValue int64, aliases ...string) int64
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.TryInt(name, defValue, aliases...)
+	return s._Stats.TryInt(name, defValue, aliases...)
 }
 
 // Value should be an float64 or a convertible string; otherwise defValue is returned
@@ -614,7 +642,7 @@ func (s *SyncStats) TryFloat(name string, defValue float64, aliases ...string) f
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.TryFloat(name, defValue, aliases...)
+	return s._Stats.TryFloat(name, defValue, aliases...)
 }
 
 // Value should be a string; otherwise defValue is returned
@@ -623,7 +651,7 @@ func (s *SyncStats) TryString(name string, defValue string, aliases ...string) s
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	return s.Stats.TryString(name, defValue, aliases...)
+	return s._Stats.TryString(name, defValue, aliases...)
 }
 
 // Value should be an float64 or a convertible string
@@ -632,5 +660,5 @@ func (s *SyncStats) AggregateStatsTo(other Stats) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	other.AggregateStats(s.Stats)
+	other.AggregateStats(s._Stats)
 }

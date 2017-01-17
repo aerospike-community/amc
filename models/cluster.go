@@ -889,31 +889,24 @@ func (c *Cluster) DatacenterInfo() common.Stats {
 
 	readTotal, readSucc := 0.0, 0.0
 	writeTotal, writeSucc := 0.0, 0.0
+	zeroValue := float64(0)
 	for stat, nodeMap := range c.LatestThroughput() {
 		switch stat {
 		case "stat_read_reqs":
 			for _, v := range nodeMap {
-				if v.Value() != nil {
-					readTotal += *v.Value()
-				}
+				readTotal += *v.Value(&zeroValue)
 			}
 		case "stat_read_success":
 			for _, v := range nodeMap {
-				if v.Value() != nil {
-					readSucc += *v.Value()
-				}
+				readSucc += *v.Value(&zeroValue)
 			}
 		case "stat_write_reqs":
 			for _, v := range nodeMap {
-				if v.Value() != nil {
-					writeTotal += *v.Value()
-				}
+				writeTotal += *v.Value(&zeroValue)
 			}
 		case "stat_write_success":
 			for _, v := range nodeMap {
-				if v.Value() != nil {
-					writeSucc += *v.Value()
-				}
+				writeSucc += *v.Value(&zeroValue)
 			}
 		}
 	}

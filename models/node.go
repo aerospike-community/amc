@@ -100,7 +100,7 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 		status:         nodeStatus.On,
 		namespaces:     atomic.Value{},
 		latencyHistory: lh,
-		_alertStates:   common.SyncStats{Stats: common.Stats{}},
+		_alertStates:   *common.NewSyncStats(common.Stats{}),
 		alerts:         common.NewAlertBucket(db, 50),
 	}
 

@@ -148,6 +148,20 @@ func getClusterBasic(c echo.Context) error {
 	})
 }
 
+var statsNameAliases = map[string][2]string{
+	"read_tps":  {"stat_read_reqs", "stat_read_success"},
+	"write_tps": {"stat_write_reqs", "stat_write_success"},
+
+	"xdr_read_tps":  {"xdr_read_reqs", "xdr_read_success"},
+	"xdr_write_tps": {"xdr_write_reqs", "xdr_write_success"},
+
+	"scan_tps":  {"scan_reqs", "scan_success"},
+	"query_tps": {"query_reqs", "query_success"},
+
+	"udf_tps":        {"udf_reqs", "udf_success"},
+	"batch_read_tps": {"batch_read_reqs", "batch_read_success"},
+}
+
 func getClusterThroughputHistory(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
@@ -172,20 +186,6 @@ func getClusterThroughputHistory(c echo.Context) error {
 		Secondary *float64 `json:"secondary"`
 	}
 
-	converter := map[string][2]string{
-		"read_tps":  {"stat_read_reqs", "stat_read_success"},
-		"write_tps": {"stat_write_reqs", "stat_write_success"},
-
-		"xdr_read_tps":  {"xdr_read_reqs", "xdr_read_success"},
-		"xdr_write_tps": {"xdr_write_reqs", "xdr_write_success"},
-
-		"scan_tps":  {"scan_reqs", "scan_success"},
-		"query_tps": {"query_reqs", "query_success"},
-
-		"udf_tps":        {"udf_reqs", "udf_success"},
-		"batch_read_tps": {"batch_read_reqs", "batch_read_success"},
-	}
-
 	tm := time.Unix(since, 0)
 	throughput := cluster.ThroughputSince(tm)
 
@@ -193,7 +193,8 @@ func getClusterThroughputHistory(c echo.Context) error {
 		"cluster_status": cluster.Status(),
 	}
 
-	for outStatName, aliases := range converter {
+	zeroValue := float64(0)
+	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[0]]
 		secondaryVals := throughput[aliases[1]]
 
@@ -203,9 +204,9 @@ func getClusterThroughputHistory(c echo.Context) error {
 			for i, yValues := range yValuesList {
 				var Secondary *float64
 				if len(secondaryVals[node]) > i {
-					Secondary = secondaryVals[node][i].Value()
+					Secondary = secondaryVals[node][i].Value(&zeroValue)
 				}
-				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(), Secondary: Secondary})
+				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(&zeroValue), Secondary: Secondary})
 			}
 			statRes[node] = statList
 		}
@@ -230,33 +231,20 @@ func getClusterThroughput(c echo.Context) error {
 		Secondary *float64 `json:"secondary"`
 	}
 
-	converter := map[string][2]string{
-		"read_tps":  {"stat_read_reqs", "stat_read_success"},
-		"write_tps": {"stat_write_reqs", "stat_write_success"},
-
-		"xdr_read_tps":  {"xdr_read_reqs", "xdr_read_success"},
-		"xdr_write_tps": {"xdr_write_reqs", "xdr_write_success"},
-
-		"scan_tps":  {"scan_reqs", "scan_success"},
-		"query_tps": {"query_reqs", "query_success"},
-
-		"udf_tps":        {"udf_reqs", "udf_success"},
-		"batch_read_tps": {"batch_read_reqs", "batch_read_success"},
-	}
-
 	throughput := cluster.LatestThroughput()
 
 	res := map[string]interface{}{
 		"cluster_status": cluster.Status(),
 	}
 
-	for outStatName, aliases := range converter {
+	zeroVal := float64(0)
+	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[0]]
 		secondaryVals := throughput[aliases[1]]
 
 		statRes := make(map[string]chartStat, len(primaryVals))
 		for node, yValues := range primaryVals {
-			statRes[node] = chartStat{X: yValues.TimestampJson(nil), Y: yValues.Value(), Secondary: secondaryVals[node].Value()}
+			statRes[node] = chartStat{X: yValues.TimestampJson(nil), Y: yValues.Value(&zeroVal), Secondary: secondaryVals[node].Value(&zeroVal)}
 		}
 
 		res[outStatName] = statRes
@@ -267,6 +255,41 @@ func getClusterThroughput(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+var statKeys = []string{"system_free_mem_pct",
+	"nsup-threads",
+	"cluster_integrity",
+	"storage_defrag_records",
+	"scan-priority",
+	"client_connections",
+	"migrate_progress_recv",
+	"replication-fire-and-forget",
+	"storage-benchmarks",
+	"stat_write_errs",
+	"node_status",
+	"objects",
+	"tombstones",
+	"proto-fd-max",
+	"system_swapping",
+	"err_write_fail_prole_unknown",
+	"queue",
+	"uptime",
+	"err_out_of_space",
+	"tsvc_queue",
+	"migrate_progress_send",
+	"client-fd-max",
+	"migrate_incoming_remaining",
+	"free-pct-memory",
+	"cluster_name",
+	"migrate_outgoing_remaining",
+	"cluster_visibility",
+	"build",
+	"cluster_size",
+	"stat_duplicate_operation",
+	"free-pct-disk",
+	"batch_errors",
+	"same_cluster",
+}
+
 func getClusterNodes(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
@@ -274,41 +297,6 @@ func getClusterNodes(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 	nodeList := strings.Split(c.Param("nodes"), ",")
-
-	statKeys := []string{"system_free_mem_pct",
-		"nsup-threads",
-		"cluster_integrity",
-		"storage_defrag_records",
-		"scan-priority",
-		"client_connections",
-		"migrate_progress_recv",
-		"replication-fire-and-forget",
-		"storage-benchmarks",
-		"stat_write_errs",
-		"node_status",
-		"objects",
-		"tombstones",
-		"proto-fd-max",
-		"system_swapping",
-		"err_write_fail_prole_unknown",
-		"queue",
-		"uptime",
-		"err_out_of_space",
-		"tsvc_queue",
-		"migrate_progress_send",
-		"client-fd-max",
-		"migrate_incoming_remaining",
-		"free-pct-memory",
-		"cluster_name",
-		"migrate_outgoing_remaining",
-		"cluster_visibility",
-		"build",
-		"cluster_size",
-		"stat_duplicate_operation",
-		"free-pct-disk",
-		"batch_errors",
-		"same_cluster",
-	}
 
 	res := make(map[string]interface{}, len(nodeList))
 	for _, node := range cluster.Nodes() {
