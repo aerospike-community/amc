@@ -42,6 +42,13 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
             if(Util.setGlobalClusterInfoInModel("clusters", this)){
                 this.fetchSuccess(this);
             }
+
+            // set selected latency window
+            var latencyWindow = window.AMCGLOBALS.persistent.latencyWindow;
+            if(latencyWindow) {
+              $('#selectHistory').val(latencyWindow);
+            }
+
         },
 
         startEventListeners : function (){
@@ -89,9 +96,10 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
             });
 
             window.$("#selectHistory").off("change").on("change", function(){
+                window.AMCGLOBALS.persistent.latencyWindow = this.value;
 
                 that.mainChart.configure({
-                    timeWindowSize : (parseInt(this.value) * 1000),
+                    timeWindowSize : parseInt(this.value)*1000,
                     fixTimeWindowSize : this.value === "1800" ? false : true,
                     // xAxisNumberOfTicks : 3,
                 });
