@@ -5,6 +5,8 @@ the issue of header validation
 the issue of non-accessible nodes (which are in the peer list, but only via local IPs)
 the issue of remving nodes in big clusters: we don't remove all nodes, so the seed will not be tried again
 
+add TLS CLI params to tests so that we can test them
+
 
 1.19:
   Release CHECKLIST:
