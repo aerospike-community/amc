@@ -674,7 +674,7 @@ func (n *Node) DataCenters() map[string]common.Stats {
 			nodes[i] = strings.Replace(nodes[i], "+", ":", -1)
 		}
 		stats["Nodes"] = common.DeleteEmpty(nodes)
-		stats["namespaces"] = common.DeleteEmpty(strings.Split(stats["namespaces"].(string), ","))
+		stats["namespaces"] = common.DeleteEmpty(strings.Split(stats.TryString("namespaces", ""), ","))
 		dcs[k] = stats
 
 		if len(nodes) == 0 {
@@ -955,10 +955,10 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 			nodeStats[op] = stats
 		} else {
 			// nstats := nstatsIfc.(common.Stats)
-			if timestamp > nstats["timestamp"].(string) {
+			if timestamp > nstats.TryString("timestamp", "") {
 				nstats["timestamp"] = timestamp
 			}
-			nstats["tps"] = nstats["tps"].(float64) + opsCount
+			nstats["tps"] = nstats.TryFloat("tps", 0) + opsCount
 			nBuckets := nstats["buckets"].([]string)
 			if len(buckets) > len(nBuckets) {
 				nstats["buckets"] = append(nBuckets, buckets[len(nBuckets):]...)
