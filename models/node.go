@@ -935,6 +935,10 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 			break
 		}
 
+		for i := range valBucketsFloat {
+			valBucketsFloat[i] *= opsCount
+		}
+
 		stats := common.Stats{
 			"tps":        opsCount,
 			"timestamp":  timestamp,
@@ -954,25 +958,33 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 		if nstats := nodeStats[op]; nstats == nil {
 			nodeStats[op] = stats
 		} else {
-			// nstats := nstatsIfc.(common.Stats)
 			if timestamp > nstats.TryString("timestamp", "") {
 				nstats["timestamp"] = timestamp
 			}
+
 			nstats["tps"] = nstats.TryFloat("tps", 0) + opsCount
 			nBuckets := nstats["buckets"].([]string)
 			if len(buckets) > len(nBuckets) {
 				nstats["buckets"] = append(nBuckets, buckets[len(nBuckets):]...)
-				nstats["valBuckets"] = append(nstats["valBuckets"].([]float64), make([]float64, len(nBuckets))...)
+				nstats["valBuckets"] = append(nstats["valBuckets"].([]float64), make([]float64, len(buckets[len(nBuckets):]))...)
 			}
 
 			nValBuckets := nstats["valBuckets"].([]float64)
 			for i := range buckets {
-				nValBuckets[i] += valBucketsFloat[i] * opsCount
+				nValBuckets[i] += valBucketsFloat[i]
 			}
 			nstats["valBuckets"] = nValBuckets
-
 			nodeStats[op] = nstats
 		}
+	}
+
+	for _, nstats := range nodeStats {
+		tps := nstats.TryFloat("tps", 1)
+		nValBuckets := nstats["valBuckets"].([]float64)
+		for i := range nValBuckets {
+			nValBuckets[i] /= tps
+		}
+		nstats["valBuckets"] = nValBuckets
 	}
 
 	return res, nodeStats
