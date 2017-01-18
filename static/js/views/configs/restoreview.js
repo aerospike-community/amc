@@ -209,13 +209,8 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
 		},
 
 		checkForLocalhost : function(){
-			if($("#restoreFileNetworkAddress").val() == "localhost" || $("#restoreFileNetworkAddress").val() == "127.0.0.1"){
-                $("#restoreUsername").prop('disabled', true);
-                $("#restorePassword").prop('disabled', true);
-            } else {
-                $("#restoreUsername").prop('disabled', false);
-                $("#restorePassword").prop('disabled', false);
-            }
+          $("#restoreUsername").prop('disabled', false);
+          $("#restorePassword").prop('disabled', false);
 		},
         
         clusterRestoreHandler : function(){
