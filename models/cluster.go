@@ -53,8 +53,9 @@ type Cluster struct {
 
 	alerts *common.AlertBucket
 
-	users []*as.UserRoles
-	roles []*as.Role
+	users      []*as.UserRoles
+	roles      []*as.Role
+	privileges []string
 
 	activeBackup  *Backup
 	activeRestore *Restore
@@ -265,6 +266,15 @@ func (c *Cluster) CreateUDF(name, body string) error {
 func (c *Cluster) DropUDF(udf string) error {
 	_, err := c.client.RemoveUDF(nil, udf)
 	return err
+}
+
+func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType string) error {
+	_, err := c.client.CreateIndex(nil, namespace, setName, indexName, binName, as.IndexType(indexType))
+	return err
+}
+
+func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
+	return c.client.DropIndex(nil, namespace, setName, indexName)
 }
 
 func (c *Cluster) Nodes() (nodes []*Node) {
@@ -521,11 +531,24 @@ func (c *Cluster) updateUsers() error {
 		return nil
 	}
 
+	privileges := []string{}
+	for _, r := range roles {
+		role, err := c.client.QueryRole(nil, r.Name)
+		if err != nil {
+			continue
+		}
+
+		for _, priv := range role.Privileges {
+			privileges = append(privileges, string(priv.Code))
+		}
+	}
+
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	c.users = users
 	c.roles = roles
+	c.privileges = common.SortStrings(common.StrUniq(privileges))
 
 	return nil
 }
@@ -801,7 +824,15 @@ func (c *Cluster) CurrentUserRoles() []string {
 	if user == nil {
 		return nil
 	}
+
 	return user.Roles
+}
+
+func (c *Cluster) CurrentUserPrivileges() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	return c.privileges
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {

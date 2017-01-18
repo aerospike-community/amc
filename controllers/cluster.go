@@ -683,3 +683,57 @@ func setClusterUpdateInterval(c echo.Context) error {
 		"status": "success",
 	})
 }
+
+func postClusterAddIndex(c echo.Context) error {
+	form := struct {
+		IndexName string `form:"index_name"`
+		BinName   string `form:"bin_name"`
+		SetName   string `form:"set_name"`
+		IndexType string `form:"bin_type"`
+		Namespace string `form:"namespace"`
+	}{}
+
+	c.Bind(&form)
+	if len(form.IndexName) == 0 || len(form.BinName) == 0 || len(form.SetName) == 0 || len(form.IndexType) == 0 || len(form.Namespace) == 0 {
+		return c.JSON(http.StatusOK, errorMap("Invalid index data."))
+	}
+
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	if err := cluster.CreateIndex(form.Namespace, form.SetName, form.IndexName, form.BinName, form.IndexType); err != nil {
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
+}
+
+func postClusterDropIndex(c echo.Context) error {
+	form := struct {
+		IndexName string `form:"index_name"`
+	}{}
+
+	c.Bind(&form)
+	if len(form.IndexName) == 0 {
+		return c.JSON(http.StatusOK, errorMap("Invalid index name."))
+	}
+
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	if err := cluster.DropIndex(c.Param("namespace"), "", form.IndexName); err != nil {
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
+}

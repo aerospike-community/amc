@@ -158,8 +158,11 @@ func Server(config *common.Config) {
 	e.POST("/aerospike/service/clusters/:clusterUuid/xdr/:xdrPort/nodes/:nodes/setconfig", setClusterXdrNodesConfig)
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", getClusterNodeAllStats)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", getClusterNamespaceNodeAllStats)
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", getClusterNamespaceSindexNodeAllStats)
 	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:port/nodes/:node/allstats", getClusterXdrNodeAllStats)
+
+	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", getClusterNamespaceSindexNodeAllStats)
+	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/add_index", postClusterAddIndex)
+	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/drop_index", postClusterDropIndex)
 
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", getClusterNamespaceSindexes)
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", getClusterNamespaceSets)

@@ -53,7 +53,7 @@ func getClusterUserRoles(c echo.Context) error {
 	}
 
 	res := map[string]interface{}{
-		"rolelist": cluster.CurrentUserRoles(),
+		"rolelist": cluster.CurrentUserPrivileges(),
 	}
 
 	return c.JSON(http.StatusOK, res)

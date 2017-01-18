@@ -74,7 +74,7 @@ func Sessions(name string, store Store) echo.MiddlewareFunc {
 			w.Header().Set("Access-Control-Allow-Methods", "GET")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Max-Age", "10")
-			w.Header().Set("Cache-Control", "must-revalidate, post-check=0, pre-check=0, no-cache")
+			w.Header().Set("Cache-Control", "must-revalidate, post-check=0, pre-check=0")
 
 			s := &session{name: name, request: request, store: store, session: nil, hasChanged: false, writer: c.Response().Writer}
 			c.Set(DefaultKey, s)
