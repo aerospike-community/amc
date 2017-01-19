@@ -28,6 +28,9 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 								'		<div name="'+model.address+'" class="all-sparkline-chart-container">' + 
 								'		</div>' + 
 								'	</div>' + 
+                ' <div style="position: absolute; top: 45%; left: 45%; display: none; color: #aaa" class="lat-data-unavailable">' +
+                '  <h4> No data available </h4>' +
+                ' </div>' +
 								'</div>';
 								
 			$('#nodesLatencyChartsContainer').append(templateStr);
@@ -142,7 +145,19 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 		},
     error: function(model) {
       model.rowView.spinner.stopOverlay();
+      this.showErrText(true);
     },
+
+    showErrText: function(show) {
+      var selector = '#' + Util.removeDotAndColon(this.address) + '-nodeLatencyContainer';
+      selector += ' .lat-data-unavailable';
+      if(show) {
+        $(selector).css('display', 'block');
+      } else {
+        $(selector).css('display', 'none');
+      }
+    },
+
 		render: function(model, latencyData){
 			
 			function renderOnDemand(){
@@ -152,6 +167,7 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 				var subTitle = nodeLatencyContainer.find('.sub-title-bar');
 				var containerVisible = boxContainer.css("display") === 'none' ? false : true;
 				model.rowView.spinner.stopOverlay();
+        this.showErrText(false);
 				if((typeof model.attributes.node_status === 'undefined' || model.attributes.node_status === 'on') && model.latencyAvailable){
 					
 					if( $('#nodesLatencyChartsContainer .node-latency-container').length == 1 && 
