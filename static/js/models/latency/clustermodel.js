@@ -44,12 +44,27 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
             }
 
             // set selected latency window
-            var latencyWindow = window.AMCGLOBALS.persistent.latencyWindow;
-            if(latencyWindow) {
-              $('#selectHistory').val(latencyWindow);
-            }
-
+            this.initLatencyWindow();
         },
+
+      initLatencyWindow: function() {
+          var latencyWindow = window.AMCGLOBALS.persistent.latencyWindow;
+          if(!latencyWindow) {
+            return;
+          }
+
+          this.updateChartWindow(latencyWindow);
+          // set value in dropdown
+          $('#selectHistory').val(latencyWindow);
+      },
+
+      updateChartWindow: function(latencyWindow) {
+          this.mainChart.configure({
+              timeWindowSize : parseInt(latencyWindow)*1000,
+              fixTimeWindowSize : latencyWindow === "1800" ? false : true,
+          });
+      },
+        
 
         startEventListeners : function (){
             var that = this;
@@ -96,14 +111,10 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
             });
 
             window.$("#selectHistory").off("change").on("change", function(){
-                window.AMCGLOBALS.persistent.latencyWindow = this.value;
+                var latencyWindow = this.value;
+                window.AMCGLOBALS.persistent.latencyWindow = latencyWindow;
 
-                that.mainChart.configure({
-                    timeWindowSize : parseInt(this.value)*1000,
-                    fixTimeWindowSize : this.value === "1800" ? false : true,
-                    // xAxisNumberOfTicks : 3,
-                });
-
+                that.updateChartWindow(latencyWindow);
                 that.mainChart.updateSeries(that.mainChart.rawData);
             });
         },
