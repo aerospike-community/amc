@@ -341,7 +341,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                         "<input type='text' style='width: 135px;text-align:center;' placeholder='Host Name or IP' class='dialog_input' value='" + nodeAddress + "' id='ip_dialog'/>" +
                                         "<span>:</span>" +
                                         "<input id='port_dialog' class='dialog_input' type='number' style='width: 55px;' maxlength='5' placeholder='PORT' value='" + port + "'/>" +
-                                        "<div><input type='text' style='width: 200px; text-align:center;' placeholder='Cluster Name (OPTIONAL)' class='dialog_input' value='' id='cluster_name_dialog'/></div>"+
+                                        "<div><input type='text' style='width: 200px; text-align:center;' placeholder='Cluster Label (OPTIONAL)' class='dialog_input' value='' id='cluster_name_dialog'/></div>"+
                                         "<div><label class='dialog_input'><input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;' title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>Multicluster View</label></div>"+
                                         "<div id='error_message' class='dialog-message'></div>");
 

@@ -41,8 +41,8 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
         },
 
         isCommunityEdition: function() {
-          var edition = window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE 
-          if(!edition || edition === AppConfig.amc_type[0]) {  
+          var edition = window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE
+          if(!edition || edition === AppConfig.amc_type[0]) {
             return true;
           } else {
             return false;
@@ -2536,7 +2536,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                         postDialog : function(){
                             $("#ip_dialog").attr("disabled", "disabled").val(seedNode.split(":")[0]);
                             $("#port_dialog").attr("disabled", "disabled").val(seedNode.split(":")[1]);
-                            $("#cluster_name_dialog").val(clusterName).attr("placeholder","Cluster Name").focus();
+                            $("#cluster_name_dialog").val(clusterName).attr("placeholder","Cluster Label").focus();
                         },
                         connect : function(){
                             var ipAddress = $("#ip_dialog").removeAttr("disabled").val().trim();
@@ -2606,7 +2606,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                 html += ">";
 
                 html += "<div style='float:right;'>";
-                html += "<div class='cluster_button sprite edit' title='edit cluster name'></div>";
+                html += "<div class='cluster_button sprite edit' title='edit cluster label'></div>";
                 html += "<div class='cluster_button sprite remove' title='remove cluster'></div>";
 
                 html += "</div>";
@@ -3038,8 +3038,8 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                         $(document).trigger("mouseup:alerts",[e]);
 
                         var container = $("#rightPanel").add("#rightPanelSlideOut").add("#rightPanelButton").add(".ui-dialog.ui-widget, .ui-widget-overlay.ui-front");
-                        if( document.contains(e.target) && 
-                            ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) || 
+                        if( document.contains(e.target) &&
+                            ((!(container.is(target) || container.has(target).length > 0) && $("#rightPanelButton").hasClass("active")) ||
                              $("#rightPanelCloseButton").is(target) || $("#multiClusterCloseBtn").is(target)) ){
                             Util.closeRightPanel();
                             $(document).trigger("mouseup:nodeselect",[e]).trigger("mouseup:changecluster",[e]).trigger("mouseup:user-setting",[e]);
