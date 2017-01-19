@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	// log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
@@ -166,6 +167,9 @@ func postClusterAddUser(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
 	})
@@ -181,6 +185,9 @@ func postClusterDropUser(c echo.Context) error {
 	if err := cluster.DropUser(c.Param("user")); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
@@ -225,6 +232,9 @@ func postClusterUpdateUser(c echo.Context) error {
 			return c.JSON(http.StatusOK, errorMap(err.Error()))
 		}
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
@@ -302,6 +312,9 @@ func postClusterAddRole(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
 	})
@@ -317,6 +330,9 @@ func postClusterDropRole(c echo.Context) error {
 	if err := cluster.DropRole(c.Param("role")); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
@@ -352,6 +368,9 @@ func postClusterUpdateRole(c echo.Context) error {
 	if err := cluster.RemovePrivileges(c.Param("role"), privileges); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",

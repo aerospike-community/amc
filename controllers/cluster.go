@@ -399,6 +399,9 @@ func postClusterAddUDF(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
 	})
@@ -423,6 +426,9 @@ func postClusterDropUDF(c echo.Context) error {
 	if err := cluster.DropUDF(form.FileName); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
@@ -708,6 +714,9 @@ func postClusterAddIndex(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
 	})
@@ -732,6 +741,9 @@ func postClusterDropIndex(c echo.Context) error {
 	if err := cluster.DropIndex(c.Param("namespace"), "", form.IndexName); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
+
+	// wait for different nodes to sync up
+	time.Sleep(1 * time.Second)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success",
