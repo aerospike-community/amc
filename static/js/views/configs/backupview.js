@@ -65,13 +65,8 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             });
 
             $("#backupMachineNetworkAddress").focusout(function(){
-                if($("#backupMachineNetworkAddress").val() == "localhost" || $("#backupMachineNetworkAddress").val() == "127.0.0.1"){
-                    $("#backupUsername").prop('disabled', true);
-                    $("#backupPassword").prop('disabled', true);
-                } else {
-                    $("#backupUsername").prop('disabled', false);
-                    $("#backupPassword").prop('disabled', false);
-                }
+                $("#backupUsername").prop('disabled', false);
+                $("#backupPassword").prop('disabled', false);
             });
 
             $("#clusterBackupContainer input").off("click").on("click", function() {
