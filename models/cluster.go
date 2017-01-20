@@ -475,9 +475,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateUsers()
 	c.updateDatacenterInfo()
 	c.checkHealth()
-	if !common.AMCIsProd() {
-		log.Debugf("Updating stats for cluster took: %s", time.Since(t))
-	}
+	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 
 	c.updatedAt(time.Now())
 
@@ -659,7 +657,23 @@ func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointVa
 	return res
 }
 
+func (c *Cluster) ServerTime() time.Time {
+	var tm time.Time
+	for _, node := range c.Nodes() {
+		if tm.Before(node.ServerTime()) {
+			tm = node.ServerTime()
+		}
+	}
+
+	return tm
+}
+
 func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
+	// if no tm specified, return for the last 30 mins
+	if tm.IsZero() {
+		tm = c.ServerTime().Add(-time.Minute * 30)
+	}
+
 	res := map[string]map[string][]*common.SinglePointValue{}
 	for _, node := range c.Nodes() {
 		for statName, valueMap := range node.ThroughputSince(tm) {

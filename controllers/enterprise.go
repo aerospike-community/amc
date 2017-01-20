@@ -129,8 +129,6 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 			pct := math.Max(0, 100.0-totalOver1ms)
 			data = append(data, map[common.JsonRawString]interface{}{
 				common.JsonRawString(LTE + buckets[0][1:]): common.Stats{
-					// "value": math.Max(0, common.Round(tps*pct/100, 0.01, 2)),
-					// "pct":   math.Max(0, common.Round(pct, 0.01, 2)),
 					"value": math.Max(0, tps*pct/100),
 					"pct":   math.Max(0, pct),
 				},
@@ -174,7 +172,7 @@ func getNodeLatencyHistory(c echo.Context) error {
 	}
 
 	latencyHistory := []common.Stats{}
-	for _, latency := range node.LatencySince(c.Param("start_time")) {
+	for _, latency := range node.LatencySince(c.QueryParam("start_time")) {
 		latencyHistory = append(latencyHistory, transformLatency(latency))
 	}
 

@@ -89,7 +89,7 @@ func (r *Restore) Execute() error {
 
 	// Only log during development
 	if !common.AMCIsProd() {
-		log.Printf("Running remote command for restore %s\n", cmd.Path)
+		log.Debugf("Running remote command for restore %s\n", cmd.Path)
 	}
 
 	session, err := r.SSHClient.Session(cmd)

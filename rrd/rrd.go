@@ -136,8 +136,8 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 		if b.values[i%b.Size()] != nil {
 			v := math.Floor(*b.values[i%b.Size()] / float64(b.resolution))
 			res = append(res, common.NewSinglePointValue(&tm, &v))
-		} else {
-			res = append(res, common.NewSinglePointValue(&tm, nil))
+			// } else {
+			// 	res = append(res, common.NewSinglePointValue(&tm, nil))
 		}
 	}
 

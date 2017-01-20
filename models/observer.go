@@ -11,6 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	asl "github.com/aerospike/aerospike-client-go/logger"
 	"github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
@@ -372,6 +373,7 @@ func (o *ObserverT) Config() *common.Config {
 
 func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugStatus {
 	log.SetLevel(log.DebugLevel)
+	asl.Logger.SetLevel(asl.DEBUG)
 
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
@@ -386,6 +388,7 @@ func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugSt
 
 func (o *ObserverT) StopDebug() DebugStatus {
 	log.SetLevel(o.config.LogLevel())
+	asl.Logger.SetLevel(o.config.AeroLogLevel())
 
 	o.mutex.Lock()
 	defer o.mutex.Unlock()

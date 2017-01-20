@@ -183,8 +183,10 @@ func getClusterThroughputHistory(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
 	}
 
-	since := time.Now().Unix() - (31 * 60) // 30 minutes
-	beginStr := c.Param("start_time")
+	var tm time.Time // zero value
+
+	since := int64(0)
+	beginStr := c.QueryParam("start_time")
 	if beginStr != "" {
 		sinceUnix, err := strconv.ParseInt(beginStr, 10, 64)
 		if err != nil {
@@ -200,7 +202,10 @@ func getClusterThroughputHistory(c echo.Context) error {
 		Secondary *float64 `json:"secondary"`
 	}
 
-	tm := time.Unix(since, 0)
+	if time.Unix(since, 0).After(cluster.ServerTime().Add(-time.Minute * 30)) {
+		tm = time.Unix(since, 0)
+	}
+
 	throughput := cluster.ThroughputSince(tm)
 
 	res := map[string]interface{}{
@@ -208,6 +213,7 @@ func getClusterThroughputHistory(c echo.Context) error {
 	}
 
 	zeroValue := float64(0)
+	zeroTime := cluster.ServerTime()
 	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[0]]
 		secondaryVals := throughput[aliases[1]]
@@ -220,7 +226,7 @@ func getClusterThroughputHistory(c echo.Context) error {
 				if len(secondaryVals[node]) > i {
 					Secondary = secondaryVals[node][i].Value(&zeroValue)
 				}
-				statList = append(statList, chartStat{X: yValues.TimestampJson(&tm), Y: yValues.Value(&zeroValue), Secondary: Secondary})
+				statList = append(statList, chartStat{X: yValues.TimestampJson(&zeroTime), Y: yValues.Value(&zeroValue), Secondary: Secondary})
 			}
 			statRes[node] = statList
 		}

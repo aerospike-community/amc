@@ -82,7 +82,7 @@ func (b *Backup) Execute() error {
 
 	// Only log during development
 	if !common.AMCIsProd() {
-		log.Printf("Running remote command for backup %s\n", cmd.Path)
+		log.Debugf("Running remote command for backup %s\n", cmd.Path)
 	}
 
 	session, err := b.SSHClient.Session(cmd)

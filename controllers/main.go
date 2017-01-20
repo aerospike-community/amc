@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"bytes"
 	"fmt"
-	log1 "log"
 	"net/http"
 	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
-	asl "github.com/aerospike/aerospike-client-go/logger"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -94,20 +91,6 @@ func getAMCVersion(c echo.Context) error {
 
 func Server(config *common.Config) {
 	_observer = models.New(config)
-
-	// TODO: set to the same logger
-	asl.Logger.SetLogger(log.StandardLogger())
-
-	asl.Logger.SetLevel(asl.INFO)
-	if !common.AMCIsProd() {
-		asl.Logger.SetLevel(asl.DEBUG)
-	}
-
-	var buf bytes.Buffer
-	logger := log1.New(&buf, "", log1.LstdFlags|log1.Lshortfile)
-	logger.SetOutput(os.Stdout)
-	asl.Logger.SetLogger(logger)
-	asl.Logger.SetLevel(asl.DEBUG)
 
 	_defaultClientPolicy.Timeout = 10 * time.Second
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
@@ -236,7 +219,7 @@ func Server(config *common.Config) {
 		log.Infof("In HTTPS (secure) Mode")
 		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
 	} else {
-		log.Infof("In HTTP (unsecure) Mode.")
+		log.Infof("In HTTP (insecure) Mode.")
 		e.Start(config.AMC.Bind)
 	}
 }

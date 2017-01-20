@@ -8,6 +8,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
+	aslog "github.com/aerospike/aerospike-client-go/logger"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -87,6 +88,21 @@ func (c *Config) LogLevel() log.Level {
 	}
 }
 
+func (c *Config) AeroLogLevel() aslog.LogPriority {
+	switch strings.ToLower(c.AMC.LogLevel) {
+	case "debug":
+		return aslog.DEBUG
+	case "warn", "warning":
+		return aslog.WARNING
+	case "err", "error":
+		return aslog.ERR
+	case "info":
+		return aslog.INFO
+	default:
+		return aslog.INFO
+	}
+}
+
 func InitConfig(configFile, configDir string, config *Config) {
 	// to print everything out regarding reading the config in app init
 	log.SetLevel(log.DebugLevel)
@@ -110,6 +126,9 @@ func InitConfig(configFile, configDir string, config *Config) {
 	if AMCIsProd() {
 		setLogFile(config.AMC.ErrorLog)
 	}
+
+	aslog.Logger.SetLogger(log.StandardLogger())
+
 	setLogLevel(config.AMC.LogLevel)
 	openDB(config.AMC.Database)
 }
@@ -164,7 +183,7 @@ func openDB(filepath string) {
 	for _, ddl := range schema {
 		// ignore error
 		_, err := db.Exec(ddl)
-		if err != nil && !AMCIsProd() {
+		if err != nil {
 			log.Warn(err)
 		}
 	}
@@ -181,14 +200,20 @@ func setLogFile(filepath string) {
 func setLogLevel(level string) {
 	level = strings.ToLower(level)
 	log.SetLevel(log.InfoLevel)
+	aslog.Logger.SetLevel(aslog.INFO)
+
 	switch level {
 	case "info":
 		log.SetLevel(log.InfoLevel)
-	case "warning":
+		aslog.Logger.SetLevel(aslog.INFO)
+	case "warning", "warn":
 		log.SetLevel(log.WarnLevel)
-	case "error":
+		aslog.Logger.SetLevel(aslog.WARNING)
+	case "error", "err":
 		log.SetLevel(log.ErrorLevel)
+		aslog.Logger.SetLevel(aslog.ERR)
 	case "debug":
 		log.SetLevel(log.DebugLevel)
+		aslog.Logger.SetLevel(aslog.DEBUG)
 	}
 }

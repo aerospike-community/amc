@@ -167,9 +167,7 @@ func (n *Node) update() error {
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 	n.updateHistory()
 
-	if !common.AMCIsProd() {
-		log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats["objects"], time.Since(tm))
-	}
+	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats["objects"], time.Since(tm))
 
 	return nil
 }
@@ -266,14 +264,14 @@ func (n *Node) LatestLatency() map[string]common.Stats {
 }
 
 func (n *Node) LatencySince(tms string) []map[string]common.Stats {
-	tm := n.ServerTime().Unix() - 30*60
-	if len(tms) > 0 {
-		if v, err := n.latencyDateTime(tms); err == nil {
-			tm = v.Unix()
-		}
-	}
+	tm := n.ServerTime().Add(-time.Minute * 30)
+	// if len(tms) > 0 {
+	// 	if v, err := n.latencyDateTime(tms); err == nil && v.After(tm) {
+	// 		tm = v
+	// 	}
+	// }
 
-	vs := n.latencyHistory.ValuesSince(time.Unix(tm, 0))
+	vs := n.latencyHistory.ValuesSince(tm)
 	vsTyped := make([]map[string]common.Stats, len(vs))
 	for i := range vs {
 		if vIfc := vs[i]; vIfc != nil {
@@ -289,11 +287,12 @@ func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
+	zeroVal := float64(0)
 	for name, bucket := range n.statsHistory {
 		val := bucket.LastValue()
 		if val == nil {
-			tm := time.Now().Unix()
-			val = common.NewSinglePointValue(&tm, nil)
+			tm := n.ServerTime().Unix()
+			val = common.NewSinglePointValue(&tm, &zeroVal)
 		}
 		res[name] = map[string]*common.SinglePointValue{
 			n.Address(): val,
@@ -306,11 +305,12 @@ func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
+	zeroVal := float64(0)
 	for name, bucket := range n.statsHistory {
 		vs := bucket.ValuesSince(tm)
 		if len(vs) == 0 {
-			tm := time.Now().Unix()
-			vs = []*common.SinglePointValue{common.NewSinglePointValue(&tm, nil)}
+			tm := n.ServerTime().Unix()
+			vs = []*common.SinglePointValue{common.NewSinglePointValue(&tm, &zeroVal)}
 		}
 		res[name] = map[string][]*common.SinglePointValue{
 			n.Address(): vs,
@@ -326,8 +326,12 @@ func (n *Node) getStatsHistory(stat string) *rrd.Bucket {
 }
 func (n *Node) updateHistory() {
 	// this uses a RLock, so we put it before the locks to avoid deadlock
-	latestLatencyReport, err := n.latestLatencyReportDateTime()
+	// latestLatencyReport, err := n.latestLatencyReportDateTime()
 	tm := n.ServerTime().Unix()
+
+	if tm == 0 {
+		return
+	}
 
 	for _, stat := range _recordedNodeStats {
 		bucket := n.getStatsHistory(stat)
@@ -338,58 +342,59 @@ func (n *Node) updateHistory() {
 		}
 	}
 
-	if err == nil && !latestLatencyReport.IsZero() {
-		n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
-	}
+	n.latencyHistory.Add(tm, n.LatestLatency())
+	// n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
 }
 
-func (n *Node) latestLatencyReportDateTime() (time.Time, error) {
-	var latTime string
-	for _, stats := range n.LatestLatency() {
-		latTime = stats.TryString("timestamp", "")
-		break
-	}
+// func (n *Node) latestLatencyReportDateTime() (time.Time, error) {
+// 	var latTime string
+// 	for _, stats := range n.LatestLatency() {
+// 		latTime = stats.TryString("timestamp", "")
+// 		break
+// 	}
 
-	return n.latencyDateTime(latTime)
-}
+// 	return n.latencyDateTime(latTime)
+// }
 
-// adds date part to the latency time string
-func (n *Node) latencyDateTime(ts string) (time.Time, error) {
-	const layout = "2006-1-2 15:04:05"
+// // adds date part to the latency time string
+// func (n *Node) latencyDateTime(ts string) (time.Time, error) {
+// 	log.Debugf("trying to parse: %s", ts)
 
-	if len(ts) == 0 {
-		// return zero value
-		return time.Time{}, nil
-	}
+// 	const layout = "2006-1-2 15:04:05-MST"
 
-	// remove the timezone if exists
-	if len(ts) > 8 {
-		ts = ts[:8]
-	}
+// 	if len(ts) == 0 {
+// 		// return zero value
+// 		return time.Time{}, nil
+// 	}
 
-	// means there is no server time yet
-	st := n.ServerTime()
-	if st.IsZero() {
-		return st, nil
-	}
+// 	// // remove the timezone if exists
+// 	// if len(ts) > 8 {
+// 	// 	ts = ts[:8]
+// 	// }
 
-	// beginning of day
-	t := st.Truncate(24 * time.Hour)
-	year, month, day := t.Date()
+// 	// means there is no server time yet
+// 	st := n.ServerTime()
+// 	if st.IsZero() {
+// 		return st, nil
+// 	}
 
-	t2, err := time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day)+ts)
-	if err != nil {
-		log.Debug("DATE PARSE ERROR! ", err)
-		return t2, err
-	}
+// 	// beginning of day
+// 	t := st.Truncate(24 * time.Hour)
+// 	year, month, day := t.Date()
 
-	// must not be in the future
-	if t2.After(st) {
-		// format for yesterday
-		time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day-1)+ts)
-	}
-	return t2, nil
-}
+// 	t2, err := time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day)+ts)
+// 	if err != nil {
+// 		log.Debug("DATE PARSE ERROR! ", err)
+// 		return t2, err
+// 	}
+
+// 	// must not be in the future
+// 	if t2.After(st) {
+// 		// format for yesterday
+// 		time.Parse(layout, fmt.Sprintf("%d-%d-%d ", year, month, day-1)+ts)
+// 	}
+// 	return t2, nil
+// }
 
 func (n *Node) XdrEnabled() bool {
 	return n.StatsAttr("xdr_uptime") != nil
