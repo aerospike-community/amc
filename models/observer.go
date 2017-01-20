@@ -16,12 +16,21 @@ import (
 	"github.com/citrusleaf/amc/common"
 )
 
+type DebugStatus struct {
+	On        bool
+	StartTime time.Time
+	Duration  time.Duration
+	Initiator string
+}
+
 // sqlite3 database
 var db *sql.DB
 
 type ObserverT struct {
 	sessions map[string][]*Cluster
 	config   *common.Config
+
+	debug DebugStatus
 
 	clusters []*Cluster
 	mutex    deadlock.RWMutex
@@ -74,6 +83,7 @@ func New(config *common.Config) *ObserverT {
 }
 
 func (o *ObserverT) stop() {
+	o.StopDebug()
 	close(o.notifyCloseChan)
 }
 
@@ -117,6 +127,10 @@ func (o *ObserverT) observe(config *common.Config) {
 		select {
 
 		case <-time.After(time.Second):
+			if o.debugExpired() {
+				o.StopDebug()
+			}
+
 			o.updateClusters()
 
 		case <-o.notifyCloseChan:
@@ -354,6 +368,45 @@ func (o *ObserverT) DatacenterInfo() common.Stats {
 
 func (o *ObserverT) Config() *common.Config {
 	return o.config
+}
+
+func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugStatus {
+	log.SetLevel(log.DebugLevel)
+
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	o.debug.On = true
+	o.debug.StartTime = time.Now()
+	o.debug.Duration = duration
+	o.debug.Initiator = initiator
+
+	return o.debug
+}
+
+func (o *ObserverT) StopDebug() DebugStatus {
+	log.SetLevel(o.config.LogLevel())
+
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	o.debug.On = false
+
+	return o.debug
+}
+
+func (o *ObserverT) DebugStatus() DebugStatus {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	return o.debug
+}
+
+func (o *ObserverT) debugExpired() bool {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
+	return o.debug.On && time.Now().After(o.debug.StartTime.Add(o.debug.Duration))
 }
 
 func findAliases(address string, port int) []string {

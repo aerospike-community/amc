@@ -31,7 +31,61 @@ func postSessionTerminate(c echo.Context) error {
 }
 
 func getDebug(c echo.Context) error {
-	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success", "debugging": "OFF", "initiator": null}`))
+	res := _observer.DebugStatus()
+	if res.On {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"status":            "success",
+			"debugging":         "ON",
+			"initiator":         res.Initiator,
+			"isOriginInitiator": res.Initiator == c.Request().RemoteAddr,
+			"start_time":        res.StartTime.UnixNano() / 1e6, //1484923724160,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":    "success",
+		"debugging": "OFF",
+		"initiator": nil,
+	})
+}
+
+func postDebug(c echo.Context) error {
+	form := struct {
+		Service      string `form:"service"`
+		DurationMins int    `form:"duration"`
+		Username     string `form:"username"`
+	}{}
+
+	c.Bind(&form)
+
+	var res models.DebugStatus
+	switch form.Service {
+	case "start":
+		res = _observer.StartDebug(c.Request().RemoteAddr, time.Duration(form.DurationMins)*time.Minute)
+	case "restart":
+		res = _observer.StartDebug(c.Request().RemoteAddr, time.Duration(form.DurationMins)*time.Minute)
+	case "stop":
+		res = _observer.StopDebug()
+	default:
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	if res.On {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"status":     "success",
+			"debugging":  "ON",
+			"initiator":  res.Initiator,
+			"start_time": res.StartTime.UnixNano() / 1e6, //1484923724160,
+			"service":    form.Service,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":    "success",
+		"debugging": "OFF",
+		"initiator": nil,
+		"service":   form.Service,
+	})
 }
 
 func getAMCVersion(c echo.Context) error {
@@ -104,7 +158,10 @@ func Server(config *common.Config) {
 
 	// Routes
 	e.POST("/session-terminate", postSessionTerminate)
+
 	e.GET("/aerospike/service/debug", getDebug)
+	e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
+
 	e.GET("/get_amc_version", getAMCVersion)
 	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
 

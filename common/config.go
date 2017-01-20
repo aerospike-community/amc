@@ -72,6 +72,21 @@ type Config struct {
 	} `toml:"basic_auth"`
 }
 
+func (c *Config) LogLevel() log.Level {
+	switch strings.ToLower(c.AMC.LogLevel) {
+	case "debug":
+		return log.DebugLevel
+	case "warn", "warning":
+		return log.WarnLevel
+	case "err", "error":
+		return log.ErrorLevel
+	case "info":
+		return log.InfoLevel
+	default:
+		return log.InfoLevel
+	}
+}
+
 func InitConfig(configFile, configDir string, config *Config) {
 	// to print everything out regarding reading the config in app init
 	log.SetLevel(log.DebugLevel)
