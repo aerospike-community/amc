@@ -19,8 +19,8 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "backbone", "poller", "config/app-config", "underscore", "helper/AjaxManager", "helper/servicemanager",
-    "helper/usermanager","helper/notification" , "helper/overlay", "models/common/AlertEmailsModel", "views/common/AlertEmailsView"], 
-    function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay, AlertEmailsModel, AlertEmailsView){
+    "helper/usermanager","helper/notification" , "helper/overlay", "models/common/AlertEmailsModel", "views/common/AlertEmailsView", "helper/modal"], 
+    function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay, AlertEmailsModel, AlertEmailsView, modal){
 
     var Util = {
         initAMC: function(){
@@ -2032,33 +2032,11 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
         },
 
         showModalDialog : function(DOM, modalSettings, submit, cancel){
-            $("#ModalWrapper").remove();
-            $("body").append(DOM);
-            $("#ModalWrapper").dialog(_.extend({
-                modal: true,
-                resizable: false
-            }, modalSettings));
-
-            if(submit){
-                $("#ModalSubmit").on("click", submit);
-            }
-
-            if(cancel){
-                $("#ModalCancel").on("click", cancel);
-            }
-
-            $("#modalBody .modal-content").on("keydown", function(e){
-                if (e.keyCode === 13) {
-                    submit(e);
-                }
-            });
-            $(window).resize(function() {
-                $("#ModalWrapper").dialog("option", "position", "center");
-            });
+          modal.showModalDialog(DOM, modalSettings, submit, cancel);
         },
 
         hideModalDialog : function(){
-            $("#ModalWrapper").remove();
+          modal.hideModalDialog();
         },
 
         startCluster : function(page, callback){

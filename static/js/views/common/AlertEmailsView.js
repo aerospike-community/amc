@@ -1,10 +1,12 @@
-define(['jquery', 'underscore', 'backbone', 'helper/notification'], 
-function($, _, Backbone, Notification) {
+define(['jquery', 'underscore', 'backbone', 'helper/notification', 'helper/modal'], 
+function($, _, Backbone, Notification, modal) {
   function validateEmail(email) {
     // see http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   }
+
+  var TOAST_TIMEOUT = 3*1000;
 
   var AlertEmailsView = Backbone.View.extend({
     initialize: function() {
@@ -25,19 +27,28 @@ function($, _, Backbone, Notification) {
     },
 
     removeEmail: function(evt) {
+      var that = this;
       var email = evt.target.parentElement.innerText;
       var emails = [email];
-      this.model.remove(emails, 
-        function success() {
-          Notification.toastNotification('green', 'Email: ' + email + ' removed successfully');
-        },
-        function failure() {
-          Notification.toastNotification('red', 'Unable to remove email: ' + email);
-        }
-      );
+      var content = 'Remove email: ' + email + ' from receving alerts';
+
+      modal.confirmModal('Remove Email', content, success);
+      return;
+
+      function success() {
+        that.model.remove(emails, 
+          function success() {
+            Notification.toastNotification('green', 'Email: ' + email + ' removed successfully', TOAST_TIMEOUT);
+          },
+          function failure() {
+            Notification.toastNotification('red', 'Unable to remove email: ' + email, TOAST_TIMEOUT);
+          }
+        );
+      }
     },
 
     addEmail: function() {
+      var that = this;
       var input = this.$('form input[name=email]');
       var email = input.val();
       var valid = validateEmail(email);
@@ -50,14 +61,22 @@ function($, _, Backbone, Notification) {
         return;
       } 
       err.hide();
-      this.model.add([email],
-        function success() {
-          Notification.toastNotification('green', 'Email: ' + email + ' added successfully');
-        },
-        function failure() {
-          Notification.toastNotification('red', 'Unable to add email: ' + email);
-        }
-      );
+
+      var content = 'Add email: ' + email + ' to receive alerts';
+      modal.confirmModal('Add Email', content, success);
+      return;
+
+      function success() {
+        input.val('');
+        that.model.add([email],
+          function success() {
+            Notification.toastNotification('green', 'Email: ' + email + ' added successfully', TOAST_TIMEOUT);
+          },
+          function failure() {
+            Notification.toastNotification('red', 'Unable to add email: ' + email, TOAST_TIMEOUT);
+          }
+        );
+      }
     },
 
     template: function(emails) {
