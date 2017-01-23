@@ -18,7 +18,9 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "backbone", "poller", "config/app-config", "underscore","helper/AjaxManager","helper/servicemanager","helper/usermanager","helper/notification" , "helper/overlay"], function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay){
+define(["jquery", "backbone", "poller", "config/app-config", "underscore", "helper/AjaxManager", "helper/servicemanager",
+    "helper/usermanager","helper/notification" , "helper/overlay", "models/common/AlertEmailsModel", "views/common/AlertEmailsView"], 
+    function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay, AlertEmailsModel, AlertEmailsView){
 
     var Util = {
         initAMC: function(){
@@ -38,6 +40,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                     Util.logger.setDefaultValueToDuration();
                 }
             });
+
         },
 
         isCommunityEdition: function() {
@@ -68,6 +71,11 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
             });
 
             window.AMCGLOBALS.pageSpecific.spinner = new Overlay("envSetupSpinner");
+
+            // set up for community edition
+            if(Util.isCommunityEdition()) {
+              $('#AlertEmailsSelector').hide();
+            }
         },
 
         removeEnviromentSetupUI : function(){
@@ -2870,6 +2878,24 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore","helpe
                     $('#updateIntervalErrorMsg').hide(200);
                     $('#updateTimeIntervalInput').val(window.AMCGLOBALS.persistent.updateInterval/1000);
                     $('#setUpdateLocalTimeZoneInput').attr('checked', Util.useLocalTimezone());
+                })
+                .off("panel:deactivate").on("panel:deactivate", function(){
+                    $(this).removeClass("active");
+                });
+
+            var AlertEmailInitialized = false;
+            $("#AlertEmails")
+                .off("panel:activate").on("panel:activate", function(){
+                    $(this).addClass("active");
+                    if(AlertEmailInitialized) {
+                      return;
+                    }
+
+                    AlertEmailInitialized = true;
+                    var model = new AlertEmailsModel();
+                    var view = new AlertEmailsView({model: model});
+                    view.render();
+                    $('#email-container').html(view.el);
                 })
                 .off("panel:deactivate").on("panel:deactivate", function(){
                     $(this).removeClass("active");

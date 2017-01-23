@@ -165,6 +165,9 @@ under the License.
                 <li class="slide-out-button" data-for-id="AMCSettings">
                     <div>Change AMC settings</div>
                 </li>
+                <li id="AlertEmailsSelector" class="slide-out-button" data-for-id="AlertEmails">
+                    <div> Alert Emails </div>
+                </li>
             </ul>
 
             <div id="activityLogger" class="logger-container">
@@ -278,6 +281,15 @@ under the License.
                         <div class="submit">
                             <button class="btn blue_btn" id="setUpdateTimeInterval">Apply</button>
                         </div>
+                    </div>
+                </div>
+
+                <div id="AlertEmails" class="amc-settings overlay">
+                    <div style="font-size: 16px; color: #000; line-height: 20px; text-align: center; width: 90%; margin-left: auto; margin-right: auto;">
+                      Emails receiving alerts
+                    </div>
+                    <hr style="margin-top: 5px;">
+                    <div class="amc-settings-container" id="email-container">
                     </div>
                 </div>
             </div>
@@ -1020,7 +1032,7 @@ under the License.
 
                         <%if(data.cluster_name != null && !$.isEmptyObject(data.cluster_name)) { %>
                             <div class="multicluster individual">
-                                <div class="multicluster individual title">Cluster Label</div>
+                                <div class="multicluster individual title">Cluster Name</div>
                                 <div class="multicluster individual value"><%=data.cluster_name%></div>
                             </div>
                         <% } else if(data.dc_name.length != 0) { %>
