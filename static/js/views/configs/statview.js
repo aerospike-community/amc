@@ -41,7 +41,7 @@ define(["jquery", "underscore", "backbone", "helper/edit-config", "helper/jqgrid
                 
                 model.statList = AppConfig[this.attrList];
                 if( _.isEmpty( $('#statListTable').jqGrid('getGridParam','data') ) && window.AMCGLOBALS.pageSpecific.statListGenerated ){
-                    StatTable.initAndSetGridData(AppConfig[this.attrList]);
+                    StatTable.initAndSetGridData(AppConfig[this.attrList], model.modelType);
                     window.$(AppConfig.stat.statTableDiv).trigger("renderall", [window.AMCGLOBALS.pageSpecific.lazyRender]);
                 }
             }
@@ -62,16 +62,16 @@ define(["jquery", "underscore", "backbone", "helper/edit-config", "helper/jqgrid
 
                 Util.checkVisibilityAndCall(this, function(){
                     if(model['attributes']['node_status'] === "off"){
-                        StatTable.updateRowData(model.statTableID,  model.statList, model.address, model['attributes'], 'Node Down');
+                        StatTable.updateRowData(model.statTableID,  model.modelType, model.statList, model.address, model['attributes'], 'Node Down');
                     }else{
-                        StatTable.updateRowData(model.statTableID,  model.statList, model.address, model['attributes']);
+                        StatTable.updateRowData(model.statTableID,  model.modelType, model.statList, model.address, model['attributes']);
                     }
                 }, "horizontal", "#nodeStatListGrid .ui-jqgrid-bdiv");
 
             }
         },
         renderNetworkError: function(model){
-            StatTable.updateRowData(model.statTableID,  model.statList, model.address, model['attributes'], 'N/E');
+            StatTable.updateRowData(model.statTableID,  model.modelType, model.statList, model.address, model['attributes'], 'N/E');
         },
         
           

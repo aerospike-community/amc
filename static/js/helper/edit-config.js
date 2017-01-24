@@ -18,13 +18,41 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config", "config/var-details","helper/AjaxManager"], function($, _, Backbone, D3, GridHelper, Util, AppConfig, VarDetails,AjaxManager){
+
+    var STATIC_CONFIGS = {
+      namespace : ['storage-engine', 'device', 'file', 'filesize', 'data-in-memory', 'defrag-startup-minimum', 'write-block-size', 
+                  'scheduler-mode', 'cold-start-empty', 'partition-tree-locks', 'partition-tree-sprigs', 'replication-factor',
+                  'single-bin', 'data-in-index', 'cold-start-evict-ttl', 'si', 'set'],
+      node      : ['enable-xdr', 'xdr-digestlog-path', 'xdr-client-threads', 'xdr-errorlog-path', 
+                  'xdr-local-node-port', 'xdr-info-port', 'xdr-pidfile', 'address', 'node_status'],
+      xdr       : ['xdr_status', 'enable-xdr', 'xdr-digestlog-path', 'xdr-client-threads', 
+                  'xdr-errorlog-path', 'xdr-local-node-port', 'xdr-info-port', 'xdr-pidfile'],
+    };
+
+    function isStaticConfig(context, config) {
+      var list = [];
+      var found;
+
+      if(context === 'nodes') {
+        list = STATIC_CONFIGS.node;
+      } else if(context === 'namespace') {
+        list = STATIC_CONFIGS.namespace;
+      } else if(context === 'xdr') {
+        list = STATIC_CONFIGS.xdr;
+      }
+
+      found = _.find(list, function(c) { return c === config;});
+      found = found || false; // _.find returns undefined when no value passes the test
+      return found;
+    }
+
     var StatTable = {   
-        updateRowData: function(container, statList, address, modelData, errorStr){
+        updateRowData: function(container, context, statList, address, modelData, errorStr){
             var that = this;
             try{
                 var gridData = $(container).jqGrid('getGridParam','data');
                 if(typeof errorStr === 'undefined'){
-                    this.checkAndAddStats(container, modelData, statList, gridData, function(){
+                    this.checkAndAddStats(container, context, modelData, statList, gridData, function(){
 						that.updateColumnClasses(container, address, 'red-text', 'green-text');
 						that.updateGridColumnDataSucc(gridData, address, modelData);
 						$(container).jqGrid('setGridParam', {data: gridData}).trigger('reloadGrid');
@@ -79,7 +107,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             
             }
         },
-        checkAndAddStats: function(container, modelData, statList, gridData, callback){
+        checkAndAddStats: function(container, context, modelData, statList, gridData, callback){
              
                 var data = _.map(modelData, function(num, key){ return key; });
                 var newStats = _.difference(data, statList);
@@ -94,16 +122,18 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 				}	
 				
 				function setData(stats, index){
+          var disabled = false;
 					for(var i = index; i < index + 10 && i < stats.length; i++){
 						if(!StatTable.isDisabled(newStats[i])){
 							var data = {};
 							data.stat = newStats[i];
-                            if(data.stat === "address" || data.stat === "node_status" || data.stat === "xdr_status"){
-                                data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
-                            } else{
-                                data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='New Value'></input>";
-                            }
-                            jQuery(container).addRowData(newStats[i], data);
+              disabled = isStaticConfig(context, data.stat);
+              if(disabled){
+                  data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
+              } else{
+                  data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='New Value'></input>";
+              }
+              jQuery(container).addRowData(newStats[i], data);
 						}
 					}
 					
@@ -312,15 +342,17 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             $(AppConfig.stat.statTableDiv).trigger("reloadGrid");
             
         },
-        initEmptyGridData: function(statList){
+        initEmptyGridData: function(statList, context){
             var myGridData = [];
             var counter=0;
+            var disabled = false;
             for(var i in statList){
                 var data = {};
                 
                 if(!StatTable.isDisabled(statList[i])){
                     data.stat = statList[i];
-                    if(data.stat === "address" || data.stat === "node_status" || data.stat === "xdr_status"){
+                    disabled = isStaticConfig(context, data.stat);
+                    if(disabled){
                         data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
                     } else{
                         data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='New Value'></input>";
@@ -331,8 +363,8 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             }    
             return myGridData;
         },
-        initAndSetGridData: function(statList){
-            var gridData = this.initEmptyGridData(statList);
+        initAndSetGridData: function(statList, context){
+            var gridData = this.initEmptyGridData(statList, context);
             $(AppConfig.stat.statTableDiv).jqGrid('setGridParam', {data: gridData}).trigger('reloadGrid');
         },
         createColModelObject: function(colName, colIndex, alignment, width){
