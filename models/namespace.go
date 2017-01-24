@@ -269,7 +269,7 @@ func (ns *Namespace) setAliases() {
 	if exists := stats.Get("device_total_bytes"); exists != nil {
 		calcStats["used-bytes-disk"] = stats.TryInt("device_used_bytes", 0)
 		calcStats["total-bytes-disk"] = stats.TryInt("device_total_bytes", 0)
-		calcStats["free-bytes-disk"] = calcStats.TryInt("total-bytes-disk", 0) - calcStats.TryInt("device_used_bytes", 0)
+		calcStats["free-bytes-disk"] = stats.TryInt("device_total_bytes", 0) - stats.TryInt("device_used_bytes", 0)
 		calcStats["free-pct-disk"] = stats.TryFloat("device_free_pct", 0)
 		calcStats["available_pct"] = stats.TryFloat("device_available_pct", 0)
 		calcStats["free_pct"] = stats.TryFloat("device_free_pct", 0)
@@ -289,7 +289,7 @@ func (ns *Namespace) setAliases() {
 	calcStats["max-void-time"] = stats.TryInt("max_void_time", 0)
 	calcStats["free-pct-memory"] = stats.TryFloat("memory_free_pct", 0)
 	calcStats["used-bytes-memory"] = stats.TryInt("memory_used_bytes", 0)
-	calcStats["free-bytes-memory"] = calcStats.TryInt("total-bytes-memory", 0) - calcStats.TryInt("used-bytes-memory", 0)
+	calcStats["free-bytes-memory"] = stats.TryInt("memory-size", 0) - stats.TryInt("memory_used_bytes", 0)
 	calcStats["data-used-bytes-memory"] = stats.TryInt("memory_used_data_bytes", 0)
 	calcStats["index-used-bytes-memory"] = stats.TryInt("memory_used_index_bytes", 0)
 	calcStats["sindex-used-bytes-memory"] = stats.TryInt("memory_used_sindex_bytes", 0)
@@ -342,7 +342,8 @@ func (ns *Namespace) SetsInfo() map[string]common.Stats {
 		v["n_objects"] = v.Get("objects")
 		v["stop-write-count"] = v.Get("stop-writes-count")
 		v["delete"] = v.Get("deleting")
-		v["evict-hwm-count"] = "n/s"
+		v["evict-hwm-count"] = common.NOT_SUPPORTED
+		v["enable-xdr"] = v.Get("set-enable-xdr")
 
 		res[k] = v
 	}
@@ -357,8 +358,8 @@ func (ns *Namespace) Stats() common.Stats {
 		"memory-pct":                ns.MemoryPercent(),
 		"disk":                      ns.Disk(),
 		"disk-pct":                  ns.DiskPercent(),
-		"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("master-objects", 0), "'"), common.Comma(nsStats.TryInt("master_tombstones", 0), "'")),
-		"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("prole-objects", 0), "'"), common.Comma(nsStats.TryInt("prole_tombstones", 0), "'")),
+		"master-objects-tombstones": fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("master-objects", 0), ","), common.Comma(nsStats.TryInt("master_tombstones", 0), ",")),
+		"prole-objects-tombstones":  fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("prole-objects", 0), ","), common.Comma(nsStats.TryInt("prole_tombstones", 0), ",")),
 		// "least_available_pct":       ns.StatsAttr("available_pct"),
 	}
 

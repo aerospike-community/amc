@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-const NOT_SUPPORTED = "n/s"
-const NOT_AVAILABLE = "n/a"
+const NOT_SUPPORTED = "N/S"
+const NOT_AVAILABLE = "N/A"
 
 type SinglePointValue struct {
 	timestamp *int64
@@ -250,6 +250,10 @@ func (s Info) ToInfoMap(name string, alias string, delim string) map[string]Info
 	infoMap := map[string]Info{}
 
 	statsFragsTrimmed := strings.Trim(s[name], ";")
+	if statsFragsTrimmed == "" {
+		return infoMap
+	}
+
 	statsFrags := strings.Split(statsFragsTrimmed, ";")
 	for _, frag := range statsFrags {
 		res := Info{}
@@ -278,6 +282,10 @@ func (s Info) ToStatsMap(name string, alias string, delim string) map[string]Sta
 	statsMap := map[string]Stats{}
 
 	statsFragsTrimmed := strings.Trim(s[name], ";")
+	if statsFragsTrimmed == "" {
+		return statsMap
+	}
+
 	statsFrags := strings.Split(statsFragsTrimmed, ";")
 	for _, frag := range statsFrags {
 		res := Info{}

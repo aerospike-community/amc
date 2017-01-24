@@ -19,7 +19,7 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "backbone", "poller", "config/app-config", "underscore", "helper/AjaxManager", "helper/servicemanager",
-    "helper/usermanager","helper/notification" , "helper/overlay", "models/common/AlertEmailsModel", "views/common/AlertEmailsView", "helper/modal"], 
+    "helper/usermanager","helper/notification" , "helper/overlay", "models/common/AlertEmailsModel", "views/common/AlertEmailsView", "helper/modal"],
     function($, Backbone, Poller, AppConfig, _,AjaxManager,ServiceManager,UserManager,Notification, Overlay, AlertEmailsModel, AlertEmailsView, modal){
 
     var Util = {

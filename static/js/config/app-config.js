@@ -237,13 +237,13 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
         ],
         setsDefListColumn: [
 //            {name: 'namespaceName', width: 150, align: 'center', resizable: false, sortable: true, title: 'Size of the cluster'},
-            {name: 'set_name', width: 200, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}},
-            {name: 'n_objects', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}, sorttype : 'number'},
-            {name: 'stop-write-count', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}, sorttype : 'number'},
-            {name: 'evict-hwm-count', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}, sorttype : 'number'},
-            {name: 'delete', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}},
-            {name: 'enable-xdr', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}},
-			{name: 'disable-eviction', width: 150, align: 'center', resizable: false, sortable: true, title: 'Aerospike build version', searchoptions:{clearSearch: false}}
+            {name: 'set_name', width: 200, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
+            {name: 'n_objects', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
+            {name: 'stop-write-count', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
+            {name: 'evict-hwm-count', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
+            {name: 'delete', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
+            {name: 'enable-xdr', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
+			{name: 'disable-eviction', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}}
         ],
         storageDefListColumn: [
 //            {name: 'namespaceName', width: 150, align: 'center', resizable: false, sortable: true, title: 'Size of the cluster'},

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -40,7 +41,8 @@ func postGetClusterId(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
-	sid, _ := sessionId(c)
+	// update the session cookie
+	sid := manageSession(c)
 
 	cluster := _observer.FindClusterBySeed(sid, host, port, form.Username, form.Password)
 	if cluster != nil {
@@ -65,9 +67,6 @@ func postGetClusterId(c echo.Context) error {
 			return c.JSON(http.StatusOK, errorMap(err.Error()))
 		}
 	}
-
-	// update the session cookie
-	sid = manageSession(c)
 
 	// create output
 	response := map[string]interface{}{
@@ -215,8 +214,8 @@ func getClusterThroughputHistory(c echo.Context) error {
 	zeroValue := float64(0)
 	zeroTime := cluster.ServerTime()
 	for outStatName, aliases := range statsNameAliases {
-		primaryVals := throughput[aliases[0]]
-		secondaryVals := throughput[aliases[1]]
+		primaryVals := throughput[aliases[1]]
+		secondaryVals := throughput[aliases[0]]
 
 		statRes := map[string][]chartStat{}
 		for node, yValuesList := range primaryVals {
@@ -259,8 +258,8 @@ func getClusterThroughput(c echo.Context) error {
 
 	zeroVal := float64(0)
 	for outStatName, aliases := range statsNameAliases {
-		primaryVals := throughput[aliases[0]]
-		secondaryVals := throughput[aliases[1]]
+		primaryVals := throughput[aliases[1]]
+		secondaryVals := throughput[aliases[0]]
 
 		statRes := make(map[string]chartStat, len(primaryVals))
 		for node, yValues := range primaryVals {
@@ -275,25 +274,26 @@ func getClusterThroughput(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-var statKeys = []string{"system_free_mem_pct",
-	"nsup-threads",
+var statKeys = []string{
+	"system_free_mem_pct",
+	// "nsup-threads",
 	"cluster_integrity",
 	"storage_defrag_records",
-	"scan-priority",
+	// "scan-priority",
 	"client_connections",
 	"migrate_progress_recv",
-	"replication-fire-and-forget",
-	"storage-benchmarks",
+	// "replication-fire-and-forget",
+	// "storage-benchmarks",
 	"stat_write_errs",
 	"node_status",
 	"objects",
 	"tombstones",
 	"proto-fd-max",
 	"system_swapping",
-	"err_write_fail_prole_unknown",
+	// "err_write_fail_prole_unknown",
 	"queue",
 	"uptime",
-	"err_out_of_space",
+	// "err_out_of_space",
 	"tsvc_queue",
 	"migrate_progress_send",
 	"client-fd-max",
@@ -304,7 +304,7 @@ var statKeys = []string{"system_free_mem_pct",
 	"cluster_visibility",
 	"build",
 	"cluster_size",
-	"stat_duplicate_operation",
+	// "stat_duplicate_operation",
 	"free-pct-disk",
 	"batch_errors",
 	"same_cluster",
@@ -322,12 +322,24 @@ func getClusterNodes(c echo.Context) error {
 	for _, node := range cluster.Nodes() {
 		for _, nodeName := range nodeList {
 			if node.Address() == nodeName {
+				nodeMem := node.Memory()
+				nodeDisk := node.Disk()
+
 				stats := node.AnyAttrs(statKeys...)
 				stats["cluster_visibility"] = (node.VisibilityStatus())
 				stats["same_cluster"] = true
-				stats["memory"] = node.Memory()
-				stats["disk"] = node.Disk()
+				stats["memory"] = nodeMem
+				stats["disk"] = nodeDisk
 				stats["node_status"] = node.Status()
+
+				// customized calculations
+				if nodeDisk.TryFloat("total-bytes-disk", 0) > 0 {
+					stats["free-pct-disk"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-disk", 0) / nodeDisk.TryFloat("total-bytes-disk", 1))
+				}
+				if nodeMem.TryFloat("total-bytes-memory", 0) > 0 {
+					stats["free-pct-memory"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-memory", 0) / nodeDisk.TryFloat("total-bytes-memory", 1))
+				}
+
 				for _, key := range statKeys {
 					if _, exists := stats[key]; !exists {
 						stats[key] = common.NOT_AVAILABLE

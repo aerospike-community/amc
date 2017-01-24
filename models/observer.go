@@ -239,10 +239,11 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *s
 	}
 
 	cluster := newCluster(o, client, alias, policy.User, policy.Password, hosts)
-	o.AppendCluster(sessionId, cluster)
 	if cluster.IsSet() {
 		cluster.update(nil)
 	}
+
+	o.AppendCluster(sessionId, cluster)
 
 	return cluster, nil
 }

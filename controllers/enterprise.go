@@ -72,7 +72,6 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 	}
 
 	clusters, _ := _observer.MonitoringClusters(sid)
-
 	result := make([]map[string]interface{}, len(clusters))
 	for i, cluster := range clusters {
 		result[i] = map[string]interface{}{

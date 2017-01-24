@@ -64,6 +64,10 @@ type Cluster struct {
 }
 
 func newCluster(observer *ObserverT, client *as.Client, alias *string, user, password string, seeds []*as.Host) *Cluster {
+	if alias != nil && len(*alias) == 0 {
+		alias = nil
+	}
+
 	newCluster := Cluster{
 		observer:        observer,
 		client:          client,
@@ -370,15 +374,30 @@ func (c *Cluster) User() *string {
 	return &u
 }
 
+func (c *Cluster) Name() *string {
+	for _, node := range c.Nodes() {
+		if cName := node.ClusterName(); cName != "" && cName != "null" {
+			return &cName
+		}
+	}
+
+	return nil
+}
+
 func (c *Cluster) Alias() *string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	if c.alias == nil {
-		return nil
+	if c.alias != nil && len(*c.alias) > 0 {
+		alias := *c.alias
+		return &alias
 	}
-	alias := *c.alias
-	return &alias
+
+	if cName := c.Name(); cName != nil {
+		return cName
+	}
+
+	return nil
 }
 
 func (c *Cluster) SetAlias(alias string) {
@@ -752,8 +771,8 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 				}
 			}
 
-			nsStats["master-objects-tombstones"] = fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("master-objects", 0), "'"), common.Comma(nsStats.TryInt("master_tombstones", 0), "'"))
-			nsStats["prole-objects-tombstones"] = fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("prole-objects", 0), "'"), common.Comma(nsStats.TryInt("prole_tombstones", 0), "'"))
+			nsStats["master-objects-tombstones"] = fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("master-objects", 0), ","), common.Comma(nsStats.TryInt("master_tombstones", 0), ","))
+			nsStats["prole-objects-tombstones"] = fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("prole-objects", 0), ","), common.Comma(nsStats.TryInt("prole_tombstones", 0), ","))
 
 			nsStats["least_available_pct"] = leastDiskPct
 			nsStats["cluster_status"] = c.Status()
@@ -795,8 +814,8 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 			"disk":                      ns.Disk(),
 			"disk-pct":                  ns.DiskPercent(),
 			"node_status":               node.Status(),
-			"master-objects-tombstones": fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("master-objects", 0), "'"), common.Comma(nsStats.TryInt("master_tombstones", 0), "'")),
-			"prole-objects-tombstones":  fmt.Sprintf("%v, %v", common.Comma(nsStats.TryInt("prole-objects", 0), "'"), common.Comma(nsStats.TryInt("prole_tombstones", 0), "'")),
+			"master-objects-tombstones": fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("master-objects", 0), ","), common.Comma(nsStats.TryInt("master_tombstones", 0), ",")),
+			"prole-objects-tombstones":  fmt.Sprintf("%v / %v", common.Comma(nsStats.TryInt("prole-objects", 0), ","), common.Comma(nsStats.TryInt("prole_tombstones", 0), ",")),
 			"least_available_pct":       ns.StatsAttr("available_pct"),
 		}
 
