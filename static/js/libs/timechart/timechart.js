@@ -1224,12 +1224,16 @@ under the License.
 		var that = this;
 		var xClose = that.closestIndex(that.dataGrid, x.getTime());
 		var yClose, bubbleData, yClosest;
-		var bubble = that.el[0][0].parentNode;
 		var template = "";
 		var bubbleHTML = "";
 		var templateVar = [];
 		var lastEnd = 0;
 		var containerOffset = $(that.parentContainer).offset();
+    // stack context formed on body, if any other parent is chosen then the stack order
+    // is determined by parent. z-index might not have any effect, and this
+    // bubble is hidden behind other elements.
+    // see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/
+		var bubble = $('body');
 		that.removeBubble();
 		
 		xClose = parseInt(xClose);

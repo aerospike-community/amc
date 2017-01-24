@@ -39,7 +39,7 @@ svg.timeseries{
 
 .timeseries.bubble.container{
 	position : fixed;
-	z-index : 10;
+	z-index : 1000;
 	display : inline-block;
 	pointer-events : none;
 	box-shadow: -4px -2px 20px -5px black;
