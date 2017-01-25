@@ -358,13 +358,14 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                               "title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>" +
                                             "Multicluster View" +
                                           "</label>" + 
-                                          "<label class='dialog_input' id='enable_tls_container' style='display: none'>" +
-                                            "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
-                                              "title='TLS' name='enable_tls' id='enable_tls'>" +
-                                            "TLS" +
-                                          "</label>" + 
                                         "</div>"+
-                                        "<div style='display: none' id='tls_params'>" +
+                                        "<div id='tls_container' " +
+                                            " style='display: none; text-align: left; border-bottom: 1px solid #e5e5e5; height: 20px; padding-left: 178px'>" +
+                                          "<div style='line-height: 8px; font-size: 8px' class='icon-seed-node-dialog icon-plus'> </div>" +
+                                          "<div style='line-height: 8px; font-size: 8px; display: none' class='icon-seed-node-dialog icon-minus'> </div>" +
+                                          "<div style='float: left'> TLS </div>" +
+                                        "</div>" +
+                                        "<div style='display: none; clear: both;' id='tls_params'>" +
                                           "<div>" +
                                             "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Name'/>" +
                                           "</div>" +
@@ -407,7 +408,8 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
                  if (ipAddress.length === 0 && portNumber.length === 0) {
                    $("#error_message").text("Seed node and port number is mandatory");
-                 } else if($('#enable_tls').is(':checked')) {
+                 } else if(certFiles.length !== 0 || keyFiles.length !== 0 || tls_name) {
+                   // all values should be entered
                    if(certFiles.length === 0 || keyFiles.length === 0 || !tls_name) {
                      $("#error_message").text("Invalid TLS values");
                      return;
@@ -475,12 +477,17 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
             // disable TLS for now
             if(Util.isEnterpriseEdition()) {
-              $('#enable_tls_container').show();
-              $('#enable_tls').change(function() {
-                if(this.checked) {
-                  $('#tls_params').show();
+              var shown = true;
+              $('#tls_container').show();
+              $('#tls_container').click(function() {
+                $('#tls_params').toggle();
+                shown = !shown;
+                if(shown) {
+                  $('#tls_container .icon-plus').show();
+                  $('#tls_container .icon-minus').hide();
                 } else {
-                  $('#tls_params').hide();
+                  $('#tls_container .icon-plus').hide();
+                  $('#tls_container .icon-minus').show();
                 }
               });
             }
