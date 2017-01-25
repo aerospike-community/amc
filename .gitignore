@@ -4,3 +4,5 @@ amc.db3
 deployment/release/amc/opt/amc/amc
 deployment/release/amc/opt/amc/static
 deployment/release/amc/opt/amc/mailer
+amc
+*.todo
