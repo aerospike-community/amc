@@ -53,7 +53,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
         },
 
         isEnterpriseEdition: function() {
-          return !this.isCommunityEdition;
+          return !this.isCommunityEdition();
         },
 
         setEnviromentSetupUI : function(){

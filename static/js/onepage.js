@@ -167,7 +167,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
         /**********************************/
 
-        that.getClusterID = function(ip, port, callback, clusterName, multiclusterview) {
+        that.getClusterID = function(ip, port, callback, clusterName, multiclusterview, tls) {
             var that = this;
 
             if (!is_valid_port(port)) {
@@ -186,6 +186,10 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                 clusterInfo.cluster_name = clusterName;
 
             $("body").append(AppConfig.cursorStyler.cursorStylerHtmlStr);
+
+            clusterInfo.tls_name = tls.tls_name;
+            clusterInfo.cert_file = tls.cert_file;
+            clusterInfo.key_file = tls.key_file;
 
             /* RECHECK */
             var isExistingUserLogout = false;
@@ -342,7 +346,31 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                         "<span>:</span>" +
                                         "<input id='port_dialog' class='dialog_input' type='number' style='width: 55px;' maxlength='5' placeholder='PORT' value='" + port + "'/>" +
                                         "<div><input type='text' style='width: 200px; text-align:center;' placeholder='Cluster Label (OPTIONAL)' class='dialog_input' value='' id='cluster_name_dialog'/></div>"+
-                                        "<div><label class='dialog_input'><input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;' title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>Multicluster View</label></div>"+
+                                        "<div>" +
+                                          "<label class='dialog_input'>" +
+                                            "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
+                                              "title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>" +
+                                            "Multicluster View" +
+                                          "</label>" + 
+                                          "<label class='dialog_input' id='enable_tls_container' style='display: none'>" +
+                                            "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
+                                              "title='TLS' name='enable_tls' id='enable_tls'>" +
+                                            "TLS" +
+                                          "</label>" + 
+                                        "</div>"+
+                                        "<div style='display: none' id='tls_params'>" +
+                                          "<div>" +
+                                            "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Name'/>" +
+                                          "</div>" +
+                                          "<label>" +
+                                            "<span style='margin-right: 55px'> TLS Key </span>" +
+                                            "<input id='tls_key' class='dialog_input' type='file' >" +
+                                          "</label>" +
+                                          "<div>" +
+                                            "<span style='margin-right: 10px'> TLS Certificate </span>" +
+                                            "<input id='tls_certificate' class='dialog_input' type='file'>" +
+                                          "</div>" +
+                                        "</div>" +
                                         "<div id='error_message' class='dialog-message'></div>");
 
             popupModel.set('footer',"<div id='dialog_message_2' class='dialog-message'>(The other nodes in the cluster will be discovered automatically)</div>");
@@ -361,19 +389,62 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                  var portNumber = $("#port_dialog").val().trim();
                  var clusterName = $("#cluster_name_dialog").val().trim();
                  var multiclusterviewCheck = is_checked("multiclusterview_check");
+                 var tls = {};
+                 var certFiles = document.getElementById('tls_certificate').files;
+                 var keyFiles = document.getElementById('tls_key').files;
+                 var tls_name = $('#tls_name').val().trim();
 
-                 if (ipAddress.length > 0 && portNumber.length > 0) {
-                    getClusterID(ipAddress, portNumber, function(response){
-                        if(response !== "error"){
-                            Util.hideModalDialog();
-                            connectCallback && connectCallback(response, multiclusterviewCheck);
-                        }
-                    }, clusterName, multiclusterviewCheck);
-                } else {
-                    $("#error_message").text("Seed node and port number is mandatory");
-                    return;
-                }
+
+                 if (ipAddress.length === 0 && portNumber.length === 0) {
+                   $("#error_message").text("Seed node and port number is mandatory");
+                 } else if($('#enable_tls').is(':checked')) {
+                   if(certFiles.length === 0 || keyFiles.length === 0 || !tls_name) {
+                     $("#error_message").text("Invalid TLS values");
+                     return;
+                   }
+                   tls.tls_name = tls_name;
+                   // read tls key and certificate as string
+                   var numTLSFiles = 0;
+                   function readFile(file, callback) {
+                     var reader = new FileReader();
+                     reader.onload = function(evt) {
+                       callback(reader.result);
+                     };
+                     reader.readAsText(file);
+                   }
+                   // read tls key file
+                   readFile(keyFiles[0], function(text) {
+                     tls.key_file = text;
+                     numTLSFiles++;
+                     if(numTLSFiles === 2) {
+                       sendRequest();
+                     }
+                   });
+                   // read tls certificate file
+                   readFile(certFiles[0], function(text) {
+                     tls.cert_file = text;
+                     numTLSFiles++;
+                     if(numTLSFiles === 2) {
+                       sendRequest();
+                     }
+                   });
+
+                 } else {
+                   sendRequest();
+                 } 
+                 return;
+
+                 function sendRequest() {
+                   getClusterID(ipAddress, portNumber, function(response){
+                     if(response !== "error"){
+                       Util.hideModalDialog();
+                       connectCallback && connectCallback(response, multiclusterviewCheck);
+                     }
+                   }, clusterName, multiclusterviewCheck, tls);
+                 }
             }
+
+
 
             function closePopup(){
                 popupModel.destroy();
@@ -390,6 +461,18 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             );
 
             Util.numbericInputValidation("#port_dialog", "#ModalSubmit");
+
+            // disable TLS for now
+            if(false && Util.isEnterpriseEdition()) {
+              $('#enable_tls_container').show();
+              $('#enable_tls').change(function() {
+                if(this.checked) {
+                  $('#tls_params').show();
+                } else {
+                  $('#tls_params').hide();
+                }
+              });
+            }
 
             if(typeof operation === "object" && typeof operation.postDialog === "function"){
                 operation.postDialog();
