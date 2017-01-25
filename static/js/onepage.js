@@ -187,9 +187,11 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
             $("body").append(AppConfig.cursorStyler.cursorStylerHtmlStr);
 
-            clusterInfo.tls_name = tls.tls_name;
-            clusterInfo.cert_file = tls.cert_file;
-            clusterInfo.key_file = tls.key_file;
+            if(tls) {
+              clusterInfo.tls_name = tls.tls_name;
+              clusterInfo.cert_file = tls.cert_file;
+              clusterInfo.key_file = tls.key_file;
+            }
 
             /* RECHECK */
             var isExistingUserLogout = false;
