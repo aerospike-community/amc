@@ -191,6 +191,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
               clusterInfo.tls_name = tls.tls_name;
               clusterInfo.cert_file = tls.cert_file;
               clusterInfo.key_file = tls.key_file;
+              clusterInfo.encrypt_only = tls.encrypt_only;
             }
 
             /* RECHECK */
@@ -200,6 +201,9 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             function processSuccess(response){
                 if (response.error === undefined) {
 
+                    if(tls) {
+                      AuthManager.setTLSProps(seedNode, tls.tls_name, tls.key_file, tls.cert_file, tls.encrypt_only);
+                    }
                     SessionManager.putItemIntoSession(AppConfig.sessionKeys.isSecurityEnable,response.security_enabled);
 
                     var clusterName = ($("#cluster_name_dialog").val() || "").trim();//RECHECK
@@ -364,10 +368,14 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                           "<div>" +
                                             "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Name'/>" +
                                           "</div>" +
-                                          "<label>" +
+                                          "<div>" +
+                                            "<input id='encrypt_only' class='dialog_input' type='checkbox' >" +
+                                            "<span style='margin-right: -17px'> Encrypt Only (insecure)</span>" +
+                                          "</div>" +
+                                          "<div>" +
                                             "<span style='margin-right: 55px'> TLS Key </span>" +
                                             "<input id='tls_key' class='dialog_input' type='file' >" +
-                                          "</label>" +
+                                          "</div>" +
                                           "<div>" +
                                             "<span style='margin-right: 10px'> TLS Certificate </span>" +
                                             "<input id='tls_certificate' class='dialog_input' type='file'>" +
@@ -395,7 +403,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                  var certFiles = document.getElementById('tls_certificate').files;
                  var keyFiles = document.getElementById('tls_key').files;
                  var tls_name = $('#tls_name').val().trim();
-
+                 var encrypt_only = $('#encrypt_only').is(':checked');
 
                  if (ipAddress.length === 0 && portNumber.length === 0) {
                    $("#error_message").text("Seed node and port number is mandatory");
@@ -405,6 +413,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                      return;
                    }
                    tls.tls_name = tls_name;
+                   tls.encrypt_only = encrypt_only;
                    // read tls key and certificate as string
                    var numTLSFiles = 0;
                    function readFile(file, callback) {

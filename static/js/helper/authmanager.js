@@ -6,6 +6,7 @@
 define(["jquery","underscore","backbone", "config/app-config", "models/common/PopupModel","helper/AjaxManager","helper/servicemanager","helper/notification","helper/sessionmanager", "helper/util"],
 	function($,_, Backbone, AppConfig ,PopupModel,AjaxManager,ServiceManager,Notification,SessionManager, Util){
 
+  var _tlsProps = {};
 	var AuthManager = {
 
 			getLoggedInUserInfo : function(clusterID){
@@ -27,6 +28,15 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
 			        	SessionManager.cleanupLocalUserSession();
 		            }
 			 },
+
+       setTLSProps: function(address, name, key, certificate, encryptOnly) {
+         _tlsProps[address] = {
+           certificate : certificate,
+           name        : name,
+           key         : key,
+           encryptOnly : encryptOnly,
+        };
+       },
 
 			 showUserLoginPopup : function(properties,callback,showErrorMessage,clusterName,multiclusterview){
 			 	var that = this;
@@ -66,7 +76,7 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
 
 	            function userLogin() {
 	                if(that._isUserEnterValidData()){
-	                	var formdata = that._getUserLoginObject();
+	                	var formdata = that._getUserLoginObject(properties.seedNode);
 
 	                	if(clusterName != null)
 	                		formdata.cluster_name = clusterName;
@@ -353,10 +363,17 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
 	            });
 	        },
 
-	        _getUserLoginObject : function(){
+	        _getUserLoginObject : function(address){
 	        	var formData = {};
+            var tls = _tlsProps[address];
 	        	formData.username =  $("#loginUsername").val().trim();
 	            formData.password = $('#loginPassword').val().trim();
+            if(tls) {
+              formData.tls_name = tls.name;
+              formData.cert_file = tls.certificate;
+              formData.key_file = tls.key;
+              formData.encrypt_only = tls.encryptOnly;
+            }
 	            return formData;
 	        },
 
