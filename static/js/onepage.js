@@ -465,7 +465,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             Util.numbericInputValidation("#port_dialog", "#ModalSubmit");
 
             // disable TLS for now
-            if(false && Util.isEnterpriseEdition()) {
+            if(Util.isEnterpriseEdition()) {
               $('#enable_tls_container').show();
               $('#enable_tls').change(function() {
                 if(this.checked) {
