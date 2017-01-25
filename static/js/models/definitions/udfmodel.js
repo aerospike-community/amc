@@ -28,7 +28,7 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
 
             if( ServiceManager.isUserHasAccessToService("REMOVE_UDF") ){
                 model.formatter = function( cellvalue, options, rowObject ){
-                    return "<span class='drop-udf-btn hover-drop-btn icon-cancel-circle remove-node-icon'></span><span>" + cellvalue + "</span>";
+                    return "<span class='drop-udf-btn hover-drop-btn icon-cancel-circle remove-node-icon' style='display: inline-block'></span><span>" + cellvalue + "</span>";
                 };
             } else {
                 delete model.formatter;
@@ -74,14 +74,7 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             model.udfData = modelData.udfs;
             
             if(_.isEmpty(model.udfData)){
-                var tempData = {
-                        "filename" : "Empty",
-                        "cache_size" : "N/A",
-                        "synced" : "N/A",
-                        "type" : "N/A"
-                };
                 model.views[0] = new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
-                model.views[0].renderNetworkError(model, tempData, 0);
                 
             }else{
                 var removedUDFs = _.difference( _.map( model.views, function(udf){ return udf.viewID; }), _.keys( model.udfData ) );
@@ -168,14 +161,7 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             }
         },
         displayNetworkErrorRow: function(model){
-            var tempData = {
-                    "filename" : "N/E",
-                    "cache_size" : "N/E",
-                    "synced" : "N/E",
-                    "type" : "N/E"
-            };
             model.views[0] = new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
-            model.views[0].renderNetworkError(model, tempData, 0);
         },
 
         dropUDF: function(filename, callback){

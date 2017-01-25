@@ -69,17 +69,7 @@ define(["underscore", "backbone", "poller", "views/definitions/setsview", "helpe
             var setsData = modelData.sets;
             model.setsList = _.pluck(setsData, 'set_name');
             if(_.isEmpty(model.setsList)){
-                var tempData = {
-                    "set_name": "N/A",
-                    "enable-xdr": "N/A",
-                    "stop-write-count": "N/A",
-                    "evict-hwm-count": "N/A",
-                    "node_status": "N/A",
-                    "n_objects": "N/A",
-                    "delete": "N/A"
-                };
                 model.views[0] = new SetsView({tableDiv:model.tableDiv, indexName:0 ,model: model});
-                model.views[0].render(model, tempData, 0);
             }else{
             
                 for(var i in model.setsList){
@@ -111,18 +101,7 @@ define(["underscore", "backbone", "poller", "views/definitions/setsview", "helpe
             }
         },
         displayNetworkErrorRow: function(model){
-            var tempData = {
-                    "set_name": "N/E",
-					"enable-xdr": "N/E",
-                    "stop-write-count": "N/E",
-                    "evict-hwm-count": "N/E",
-                    "node_status": "N/E",
-                    "n_objects": "N/E",
-                    "delete": "N/E"
-                    
-            };
             model.views[0] = new SetsView({tableDiv:model.tableDiv, indexName:0 ,model: model});
-            model.views[0].renderNetworkError(model, tempData, 0);
         }
         
         

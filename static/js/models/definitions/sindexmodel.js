@@ -43,7 +43,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
 
             if( ServiceManager.isUserHasAccessToService("DROP_INDEX") ){
                 model.formatter = function( cellvalue, options, rowObject ){
-                    return "<span class='drop-index-btn hover-drop-btn icon-cancel-circle remove-node-icon'></span><span>" + cellvalue + "</span>";
+                    return "<span class='drop-index-btn hover-drop-btn icon-cancel-circle remove-node-icon' style='display: inline-block'></span><span>" + cellvalue + "</span>";
                 };
             } else {
             	delete model.formatter;
@@ -113,22 +113,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
             model.indexList = _.pluck(indexData, 'indexname');
 
             if(_.isEmpty(model.indexList)){
-                var tempData = {
-                    "indexname": "Empty",
-                    "bins": "N/A",
-                    "set": "N/A",
-                    "type": "N/A",
-                    "sync_state": "N/A"
-                };
-                
-                if(that.version){
-                    var versionCheck = that.versionCompare(that.version);
-                    tempData = that.replaceTempData(versionCheck, tempData);
-                }
-                
                 model.views[0] = new SIndexView({tableDiv:model.tableDiv, indexName:0 ,model: model});
-                model.views[0].render(model, tempData, 0);
-                
             }else{
                 for(var i in model.indexList){
                     for(var j in indexData){
@@ -175,23 +160,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
             }
         },
         displayNetworkErrorRow: function(model){
-            var that = this;
-            var tempData = {
-                    "indexname": "N/E",
-                    "bins": "N/E",
-                    "set": "N/E",
-                    "type": "N/E",
-                    "sync_state": "N/E"
-                };
-
-            if(that.version){
-                var versionCheck = that.versionCompare(taht.version);
-                tempData = that.replaceTempData(versionCheck, tempData);
-            }
-               
-
             model.views[0] = new SIndexView({tableDiv:model.tableDiv, indexName:0 ,model: model});
-            model.views[0].renderNetworkError(model, tempData, 0);
         },
 
         addNewIndex : function(indexData, callback){
