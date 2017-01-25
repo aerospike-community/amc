@@ -50,7 +50,7 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
       initLatencyWindow: function() {
           var latencyWindow = window.AMCGLOBALS.persistent.latencyWindow;
           if(!latencyWindow) {
-            return;
+            latencyWindow = 60; // one minute
           }
 
           this.updateChartWindow(latencyWindow);
@@ -59,10 +59,13 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
       },
 
       updateChartWindow: function(latencyWindow) {
-          this.mainChart.configure({
-              timeWindowSize : parseInt(latencyWindow)*1000,
-              fixTimeWindowSize : latencyWindow === "1800" ? false : true,
-          });
+        var timeWindowSize = parseInt(latencyWindow)*1000;
+        var fixTimeWindowSize = latencyWindow === "1800" ? false : true;
+        this.mainChart.configure({
+          timeWindowSize    : timeWindowSize,
+          fixTimeWindowSize : fixTimeWindowSize,
+        });
+        this.nodeCentralisedModel.updateWindow(timeWindowSize, fixTimeWindowSize);
       },
         
 

@@ -61,6 +61,12 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
             console.info("err");
         },
 
+      updateWindow: function(timeWindowSize, fixTimeWindowSize) {
+        this.nodeCollection.each(function(model) {
+          model.updateWindow(timeWindowSize, fixTimeWindowSize);
+        });
+      },
+
         startEventListeners : function (){
             var that = this;
 

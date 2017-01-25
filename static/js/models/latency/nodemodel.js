@@ -338,6 +338,11 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			}
         },
 
+    updateWindow: function(timeWindowSize, fixTimeWindowSize) {
+      this.rowView.updateWindow(this, this.latencyData, timeWindowSize, fixTimeWindowSize);
+    },
+
+
 		prependAndFillNullLatencyData: function(latencyResponse){
 			var that = this;
 			var latencyData = latencyResponse;

@@ -13,6 +13,8 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 			this.initialized = false;
 			this.el = null;
 			this.address = model.address;
+      this.timeWindowSize = null;
+      this.fixTimeWindowSize = null;
         },
 		
 		initMainContainers: function(model){
@@ -158,6 +160,25 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
       }
     },
 
+    updateWindow: function(model, latencyData, timeWindowSize, fixTimeWindowSize) {
+      var attr;
+
+      if(!latencyData) {
+        this.timeWindowSize = timeWindowSize;
+        this.fixTimeWindowSize = fixTimeWindowSize;
+        return;
+      }
+
+      for(attr in latencyData){
+        chart = model.rowView.sparkline[attr];
+        chart.configure({
+            timeWindowSize    : timeWindowSize, 
+            fixTimeWindowSize : fixTimeWindowSize, 
+        });
+      }
+      this.render(model, latencyData);
+    },
+
 		render: function(model, latencyData){
 			
 			function renderOnDemand(){
@@ -295,6 +316,8 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 		initSparkline: function(view){
 			var boxContainer = $(view.nodeLatencyContainer.find('.box-container')[0]);
 			var sparklineContainer = boxContainer.find('.sparkline-container');
+      var timeWindowSize = this.timeWindowSize;
+      var fixTimeWindowSize = this.fixTimeWindowSize;
 			
 			view.sparkline = {};
 			sparklineContainer.each(function(){
@@ -322,7 +345,9 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 					marginLeft : 10,
 					yAxisNumberOfTicks : 2,
 					yAxisTickOrientation : 'right',
-					scaleYCeilOffset : '5%'
+					scaleYCeilOffset : '5%',
+          timeWindowSize: timeWindowSize,
+          fixTimeWindowSize: fixTimeWindowSize,
 				});
 			});
 
