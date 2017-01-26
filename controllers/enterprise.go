@@ -162,12 +162,12 @@ func getNodeLatencyHistory(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 
 	node := cluster.FindNodeByAddress(c.Param("nodes"))
 	if node == nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"status": "failure", "error": "Node not found"})
+		return c.JSON(http.StatusOK, errorMap("Node not found"))
 	}
 
 	latencyHistory := []common.Stats{}
@@ -187,12 +187,12 @@ func getNodeLatency(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"status": "failure", "error": "Cluster not found"})
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 
 	nodes := cluster.FindNodesByAddress(strings.Split(c.Param("nodes"), ",")...)
 	if len(nodes) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]string{"status": "failure", "error": "Node not found"})
+		return c.JSON(http.StatusOK, errorMap("Node not found"))
 	}
 
 	res := map[string]interface{}{}
@@ -413,6 +413,57 @@ func postAddClusterNodes(c echo.Context) error {
 	}
 
 	err = cluster.AddNode(host, port)
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
+	}
+
+	// create output
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
+}
+
+func getAlertEmails(c echo.Context) error {
+	// create output
+	return c.JSON(http.StatusOK, _observer.Config().AlertEmails())
+}
+
+func postAlertEmails(c echo.Context) error {
+	form := struct {
+		Emails string `form:"emails"`
+	}{}
+
+	c.Bind(&form)
+	if len(form.Emails) == 0 {
+		return c.JSON(http.StatusOK, errorMap("No emails specified."))
+	}
+
+	emails := strings.Split(form.Emails, ",")
+	err := _observer.Config().AppendAlertEmails(emails)
+
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap(err.Error()))
+	}
+
+	// create output
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+	})
+}
+
+func deleteAlertEmails(c echo.Context) error {
+	form := struct {
+		Emails string `form:"emails"`
+	}{}
+
+	c.Bind(&form)
+	if len(form.Emails) == 0 {
+		return c.JSON(http.StatusOK, errorMap("No emails specified."))
+	}
+
+	emails := strings.Split(form.Emails, ",")
+	err := _observer.Config().DeleteAlertEmails(emails)
+
 	if err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}

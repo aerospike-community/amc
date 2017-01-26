@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/tls"
+	// "crypto/x509"
 	"math"
 	"net/http"
 	"sort"
@@ -10,6 +12,7 @@ import (
 
 	// . "github.com/ahmetalpbalkan/go-linq"
 	log "github.com/Sirupsen/logrus"
+	as "github.com/aerospike/aerospike-client-go"
 	ast "github.com/aerospike/aerospike-client-go/types"
 	"github.com/labstack/echo"
 
@@ -29,6 +32,7 @@ func postGetClusterId(c echo.Context) error {
 		Username     string `form:"username"`
 		Password     string `form:"password"`
 		ClusterAlias string `form:"cluster_name"`
+		EncryptOnly  bool   `form:"encrypt_only"`
 	}{}
 
 	c.Bind(&form)
@@ -44,7 +48,10 @@ func postGetClusterId(c echo.Context) error {
 	// update the session cookie
 	sid := manageSession(c)
 
-	cluster := _observer.FindClusterBySeed(sid, host, port, form.Username, form.Password)
+	seedHost := as.NewHost(host, port)
+	seedHost.TLSName = form.TLSName
+
+	cluster := _observer.FindClusterBySeed(sid, seedHost, form.Username, form.Password)
 	if cluster != nil {
 		cluster.SetAlias(form.ClusterAlias)
 		_observer.AppendCluster(sid, cluster)
@@ -52,7 +59,35 @@ func postGetClusterId(c echo.Context) error {
 		clientPolicy := *_defaultClientPolicy
 		clientPolicy.User = form.Username
 		clientPolicy.Password = form.Password
-		cluster, err = _observer.Register(sid, &clientPolicy, &form.ClusterAlias, host, uint16(port))
+
+		if len(form.TLSName) > 0 || form.EncryptOnly == true {
+			// Setup TLS Config
+			tlsConfig := &tls.Config{
+				Certificates:             _observer.Config().ClientPool(),
+				RootCAs:                  _observer.Config().ServerPool(),
+				InsecureSkipVerify:       form.EncryptOnly,
+				PreferServerCipherSuites: true,
+			}
+			tlsConfig.BuildNameToCertificate()
+
+			clientPolicy.TlsConfig = tlsConfig
+		}
+
+		// hostAddrs := strings.Split(host, ",")
+		// hosts := make([]*as.Host, 0, len(hostAddrs))
+
+		// for _, addr := range hostAddrs {
+		// 	resolved, err := resolveHost(addr)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+
+		// 	for _, ip := range resolved {
+		// 		hosts = append(hosts, as.NewHost(ip, int(port)))
+		// 	}
+		// }
+
+		cluster, err = _observer.Register(sid, &clientPolicy, &form.ClusterAlias, seedHost)
 		if err != nil {
 			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
 				// create output

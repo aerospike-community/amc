@@ -342,7 +342,9 @@ func (n *Node) updateHistory() {
 		}
 	}
 
-	n.latencyHistory.Add(tm, n.LatestLatency())
+	if ll := n.LatestLatency(); ll != nil {
+		n.latencyHistory.Add(tm, ll)
+	}
 	// n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
 }
 
@@ -984,7 +986,10 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 	}
 
 	for _, nstats := range nodeStats {
-		tps := nstats.TryFloat("tps", 1)
+		tps := nstats.TryFloat("tps", 0)
+		if tps == 0 {
+			tps = 1
+		}
 		nValBuckets := nstats["valBuckets"].([]float64)
 		for i := range nValBuckets {
 			nValBuckets[i] /= tps

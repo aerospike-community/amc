@@ -1,10 +1,13 @@
 package common
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
@@ -59,18 +62,88 @@ type Config struct {
 	}
 
 	Mailer struct {
-		TemplatePath string `toml:"template_path"`
-		Host         string `toml:"host"`
-		Port         uint16 `toml:"port"`
-		User         string `toml:"user"`
-		Password     string `toml:"password"`
-		SendTo       string `toml:"send_to"`
+		mutex sync.RWMutex
+
+		TemplatePath string   `toml:"template_path"`
+		Host         string   `toml:"host"`
+		Port         uint16   `toml:"port"`
+		User         string   `toml:"user"`
+		Password     string   `toml:"password"`
+		SendTo       []string `toml:"send_to"`
 	} `toml:"mailer"`
 
 	BasicAuth struct {
 		User     string `toml:"user"`
 		Password string `toml:"password"`
 	} `toml:"basic_auth"`
+
+	TLS struct {
+		ServerPool []string `toml:"server_cert_pool"`
+		ClientPool map[string]struct {
+			CertFile string `toml:"cert_file"`
+			KeyFile  string `toml:"key_file"`
+		} `toml:"client_certs"`
+	} `toml:"tls"`
+
+	serverPool *x509.CertPool
+	clientPool []tls.Certificate
+}
+
+func (c *Config) AppendAlertEmails(emails []string) error {
+	c.Mailer.mutex.Lock()
+	defer c.Mailer.mutex.Unlock()
+
+	for i, e := range c.Mailer.SendTo {
+		c.Mailer.SendTo[i] = strings.Trim(strings.ToLower(e), "\t ")
+	}
+
+	c.Mailer.SendTo = append(c.Mailer.SendTo, emails...)
+	c.Mailer.SendTo = StrUniq(c.Mailer.SendTo)
+
+	return nil
+}
+
+func (c *Config) DeleteAlertEmails(emails []string) error {
+	c.Mailer.mutex.Lock()
+	defer c.Mailer.mutex.Unlock()
+
+	for i, e := range c.Mailer.SendTo {
+		c.Mailer.SendTo[i] = strings.Trim(strings.ToLower(e), "\t ")
+	}
+
+	remEmails := map[string]struct{}{}
+	for _, e := range emails {
+		remEmails[strings.Trim(strings.ToLower(e), "\t ")] = struct{}{}
+	}
+
+	newEmails := make([]string, 0, len(c.Mailer.SendTo))
+	for _, e := range c.Mailer.SendTo {
+		if _, exists := remEmails[e]; !exists {
+			newEmails = append(newEmails, e)
+		}
+	}
+
+	c.Mailer.SendTo = StrUniq(newEmails)
+
+	return nil
+}
+
+func (c *Config) AlertEmails() []string {
+	c.Mailer.mutex.RLock()
+	defer c.Mailer.mutex.RUnlock()
+
+	res := make([]string, len(c.Mailer.SendTo))
+	copy(res, c.Mailer.SendTo)
+
+	return res
+}
+
+func (c *Config) ServerPool() *x509.CertPool {
+	return c.serverPool
+}
+
+func (c *Config) ClientPool() []tls.Certificate {
+	return c.clientPool
 }
 
 func (c *Config) LogLevel() log.Level {
@@ -127,6 +200,39 @@ func InitConfig(configFile, configDir string, config *Config) {
 		setLogFile(config.AMC.ErrorLog)
 	}
 
+	// Try to load system CA certs, otherwise just make an empty pool
+	serverPool, err := x509.SystemCertPool()
+	if err != nil {
+		log.Errorf("FAILED: Adding system certificates to the pool failed: %s", err)
+		serverPool = x509.NewCertPool()
+	}
+
+	// Try to load system CA certs and add them to the system cert pool
+	for _, caFile := range config.TLS.ServerPool {
+		caCert, err := ioutil.ReadFile(caFile)
+		if err != nil {
+			log.Errorf("FAILED: Adding server certificate %s to the pool failed: %s", caFile, err)
+			continue
+		}
+
+		log.Debugf("Adding server certificate %s to the pool...", caFile)
+		serverPool.AppendCertsFromPEM(caCert)
+	}
+
+	config.serverPool = serverPool
+
+	// Try to load system CA certs and add them to the system cert pool
+	for _, cFiles := range config.TLS.ClientPool {
+		cert, err := tls.LoadX509KeyPair(cFiles.CertFile, cFiles.KeyFile)
+		if err != nil {
+			log.Errorf("FAILED: Adding client certificate %s to the pool failed: %s", cFiles.CertFile, err)
+			continue
+		}
+
+		log.Debugf("Adding client certificate %s to the pool...", cFiles.CertFile)
+		config.clientPool = append(config.clientPool, cert)
+	}
+
 	aslog.Logger.SetLogger(log.StandardLogger())
 
 	setLogLevel(config.AMC.LogLevel)
@@ -173,7 +279,7 @@ func openDB(filepath string) {
 	log.Infof("Database path is: %s", filepath)
 
 	var err error
-	db, err = sql.Open("sqlite3", filepath)
+	db, err = sql.Open("sqlite3", "file:"+filepath+"?cache=shared&mode=rwc")
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %s", err.Error())
 	}

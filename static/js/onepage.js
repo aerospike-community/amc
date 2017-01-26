@@ -357,31 +357,23 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                             "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
                                               "title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>" +
                                             "Multicluster View" +
-                                          "</label>" + 
+                                          "</label>" +
                                         "</div>"+
-                                        "<div id='tls_container' " +
-                                            " style='display: none; text-align: left; border-bottom: 1px solid #e5e5e5; height: 20px; padding-left: 178px'>" +
+                                        "<br/><div id='tls_container' " +
+                                            " style='display: none; text-align: left; border-bottom: 1px solid #e5e5e5; height: 20px; padding-left: 148px'>" +
                                           "<div style='line-height: 8px; font-size: 8px' class='icon-seed-node-dialog icon-plus'> </div>" +
                                           "<div style='line-height: 8px; font-size: 8px; display: none' class='icon-seed-node-dialog icon-minus'> </div>" +
-                                          "<div style='float: left'> TLS </div>" +
+                                          "<div style='float: left'> TLS Connection Info</div>" +
                                         "</div>" +
                                         "<div style='display: none; clear: both;' id='tls_params'>" +
                                           "<div>" +
-                                            "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Name'/>" +
+                                            "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Host Name'/>" +
                                           "</div>" +
                                           "<div>" +
                                             "<input id='encrypt_only' class='dialog_input' type='checkbox' >" +
                                             "<span style='margin-right: -17px'> Encrypt Only (insecure)</span>" +
                                           "</div>" +
-                                          "<div>" +
-                                            "<span style='margin-right: 55px'> TLS Key </span>" +
-                                            "<input id='tls_key' class='dialog_input' type='file' >" +
-                                          "</div>" +
-                                          "<div>" +
-                                            "<span style='margin-right: 10px'> TLS Certificate </span>" +
-                                            "<input id='tls_certificate' class='dialog_input' type='file'>" +
-                                          "</div>" +
-                                        "</div>" +
+                                        "</div><br/>" +
                                         "<div id='error_message' class='dialog-message'></div>");
 
             popupModel.set('footer',"<div id='dialog_message_2' class='dialog-message'>(The other nodes in the cluster will be discovered automatically)</div>");
@@ -401,50 +393,51 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                  var clusterName = $("#cluster_name_dialog").val().trim();
                  var multiclusterviewCheck = is_checked("multiclusterview_check");
                  var tls = {};
-                 var certFiles = document.getElementById('tls_certificate').files;
-                 var keyFiles = document.getElementById('tls_key').files;
+                 // var certFiles = document.getElementById('tls_certificate').files;
+                 // var keyFiles = document.getElementById('tls_key').files;
                  var tls_name = $('#tls_name').val().trim();
                  var encrypt_only = $('#encrypt_only').is(':checked');
 
                  if (ipAddress.length === 0 && portNumber.length === 0) {
                    $("#error_message").text("Seed node and port number is mandatory");
-                 } else if(certFiles.length !== 0 || keyFiles.length !== 0 || tls_name) {
+                 } else if(encrypt_only || tls_name) {
                    // all values should be entered
-                   if(certFiles.length === 0 || keyFiles.length === 0 || !tls_name) {
+                   if(!encrypt_only && !tls_name) {
                      $("#error_message").text("Invalid TLS values");
                      return;
                    }
                    tls.tls_name = tls_name;
                    tls.encrypt_only = encrypt_only;
                    // read tls key and certificate as string
-                   var numTLSFiles = 0;
-                   function readFile(file, callback) {
-                     var reader = new FileReader();
-                     reader.onload = function(evt) {
-                       callback(reader.result);
-                     };
-                     reader.readAsText(file);
-                   }
-                   // read tls key file
-                   readFile(keyFiles[0], function(text) {
-                     tls.key_file = text;
-                     numTLSFiles++;
-                     if(numTLSFiles === 2) {
-                       sendRequest();
-                     }
-                   });
-                   // read tls certificate file
-                   readFile(certFiles[0], function(text) {
-                     tls.cert_file = text;
-                     numTLSFiles++;
-                     if(numTLSFiles === 2) {
-                       sendRequest();
-                     }
-                   });
+                   // var numTLSFiles = 0;
+                   // function readFile(file, callback) {
+                   //   var reader = new FileReader();
+                   //   reader.onload = function(evt) {
+                   //     callback(reader.result);
+                   //   };
+                   //   reader.readAsText(file);
+                   // }
+                   // // read tls key file
+                   // readFile(keyFiles[0], function(text) {
+                   //   tls.key_file = text;
+                   //   numTLSFiles++;
+                   //   if(numTLSFiles === 2) {
+                   //     sendRequest();
+                   //   }
+                   // });
+                   // // read tls certificate file
+                   // readFile(certFiles[0], function(text) {
+                   //   tls.cert_file = text;
+                   //   numTLSFiles++;
+                   //   if(numTLSFiles === 2) {
+                   //     sendRequest();
+                   //   }
+                   // });
 
+                   sendRequest();
                  } else {
                    sendRequest();
-                 } 
+                 }
                  return;
 
                  function sendRequest() {

@@ -1060,7 +1060,6 @@ func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
 
 func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 	alerts := []*common.Alert{}
-	return alerts
 	for _, node := range c.Nodes() {
 		alerts = append(alerts, node.AlertsFrom(id)...)
 	}

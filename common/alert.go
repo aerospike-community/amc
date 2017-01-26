@@ -47,6 +47,8 @@ type Alert struct {
 	Status      AlertStatus
 }
 
+var _alertGlobalMutex deadlock.RWMutex
+
 type AlertBucket struct {
 	alertQueue []*Alert
 	pos        int
@@ -72,9 +74,8 @@ func NewAlertBucket(db *sql.DB, size int) *AlertBucket {
 }
 
 func (ad *AlertBucket) DrainNewAlerts() []*Alert {
-	return []*Alert{}
-	ad.mutex.Lock()
-	defer ad.mutex.Unlock()
+	_alertGlobalMutex.Lock()
+	defer _alertGlobalMutex.Unlock()
 
 	res := make([]*Alert, len(ad.newAlerts))
 	if len(ad.newAlerts) > 0 {
@@ -86,9 +87,8 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 }
 
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
-	return nil
-	ad.mutex.RLock()
-	defer ad.mutex.RUnlock()
+	_alertGlobalMutex.RLock()
+	defer _alertGlobalMutex.RUnlock()
 
 	latest := Alert{}
 	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? And Resolved IS NULL ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress)
@@ -107,7 +107,6 @@ func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 }
 
 func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
-	return
 	if recurrAlert := ad.Recurring(alert); recurrAlert != nil {
 		if alert.Status == AlertStatusGreen && recurrAlert.Status != AlertStatusGreen {
 			// Recurring issue which is resolved
@@ -121,17 +120,16 @@ func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 
 	ad.saveAlert(alert)
 
-	ad.mutex.Lock()
-	defer ad.mutex.Unlock()
+	_alertGlobalMutex.Lock()
+	defer _alertGlobalMutex.Unlock()
 	ad.newAlerts = append(ad.newAlerts, alert)
 
 	return false
 }
 
 func (ad *AlertBucket) saveAlert(alert *Alert) {
-	return
-	ad.mutex.Lock()
-	defer ad.mutex.Unlock()
+	_alertGlobalMutex.Lock()
+	defer _alertGlobalMutex.Unlock()
 
 	if alert.Created.IsZero() {
 		alert.Created = time.Now()
@@ -158,9 +156,8 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 }
 
 func (ad *AlertBucket) updateRecurrence(alert *Alert) {
-	return
-	ad.mutex.Lock()
-	defer ad.mutex.Unlock()
+	_alertGlobalMutex.Lock()
+	defer _alertGlobalMutex.Unlock()
 
 	alert.LastOccured = time.Now()
 	alert.Recurrence++
@@ -170,7 +167,6 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 }
 
 func (ad *AlertBucket) ResolveAlert(alert *Alert) {
-	return
 	// Mark the old alert resolved
 	alert.Resolved.Set(time.Now())
 
@@ -183,10 +179,8 @@ func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 }
 
 func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
-	return []*Alert{}
-
-	ad.mutex.RLock()
-	defer ad.mutex.RUnlock()
+	_alertGlobalMutex.RLock()
+	defer _alertGlobalMutex.RUnlock()
 
 	res := []*Alert{}
 	var rows *sql.Rows

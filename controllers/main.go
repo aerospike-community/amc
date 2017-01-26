@@ -145,6 +145,10 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/debug", getDebug)
 	e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
 
+	e.GET("/alert-emails", getAlertEmails)
+	e.POST("/alert-emails", postAlertEmails)
+	e.POST("/delete-alert-emails", deleteAlertEmails)
+
 	e.GET("/get_amc_version", getAMCVersion)
 	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
 

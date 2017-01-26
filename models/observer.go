@@ -50,7 +50,7 @@ func New(config *common.Config) *ObserverT {
 	if db, err = sql.Open("sqlite3", config.AMC.Database); err != nil {
 		log.Errorln("Cannot connect to the database: %s", err.Error())
 	}
-	db.SetMaxOpenConns(1)
+	db.SetMaxOpenConns(10)
 
 	o := &ObserverT{
 		sessions: map[string][]*Cluster{},
@@ -66,10 +66,14 @@ func New(config *common.Config) *ObserverT {
 		cp.User = server.User
 		cp.Password = server.Password
 
-		cluster := o.FindClusterBySeed("automatic", server.Host, int(server.Port), server.User, server.Password)
+		host := as.NewHost(server.Host, int(server.Port))
+		host.TLSName = server.TLSName
+		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
 		if cluster == nil {
 			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User, " Pass: ", server.Password)
-			cluster, err = o.Register("automatic", cp, &server.Alias, server.Host, server.Port)
+			host := as.NewHost(server.Host, int(server.Port))
+			host.TLSName = server.TLSName
+			cluster, err = o.Register("automatic", cp, &server.Alias, host)
 			if err != nil {
 				log.Error("Error while trying to add database from config file for monitoring: ", err.Error())
 				continue
@@ -218,21 +222,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	return len(o.sessions[sessionId])
 }
 
-func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, host string, port uint16) (*Cluster, error) {
-	hostAddrs := strings.Split(host, ",")
-	hosts := make([]*as.Host, 0, len(hostAddrs))
-
-	for _, addr := range hostAddrs {
-		resolved, err := resolveHost(addr)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, ip := range resolved {
-			hosts = append(hosts, as.NewHost(ip, int(port)))
-		}
-	}
-
+func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, hosts ...*as.Host) (*Cluster, error) {
 	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
 	if err != nil {
 		return nil, err
@@ -294,18 +284,18 @@ func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 
 // Checks for the cluster; If the cluster exists in the session, it won't check the user/pass since it has already been checked
 // Otherwise, will search for the cluster in all the list and check user/pass in case the cluster exists
-func (o *ObserverT) FindClusterBySeed(sid string, host string, port int, user, password string) *Cluster {
+func (o *ObserverT) FindClusterBySeed(sid string, host *as.Host, user, password string) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
-	hostAddrs := strings.Split(host, ",")
-	for _, host := range hostAddrs {
-		aliases := findAliases(host, port)
+	hostAddrs := strings.Split(host.Name, ",")
+	for _, hostAddr := range hostAddrs {
+		aliases := findAliases(hostAddr, host.TLSName, host.Port)
 
 		// try to find the cluster in current session by seed
 		clusters, sessionExists := o.MonitoringClusters(sid)
 		if sessionExists && len(clusters) > 0 {
-			if cluster := o.findClusterBySeed(clusters, aliases, host, port, user, password, false); cluster != nil {
+			if cluster := o.findClusterBySeed(clusters, aliases, user, password, false); cluster != nil {
 				return cluster
 			}
 		}
@@ -313,7 +303,7 @@ func (o *ObserverT) FindClusterBySeed(sid string, host string, port int, user, p
 		// try to find the cluster in all monitored clusters
 		// CHECK for user/pass
 		if len(o.clusters) > 0 {
-			if cluster := o.findClusterBySeed(o.clusters, aliases, host, port, user, password, true); cluster != nil {
+			if cluster := o.findClusterBySeed(o.clusters, aliases, user, password, true); cluster != nil {
 				return cluster
 			}
 		}
@@ -321,17 +311,15 @@ func (o *ObserverT) FindClusterBySeed(sid string, host string, port int, user, p
 	return nil
 }
 
-func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []string, host string, port int, user, password string, checkUserPass bool) *Cluster {
+func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, user, password string, checkUserPass bool) *Cluster {
 	o.mutex.RLock()
 	defer o.mutex.RUnlock()
 
 	for _, cluster := range clusters {
-		for _, node := range cluster.nodes {
-			for _, alias := range aliases {
-				if node.Address() == alias {
-					if !checkUserPass || (cluster.User() == nil || (*cluster.user == user && *cluster.password == password)) {
-						return cluster
-					}
+		for _, alias := range aliases {
+			if node := cluster.nodes[alias]; node != nil {
+				if !checkUserPass || (cluster.User() == nil || (*cluster.user == user && *cluster.password == password)) {
+					return cluster
 				}
 			}
 		}
@@ -413,22 +401,20 @@ func (o *ObserverT) debugExpired() bool {
 	return o.debug.On && time.Now().After(o.debug.StartTime.Add(o.debug.Duration))
 }
 
-func findAliases(address string, port int) []string {
-	portStr := strconv.Itoa(port)
-
+func findAliases(address, tlsName string, port int) []as.Host {
 	// IP addresses do not need a lookup
 	ip := net.ParseIP(address)
 	if ip != nil {
-		return []string{address + ":" + portStr}
+		return []as.Host{as.Host{Name: ip.String(), Port: port, TLSName: tlsName}}
 	}
 
 	addresses, err := net.LookupHost(address)
 	if err != nil {
 		return nil
 	}
-	aliases := make([]string, 0, len(addresses))
+	aliases := make([]as.Host, 0, len(addresses))
 	for _, addr := range addresses {
-		aliases = append(aliases, addr+":"+portStr)
+		aliases = append(aliases, as.Host{Name: addr, Port: port, TLSName: tlsName})
 	}
 	return aliases
 }
