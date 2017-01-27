@@ -63,7 +63,6 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 						NodeTable.updateRowData(AppConfig.node.nodeTableDiv,  model.data, rowID, false, AppConfig.node.nodeTablePrefix);
 					}
 					this.formatRowData(model, AppConfig.node.nodeTablePrefix + rowID);
-		            this.bindRemoveButton(model);
 				}	
             });
         },
@@ -169,7 +168,6 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
                 	if(!ServiceManager.isSecurityEnable() || (ServiceManager.isSecurityEnable() && hasNodeOnOFFService)){
                 		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
                         htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div><span class="text-status-visibility">'+status+'</span>' +
-                            '<div class="turn-off-btn expand-details" name="' + nodeAddress + '"> Turn off </div>' +
                           '</div>';
                 	} else {
                 		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
@@ -183,7 +181,7 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 			htmlStr += "<div class='node status-alert-container' name='" + nodeAddress + "'></div>";
 
             $(cellContainer).html(htmlStr);
-            var button = $(".node .turn-off-btn[name='"+nodeAddress+"']");
+            var button = $(".remove-node-icon[name='"+nodeAddress+"']");
 			button.parent().parent().children(".node.status-alert-container").css("z-index",-1);
 			button.parent().parent().children(".node.status-alert-container").off("click");
       if(status === 'off') {
@@ -231,135 +229,6 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
             }); 
         },
 
-        bindRemoveButton: function(model) {
-            var that = this;
-            var button = $("div.remove-node-icon[name='" + model.address + "']");
-            
-            button.off("click");
-            button.on("click",function(e){
-                e.stopPropagation();
-                button.off("click");
-
-                that.confirmRemoveNode(model.address);
-            });
-        },
-
-        confirmRemoveNode : function(nodeAddress){
-            
-            var that = this;
-            
-            if(typeof window.modal === 'undefined'){
-                window.modal = false;
-            }
-            
-			if(!window.modal){
-				window.modal = true;
-				$("#confirmModalDialog").remove();
-				var htmlstr = '<div id="confirmModalDialog" class="removeForm"> <div class="title-bar"> <div class="icon-seed-node-dialog img-icon-seed-id"></div>Removing Node [' + nodeAddress + '] from AMC</div>' +
-						'<div align="center">' +
-							'<div class="user-popup">' +
-								'Are You Sure?' + 
-								'<br>' +
-								'<br>' +
-								'<br>' +
-								'<input id="confirmModalSubmit" class="blue_btn btn" value="Yes" type="submit">' +
-								'<input id="modalCancel" class="clear_btn btn" value="No" type="submit">' +
-								'<br>' +
-							'</div>' +
-						'</div>' +
-					'</div>';
-				
-				$("body").append(htmlstr);
-				
-				$("#confirmModalDialog").dialog({
-					dialogClass: "no-dialog-title",
-					modal: true,
-					width:(innerWidth < AppConfig.modalWidth ? "100%" : AppConfig.modalWidth),
-					closeOnEscape: false,
-					resizable: false
-				});
-				
-				Toggle.enterKeyEventForDialog("#confirmModalDialog", "#confirmModalSubmit");
-				
-				$("#confirmModalSubmit").on("click",function(e){
-					e.stopPropagation();
-					$("#confirmModalDialog").dialog('destroy');
-					$("#credentialModalDialog").off("keyup");
-					$("#confirmModalDialog").remove();
-					
-					var nodeLi = $("#nodeListSelectable li");
-					//nodeLi.addClass("ui-selected");
-
-					for(var node = 0; node < nodeLi.length; node++){
-						var add = $(nodeLi[node]).children("span.li-node-addr").text();
-						if(add === nodeAddress){
-							$(nodeLi[node]).removeClass("ui-selected");
-							break;
-						}
-					}
-					
-					nodeLi = $("#nodeListSelectable li.ui-selected");
-					
-					if(nodeLi.length == 0){
-						nodeLi = $("#nodeListSelectable li");
-						for(var node = 0; node < nodeLi.length && node < AppConfig.maxStartNodes; node++){
-							var add = $(nodeLi[node]).children("span.li-node-addr").text();
-							if(add !== nodeAddress){
-								$(nodeLi[node]).addClass("ui-selected");
-							}
-						}
-					}
-					
-					$("#nodeListSelectBtn").trigger("click");
-
-					var postData = {
-							address : nodeAddress
-					};
-					
-					
-					AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + "/remove_node",
-							{type : AjaxManager.POST, data : postData}, 
-							function (d){
-								data = d;
-								
-								console.info(data);
-								if(data.status === 'failure'){
-									$("div.node.status-alert-container[name='" + nodeAddress + "']").css("z-index",1000);
-									$("div.node.status-alert-container[name='" + nodeAddress + "']").noty({
-										text : "Failed to remove node.", 
-										type : "red", 
-										timeout: "5000", 
-										closeWith: [], 
-									});
-									setTimeout(function(){ 
-										that.skip = false; 
-										$("div.node.status-alert-container[name='" + nodeAddress + "']").css("z-index",-1);
-									}, 5000);
-								}
-					 });
-					
-					
-					Util.updateModelPoller(window.AMCGLOBALS.activePageModel, window.AMCGLOBALS.persistent.updateInterval, false);
-					Util.updateModelPoller(window.AMCGLOBALS.activePageModel, window.AMCGLOBALS.persistent.updateInterval, true);
-					 
-					window.modal = false;
-					//Util.updateVisibilityBtnSize();
-				});
-				
-				$("#modalCancel").on("click",function(e){
-					e.stopPropagation(); 
-					$("#modalCancel").off("click");
-					$("#confirmModalSubmit").off("click");
-					$("#credentialModalDialog").off("keyup");
-					$("#confirmModalDialog").dialog('destroy');
-					$("#confirmModalDialog").remove();
-					window.modal = false;
-					//Util.updateVisibilityBtnSize();
-				});
-			} else{
-				setTimeout(function(){ that.confirmRemoveNode(nodeAddress); },1000);
-			}
-        }
     });
    
     return NodeView;
