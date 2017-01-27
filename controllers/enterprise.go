@@ -473,3 +473,26 @@ func deleteAlertEmails(c echo.Context) error {
 		"status": "success",
 	})
 }
+
+func postSwitchNodeOff(c echo.Context) error {
+	nodeAddr := c.Param("node")
+	res := map[string]interface{}{
+		"address": nodeAddr,
+		"status":  "Failure",
+	}
+
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		res["error"] = "Cluster not found"
+		return c.JSON(http.StatusNotFound, res)
+	}
+
+	if err := cluster.RemoveNodeByAddress(nodeAddr); err != nil {
+		res["error"] = err.Error()
+		return c.JSON(http.StatusNotFound, res)
+	}
+
+	res["status"] = "Success"
+	return c.JSON(http.StatusOK, res)
+}

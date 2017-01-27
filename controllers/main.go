@@ -195,6 +195,7 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", sessionValidator(getClusterNodes))
 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", sessionValidator(getClusterNodeAllConfig))
 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", sessionValidator(setClusterNodesConfig))
+	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_off", sessionValidator(postSwitchNodeOff))
 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_xdr_off", sessionValidator(postSwitchXDROff))
 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_xdr_on", sessionValidator(postSwitchXDROn))
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", sessionValidator(getClusterNamespaces))

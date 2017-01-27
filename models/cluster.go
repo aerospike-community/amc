@@ -126,6 +126,30 @@ func (c *Cluster) AddNode(address string, port int) error {
 	return nil
 }
 
+func (c *Cluster) RemoveNodeByAddress(address string) error {
+	node := c.FindNodeByAddress(address)
+	if node == nil {
+		return errors.New(fmt.Sprintf("Node %s not found.", address))
+	}
+
+	if node.Status() == nodeStatus.On {
+		return errors.New(fmt.Sprintf("Node %s is active. Only inactive nodes can be removed.", address))
+	}
+
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	newNodes := make(map[as.Host]*Node, len(c.nodes))
+	for host, oldNode := range c.nodes {
+		if node != oldNode {
+			newNodes[host] = oldNode
+		}
+	}
+
+	c.nodes = newNodes
+	return nil
+}
+
 func (c *Cluster) UpdateInterval() int {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
