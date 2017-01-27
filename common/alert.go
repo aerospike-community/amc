@@ -24,6 +24,12 @@ const (
 	AlertTypeNodeMemory          AlertType = 3
 	AlertTypeNodeTransQueue      AlertType = 4
 	AlertTypeNodeFileDescriptors AlertType = 5
+
+	AlertTypeNamespaceAvailablePct           AlertType = 6
+	AlertTypeNamespaceDiskPctHighWatermark   AlertType = 7
+	AlertTypeNamespaceDiskPctStopWrites      AlertType = 8
+	AlertTypeNamespaceMemoryPctHighWatermark AlertType = 9
+	AlertTypeNamespaceMemoryPctStopWrites    AlertType = 10
 )
 
 type AlertStatus string
@@ -116,6 +122,9 @@ func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 			ad.updateRecurrence(recurrAlert)
 			return true
 		}
+	} else if alert.Status == AlertStatusGreen {
+		// do not save green alerts which do not resolve another alert
+		return false
 	}
 
 	ad.saveAlert(alert)
@@ -189,7 +198,7 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 	if id == 0 {
 		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where NodeAddress = ? ORDER BY Id DESC LIMIT 20", _alertFields), nodeAddress)
 	} else {
-		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ? AND NodeAddress = ? ORDER BY Id DESC", _alertFields), id, nodeAddress)
+		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ? AND NodeAddress = ? ORDER BY Id DESC LIMIT 1000", _alertFields), id, nodeAddress)
 	}
 
 	if err != nil {

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -10,6 +11,18 @@ import (
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/controllers/middleware/sessions"
 )
+
+func sessionValidator(f func(c echo.Context) error) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		sid, err := sessionId(c)
+		if err != nil || !_observer.SessionExists(sid) {
+			invalidateSession(c)
+			return c.JSON(http.StatusUnauthorized, errorMap("invalid session : None"))
+		}
+
+		return f(c)
+	}
+}
 
 func sessionId(c echo.Context) (string, error) {
 	session := sessions.Default(c)

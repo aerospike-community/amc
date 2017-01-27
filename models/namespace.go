@@ -69,6 +69,8 @@ func (ns *Namespace) ServerTime() time.Time {
 }
 
 func (ns *Namespace) update(info common.Info) error {
+	defer ns.notifyAboutChanges()
+
 	ns.setInfo(info)
 	ns.setAliases()
 	ns.updateHistory()
@@ -378,41 +380,6 @@ func (ns *Namespace) Stats() common.Stats {
 	return res
 }
 
-// var _configuration_params = []string{
-// 	"type",
-// 	"storage-engine",
-// 	"file",
-// 	"storage-engine.file",
-// 	"filesize",
-// 	"storage-engine.filesize",
-// 	"load-at-startup",
-// 	"data-in-memory",
-// 	"defrag-period",
-// 	"defrag-lwm-pct",
-// 	"storage-engine.defrag-lwm-pct",
-// 	"defrag-max-blocks",
-// 	"defrag-startup-minimum",
-// 	"storage-engine.defrag-startup-minimum",
-// 	"write-block-size",
-// 	"storage-engine.write-block-size",
-// 	"ticker-interval",
-// 	"replication-factor",
-// 	"low-water-pct",
-// 	"high-water-memory-pct",
-// 	"high-water-disk-pct",
-// 	"high-water-pct",
-// 	"evict-pct",
-// 	"stop-writes-pct",
-// 	"memory-size",
-// 	"default-ttl",
-// 	"max-ttl",
-// 	"allow-versions",
-// 	"single-bin",
-// 	"node_status",
-// 	"migrate-sleep",
-// 	"migrate-order",
-// }
-
 func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
 	info := ns.latestInfo.ToInfo("get-config:context=namespace;id=" + ns.name).ToStats()
 	return info
@@ -435,4 +402,21 @@ func (ns *Namespace) SetConfig(config common.Info) error {
 	}
 
 	return errors.New(errMsg)
+}
+
+func (ns *Namespace) notifyAboutChanges() {
+	go ns.updateNotifications()
+}
+
+func (ns *Namespace) updateNotifications() error {
+	latestStats := ns.latestStats.Clone()
+	ns.calcStats.CloneInto(latestStats)
+
+	ns.CheckAvailablePct(latestStats)
+	ns.CheckDiskPctHighWatermark(latestStats)
+	ns.CheckDiskPctStopWrites(latestStats)
+	ns.CheckMemoryPctHighWatermark(latestStats)
+	ns.CheckMemoryPctStopWrites(latestStats)
+
+	return nil
 }
