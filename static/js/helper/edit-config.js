@@ -537,6 +537,9 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             AjaxManager.sendRequest(resourceUrl,{type: AjaxManager.POST, data : validValues},function(response){
             	$("#configApplyingChanges").dialog("close");
                 that.showConfigUpdateDiv(response,validValues);
+                if('cluster-name' in validValues) {
+                  Util.setClusterName(validValues['cluster-name']);
+                }
             }, function(response){
             	var failMsg = "Network Error";
                 if(response.status == 401)

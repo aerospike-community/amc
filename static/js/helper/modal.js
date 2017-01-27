@@ -43,14 +43,32 @@ define(['jquery', 'underscore', 'models/common/PopupModel'], function($, _, Popu
 
       var success = function() {
         modal.hideModalDialog();
-        onselect();
+        onselect || onselect();
       };
       var cancel = function() {
         modal.hideModalDialog();
+        oncancel || oncancel();
       };
       modal.showModalDialog(DOM, modalSettings, success, cancel);
-    }
+    },
 
+    messageModal: function(title, content, callback) {
+      var popupModel = new PopupModel({
+        showCancelButton: false,
+        content: '<div style="padding: 15px; font-size: 16px; margin-bottom: 20px">' + content + '</div>',
+        modalClass: 'user-popup',
+        submitButtonValue: 'OK',
+        title: title,
+      });
+      var DOM = _.template($("#ModalTemplate").text(), popupModel.toJSON());
+      var modalSettings = {width: '600px', closeOnEscape: true, dialogClass: 'no-dialog-title'};
+
+      var success = function() {
+        modal.hideModalDialog();
+        callback || callback();
+      };
+      modal.showModalDialog(DOM, modalSettings, success);
+    },
   };
 
   return modal;

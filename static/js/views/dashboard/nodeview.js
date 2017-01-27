@@ -16,7 +16,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
-define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-helper", "config/view-config", "config/app-config", "helper/toggle", "helper/util","helper/AjaxManager","helper/servicemanager","helper/notification"], function($, _, Backbone, NodeTable, GridHelper, ViewConfig, AppConfig, Toggle, Util,AjaxManager,ServiceManager,Notification){
+define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-helper", "config/view-config", "config/app-config", "helper/toggle", "helper/util","helper/AjaxManager","helper/servicemanager","helper/notification", "helper/modal"], function($, _, Backbone, NodeTable, GridHelper, ViewConfig, AppConfig, Toggle, Util,AjaxManager,ServiceManager,Notification, modal){
 
     var NodeView = Backbone.View.extend({
         isInitialized: false,
@@ -236,6 +236,19 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 					Notification.toastNotification("red", "You don't have access to ON/OFF node", 3000);
 					return;
 				}
+
+        // on, off are just indicators for the AMC to start/stop collecting statistics.
+        // Cannot turn off a node which is still part of the cluster and cannot
+        // turn on a node which is not part of the cluster
+        var active = window.AMCGLOBALS.persistent.nodeList !== -1;
+        if(active && status === 'on') {
+          modal.messageModal('Warning ', '<span style="color: orange">Cannot turn OFF an active node of the cluster </span>');
+          return;
+        } else if(!active && status === 'off') {
+          modal.messageModal('Warning ', '<span style="color: orange">Cannot turn ON an inactive node of the cluster </span>');
+          return;
+        }
+
                 view.skip = true;
                 button.parent().parent().children(".node.status-alert-container").css("z-index",1001);
                 button.parent().parent().children(".node.status-alert-container").on("click",function(e){

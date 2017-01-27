@@ -2685,6 +2685,10 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
              });
          },
 
+     setClusterName: function(name) {
+       $("#clusterID .attribute-value").text(name);
+     },
+
 		 showCurrentlyMonitoringCluster : function(modal, exitIfNoneExist, callback){
 			 $(AppConfig.header.multipleClusterListHolder).empty();
 
