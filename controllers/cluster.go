@@ -181,6 +181,7 @@ func getClusterBasic(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"cluster_builds":         builds,
+		"cluster_name":           cluster.Alias(),
 		"build_details":          cluster.BuildDetails(),
 		"active_red_alert_count": 0, // TODO: implement
 		"users":                  users,
