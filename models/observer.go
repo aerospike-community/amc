@@ -231,6 +231,11 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *s
 	cluster := newCluster(o, client, alias, policy.User, policy.Password, hosts)
 	if cluster.IsSet() {
 		cluster.update(nil)
+
+		if err := cluster.versionSupported("3.9"); err != nil {
+			cluster.close()
+			return nil, err
+		}
 	}
 
 	o.AppendCluster(sessionId, cluster)

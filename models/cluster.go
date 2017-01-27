@@ -640,6 +640,19 @@ func (c *Cluster) updateStats() error {
 	return nil
 }
 
+func (c *Cluster) versionSupported(oldest string) error {
+	buildDetails := c.BuildDetails()
+	verList := buildDetails["version_list"].(map[string][]string)
+
+	for ver, nodeList := range verList {
+		if version.Compare(ver, oldest, "<") {
+			return errors.New(fmt.Sprintf("Database cluster is not supported. Latest supported version is: `v%s`. Nodes [%s] are at `v%s`", oldest, strings.Join(nodeList, ", "), ver))
+		}
+	}
+
+	return nil
+}
+
 func (c *Cluster) BuildDetails() map[string]interface{} {
 	result := map[string]interface{}{}
 
