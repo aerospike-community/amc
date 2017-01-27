@@ -146,15 +146,15 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 			var hasNodeOnOFFService = ServiceManager.isUserHasAccessToService(ServiceManager.serviceComponentMap.DASHBOARD_PAGE.DASHBOARD_NODE_ON_OFF.SERVICE_KEY);
 			if(status === 'on'){
                 if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]){
-                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="background-color:gray;" title="This feature available in enterprise version">';
-                    htmlStr += '<span class="text-status-visibility" style="color:darkgray;"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div></div>';
+                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px;" title="This feature available in enterprise version">';
+                    htmlStr += '<span class="text-status-visibility" style="color:darkgray;"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node"></div></div>';
                 } else {
                 	if(!ServiceManager.isSecurityEnable() || (ServiceManager.isSecurityEnable() && hasNodeOnOFFService)){
-                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container">';
-                       	htmlStr += '<span class="text-status-visibility"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div></div>';
+                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
+                       	htmlStr += '<span class="text-status-visibility"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div></div>';
                 	} else {
-                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="background-color:gray;">';
-                        htmlStr += '<span class="text-status-visibility" style="color:darkgray;"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div></div>';
+                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
+                        htmlStr += '<span class="text-status-visibility" style="color:darkgray;"> ' + status + '</span><div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div></div>';
                 	}
                 }
                 
@@ -163,15 +163,17 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 					htmlStr += '<div class="icon-cancel-circle remove-node-icon" name="' + nodeAddress + '" title="Remove node from AMC"></div>';
                 
                 if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]){  
-                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="background-color:gray;" title="This feature available in enterprise version">';
-                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div><span class="text-status-visibility" style="color:darkgray;">'+status+'</span></div>';
+                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px" title="This feature available in enterprise version">';
+                    htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div><span class="text-status-visibility" style="color:darkgray;">'+status+'</span></div>';
                 } else {
                 	if(!ServiceManager.isSecurityEnable() || (ServiceManager.isSecurityEnable() && hasNodeOnOFFService)){
-                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container">';
-                        htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div><span class="text-status-visibility">'+status+'</span></div>';
+                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
+                        htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div><span class="text-status-visibility">'+status+'</span>' +
+                            '<div class="turn-off-btn expand-details" name="' + nodeAddress + '"> Turn off </div>' +
+                          '</div>';
                 	} else {
-                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="background-color:gray;">';
-                        htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-slider"></div><span class="text-status-visibility" style="color:darkgray;">'+status+'</span></div>';
+                		htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node visibility-button-container" style="width: 30px">';
+                        htmlStr += '<div name="' + nodeAddress + '" class="'+iconClassName+'-visibility node "></div><span class="text-status-visibility" style="color:darkgray;">'+status+'</span></div>';
                 	}
                     
                 }
@@ -181,10 +183,12 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 			htmlStr += "<div class='node status-alert-container' name='" + nodeAddress + "'></div>";
 
             $(cellContainer).html(htmlStr);
-            var button = $(".node.visibility-button-slider[name='"+nodeAddress+"']");
+            var button = $(".node .turn-off-btn[name='"+nodeAddress+"']");
 			button.parent().parent().children(".node.status-alert-container").css("z-index",-1);
 			button.parent().parent().children(".node.status-alert-container").off("click");
-			that.bindToggleButton(button, nodeAddress, status, that, container, rowID, colIndex);
+      if(status === 'off') {
+        that.bindToggleButton(button, nodeAddress, status, that, container, rowID, colIndex);
+      }
 						
 	    },
         statusInAddress : function(model, container, rowID, data, AddressClassName, colIndex){
@@ -201,89 +205,30 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
 
         bindToggleButton : function(button, nodeAddress, status, view, container, rowID, colIndex){
             var that = this;
-            
-            button.off("click");
             var hasNodeOnOFFService = ServiceManager.isUserHasAccessToService(ServiceManager.serviceComponentMap.DASHBOARD_PAGE.DASHBOARD_NODE_ON_OFF.SERVICE_KEY);
-            if(button.prop("class").indexOf("draggable") != -1){
-				try{
-					button.draggable("destroy",1);
-				} catch(e){	}
-            }
-            if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE !== AppConfig.amc_type[0] && 
-            		(!ServiceManager.isSecurityEnable() || (ServiceManager.isSecurityEnable() && hasNodeOnOFFService))){
-            	
-            	button.draggable({ 
-                    containment: "parent", axis: "x",
-                    snap : ".visibility-button-container[name='" + nodeAddress + "']",
-                    start : function(){
-                        view.skip = true;
-                    },
-                    stop: function(x) {
-                        offset = (button.offset().left) - (button.parent().offset().left);
-                        if((status === 'on' && offset < 12) || (status === 'off' && offset >= 12)){
-                            button.parent().trigger("click");
-                        }
-                    }
-                });
-            }
-			
-            button.parent().off("click").on("click",function(x){
-				x.stopPropagation();
-				if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]){
-					Notification.toastNotification('information',"This feature available in enterprise version",3000);
-					return;
-				} else if(ServiceManager.isSecurityEnable() && !hasNodeOnOFFService){
-					Notification.toastNotification("red", "You don't have access to ON/OFF node", 3000);
-					return;
-				}
+            button.off("click").on("click",function(x){
+              x.stopPropagation();
+              if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]){
+                Notification.toastNotification('information',"This feature available in enterprise version",3000);
+                return;
+              } else if(ServiceManager.isSecurityEnable() && !hasNodeOnOFFService){
+                Notification.toastNotification("red", "You don't have access to ON/OFF node", 3000);
+                return;
+              }
 
-        // on, off are just indicators for the AMC to start/stop collecting statistics.
-        // Cannot turn off a node which is still part of the cluster and cannot
-        // turn on a node which is not part of the cluster
-        var active = window.AMCGLOBALS.persistent.nodeList !== -1;
-        if(active && status === 'on') {
-          modal.messageModal('Warning ', '<span style="color: orange">Cannot turn OFF an active node of the cluster </span>');
-          return;
-        } else if(!active && status === 'off') {
-          modal.messageModal('Warning ', '<span style="color: orange">Cannot turn ON an inactive node of the cluster </span>');
-          return;
-        }
+              modal.confirmModal('Stop Tracking', 'Stop collecting statistics for the node ' + nodeAddress, function success() {
+                var url = AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/nodes/' + 
+                  nodeAddress + '/switch_off';
+                AjaxManager.sendRequest(url, {type: AjaxManager.POST}, success, failure);
 
-                view.skip = true;
-                button.parent().parent().children(".node.status-alert-container").css("z-index",1001);
-                button.parent().parent().children(".node.status-alert-container").on("click",function(e){
-                    e.stopPropagation();
-                });
-				
-				try{
-					button.draggable("destroy",1);
-				} catch(e){	}
-				
-                Toggle.toggle(button, nodeAddress, status, view, 'node');
-                
-                function tryAndBind(callback){
-                    if(view.skip){
-                        setTimeout(function(){ callback(callback);}, 500);
-						console.info("timing out");
-                    } else{
-						var iconClassName = 'red';
-						if(status === 'on')
-							iconClassName = 'green';
-												
-						try{
-							button.draggable("destroy",1);
-							button.off("click");
-						} catch(e){	}
-						
-						that.statusButton(container, nodeAddress, rowID, iconClassName, colIndex);
-						
-                   }
+                function success() {
+                  Notification.toastNotification('green', 'Successfully stopped tracking node ' + nodeAddress, 3000);
                 }
-
-                tryAndBind(tryAndBind);
-                //Util.updateVisibilityBtnSize();
+                function failure() {
+                  Notification.toastNotification('red', 'Unable to stop tracking node ' + nodeAddress, 3000);
+                }
+              });
             }); 
-            
         },
 
         bindRemoveButton: function(model) {

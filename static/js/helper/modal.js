@@ -43,11 +43,11 @@ define(['jquery', 'underscore', 'models/common/PopupModel'], function($, _, Popu
 
       var success = function() {
         modal.hideModalDialog();
-        onselect || onselect();
+        onselect && onselect();
       };
       var cancel = function() {
         modal.hideModalDialog();
-        oncancel || oncancel();
+        oncancel && oncancel();
       };
       modal.showModalDialog(DOM, modalSettings, success, cancel);
     },
@@ -65,7 +65,7 @@ define(['jquery', 'underscore', 'models/common/PopupModel'], function($, _, Popu
 
       var success = function() {
         modal.hideModalDialog();
-        callback || callback();
+        callback && callback();
       };
       modal.showModalDialog(DOM, modalSettings, success);
     },

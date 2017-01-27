@@ -5720,3 +5720,9 @@ ul.ui-autocomplete .ui-state-focus{
         display: none;
     }
 }
+
+.red-visibility .turn-off-btn {
+  width: 40px;
+  margin-top: 20px;
+  line-height: 20px;
+}
