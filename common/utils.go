@@ -1,6 +1,7 @@
 package common
 
 import (
+	"database/sql"
 	"errors"
 	"math"
 	"sort"
@@ -118,4 +119,8 @@ func Comma(v int64, sep string) string {
 func SortStrings(s []string) []string {
 	sort.Strings(s)
 	return s
+}
+
+func ToNullString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
 }

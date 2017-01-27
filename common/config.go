@@ -274,6 +274,10 @@ func openDB(filepath string) {
 			Progress integer,
 			Error	 text
 		);`,
+		`CREATE TABLE migrations (
+			Version      integer
+		);`,
+		`ALTER TABLE alerts ADD COLUMN Namespace test;`,
 	}
 
 	log.Infof("Database path is: %s", filepath)

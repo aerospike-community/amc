@@ -13,7 +13,7 @@ import (
 	// "github.com/jmoiron/sqlx"
 )
 
-const _alertFields = "Id, Type, ClusterId, NodeAddress, Desc, Created, LastOccured, Resolved, Recurrence, Status"
+const _alertFields = "Id, Type, ClusterId, NodeAddress, Namespace, Desc, Created, LastOccured, Resolved, Recurrence, Status"
 
 type AlertType int
 
@@ -45,6 +45,7 @@ type Alert struct {
 	Type        AlertType
 	ClusterId   string
 	NodeAddress string
+	Namespace   sql.NullString
 	Desc        string
 	Created     time.Time
 	LastOccured time.Time
@@ -97,7 +98,7 @@ func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 	defer _alertGlobalMutex.RUnlock()
 
 	latest := Alert{}
-	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? And Resolved IS NULL ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress)
+	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? AND Resolved IS NULL AND (Namespace IS NULL OR Namespace = ?) ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress, alert.Namespace.String)
 	if err := latest.fromSQLRow(row); err != nil {
 		if err == sql.ErrNoRows {
 			return nil
@@ -159,7 +160,7 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 	ad.alertQueue[ad.pos%len(ad.alertQueue)] = alert
 	ad.pos++
 
-	if _, err := db.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Namespace, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 }
@@ -182,8 +183,14 @@ func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 	// Mark the old alert resolved in the DB
 	// Resolve all older alerts
 	log.Warn("Marking the issue as resolved...")
-	if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ?", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
-		log.Error(err)
+	if alert.Namespace.String == "" {
+		if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ?", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
+			log.Error(err)
+		}
+	} else {
+		if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ? AND Namespace = ?", alert.Resolved, alert.Type, alert.NodeAddress, alert.Namespace.String); err != nil {
+			log.Error(err)
+		}
 	}
 }
 
@@ -216,14 +223,14 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 }
 
 func (a *Alert) fromSQLRow(row *sql.Row) error {
-	return row.Scan(&a.Id, &a.Type, &a.ClusterId, &a.NodeAddress, &a.Desc, &a.Created, &a.LastOccured, &a.Resolved, &a.Recurrence, &a.Status)
+	return row.Scan(&a.Id, &a.Type, &a.ClusterId, &a.NodeAddress, &a.Namespace, &a.Desc, &a.Created, &a.LastOccured, &a.Resolved, &a.Recurrence, &a.Status)
 }
 
 func fromSQLRows(rows *sql.Rows) ([]*Alert, error) {
 	res := []*Alert{}
 	for rows.Next() {
 		alert := Alert{}
-		if err := rows.Scan(&alert.Id, &alert.Type, &alert.ClusterId, &alert.NodeAddress, &alert.Desc, &alert.Created, &alert.LastOccured, &alert.Resolved, &alert.Recurrence, &alert.Status); err != nil {
+		if err := rows.Scan(&alert.Id, &alert.Type, &alert.ClusterId, &alert.NodeAddress, &alert.Namespace, &alert.Desc, &alert.Created, &alert.LastOccured, &alert.Resolved, &alert.Recurrence, &alert.Status); err != nil {
 			return res, err
 		}
 		res = append(res, &alert)

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	// log "github.com/Sirupsen/logrus"
 	// "github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
@@ -33,6 +32,7 @@ func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 		ClusterId:   ns.node.cluster.Id(),
 		Type:        common.AlertTypeNamespaceAvailablePct,
 		NodeAddress: ns.node.Address(),
+		Namespace:   common.ToNullString(ns.name),
 		Desc:        fmt.Sprintf(messages[string(status)], ns.name, ns.node.Address()),
 		Created:     time.Now(),
 		LastOccured: time.Now(),
@@ -63,6 +63,7 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 		ClusterId:   ns.node.cluster.Id(),
 		Type:        common.AlertTypeNamespaceDiskPctHighWatermark,
 		NodeAddress: ns.node.Address(),
+		Namespace:   common.ToNullString(ns.name),
 		Desc:        fmt.Sprintf(messages[string(status)], ns.name, ns.node.Address()),
 		Created:     time.Now(),
 		LastOccured: time.Now(),
@@ -92,6 +93,7 @@ func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 		ClusterId:   ns.node.cluster.Id(),
 		Type:        common.AlertTypeNamespaceDiskPctStopWrites,
 		NodeAddress: ns.node.Address(),
+		Namespace:   common.ToNullString(ns.name),
 		Desc:        fmt.Sprintf(messages[string(status)], ns.name, ns.node.Address()),
 		Created:     time.Now(),
 		LastOccured: time.Now(),
@@ -122,6 +124,7 @@ func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 		ClusterId:   ns.node.cluster.Id(),
 		Type:        common.AlertTypeNamespaceMemoryPctStopWrites,
 		NodeAddress: ns.node.Address(),
+		Namespace:   common.ToNullString(ns.name),
 		Desc:        fmt.Sprintf(messages[string(status)], ns.name, ns.node.Address()),
 		Created:     time.Now(),
 		LastOccured: time.Now(),
@@ -143,7 +146,7 @@ func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 	highWatermark := latestState.TryInt("high-water-memory-pct", 100)
 
 	status := common.AlertStatusGreen
-	if usedMem >= highWatermark {
+	if usedMem > highWatermark {
 		status = common.AlertStatusYellow
 	}
 
@@ -152,6 +155,7 @@ func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 		ClusterId:   ns.node.cluster.Id(),
 		Type:        common.AlertTypeNamespaceMemoryPctHighWatermark,
 		NodeAddress: ns.node.Address(),
+		Namespace:   common.ToNullString(ns.name),
 		Desc:        fmt.Sprintf(messages[string(status)], ns.name, ns.node.Address()),
 		Created:     time.Now(),
 		LastOccured: time.Now(),
