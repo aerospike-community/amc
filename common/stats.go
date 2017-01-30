@@ -1,6 +1,7 @@
 package common
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -669,4 +670,55 @@ func (s *SyncStats) AggregateStatsTo(other Stats) {
 	defer s.mutex.RUnlock()
 
 	other.AggregateStats(s._Stats)
+}
+
+/*
+	Utility functions
+*/
+
+// StatsBy is the type of a "less" function that defines the ordering of its Stats arguments.
+type StatsBy func(fieldName string, p1, p2 Stats) bool
+
+var ByFloatField = func(fieldName string, p1, p2 Stats) bool {
+	return p1.TryFloat(fieldName, 0) < p2.TryFloat(fieldName, 0)
+}
+
+var ByIntField = func(fieldName string, p1, p2 Stats) bool {
+	return p1.TryInt(fieldName, 0) < p2.TryInt(fieldName, 0)
+}
+
+var ByStringField = func(fieldName string, p1, p2 Stats) bool {
+	return p1.TryString(fieldName, "") < p2.TryString(fieldName, "")
+}
+
+// Sort is a method on the function type, StatsBy, that sorts the argument slice according to the function.
+func (by StatsBy) Sort(fieldName string, statsList []Stats) {
+	ps := &statsSorter{
+		fieldName: fieldName,
+		statsList: statsList,
+		by:        by, // The Sort method's receiver is the function (closure) that defines the sort order.
+	}
+	sort.Sort(ps)
+}
+
+// statsSorter joins a StatsBy function and a slice of statsList to be sorted.
+type statsSorter struct {
+	fieldName string
+	statsList []Stats
+	by        func(fieldName string, p1, p2 Stats) bool // Closure used in the Less method.
+}
+
+// Len is part of sort.Interface.
+func (s *statsSorter) Len() int {
+	return len(s.statsList)
+}
+
+// Swap is part of sort.Interface.
+func (s *statsSorter) Swap(i, j int) {
+	s.statsList[i], s.statsList[j] = s.statsList[j], s.statsList[i]
+}
+
+// Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
+func (s *statsSorter) Less(i, j int) bool {
+	return s.by(s.fieldName, s.statsList[i], s.statsList[j])
 }

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -36,6 +37,7 @@ type Cluster struct {
 	aggNsStats, aggNsCalcStats           map[string]common.Stats
 	aggTotalNsStats, aggTotalNsCalcStats common.Stats
 	aggNsSetStats                        map[string]map[string]common.Stats // [namespace][set]aggregated stats
+	jobs                                 atomic.Value                       // []common.Stats
 
 	// either a uuid.V4, or a sorted comma delimited string of host:port
 	uuid            string
@@ -515,6 +517,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	t := time.Now()
 	c.updateCluster()
 	c.updateStats()
+	c.updateJobs()
 	c.updateUsers()
 	c.updateDatacenterInfo()
 	c.checkHealth()
@@ -934,6 +937,33 @@ func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	}
 
 	return res
+}
+
+func (c *Cluster) updateJobs() {
+	res := []common.Stats{}
+	for _, node := range c.Nodes() {
+		for _, job := range node.Jobs() {
+			job["node"] = common.Stats{
+				"address":     node.Address(),
+				"node_status": node.Status(),
+				"build":       node.Build(),
+				"memory":      node.Memory(),
+			}
+
+			res = append(res, job)
+		}
+	}
+
+	c.jobs.Store(res)
+}
+
+func (c *Cluster) Jobs() []common.Stats {
+	res := c.jobs.Load()
+	if res == nil {
+		return []common.Stats{}
+	}
+
+	return res.([]common.Stats)
 }
 
 func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {

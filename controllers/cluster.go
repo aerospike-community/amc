@@ -684,6 +684,7 @@ func getClusterNamespaceStorage(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// TODO: Remove this later when UI is updated
 func getClusterJobsNode(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
@@ -707,11 +708,52 @@ func getClusterJobsNode(c echo.Context) error {
 	}
 
 	res := map[string]interface{}{
-		"node_status": "on",
+		"node_status": node.Status(),
 		"build":       node.Build(),
 		"memory":      node.Memory(),
 		"jobs":        jobs,
 	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func getClusterJobs(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	offset, err := strconv.Atoi(c.QueryParam("offset"))
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap("Wrong offset param specified."))
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		return c.JSON(http.StatusOK, errorMap("Wrong limit param specified."))
+	}
+
+	res := common.Stats{
+		"status": "success",
+		"offset": offset,
+		"limit":  limit,
+	}
+
+	jobs := cluster.Jobs()
+	if len(jobs) < offset {
+		res["jobs"] = jobs
+		res["job_count"] = len(jobs)
+		return c.JSON(http.StatusOK, res)
+	}
+
+	common.StatsBy(common.ByIntField).Sort("time-since-done", jobs)
+	if offset+limit <= len(jobs) {
+		jobs = jobs[offset : offset+limit]
+	}
+
+	res["jobs"] = jobs
+	res["job_count"] = len(jobs)
 
 	return c.JSON(http.StatusOK, res)
 }
