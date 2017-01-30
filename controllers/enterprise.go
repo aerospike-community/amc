@@ -149,9 +149,10 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 		}
 
 		latencies[opMapper[op]] = common.Stats{
-			"timestamp": timestamp,
-			"ops/sec":   tps,
-			"data":      data,
+			"timestamp":      timestamp,
+			"timestamp_unix": stats["timestamp_unix"],
+			"ops/sec":        tps,
+			"data":           data,
 		}
 	}
 

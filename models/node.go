@@ -995,6 +995,7 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 			nValBuckets[i] /= tps
 		}
 		nstats["valBuckets"] = nValBuckets
+		nstats["timestamp_unix"] = n.ServerTime().Unix()
 	}
 
 	return res, nodeStats
