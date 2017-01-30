@@ -691,7 +691,6 @@ var ByStringField = func(fieldName string, p1, p2 Stats) bool {
 	return p1.TryString(fieldName, "") < p2.TryString(fieldName, "")
 }
 
-// Sort is a method on the function type, StatsBy, that sorts the argument slice according to the function.
 func (by StatsBy) Sort(fieldName string, statsList []Stats) {
 	ps := &statsSorter{
 		fieldName: fieldName,
@@ -699,6 +698,15 @@ func (by StatsBy) Sort(fieldName string, statsList []Stats) {
 		by:        by, // The Sort method's receiver is the function (closure) that defines the sort order.
 	}
 	sort.Sort(ps)
+}
+
+func (by StatsBy) SortReverse(fieldName string, statsList []Stats) {
+	ps := &statsSorter{
+		fieldName: fieldName,
+		statsList: statsList,
+		by:        by, // The Sort method's receiver is the function (closure) that defines the sort order.
+	}
+	sort.Sort(sort.Reverse(ps))
 }
 
 // statsSorter joins a StatsBy function and a slice of statsList to be sorted.

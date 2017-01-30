@@ -717,7 +717,24 @@ func getClusterJobsNode(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func getClusterJobs(c echo.Context) error {
+var _jobsSortFields = map[string]common.StatsBy{
+	"address":         common.ByStringField,
+	"job-type":        common.ByStringField,
+	"module":          common.ByStringField,
+	"ns":              common.ByStringField,
+	"set":             common.ByStringField,
+	"status":          common.ByStringField,
+	"job-progress":    common.ByIntField,
+	"mem-usage":       common.ByIntField,
+	"net-io-bytes":    common.ByIntField,
+	"priority":        common.ByIntField,
+	"recs-read":       common.ByIntField,
+	"run-time":        common.ByIntField,
+	"time-since-done": common.ByIntField,
+	"trid":            common.ByIntField,
+}
+
+func getClusterNodesJobs(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
 	if cluster == nil {
@@ -734,20 +751,55 @@ func getClusterJobs(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Wrong limit param specified."))
 	}
 
+	sortField := c.QueryParam("sort_by")
+	if sortField == "" {
+		sortField = "time-since-done"
+	}
+
+	sortFunc, exists := _jobsSortFields[sortField]
+	if !exists {
+		return c.JSON(http.StatusOK, errorMap("Field specified by sort_by not supported."))
+	}
+
 	res := common.Stats{
 		"status": "success",
 		"offset": offset,
 		"limit":  limit,
 	}
 
-	jobs := cluster.Jobs()
+	jobs := []common.Stats{}
+	nodesAddrs := common.DeleteEmpty(strings.Split(c.Param("nodes"), ","))
+	for _, nodeAddr := range nodesAddrs {
+		node := cluster.FindNodeByAddress(nodeAddr)
+		if node == nil {
+			continue
+		}
+
+		jobStats := node.Jobs()
+		for _, v := range jobStats {
+			v["address"] = node.Address()
+			v["node"] = map[string]interface{}{
+				"node_status": node.Status(),
+				"build":       node.Build(),
+				"memory":      node.Memory(),
+			}
+			jobs = append(jobs, v)
+		}
+
+	}
+
 	if len(jobs) < offset {
 		res["jobs"] = jobs
 		res["job_count"] = len(jobs)
 		return c.JSON(http.StatusOK, res)
 	}
 
-	common.StatsBy(common.ByIntField).Sort("time-since-done", jobs)
+	if c.QueryParam("sort_order") == "desc" {
+		common.StatsBy(sortFunc).SortReverse(sortField, jobs)
+	} else {
+		common.StatsBy(sortFunc).Sort(sortField, jobs)
+	}
+
 	if offset+limit <= len(jobs) {
 		jobs = jobs[offset : offset+limit]
 	}

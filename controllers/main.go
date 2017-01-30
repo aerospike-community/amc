@@ -216,7 +216,7 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", sessionValidator(getClusterNamespaceSindexes))
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", sessionValidator(getClusterNamespaceSets))
 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/storage", sessionValidator(getClusterNamespaceStorage))
-	e.GET("/aerospike/service/clusters/:clusterUuid/jobs", getClusterJobs)
+	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/jobs", getClusterNodesJobs)
 	e.GET("/aerospike/service/clusters/:clusterUuid/jobs/nodes/:node", getClusterJobsNode)
 
 	e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)
