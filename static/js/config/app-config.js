@@ -275,13 +275,16 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
         xdrConfigList : [],
         namespaceConfigList : [],
 
-        jobsList: [ 'Host : Port', 'Job ID', 'Progress', 'Status', 'Memory',  'Namespace', 'Run Time', 'Module', 'Type'],
+        jobsList: [ 'Host : Port', 'Job ID', 'Progress %', 'Status', 'Memory',  'Net. IO', 'Priority', 'Recs Read', 'Namespace', 'Run Time', 'Module', 'Type'],
         jobsListColumn: [
             {name: 'address', width: 150, align: 'center', resizable: false, sortable: true, title: 'Size of the cluster', searchoptions:{clearSearch: false}},
             {name: 'trid', width: 150, align: 'center', resizable: false, sortable: true, title: 'Size of the cluster', searchoptions:{clearSearch: false}},
             {name: 'job-progress', width: 50, align: 'center', resizable: false, sortable: true, title: 'Disk Usage', searchoptions:{clearSearch: false}},
             {name: 'status', width: 80, align: 'center', resizable: false, sortable: true, title: 'Disk Usage', searchoptions:{clearSearch: false}},
             {name: 'mem_pie_chart', width: 100, align: 'center', resizable: false, sortable: true, title: 'If all the nodes are visible to all the nodes in the cluster ', searchoptions:{clearSearch: false}},
+            {name: 'net-io-bytes', width: 100, align: 'center', resizable: false, sortable: true, title: 'Network IO (bytes)', searchoptions:{clearSearch: false}},
+            {name: 'priority', width: 100, align: 'center', resizable: false, sortable: true, title: 'Priority', searchoptions:{clearSearch: false}},
+            {name: 'recs-read', width: 100, align: 'center', resizable: false, sortable: true, title: 'Records Read', searchoptions:{clearSearch: false}},
             {name: 'ns', width: 100, align: 'center', resizable: false, sortable: true, title: 'Disk Usage', searchoptions:{clearSearch: false}},
             {name: 'run_time', width: 60, align: 'center', resizable: false, sortable: true, title: 'Disk Usage', searchoptions:{clearSearch: false}},
             {name: 'module', width: 60, align: 'center', resizable: false, sortable: true, title: 'Disk Usage', searchoptions:{clearSearch: false}},
