@@ -142,7 +142,10 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             
             for(var v in views){
                 view = views[v];
-                if(view.viewData['synced'] !== 'YES'){
+                if(!view || !view.viewData) {
+                  continue;
+                }
+                if('synced' in view.viewData && view.viewData['synced'] !== 'YES'){
                     view.startEventHandlers();
                 }
             }
