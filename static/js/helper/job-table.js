@@ -20,6 +20,15 @@ under the License.
 define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config"], function($, _, Backbone, D3, GridHelper, Util, AppConfig){
     var JobTable = {   
         nodeTableIds: [],
+
+        updatePages: function(container, current, total) {
+          var text = 'Page ' + current;
+          if(total) {
+            text += '/' + total;
+          }
+          $(container + ' .page-index').html(text);
+        },
+
         createOrUpdateRow: function(container, data, rowID, model, isError){
             data = JobTable.getNodeListData(model, rowID, data, isError);
             try{
@@ -33,6 +42,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 console.info(e.toString());
             }
         },
+
         updateRow: function(container, data, rowID){
             try{
                     jQuery(container).setRowData(rowID, data);
@@ -65,7 +75,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             var versionCheck = Util.versionCompare(data.build,"3.6.0");
             modifiedData["net_io_bytes_formatted"] = versionCheck >= 0 ? Util.bytesToSize(data["net-io-bytes"]) : Util.bytesToSize(data["net_io_bytes"]);
             modifiedData["run_time"] = versionCheck >= 0 ? Util.msecToTime(data["run-time"]) : Util.msecToTime(data["run_time"]) ;
-            modifiedData["mem_arr"] = [versionCheck >= 0 ? data['mem-usage'] : data['mem_usage'], (model.attributes['memory']['total-bytes-memory']-(versionCheck >= 0 ? data['mem-usage'] : data['mem_usage']))];
+            modifiedData["mem_arr"] = [versionCheck >= 0 ? data['mem-usage'] : data['mem_usage'], (data.node['memory']['total-bytes-memory']-(versionCheck >= 0 ? data['mem-usage'] : data['mem_usage']))];
             modifiedData["address"] = JobTable.statusInAddressHtmlStr(model.subGridEnabled[rowID], data["address"], 'green-address-text');
             
             return modifiedData;
@@ -81,47 +91,45 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             }
             return htmlStr;
         },
+
+        showLoader: function(container) {
+          $('<div class="job-loader"/>').css({
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            left: 0,
+            top: 0,
+            zIndex: 1000000,  // to be on the safe side
+            background: "url(/images/loading.gif) no-repeat 50% 50%"
+          }).appendTo($(container));
+        },
+
+        stopLoader: function(container) {
+          $(container + ' .job-loader').remove();
+        },
                 
-        initNodeGrid: function(container, pieConfig, models, pager){
+        initNodeGrid: function(container, pieConfig, models, pager, rowNum, jobStatus){
 		
 			var parentContainer = $(container).parent();
-			parentContainer.find("div.toggleSearchHeader").css("display","inline-block");
-			parentContainer.find("div.toggleSearchHeader input").off("change");
-            parentContainer.find("div.toggleSearchHeader input").on("change",function(e){
-                e.stopPropagation();
-                if($(this).prop("checked")){
-                    parentContainer.find(".ui-search-toolbar").show();
-                } else{
-                    parentContainer.find(".ui-search-toolbar").hide();
-                }
-            });
 		
             //$(container).jqGrid('GridDestroy');
             var containerWidth = (Math.max(window.innerWidth * 0.95, 750));
             var grid = jQuery(container).jqGrid({
                     datatype:'local',
-                    //data: nodeListData,
+                    search: false,
                     hidegrid: false,
                     colNames: AppConfig.jobsList,
                     colModel: AppConfig.jobsListColumn,
                     height: 'auto',
                     loadui : 'disable',
-                    loadonce:true,
-                    //ExpandColClick: true,
-//                    subGrid: true,
+                    loadonce: true,
                     subGrid: true,
                     headertitles : true,
-                    rowNum: 10,
-                    rowList:[10,20,50,100,200,300],
-                    sortname: "trid",
-                    sortorder: "asc",
+                    rowNum: rowNum,
                     rownumbers: false,
-                    pager: pager,
-                    pagerpos:'center',
                     recordpos:'left',
                     pgbuttons:true,
                     toppager: false,
-                    //cmTemplate: {sortable:false},
                     width:containerWidth,
                     subGridRowExpanded: function(subgrid_id, row_id) {
                         var cellContainer = container+' tr#'+row_id+' td:nth-child('+(2)+') .expand-details';
@@ -129,8 +137,12 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
             
                         var rowIdBreakPt = row_id.indexOf('_');
                         var modelI = row_id.substr(0, rowIdBreakPt); 
-                        var jobID = row_id.substr(rowIdBreakPt+1); 
-                        var data = models[modelI]['attributes']['jobs'][jobID];
+                        var jobID = row_id.slice(row_id.lastIndexOf('_')+1);
+                        var data = _.find(models[modelI]['attributes']['jobs'], function(job) {
+                          if(job.trid+'' === jobID) {
+                            return true;
+                          }
+                        });
                         models[modelI].subGridEnabled[row_id] = true;
                         
                         var tableHtmlStr = "";
@@ -147,10 +159,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                         $(cellContainer).html('View Details');
                         var rowIdBreakPt = row_id.indexOf('_');
                         var modelI = row_id.substr(0, rowIdBreakPt); 
-                        var jobID = row_id.substr(rowIdBreakPt+1); 
-                        var data = models[modelI]['attributes']['jobs'][jobID];
                         models[modelI].subGridEnabled[row_id] = false;
-                        
                     },
                     gridComplete: function () {
                         
@@ -161,7 +170,17 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                     },
                     loadComplete: function () {
                         $(container).jqGrid('hideCol', 'subgrid');
-                    }
+                    },
+                    onSortCol: function(index, columnIndex, sortOrder) {
+                      var i, model;
+                      for(i = 0; i < models.length; i++) {
+                        model = models[i];
+                        if(model.status === jobStatus) {
+                          model.sortTable(index, sortOrder);
+                        }
+                      }
+                      return 'stop';
+                    },
                 });
             GridHelper.columnHeaderTitleFormatter(grid, AppConfig.nodeListColumn );
             var searchOptions = {
@@ -170,6 +189,12 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 stringResult: true,
                 autosearch: true
             };
+            $(pager).html('<div style="text-align: center; margin: 10px 10px 0 45%; height: 20px">' +
+                            '<a class="page-prev" style="float: left;color: #337ab7;cursor: pointer;margin: 0 5px 0 5px;"> Prev </a>' +
+                            '<span class="page-index" style="float: left"> Page 1 </span>' +
+                            '<a class="page-next" style="float: left;color: #337ab7;cursor: pointer;margin: 0 5px 0 5px;"> Next </a>' +
+                          '</div>');
+
             jQuery(container).jqGrid('filterToolbar', searchOptions);
             parentContainer.find(".ui-search-toolbar").hide();
 

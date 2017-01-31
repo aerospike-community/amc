@@ -17,21 +17,54 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["underscore", "backbone", "poller", "config/app-config", "views/jobs/nodeview", "helper/util"], function(_, Backbone, Poller, AppConfig, NodeView, Util){
+define(["underscore", "backbone", "poller", "config/app-config", "views/jobs/nodeview", "helper/util", "helper/job-table"], 
+function(_, Backbone, Poller, AppConfig, NodeView, Util, JobTable){
     var NodeModel = Backbone.Model.extend({
         initVariables :function(){
             this.expanded = {};
             this.jobList = {};
-            this.jobIDList = [];
+            this.jobIds = [];
             this.modelID = this.get("model_id");
-            this.totalNodes = +this.get("total_nodes");
-            this.address = this.get("address");
             this.clusterID = window.AMCGLOBALS.persistent.clusterID;//this.get("cluster_id");
             this.subGridEnabled = {};
+            this.status = this.get("status");
+            this.offset = 0;
+            this.pageSize = this.get('page_size');
+            this.limit = this.PageSize;
+            this.container = this.get("container");
+            this.offNodes = {};
+            this.prevNodes = [];
+            this.totalJobs = 0;  
+            this.sortBy = '';
+            this.sortOrder = '';
+
+            if(this.status === 'completed') {
+              this.pagerID = '#completedJobPager';
+            } else {
+              this.pagerID = '#runningJobPager';
+            }
+
             this.startEventListeners();
         },
         url: function(){
-            return AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID/*this.clusterID*/ + AppConfig.job.resourceUrl + this.address;
+            var clusterID = window.AMCGLOBALS.persistent.clusterID;
+            var nodes = window.AMCGLOBALS.persistent.selectedNodes;
+            var url = AppConfig.baseUrl + clusterID + '/nodes/' + nodes.join(',') + '/jobs?';
+            if(! _.isEqual(nodes, this.prevNodes)) {
+              this.offset = 0;
+              this.limit = this.pageSize;
+            }
+            this.prevNodes = nodes;
+            url += 'offset=' + this.offset;
+            url += '&limit=' + this.limit;
+            url += '&status=' + this.status;
+            if(this.sortBy) {
+              url += '&sort_by=' + this.sortBy;
+              if(this.sortOrder) {
+                url += '&sort_order=' + this.sortOrder;
+              }
+            }
+            return url;
         },
         initialize :function(){
 			this.CID = window.AMCGLOBALS.currentCID;
@@ -42,74 +75,104 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/jobs/nod
                 console.info(e.toString());
             }
         },
-        fetchSuccess: function(model){
-			if(model.CID !== window.AMCGLOBALS.currentCID){
-				model.destroy();
-			}
-            var nodeStatus = model.attributes['node_status'];
-            var build = typeof model.attributes['build'] !== "undefined" ? model.attributes['build'] : "3.6.0";
-            if(nodeStatus === 'on'){
-                var jobList = model.attributes['jobs'];
-                var oldJobIDList = model.jobIDList;
-                var newJobIDList = model.setJobIDList(jobList);
-                var newJobIDList = [];
-                if(!_.isUndefined(jobList)){
-                    newJobIDList = model.setJobIDList(jobList);
-                }
-                
-                if(_.isEqual(oldJobIDList, newJobIDList)){
-                    for(var jobI in oldJobIDList){
-                        var jobID = oldJobIDList[jobI];
-                        var rowID = model.modelID + '_' + jobID;
-                        jobList[jobID].build = build;
-                        model.rowView[jobID].render(model, jobList[jobID]);
-                    }
-                }else{
-                    var removedJobs = _.difference(oldJobIDList, newJobIDList);
-                    var newJobs = _.difference(newJobIDList, oldJobIDList);
-                    for(var jobI in removedJobs){
-                        var jobID = removedJobs[jobI];
-                        var rowID = model.modelID + '_' + jobID;
-                        model.rowView[jobID].removeRow();
-                        model.rowView[jobID] = null;
-                        jQuery(AppConfig.node.nodeTableDiv).delRowData(rowID);
-                        //remove the row i.e view from the container
-                        jQuery(AppConfig.job.nodeTableCompletedJobsDiv).delRowData(rowID);
-                    }
-                    for(var jobI in newJobs){
-                        var jobID = newJobs[jobI];
-                        var rowID = model.modelID + '_' + jobID;
-                        //jobList[jobID].expanded = false;
-                        jobList[jobID].build = build;
-                        model.subGridEnabled[rowID] = false;
-                        model.rowView[jobID] = new NodeView({'modelID' : model.modelID, 'rowID' : rowID, 'jobID' : jobID});
-                        model.rowView[jobID].render(model, jobList[jobID]);
-                    }
-                    model.jobIDList = newJobIDList;
-                    model.jobList = jobList;
-                }
-            }else{
-                var oldJobIDList = model.jobIDList;
-                for(var jobI in oldJobIDList){
-                    var jobID = oldJobIDList[jobI];
-                    var rowID = model.modelID + '_' + jobID;
-                    var tempData = AppConfig.blankJobData(model.address, 'N/A');
-                    model["jobList"][jobID] = tempData;
-                    model["jobList"][jobID].build = build;
-                    model.rowView[jobID].renderNetworkError(model, tempData);
-                }
+
+      toJobID: function(job) {
+        var jobID;
+        jobID = job['_address'] + '_' + job.trid;
+        jobID = jobID.replace(':', '_').replace(/\./g, '');
+        return jobID;
+      },
+
+      toRowID: function(job) {
+        return this.modelID + '_' + this.toJobID(job);
+      },
+
+      fetchSuccess: function(model){
+        if(model.CID !== window.AMCGLOBALS.currentCID){
+          model.destroy();
+        }
+        var i;
+        var job, jobs, build, jobID;
+        var rowID;
+        var oldJobs = model.jobIds;
+        var jobIds = [];
+        var jobList = {};
+        jobs = model.attributes.jobs;
+        
+        _.each(jobs, function(job) {
+          if(!job['_address']) {
+            job['_address'] = job.address;
+          } else {
+            job.address = job['_address'];
+          }
+          jobIds.push(model.toJobID(job));
+        });
+
+        _.each(oldJobs, function(jobID) {
+          var present = _.find(jobIds, function(id) {
+            if(id === jobID) {
+              return true;
             }
-			
-			if(this.clusterID !== window.AMCGLOBALS.persistent.clusterID){
-				this.clusterID = window.AMCGLOBALS.persistent.clusterID;
-				 
-			}
-			
-			if(typeof model.attributes.error !== 'undefined' && model.attributes.error.indexOf("Invalid cluster id") != -1){
-				delete model.attributes.error;
-				Util.clusterIDReset();				
-			}
-        },
+          });
+          if(!present) {
+            model.rowView[jobID].removeRow();
+          }
+        });
+
+        for(i = 0; i < jobs.length; i++) {
+          job = jobs[i];
+          jobID = model.toJobID(job);
+          rowID = model.toRowID(job);
+          node = job.node;
+          build = node.build || '3.6.0';
+          jobList[jobID] = job;
+
+          if(node.node_status === 'on'){
+            var anOldJob;
+            anOldJob = _.find(oldJobs, function(id) {
+              if(id === job.trid) {
+                return true;
+              }
+            });
+
+            model.offNodes[job.address] = false;
+            if(anOldJob) {
+              model.jobList[jobID].build = build;
+              model.rowView[jobID].render(model.container, job, model);
+            } else {
+              jobList[jobID].build = build;
+              model.subGridEnabled[rowID] = false;
+              model.rowView[jobID] = new NodeView({'modelID' : model.modelID, 'rowID' : rowID, 'jobID' : jobID});
+              model.rowView[jobID].render(model.container, job, model);
+            }
+          } else {
+            var tempData = AppConfig.blankJobData(job.address, 'N/A');
+            if(!model.offNodes[job.address]) {
+              model.offNodes[job.address] = true;
+              model["jobList"][jobID] = tempData;
+              model["jobList"][jobID].build = build;
+              model.rowView[jobID].renderNetworkError(model.container, model, tempData);
+            }
+          }
+        }
+
+        model.jobIds = jobIds;
+        model.jobList = jobList;
+
+        if(this.clusterID !== window.AMCGLOBALS.persistent.clusterID){
+          this.clusterID = window.AMCGLOBALS.persistent.clusterID;
+
+        }
+
+        if(typeof model.attributes.error !== 'undefined' && model.attributes.error.indexOf("Invalid cluster id") != -1){
+          delete model.attributes.error;
+          Util.clusterIDReset();				
+        }
+
+        model.totalJobs = model.attributes.job_count;
+        model.updatePages();
+        JobTable.stopLoader(model.container);
+      },
         setJobIDList: function(jobList){
             var jobIDList = [];
             jobIDList = _.map(jobList, function(num, key){ return key; });
@@ -120,28 +183,28 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/jobs/nod
             build = build.substring(0, n != -1 ? n : build.length);
             return build;
         },
-        fetchError: function(model){
-			if(model.CID !== window.AMCGLOBALS.currentCID){
-				model.destroy();
-			}
-			
-            var that = this;
-            var build = typeof model.attributes['build'] !== "undefined" ? model.attributes['build'] : "3.6.0";
-            try{
-				if(!(!AMCGLOBALS.pageSpecific.GlobalPollingActive && that.stop()) && this.active()){
-					var oldJobIDList = model.jobIDList;
-					for(var jobI in oldJobIDList){
-						var jobID = oldJobIDList[jobI];
-						var rowID = model.modelID + '_' + jobID;
-						var tempData = AppConfig.blankJobData(model.address, 'N/E');
-						model["jobList"][jobID] = tempData;
-                        model["jobList"][jobID].build = build;
-						model.rowView[jobID].renderNetworkError(model, tempData);
-					}
-				}				
-            }catch(e){
-                console.info(e.toString());
-            }
+        fetchError: function(model) {
+          if(model.CID !== window.AMCGLOBALS.currentCID){
+            model.destroy();
+          }
+
+          var that = this;
+          var build = typeof model.attributes['build'] !== "undefined" ? model.attributes['build'] : "3.6.0";
+          try{
+            if(!(!AMCGLOBALS.pageSpecific.GlobalPollingActive && that.stop()) && that.active()){
+              var oldJobIDList = model.jobIds;
+              _.each(model.jobList, function(job) {
+                var jobID = model.toJobID(job);
+                var rowID = model.toRowID(jobID);
+                var tempData = AppConfig.blankJobData(model.address, 'N/E');
+                model["jobList"][jobID] = tempData;
+                model["jobList"][jobID].build = build;
+                model.rowView[jobID].renderNetworkError(model.container, model, tempData);
+              });
+            }				
+          }catch(e){
+            console.info(e.toString());
+          }
         },
 
         startEventListeners : function (){
@@ -152,8 +215,41 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/jobs/nod
             };
 
             $(document).off("view:Destroy", viewDestroy).on("view:Destroy", viewDestroy);
+
+            $(this.pagerID + ' .page-next').off('click').on('click', function(evt) {
+              if(that.offset + that.limit < that.totalJobs) {
+                that.offset += that.limit;
+                that.fetchJobs();
+              }
+            });
+
+            $(this.pagerID + ' .page-prev').off('click').on('click', function(evt) {
+              if(that.offset >= that.limit) {
+                that.offset -= that.limit;
+                that.fetchJobs();
+              }
+            });
         },
-        
+
+      fetchJobs: function() {
+        JobTable.showLoader(this.container);
+        this.fetch();
+      },
+
+      sortTable: function(sortBy, sortOrder) {
+        this.sortBy = sortBy;
+        this.sortOrder = sortOrder;
+        this.fetchJobs();
+      },
+
+        updatePages: function() {
+          var current = Math.floor(this.offset / this.limit) + 1;
+          var total = Math.floor(this.totalJobs / this.limit);
+          if(total === 0) {
+            total = 1;
+          }
+          JobTable.updatePages(this.pagerID, current, total);
+        },
         
     });
 

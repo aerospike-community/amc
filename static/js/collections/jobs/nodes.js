@@ -18,6 +18,7 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "underscore", "backbone", "helper/util", "models/jobs/nodemodel", "views/jobs/nodeview", "config/app-config", "config/view-config", "helper/job-table"], function($, _, Backbone, Util, NodeModel, NodeView, AppConfig, ViewConfig, JobTable){
+    var PAGE_SIZE = 20;
     var NodeCollection = Backbone.Collection.extend({
         model: NodeModel,
         initVariables :function(){
@@ -27,14 +28,14 @@ define(["jquery", "underscore", "backbone", "helper/util", "models/jobs/nodemode
         initialize : function(){
             try{
                 this.initVariables();
-                JobTable.initNodeGrid(AppConfig.node.nodeTableDiv, ViewConfig.nodePieConfig, this.models, AppConfig.job.runningJobPager);
-                JobTable.initNodeGrid(AppConfig.job.nodeTableCompletedJobsDiv, ViewConfig.nodePieConfig, this.models, AppConfig.job.completedJobPager);
+                JobTable.initNodeGrid(AppConfig.node.nodeTableDiv, ViewConfig.nodePieConfig, this.models, AppConfig.job.runningJobPager, PAGE_SIZE, 'inprogress');
+                JobTable.initNodeGrid(AppConfig.job.nodeTableCompletedJobsDiv, ViewConfig.nodePieConfig, this.models, AppConfig.job.completedJobPager, PAGE_SIZE, 'completed');
             }catch(e){
                 console.info(e.toString());
             }
         },
-        addModel: function(modelID, address, clusterID, totalNodes){
-            var node = new NodeModel({model_id:modelID, address: address, cluster_id:clusterID, total_nodes:totalNodes});
+        addModel: function(modelID, clusterID, status, container){
+            var node = new NodeModel({model_id:modelID, cluster_id:clusterID, status: status, container: container, page_size: PAGE_SIZE});
             node.rowView = {};
             this.add(node);
         }

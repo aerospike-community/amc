@@ -203,11 +203,21 @@ define(["underscore", "backbone", "helper/util", "models/jobs/nodemodel", "colle
 			!AMCGLOBALS.pageSpecific.GlobalPollingActive && Util.updateModelPoller(response, window.AMCGLOBALS.persistent.updateInterval, false);
         },
         initNodeDetails : function(){
-            this.totalNodes = this.nodeList.length;
             this.nodeCollection = new NodeCollection();
-
-            this.createNewGridCollection(this.nodeCollection, window.AMCGLOBALS.persistent.selectedNodes, window.AMCGLOBALS.persistent.selectedNodes.length);
+            this.createNewJobModel(0, 'completed', AppConfig.job.nodeTableCompletedJobsDiv);
+            this.createNewJobModel(1, 'inprogress', AppConfig.node.nodeTableDiv);
         },
+
+        createNewJobModel: function(index, status, container) {
+            var clusterID = this.clusterID;
+            var polOptions = AppConfig.pollerOptions(AppConfig.updateInterval['jobs']);
+            var collection = this.nodeCollection;
+            collection.addModel(index, clusterID, status, container);
+            var model = collection.models[index];
+            var tempPoller = Util.initPoller(model, polOptions);
+            tempPoller.start();
+        },
+
         refreshGrid: function(collection, gridContainer){
                 $(gridContainer).jqGrid("clearGridData");
                 for(var model in collection.models){
@@ -216,13 +226,6 @@ define(["underscore", "backbone", "helper/util", "models/jobs/nodemodel", "colle
                         $(gridContainer).jqGrid("clearGridData");
                 }
                 $(gridContainer).jqGrid("clearGridData");
-        },
-        createNewGridCollection: function(collection, list, totalElements, optionalParameter){
-            //Optional Parameter : xdrPort or namespace name
-            totalElements = list.length;
-            for(var i=0; i < totalElements ;i++){
-                Util.createNewJobModel(this, collection, i, list[i], 2, 'jobs', optionalParameter);
-            }
         },
 
         startEventListeners : function (){
@@ -246,7 +249,6 @@ define(["underscore", "backbone", "helper/util", "models/jobs/nodemodel", "colle
                     	 if($(this).hasClass('ui-selected')){
                              var nodeAddr = $(this).find('.li-node-addr').text();
                              if(!(_.contains(window.AMCGLOBALS.persistent.selectedNodes, nodeAddr)) || _.contains(window.AMCGLOBALS.pageSpecific.toBeSelectedNodes, nodeAddr)){
-                                 Util.addJobToClusterModel(that, nodeAddr);
                                  window.AMCGLOBALS.persistent.selectedNodes = _.union(window.AMCGLOBALS.persistent.selectedNodes,[nodeAddr]);
                                  window.AMCGLOBALS.persistent.unSelectedNodes = _.difference(window.AMCGLOBALS.persistent.unSelectedNodes, [nodeAddr]);
                                  if(typeof window.AMCGLOBALS.pageSpecific.toBeSelectedNodes !== "undefined")
@@ -255,7 +257,6 @@ define(["underscore", "backbone", "helper/util", "models/jobs/nodemodel", "colle
                          }else{
                              var nodeAddr = $(this).find('.li-node-addr').text();
                              if(_.contains(window.AMCGLOBALS.persistent.selectedNodes, nodeAddr)){
-                                 Util.deleteJobFromClusterModel(that, nodeAddr);
                                  window.AMCGLOBALS.persistent.selectedNodes = _.difference(window.AMCGLOBALS.persistent.selectedNodes, [nodeAddr]);
                                  window.AMCGLOBALS.persistent.unSelectedNodes = _.union(window.AMCGLOBALS.persistent.unSelectedNodes,[nodeAddr]);
                              }

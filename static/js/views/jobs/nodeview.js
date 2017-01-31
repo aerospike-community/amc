@@ -50,20 +50,11 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 
             this.remove();
         },
-        render: function(model, newData){
-            if(newData.status.startsWith('done')){
-                $(AppConfig.node.nodeTableDiv).jqGrid('delRowData', this.rowID);
-                this.createJobListRow(AppConfig.job.nodeTableCompletedJobsDiv,  newData, this.rowID, this.jobID, model, false);
-            }else{
-                this.createJobListRow(AppConfig.node.nodeTableDiv,  newData, this.rowID, this.jobID, model, false);
-            }
-
-            model.data = newData;
+        render: function(container, job, model){
+          this.createJobListRow(container,  job, this.rowID, this.jobID, model, false);
         },
-        renderNetworkError: function(model , newData){
-            this.createJobListRow(AppConfig.node.nodeTableDiv, newData, this.rowID, this.jobID, model, true);
-            this.createJobListRow(AppConfig.job.nodeTableCompletedJobsDiv, newData, this.rowID, this.jobID, model, true);
-            model.data = newData;
+        renderNetworkError: function(container, job, model){
+            this.createJobListRow(container, job, this.rowID, this.jobID, model, true);
         },
         createJobListRow: function(container, data, rowID, jobID, model, isError){
             $(container).removeClass("no-jobs");

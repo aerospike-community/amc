@@ -1219,15 +1219,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                 console.info('ERROR IN STARTING_4')
             }
         },
-        addJobToClusterModel: function(clusterModel, nodeAddr){
-            try{
-                var nodeModelI = clusterModel.nodeCollection.models.length;
-                Util.createNewJobModel(clusterModel, clusterModel.nodeCollection, nodeModelI, nodeAddr, 2, 'jobs');
-
-            }catch(e){
-                console.info('error in addNodeToClusterModel')
-            }
-        },
         addNodeToClusterModel: function(clusterModel, nodeAddr){
             try{
 
@@ -1308,14 +1299,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     }
                 }
             }catch(e){
-                console.info('error in deleteNodeFromClusterModel');
-            }
-        },
-        deleteJobFromClusterModel: function(clusterModel, nodeAddr){
-            try{
-                Util.deleteModel(clusterModel.nodeCollection, AppConfig.node.nodeTableDiv, nodeAddr, 'address');
-                Util.deleteModel(clusterModel.nodeCollection, AppConfig.job.nodeTableCompletedJobsDiv, nodeAddr, 'address');
-            } catch (e) {
                 console.info('error in deleteNodeFromClusterModel');
             }
         },
