@@ -43,6 +43,12 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 
         },
 
+      timezoneChangeCallbacks : [],
+
+      registerTimeZoneChangeCallback(callback) {
+        Util.timezoneChangeCallbacks.push(callback);
+      },
+
         isCommunityEdition: function() {
           var edition = window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE
           if(!edition || edition === AppConfig.amc_type[0]) {
@@ -2803,6 +2809,10 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 			$('#setUpdateLocalTimeZoneInput').off("click").on('click',function(){
                 Util.setCookie("useLocalTimeZone", $('#setUpdateLocalTimeZoneInput').is(':checked'), 43200, "/");
                 Util.setTimezoneLabel();
+                
+                _.each(Util.timezoneChangeCallbacks, function(callback) {
+                  callback();
+                });
 			});
 
             $("#selectNodesGrid")

@@ -20,11 +20,17 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
             this.shownAlerts = Util.getCookie("shownAlerts");
             this.initAlertSettings();
             this.initDesktopNotification();
+            this.allAlerts = [];
+
             if("Notification" in window){
                 this.notificationQ = [];
             }
 
             this.model.off('change').on('change', function(model) {
+              that.allAlerts = [];
+              _.each(model.attributes, function(alert) {
+                that.allAlerts.push(alert);
+              });
             	that.showAlerts(model, model.attributes);
             });
             this.model.off('destroy').on('destroy', function(model) {
@@ -33,6 +39,10 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
             	$("#alertNotifyList").append('<li class="alert-notify-no-alerts">No Alerts</li>');
             	var alertNotifyCountEl = $("span.alert-notify-count");
             	alertNotifyCountEl.html("0").css("display", "none");
+            });
+
+            Util.registerTimeZoneChangeCallback(function() {
+              that.redrawAlerts();
             });
 
         },
@@ -159,6 +169,11 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 }
             });
 
+        },
+
+        redrawAlerts: function() {
+          $('#alert-notify-list-container ul').empty();
+          this.showAlerts(this.model, this.allAlerts);
         },
 
         showAlerts: function(model, incomingAlerts) {
@@ -357,11 +372,12 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
                 shown = "alert-notify-shown";
 
 
+            var displayTime = Util.useLocalTimezone() ? this.getLocalDate(timeStamp) : this.getUTCDate(timeStamp);
             var alertHtml = '<li class="alert alert-notify-li ' + shown + '" name="' + clusterId + ':' + alertId + '">' +
                 '<span class="' + alertClassName + ' alert-status-icon alert-notify-li-icon"></span>' +
                 '<span class="alert-notify-li-message">' +
                 '<span class="alert-notify-li-msgstr">' + msgStr + '</span>' +
-                '<span class="alert-notify-li-timestamp">' + this.getUTCDate(timeStamp) + '</span>' +
+                '<span class="alert-notify-li-timestamp">' + displayTime + '</span>' +
                 '</span>' +
                 '&nbsp;<span class="remove-inline-alert" title="Remove this alert"></span>'+
                 '</li>';
@@ -387,20 +403,30 @@ define(["jquery", "backbone", "config/view-config", "config/app-config", "helper
             var localNow =  new Date(timestamp);
             localNow.setMinutes(localNow.getMinutes() + offset);
 
-            var date = localNow.getDate();
-            var month = localNow.getMonth()+1;
-            var hours = localNow.getHours();
-            var minutes = localNow.getMinutes();
-            var seconds = localNow.getSeconds();
+            return this.formatDate(localNow) + " GMT";
+        },
 
-            var monthMM = ((month < 10)? "0" : "" ) + month;
-            var dd = ((date < 10)? "0" : "" ) + date;
-            var hh = ((hours < 10)? "0" : "" ) + hours;
-            var mm = ((minutes < 10)? "0" : "" ) + minutes;
-            var ss = ((seconds < 10)? "0" : "" ) + seconds;
+        getLocalDate: function(timestamp) {
+          var date = new Date(timestamp);
+          return this.formatDate(date);
+        },
 
-            return localNow.getFullYear() + "/"+(monthMM) + "/"+dd + " " + hh + ":" + mm + ":" +ss + " GMT";
-        }
+        formatDate: function(time) {
+          var date = time.getDate();
+          var month = time.getMonth()+1;
+          var hours = time.getHours();
+          var minutes = time.getMinutes();
+          var seconds = time.getSeconds();
+
+          var monthMM = ((month < 10)? "0" : "" ) + month;
+          var dd = ((date < 10)? "0" : "" ) + date;
+          var hh = ((hours < 10)? "0" : "" ) + hours;
+          var mm = ((minutes < 10)? "0" : "" ) + minutes;
+          var ss = ((seconds < 10)? "0" : "" ) + seconds;
+
+          return time.getFullYear() + "/"+(monthMM) + "/"+dd + " " + hh + ":" + mm + ":" +ss;
+        },
+
 
     });
 
