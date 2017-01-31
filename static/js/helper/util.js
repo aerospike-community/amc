@@ -45,7 +45,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 
       timezoneChangeCallbacks : [],
 
-      registerTimeZoneChangeCallback(callback) {
+      registerTimeZoneChangeCallback: function(callback) {
         Util.timezoneChangeCallbacks.push(callback);
       },
 
@@ -2809,7 +2809,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 			$('#setUpdateLocalTimeZoneInput').off("click").on('click',function(){
                 Util.setCookie("useLocalTimeZone", $('#setUpdateLocalTimeZoneInput').is(':checked'), 43200, "/");
                 Util.setTimezoneLabel();
-                
+
                 _.each(Util.timezoneChangeCallbacks, function(callback) {
                   callback();
                 });
