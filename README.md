@@ -40,6 +40,6 @@ $ npm install
 $ grunt build
 ```
 
-the built files will be in `build/static`
+The built files will be in `build/static`
 
 Keep in mind that you don't need to build the UI to be able to develop. The original source files are used for the development.
