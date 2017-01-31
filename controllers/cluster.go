@@ -756,6 +756,16 @@ func getClusterNodesJobs(c echo.Context) error {
 		sortField = "time-since-done"
 	}
 
+	jobStatus := strings.ToLower(c.QueryParam("status"))
+	switch jobStatus {
+	case "inprogress":
+		jobStatus = "active"
+	case "completed":
+		jobStatus = "done"
+	default:
+		jobStatus = ""
+	}
+
 	sortFunc, exists := _jobsSortFields[sortField]
 	if !exists {
 		return c.JSON(http.StatusOK, errorMap("Field specified by sort_by not supported."))
@@ -777,6 +787,10 @@ func getClusterNodesJobs(c echo.Context) error {
 
 		jobStats := node.Jobs()
 		for _, v := range jobStats {
+			if !strings.HasPrefix(v.TryString("status", ""), jobStatus) {
+				continue
+			}
+
 			v["address"] = node.Address()
 			v["node"] = map[string]interface{}{
 				"node_status": node.Status(),
@@ -788,9 +802,10 @@ func getClusterNodesJobs(c echo.Context) error {
 
 	}
 
+	jobCount := len(jobs)
 	if len(jobs) < offset {
 		res["jobs"] = jobs
-		res["job_count"] = len(jobs)
+		res["job_count"] = jobCount
 		return c.JSON(http.StatusOK, res)
 	}
 
@@ -805,7 +820,7 @@ func getClusterNodesJobs(c echo.Context) error {
 	}
 
 	res["jobs"] = jobs
-	res["job_count"] = len(jobs)
+	res["job_count"] = jobCount
 
 	return c.JSON(http.StatusOK, res)
 }
