@@ -19,6 +19,12 @@ var (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r)
+		}
+	}()
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	flag.Parse()
