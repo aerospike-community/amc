@@ -41,7 +41,14 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                 }
             });
 
+            // set of all nodes that are tls connections
+            Util.tls = {};
+
         },
+
+      setTLS: function(address, isTLS) {
+        Util.tls[address] = isTLS;
+      },
 
       timezoneChangeCallbacks : [],
 
@@ -2770,6 +2777,11 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
             $("#clusterSeed .attribute-value").text(seed);
             $("#clusterID .attribute-value").text(clusterID);
             $("#clusterUser .attribute-value").text(user);
+            if(Util.tls[seed]) {
+              $('#tlsStatus').show();
+            } else {
+              $('#tlsStatus').hide();
+            }
 
             if(!$("#changeClusterButton").hasClass("active")){
                 if(window.location.hash.indexOf("/") == -1){

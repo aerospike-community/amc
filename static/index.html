@@ -92,6 +92,10 @@ under the License.
             </div>
 
             <div class="grid_16 sub-header">
+                <div class="session-details" id="tlsStatus" style="display: none">
+                    <span class="attribute-label">Cluster Connection :</span>
+                    <span class="attribute-value">TLS </span>
+                </div>
                 <div class="session-details" id="clusterSeed">
                     <span class="attribute-label">Seed Node :</span>
                     <span class="attribute-value"></span>
@@ -270,6 +274,11 @@ under the License.
                                     </span>
                                 </div>
                             </li>
+                            <li style="margin: 10px 0 5px 0; padding-bottom: 10px; border-bottom: 1px solid #aaa">
+                              <div class="submit">
+                                  <button class="btn blue_btn" id="setUpdateTimeInterval">Apply</button>
+                              </div>
+                            </li>
                             <li>
                                 <div>
                                     <br/>
@@ -278,9 +287,6 @@ under the License.
                             </li>
                         </ul>
 
-                        <div class="submit">
-                            <button class="btn blue_btn" id="setUpdateTimeInterval">Apply</button>
-                        </div>
                     </div>
                 </div>
 

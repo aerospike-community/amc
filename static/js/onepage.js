@@ -203,6 +203,8 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
                     if(tls) {
                       AuthManager.setTLSProps(seedNode, tls.tls_name, tls.key_file, tls.cert_file, tls.encrypt_only);
+                    } else {
+                      AuthManager.removeTLSProps(seedNode);
                     }
                     SessionManager.putItemIntoSession(AppConfig.sessionKeys.isSecurityEnable,response.security_enabled);
 
@@ -470,17 +472,20 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
             // disable TLS for now
             if(Util.isEnterpriseEdition()) {
-              var shown = true;
+              var shown = false;
               $('#tls_container').show();
               $('#tls_container').click(function() {
                 $('#tls_params').toggle();
                 shown = !shown;
                 if(shown) {
-                  $('#tls_container .icon-plus').show();
-                  $('#tls_container .icon-minus').hide();
-                } else {
                   $('#tls_container .icon-plus').hide();
                   $('#tls_container .icon-minus').show();
+                } else {
+                  $('#tls_container .icon-plus').show();
+                  $('#tls_container .icon-minus').hide();
+                  // reset tls params
+                  $('#tls_name').val('')
+                  $('#encrypt_only').attr('checked', false);
                 }
               });
             }

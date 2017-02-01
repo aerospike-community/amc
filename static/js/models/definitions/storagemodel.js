@@ -99,7 +99,7 @@ define(["underscore", "backbone", "poller", "views/definitions/storageview", "he
 				typeListHtml += '----';
 			}else{
 				typeListHtml = '<div  class='+className+'>';//<span class="storage-type">';
-				typeListHtml += '<ol class="type-ol" style="list-style: none">'; 
+				typeListHtml += '<ol class="type-ol" style="list-style: none; padding: 0">'; 
             
 				for(var type in list){
 					typeListHtml += '<li title="'+list[type]+'" class="type-li">' + type + '</li>';

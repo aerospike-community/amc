@@ -36,7 +36,17 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
            key         : key,
            encryptOnly : encryptOnly,
         };
+        Util.setTLS(address, true);
        },
+
+        removeTLSProps: function(address) {
+          delete _tlsProps[address];
+          Util.setTLS(address, false);
+        },
+
+        isTLSConnection: function(address) {
+          return address in _tlsProps;
+        },
 
 			 showUserLoginPopup : function(properties,callback,showErrorMessage,clusterName,multiclusterview){
 			 	var that = this;

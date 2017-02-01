@@ -337,9 +337,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					}
 				}
 
-				if(currentLatencyTimestamp !== lastTimestamp){
-					model.pushLatencyInfo(model,latency);
-				}
+        model.pushLatencyInfo(model,latency);
 			}
         },
 
