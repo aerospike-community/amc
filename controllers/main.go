@@ -188,6 +188,7 @@ func Server(config *common.Config) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", sessionValidator(getClusterThroughputHistory))
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency/:nodes", sessionValidator(getNodeLatency))
 	e.GET("/aerospike/service/clusters/:clusterUuid/latency_history/:nodes", sessionValidator(getNodeLatencyHistory))
+	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/latency_history", sessionValidator(getNodesLatencyHistory))
 	e.GET("/aerospike/service/clusters/:clusterUuid/basic", sessionValidator(getClusterBasic))
 	e.POST("/aerospike/service/clusters/:clusterUuid/change_password", sessionValidator(postClusterChangePassword))
 	e.GET("/aerospike/service/clusters/:clusterUuid/alerts", sessionValidator(getClusterAlerts))

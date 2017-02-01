@@ -159,6 +159,7 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 	return latencies
 }
 
+// TODO: Remove this later
 func getNodeLatencyHistory(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")
 	cluster := _observer.FindClusterById(clusterUuid)
@@ -182,6 +183,38 @@ func getNodeLatencyHistory(c echo.Context) error {
 		"latency_history": latencyHistory,
 		"address":         node.Address(),
 	})
+}
+
+func getNodesLatencyHistory(c echo.Context) error {
+	clusterUuid := c.Param("clusterUuid")
+	cluster := _observer.FindClusterById(clusterUuid)
+	if cluster == nil {
+		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+	}
+
+	nodeAddrs := common.DeleteEmpty(strings.Split(c.Param("nodes"), ","))
+
+	res := make(map[string]common.Stats, len(nodeAddrs))
+	for _, nodeAddr := range nodeAddrs {
+		node := cluster.FindNodeByAddress(nodeAddr)
+		if node == nil {
+			continue
+		}
+
+		latencyHistory := []common.Stats{}
+		for _, latency := range node.LatencySince(c.QueryParam("start_time")) {
+			latencyHistory = append(latencyHistory, transformLatency(latency))
+		}
+
+		res[node.Address()] = common.Stats{
+			"node_status":     node.Status(),
+			"node_build":      node.Build(),
+			"latency_history": latencyHistory,
+			"address":         node.Address(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func getNodeLatency(c echo.Context) error {
