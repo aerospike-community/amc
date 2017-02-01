@@ -23,6 +23,10 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
             this.initVariables();
         },
 		
+      onTimeZoneChanged: function() {
+        this.fetch();
+      },
+		
         fetchSuccess: function(response){
         	if(response.CID !== window.AMCGLOBALS.currentCID){
 				response.destroy(); return;
@@ -82,6 +86,10 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
 			
 			container.off("startPoller", that.startModelPoller).on("startPoller", {model : that}, that.startModelPoller);
 			container.off("stopPoller", that.stopModelPoller).on("stopPoller", {model : that}, that.stopModelPoller);
+
+      Util.registerTimeZoneChangeCallback(function() {
+        that.onTimeZoneChanged();
+      });
         },
 		
 		startModelPoller: function(event){

@@ -265,7 +265,12 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
             for(var attr in latency){
 
-                var timestamp = new Date(this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp);
+                var timestamp = this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + 
+                  "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp;
+                if(Util.useLocalTimezone()) { 
+                  timestamp += ' UTC';
+                }
+                timestamp = new Date(timestamp);
 
 				if(this.lastTimestamp[attr] != null){
 					if((timestamp.getTime() - this.lastTimestamp[attr].getTime()) <= -10000){
