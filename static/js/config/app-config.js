@@ -223,7 +223,7 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
         availableRole : ["user-admin", "sys-admin", "read-write", "read", "write","data-admin"],
 
 	    secondaryIndexDefList: ['Index Name', 'Bin', 'Set', 'Bin Type', 'Synced on all nodes?'],
-        setsDefList: ['Set', 'Objects', 'Stop Writes Count', 'Evict HWM Count', 'Delete', 'Enable XDR', 'Disable Eviction'],
+        setsDefList: ['Set', 'Objects', 'Stop Writes Count', 'Delete', 'Enable XDR', 'Disable Eviction'],
         storageDefList: ['Storage', 'Devices', 'Synced on all nodes?'],
         udfDefList: ['UDF File Name', 'UDF File Type', 'Cache Size', 'Synced on all nodes?'],
         xdrDefList: ['Namespace Name', 'Destination Nodes'],
@@ -240,7 +240,7 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
             {name: 'set_name', width: 200, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
             {name: 'n_objects', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
             {name: 'stop-write-count', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
-            {name: 'evict-hwm-count', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
+            // {name: 'evict-hwm-count', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}, sorttype : 'number'},
             {name: 'delete', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
             {name: 'enable-xdr', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}},
 			{name: 'disable-eviction', width: 150, align: 'center', resizable: false, sortable: true, title: '', searchoptions:{clearSearch: false}}
