@@ -536,11 +536,16 @@ func (c *Cluster) SendEmailNotifications() {
 		return
 	}
 
+	clusterName := c.Id()
+	if alias := c.Alias(); alias != nil {
+		clusterName = *alias
+	}
+
 	for _, alert := range newAlerts {
 		// make the data structure, and send the mail
 		msg := map[string]template.HTML{
 			"Title":   template.HTML(fmt.Sprintf("Alert")),
-			"Cluster": template.HTML(fmt.Sprintf("%s", c.Id())),
+			"Cluster": template.HTML(fmt.Sprintf("%s", clusterName)),
 			"Node":    template.HTML(fmt.Sprintf("%s", alert.NodeAddress)),
 			"Status":  template.HTML(fmt.Sprintf("<font color='%s'><strong>%s</strong></font>", alert.Status, strings.ToUpper(string(alert.Status)))),
 			"Message": template.HTML(fmt.Sprintf("%s", alert.Desc)),
