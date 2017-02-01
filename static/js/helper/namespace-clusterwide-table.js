@@ -150,7 +150,6 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                                 if(model.attributes.name === window.AMCGLOBALS.pageSpecific.selectedNamespace)
                                     rowID = AppConfig.namespace.namespaceClusterWideTablePrefix + model.attributes.row_id;
                             });
-                            jQuery(container).toggleSubGridRow(rowID);
                             if(rowID !== row_id)
                                 showGrid();
                         } else{
