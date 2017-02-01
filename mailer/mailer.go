@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/gomail.v2"
@@ -41,7 +40,7 @@ func SendMail(config *common.Config, tplName, subject string, context interface{
 
 	msg := gomail.NewMessage(gomail.SetEncoding(gomail.Unencoded))
 	msg.SetHeader("From", fmt.Sprintf("AMC <%s>", config.Mailer.User))
-	msg.SetHeader("To", strings.Join(config.AlertEmails(), ","))
+	msg.SetHeader("To", config.AlertEmails()...)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/html", string(body))
 
