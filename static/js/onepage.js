@@ -394,7 +394,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                  var portNumber = $("#port_dialog").val().trim();
                  var clusterName = $("#cluster_name_dialog").val().trim();
                  var multiclusterviewCheck = is_checked("multiclusterview_check");
-                 var tls = {};
+                 var tls = null;
                  // var certFiles = document.getElementById('tls_certificate').files;
                  // var keyFiles = document.getElementById('tls_key').files;
                  var tls_name = $('#tls_name').val().trim();
@@ -408,33 +408,9 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                      $("#error_message").text("Invalid TLS values");
                      return;
                    }
+                   tls = {};
                    tls.tls_name = tls_name;
                    tls.encrypt_only = encrypt_only;
-                   // read tls key and certificate as string
-                   // var numTLSFiles = 0;
-                   // function readFile(file, callback) {
-                   //   var reader = new FileReader();
-                   //   reader.onload = function(evt) {
-                   //     callback(reader.result);
-                   //   };
-                   //   reader.readAsText(file);
-                   // }
-                   // // read tls key file
-                   // readFile(keyFiles[0], function(text) {
-                   //   tls.key_file = text;
-                   //   numTLSFiles++;
-                   //   if(numTLSFiles === 2) {
-                   //     sendRequest();
-                   //   }
-                   // });
-                   // // read tls certificate file
-                   // readFile(certFiles[0], function(text) {
-                   //   tls.cert_file = text;
-                   //   numTLSFiles++;
-                   //   if(numTLSFiles === 2) {
-                   //     sendRequest();
-                   //   }
-                   // });
 
                    sendRequest();
                  } else {
