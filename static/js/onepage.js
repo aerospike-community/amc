@@ -371,7 +371,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                           "<div>" +
                                             "<input id='tls_name' class='dialog_input' type='text' style='width: 163px;' placeholder='TLS Host Name'/>" +
                                           "</div>" +
-                                          "<div>" +
+                                          "<div style='display: none'>" +
                                             "<input id='encrypt_only' class='dialog_input' type='checkbox' >" +
                                             "<span style='margin-right: -17px'> Encrypt Only (insecure)</span>" +
                                           "</div>" +
