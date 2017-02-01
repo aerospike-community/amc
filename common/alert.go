@@ -87,7 +87,7 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 	res := make([]*Alert, len(ad.newAlerts))
 	if len(ad.newAlerts) > 0 {
 		copy(res, ad.newAlerts)
-		ad.newAlerts = ad.newAlerts[:1]
+		ad.newAlerts = ad.newAlerts[:0]
 	}
 
 	return res
