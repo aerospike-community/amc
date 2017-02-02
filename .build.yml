@@ -35,5 +35,5 @@ build:
       #- make.sh enterprise prod linux
       #- make.sh community prod linux
     artifact:
-      - *.deb
-      - *.rpm
+      - aerospike-amc-*.deb
+      - aerospike-amc-*.rpm
