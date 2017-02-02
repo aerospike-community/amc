@@ -15,6 +15,7 @@ build:
   - name: default
     script:
       - VERSION=$(cd $GOPATH/src/$REPO && git describe --always --tags)
+      - apt-get update
       - apt-get install build-essential
       - apt-get install curl
       - curl -sL https://deb.nodesource.com/setup | bash -
