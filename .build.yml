@@ -15,25 +15,17 @@ environment:
 build:
   - name: default
     script:
-      # dependencies. Preferably make a new docker based on these
       - apt-get install build-essential
-
       - apt-get install curl
       - curl -sL https://deb.nodesource.com/setup | bash -
       - apt-get install -y nodejs
       - npm install npm@latest -g
       - npm install grunt -g
-
       - apt-get install ruby ruby-dev rubygems gcc make
       - gem install --no-ri --no-rdoc fpm
-
       - apt-get install rpm
-
       - make.sh enterprise prod linux
       - make.sh community prod linux
-      # still working on the next two
-      #- make.sh enterprise prod linux
-      #- make.sh community prod linux
     artifact:
       - aerospike-amc-*.deb
       - aerospike-amc-*.rpm
