@@ -60,7 +60,7 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
 
       updateChartWindow: function(latencyWindow) {
         var timeWindowSize = parseInt(latencyWindow)*1000;
-        var fixTimeWindowSize = latencyWindow === "1800" ? false : true;
+        var fixTimeWindowSize = true;
         this.mainChart.configure({
           timeWindowSize    : timeWindowSize,
           fixTimeWindowSize : fixTimeWindowSize,

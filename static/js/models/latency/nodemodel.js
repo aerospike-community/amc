@@ -21,44 +21,115 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			this.attrList = ["writes_master", "writes", "reads", "proxy", "udf", "query"];
 			this.rowView = new NodeView(this);
 			this.startEventListeners();
+       this.useLocalTimezone = Util.useLocalTimezone();
         },
-        initialize :function(model){
-			this.CID = window.AMCGLOBALS.currentCID;
-			var that = this;
-            try{
-                this.initVariables();
-                AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/latency_history/' + this.address,{  async: true},
-                function(response) {
-                	that.attributes.node_status = response.node_status || "off";
 
-					if(response.latency_history != null && response.latency_history.length > 0){
+      initialize :function(model){
+        this.CID = window.AMCGLOBALS.currentCID;
+        try{
+          this.initVariables();
+        } catch(e) {
+          console.log(e);
+        }
+      },
 
-						var latencyHistory = response.latency_history;
+      initLatencyHistory: function(history) {
+        this.attributes.node_status = history.node_status || "off";
 
-						latencyHistory = that.prependAndFillNullLatencyData(response.latency_history);
+        if(history.latency_history != null && history.latency_history.length > 0){
 
-						if(latencyHistory.length > 0){
-							that.pushLatencyInfoHistory(that, latencyHistory);
-							that.latencyAvailable = true;
-							that.rowView.initContainers(that);
-						}
-					}
+          var latencyHistory = history.latency_history;
 
-					if(that.latencyAvailable || response.node_status !== "on"){
-						that.rowView.render(that,that.latencyData);
-					} else {
-            that.rowView.error(that);
+          latencyHistory = this.prependAndFillNullLatencyData(history.latency_history);
+
+          if(latencyHistory.length > 0){
+            this.pushLatencyInfoHistory(this, latencyHistory);
+            this.latencyAvailable = true;
+            this.rowView.initContainers(this);
           }
-					that.historyInitialized = true;
-                },
-                function(response) {
-                	that.historyInitialized = true;
-                });
+        }
 
-            }catch(e){
-                console.info(e.toString());
+        if(this.latencyAvailable || history.node_status !== "on"){
+          this.rowView.render(this,this.latencyData);
+        } else {
+          this.rowView.error(this);
+        }
+        this.historyInitialized = true;
+      },
+
+
+      initLatencyHistoryOnError: function() {
+        this.historyInitialized = true;
+      },
+      getCurrentDate: function() {
+        var now = new Date();
+        if(this.useLocalTimezone) {
+          return now;
+        } else {
+          return new Date(now.getTime() + now.getTimezoneOffset()*60*1000);
+        }
+      },
+
+      getDateByTimestamp: function(timestamp) {
+        var now = new Date();
+        if(this.useLocalTimezone) {
+          return new Date(timestamp);
+        } else {
+          return new Date(timestamp + now.getTimezoneOffset()*60*1000);
+        }
+      },
+
+      updateTimeZone: function() {
+        var plocal = this.useLocalTimezone;
+        this.useLocalTimezone = Util.useLocalTimezone();
+        var useLocalTimezone = this.useLocalTimezone;
+        if(plocal === useLocalTimezone) {
+          return;
+        }
+
+        var that = this;
+        var category; // total, < 1ms, < 5ms, < 8ms, etc
+        var data, cdata;
+        var attr; // reads, writes, etc
+        var i;
+        for(attr in this.latencyData) {
+          if(!this.latencyData.hasOwnProperty(attr)) {
+            continue;
+          }
+          category = this.latencyData[attr];
+
+          // category data
+          cdata = category[0].data;
+          if(cdata) {
+            for(i = 0; i < cdata.length; i++) {
+              data = cdata[i].data;
+              changeTimestamp(data);
             }
-        },
+          }
+          
+          // sum total data
+          if(_.isArray(category[1].data)) {
+            changeTimestamp(category[1].data);
+          }
+        }
+
+        return;
+
+        function changeTimestamp(data) {
+          var i, x, d;
+          var now = new Date();
+          var delta = now.getTimezoneOffset()*60*1000;
+          for(i = 0; i < data.length; i++) {
+            d = data[i];
+            // toggle time zone
+            if(useLocalTimezone) {
+              d.x = d.x - delta;
+            } else {
+              d.x = d.x + delta;
+            }
+          }
+        }
+      },
 
         fetchSuccess: function(model){
 			if(model.CID !== window.AMCGLOBALS.currentCID){
@@ -69,6 +140,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 				var latencyAvailable = false;
 				var latency = model.attributes.latency;
 
+        model.updateTimeZone();
 				if(model.attributes.node_status === "on"){
 					for(var attr in model.attributes.latency){
 						latencyAvailable = true;
@@ -151,10 +223,12 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
             function globalPollinghandler(event){
 				event.data.model.historyInitialized = false;
 				event.data.model.insertSliceHistory(event.data.model);
+
 			};
 
             $(document).on("view:Destroy", viewDestroy);
             $(document).off("pollerResume", globalPollinghandler).on("pollerResume", {model : that}, globalPollinghandler);
+
         },
 
         insertSliceHistory: function(model){
@@ -169,6 +243,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			function successHandler(response){
 				var updateCounts = response.latency_history.length;
 
+        model.updateTimeZone();
 				for(var i = 0; i < updateCounts ; i++){
 					var latencyAvailable = false;
 					var latency = response.latency_history[i];
@@ -219,8 +294,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 							break
 						}
 					}
-					if(currentLatencyTimestamp !== lastTimestamp)
+					if(currentLatencyTimestamp !== lastTimestamp) {
 						view.pushLatencyInfo(view,latencyHistory[i]);
+          }
 					lastTimestamp = currentLatencyTimestamp;
 				}
 			}
@@ -257,25 +333,21 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 
 			if(_.isEmpty(this.latencyDataDate)){
-				var currentTime = new Date();
+				var currentTime = this.getCurrentDate();
 				for(var attr in latency){
-					this.latencyDataDate[attr] = new Date(currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1) + "/" + currentTime.getDate() + " 00:00:00");
+					this.latencyDataDate[attr] = this.getCurrentDate();
 				}
 			}
 
             for(var attr in latency){
 
-                var timestamp = this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + 
-                  "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp;
-                if(Util.useLocalTimezone()) { 
-                  timestamp += ' UTC';
-                }
-                timestamp = new Date(timestamp);
+                var timestamp = this.getDateByTimestamp(latency[attr].timestamp_unix*1000);
 
 				if(this.lastTimestamp[attr] != null){
 					if((timestamp.getTime() - this.lastTimestamp[attr].getTime()) <= -10000){
-						this.latencyDataDate[attr].setDate( this.latencyDataDate[attr].getDate() + 1 );
-						timestamp = new Date(this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp);
+            // TODO dont know the purpose of these
+						// xxx this.latencyDataDate[attr].setDate( this.latencyDataDate[attr].getDate() + 1 );
+						// xxx timestamp = new Date(this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp);
 					}
 				}
 
@@ -317,11 +389,11 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					if(!_.isEmpty(this.latencyDataDate)){
 						currentTime = this.latencyDataDate[attr];
 					} else{
-						currentTime = new Date();
+						currentTime = this.getCurrentDate();
 					}
 					currentLatencyTimestamp = currentLatencyTimestamp || latency[attr].timestamp;
 					if(lastTimestamp == null){
-						lastTimestamp = new Date(model.latencyData[attr][0].data[0].data[model.latencyData[attr][0].data[0].data.length - 1].x);
+						lastTimestamp = this.getDateByTimestamp(model.latencyData[attr][0].data[0].data[model.latencyData[attr][0].data[0].data.length - 1].x);
 						var hours = (hours = lastTimestamp.getHours()) < 10 ? ("0" + hours) : hours;
 						var minutes = (minutes = lastTimestamp.getMinutes()) < 10 ? ("0" + minutes) : minutes;
 						var seconds = (seconds = lastTimestamp.getSeconds()) < 10 ? ("0" + seconds) : seconds;
@@ -358,7 +430,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					blank = false;
 					that.attrList = _.intersection(that.attrList, _.keys(latencyResponse[i]));
 					if (latencyData[i][attr]) {
-						firstTimestamp = latencyData[i][attr].timestamp;
+						firstTimestamp = latencyData[i][attr].timestamp_unix*1000;
 						firstTimestampIndex = i;
 						break;
 					}
@@ -368,8 +440,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			if(firstTimestampIndex == -1)
 				return [];
 
-			var currentTime = new Date();
-            var timestamp = +(new Date(currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1) + "/" + currentTime.getDate() + " " + firstTimestamp)).getTime();
+            var timestamp = firstTimestamp;
 
 			var lastTimestamp = firstTimestamp;
 
@@ -377,14 +448,14 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 				var blank = true;
 				for(var attr in latencyData[i]){
 					blank = false;
-					lastTimestamp = latencyData[i][attr].timestamp;
+					lastTimestamp = latencyData[i][attr].timestamp_unix*1000;
 					break;
 				}
 
 				if(blank){
-					newTimestamp = (new Date(currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1) + "/" + currentTime.getDate() + " " + lastTimestamp));
+					newTimestamp = that.getDateByTimestamp(lastTimestamp);
 					newTimestamp.setSeconds(newTimestamp.getSeconds() + 10);
-					lastTimestamp = newTimestamp.getHours() + ":" + newTimestamp.getMinutes() + ":" + newTimestamp.getSeconds();
+          lastTimestamp = newTimestamp.getTime();
 					latencyData[i] = that.getNullInfo(new Date(newTimestamp.getTime() + 10000));
 				}
 			}
@@ -392,11 +463,11 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			lastTimestamp = firstTimestamp;
 			var missingPoints = Math.max(minDataPoints - latencyData.length, 0);
 			var runIndex = 0 - missingPoints;
-			newTimestamp = (new Date(currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1) + "/" + currentTime.getDate() + " " + lastTimestamp));
+			newTimestamp = that.getDateByTimestamp(lastTimestamp);
 
 			for(var i = Math.max(firstTimestampIndex, 0) - 1; i >= runIndex; i--){
 				newTimestamp.setSeconds(newTimestamp.getSeconds() - 10);
-				lastTimestamp = newTimestamp.getHours() + ":" + newTimestamp.getMinutes() + ":" + newTimestamp.getSeconds();
+        lastTimestamp = newTimestamp;
 				if(i >= 0){
 					latencyData[i] = that.getNullInfo(new Date(newTimestamp.getTime()));
 				} else{

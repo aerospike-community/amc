@@ -24,15 +24,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
         },
 		
       onTimeZoneChanged: function() {
-        var that = this;
-        this.fetch({
-          success: function(model, response) {
-            that.fetchSuccess(model);
-          },
-          error: function(model, response) {
-            that.fetchError(model);
-          }
-        });
+        this.fetchSuccess(this);
       },
 		
         fetchSuccess: function(response){

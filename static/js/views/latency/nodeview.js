@@ -285,7 +285,7 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
 			
 			try{
 				if(window.AMCGLOBALS.activePageModel.mainChart.secondarySource.id.indexOf(model.address.replace(/\./g,"_").replace(/\:/g,"_")) !== -1){
-					renderOnDemand();
+					renderOnDemand.call(this);
 				} else{
 					Util.checkVisibilityAndCall(this, renderOnDemand);
 				}

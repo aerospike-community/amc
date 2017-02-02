@@ -2823,7 +2823,11 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                 Util.setTimezoneLabel();
 
                 _.each(Util.timezoneChangeCallbacks, function(callback) {
-                  callback();
+                  try {
+                    callback();
+                  } catch(e) {
+                    console.log(e);
+                  }
                 });
 			});
 

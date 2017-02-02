@@ -3,27 +3,75 @@
 *THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE. THE COPYRIGHT NOTICE
 *ABOVE DOES NOT EVIDENCE ANY ACTUAL OR INTENDED PUBLICATION.
 ******************************************************************************/
-define(["jquery", "underscore", "backbone", "helper/util", "models/latency/nodemodel", "config/app-config", "config/view-config", "helper/job-table"], function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable){
+define(["jquery", "underscore", "backbone", "helper/util", "models/latency/nodemodel", 
+        "config/app-config", "config/view-config", "helper/job-table", "helper/AjaxManager"], 
+function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable, AjaxManager){
     var NodeCollection = Backbone.Collection.extend({
         model: NodeModel,
         initVariables :function(){
             this.clusterSizeAlertShown = false;
             this.clusterIntegrityAlertShown = false;
             this.parent = {};
+            this.latencyHistory = {}; // map of node address to latency history
+            this.latencyFetchError = false;
         },
         initialize : function(){
             try{
                 this.bind('add', this.onModelAdded, this);
                 this.bind('remove', this.onModelRemoved, this);
                 this.initVariables();
-                //JobTable.initNodeGrid(AppConfig.node.nodeTableDiv, ViewConfig.nodePieConfig, this.models);
+                this._fetchLatencyHistory();
             }catch(e){
-                console.info(e.toString());
+                console.log(e);
             }
         },
+
+        _fetchLatencyHistory: function() {
+          var that = this;
+          var url = AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/nodes/';
+          url += window.AMCGLOBALS.persistent.nodeList.join(',');
+          url += '/latency_history';
+
+          AjaxManager.sendRequest(url, {}, 
+            function success(history) {
+              that.latencyHistory = history;
+              that._initNodes();
+            }, function error() {
+              that.latencyFetchError = true;
+              that._initNodes();
+            }
+          );
+        },
+
+        _initNodes: function() {
+          var that = this;
+          this.each(function(model) {
+            that._initNode(model);
+          });
+        },
+
+        // initialize node based on fetch status
+        _initNode: function(model) {
+          var address = model.address;
+          var history = this.latencyHistory[address];
+          try {
+            if(this.latencyFetchError) {
+              model.initLatencyHistoryOnError();
+            } else if(history) {
+              model.initLatencyHistory(history);
+            } else {
+              console.log('INFO: History not yet fetched. Not initializing node ' + address);
+            }
+          } catch(e) {
+            console.log(e);
+          }
+        },
+
         addModel: function(modelID, address, clusterID, totalNodes){
             var node = new NodeModel({model_id:modelID, address: address, cluster_id:clusterID, total_nodes:totalNodes});
+            var history = this.latencyHistory[address];
             this.add(node);
+            this._initNode(node);
         },
         onModelAdded: function(model, collection, options){
             this.parent.nodes.push(model.address);
