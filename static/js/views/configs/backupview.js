@@ -10,20 +10,19 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             var that = this;
             this.bindEvents();
             this.initAutoComplete();
+        },
 
-            this.model.on('change:renderStatus', function(model) {
-                var status = model.get('renderStatus');
-                if (status) {
-                    if (status === 'success') {
-                        $("#backupStatusMessage").text("Backup Successfully Completed").removeClass("status error").addClass("success").css("display", "block");
-                    } else if (status === 'Backup initiated') {
-                        $("#backupStatusMessage").text("Backup initiated").removeClass("success error").addClass("status").css("display", "block");
-                    } else {
-                        $("#backupStatusMessage").text("Backup Failed : " + status).removeClass("status success").addClass("error").css("display", "block");
-                    }
-                }
-
-            });
+        setRenderStatus(status) {
+          this.model.set('renderStatus', status);
+          if (status) {
+              if (status === 'success') {
+                  $("#backupStatusMessage").text("Backup Successfully Completed").removeClass("status error").addClass("success").css("display", "block");
+              } else if (status === 'Backup initiated') {
+                  $("#backupStatusMessage").text("Backup initiated").removeClass("success error").addClass("status").css("display", "block");
+              } else {
+                  $("#backupStatusMessage").text("Backup Failed : " + status).removeClass("status success").addClass("error").css("display", "block");
+              }
+          }
         },
 
         updateProgress: function(container, status, progress) {
@@ -190,17 +189,17 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
                 if (data.status === 'In Progress') {
                     that.model.backupPoller.start();
                     that.model.currentBackupId = data.backup_id;
-                    that.model.set('renderStatus', 'Backup initiated');
+                    that.setRenderStatus('Backup initiated');
                 } else if (data.status === 'Failure') {
-                    that.model.set('renderStatus', data.error);
+                    that.setRenderStatus(data.error);
                 } else {
-                    that.model.set('renderStatus', "unknown error");
+                    that.setRenderStatus('unknown error');
                 }
             }
             function failCallback(response){
             	  that.model.waitForInitiationResponse = false;
                   inputBoxs.removeAttr("disabled");
-                  that.model.set('renderStatus', "Network error");
+                  that.setRenderStatus('Network error');
             }
             AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + AppConfig.backup.initiationUrl,{type:AjaxManager.POST, data : formData},
             	successCallback, failCallback);
