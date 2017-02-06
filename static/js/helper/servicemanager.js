@@ -311,7 +311,8 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
       },
 
       // elements visible only in the enterprise edition
-      _enterpriseOnlyElements_: ["#UserDropdownButton", "#AlertDropdownButton", "#amcSettingsButton", "#activityLogger"],
+      _enterpriseOnlyElements_: ["#AlertDropdownButton", "#amcSettingsButton", "#activityLogger", '#clusterUser',
+                                 "#renameClusterBtn", "#removeClusterBtn", "#changeClusterButton"],
 
 	    _headerTabElements_ : ["ul.tab-list li.tab a#dasboardTabLink",
 	                     "ul.tab-list li.tab a#statTabLink",

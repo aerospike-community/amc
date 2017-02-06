@@ -1300,6 +1300,9 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
             });
         },
         updatePoller: function(poller, polOptionsStr){
+            if(!poller) {
+              return;
+            }
             var updateInterval = AppConfig.updateInterval[polOptionsStr];
             poller.set({continueOnError : true, delay: updateInterval}).start();
         },
@@ -2051,11 +2054,14 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 
             if(window.AMCGLOBALS.activePageModel !== null && (window.AMCGLOBALS.activePage !== page || !window.AMCGLOBALS.clusterInitiated)){
                 Poller.reset();
-                var poller = Poller.get(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']));
-                if(!poller.active()){
-                    poller.off("success").on('success', window.AMCGLOBALS.persistent.models.alertModel.fetchSuccess);
-                    poller.off("error").on('error', window.AMCGLOBALS.persistent.models.alertModel.fetchError);
-                    poller.start();
+                // alerts only for enterprise
+                if(Util.isEnterpriseEdition()) {
+                  var poller = Poller.get(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']));
+                  if(!poller.active()){
+                      poller.off("success").on('success', window.AMCGLOBALS.persistent.models.alertModel.fetchSuccess);
+                      poller.off("error").on('error', window.AMCGLOBALS.persistent.models.alertModel.fetchError);
+                      poller.start();
+                  }
                 }
                 window.$.event.trigger("view:Destroy",window.AMCGLOBALS.activePage);
                 delete window.AMCGLOBALS.activePageModel;

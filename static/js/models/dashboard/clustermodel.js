@@ -424,6 +424,10 @@ define(["underscore", "backbone", "helper/util", "views/dashboard/pieview", "mod
 
         initXdrDetails: function() {
 
+            if(Util.isCommunityEdition()) {
+              return;
+            }
+
             if (!this.xdrCollection) {
                 this.xdrCollection = new XdrCollection({
                     poll: true

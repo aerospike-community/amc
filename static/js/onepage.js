@@ -504,7 +504,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
         }
 
         that.initAlerts = function(){
-            if(typeof window.AMCGLOBALS.persistent.models.alertModel === 'undefined'){
+            if(Util.isEnterpriseEdition() && typeof window.AMCGLOBALS.persistent.models.alertModel === 'undefined'){
                 window.AMCGLOBALS.persistent.models.alertModel = new AlertModel({"cluster_id" : window.AMCGLOBALS.persistent.clusterID});
                 var alertView = new AlertView({el:AppConfig.alerts.container, model : window.AMCGLOBALS.persistent.models.alertModel});
                 (Util.initPoller(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']))).start();
