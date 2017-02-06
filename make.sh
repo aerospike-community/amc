@@ -8,6 +8,10 @@ cd $GOPATH/src/github.com/citrusleaf/amc
 edition=$1
 environ=$2
 platform=${3:-linux}
+sysname=$(uname | tr '[:upper:]' '[:lower:]')
+
+echo "platform is ${platform}"
+echo "sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
 version=`git describe --tags $(git rev-list --tags --max-count=1)`
@@ -52,6 +56,7 @@ case $platform in
 	'dawin')
 		;;
 	*)
-  		exit(1)
+		echo "unrecognized platform ${platform}"
+		exit 1
 		;;
 esac
