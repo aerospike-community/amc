@@ -14,11 +14,12 @@ environment:
 build:
   - name: default
     script:
-      - echo $PWD
-      - $REPO/make.sh enterprise prod linux
-      - $REPO/make.sh community prod linux
-      - $REPO/make.sh enterprise prod darwin
-      - $REPO/make.sh community prod darwin
+      - ls -la
+      - cd src/$REPO
+      - ./make.sh enterprise prod linux
+      - ./make.sh community prod linux
+      - ./make.sh enterprise prod darwin
+      - ./make.sh community prod darwin
     artifact:
       - aerospike-amc-*.deb
       - aerospike-amc-*.rpm
