@@ -12,7 +12,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             this.initAutoComplete();
         },
 
-        setRenderStatus(status) {
+        setRenderStatus: function(status) {
           this.model.set('renderStatus', status);
           if (status) {
               if (status === 'success') {
@@ -93,7 +93,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
 
             $('#backupNamespaceName').off("blur").on("blur", function(event) {
                 if (_.indexOf(window.AMCGLOBALS.pageSpecific.namespaceList, $(this).val()) != -1) {
-                	
+
                 	AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + AppConfig.sets.resourceUrl + $('#backupNamespaceName').val() + "/sets",{},
                 		function (response){
                 			 that.model.availableSets = [];
@@ -164,12 +164,12 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
                 $(this).autocomplete("search", "");
             });
         },
-        
-      
+
+
 
         backupCluster: function() {
             var that = this;
-           
+
             var formData = this.validateCluster();
             if(!formData){
             	return false;
@@ -203,14 +203,14 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             }
             AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + AppConfig.backup.initiationUrl,{type:AjaxManager.POST, data : formData},
             	successCallback, failCallback);
-            
-           
+
+
         },
-        
+
         //This method validate the input field, return false if data is invalid or return form data to post
         validateCluster : function(){
         	var that = this;
-        	
+
         	var disabledItems = $("#clusterBackupContainer input:disabled");
             var inputBoxs = $("#clusterBackupContainer input").not(disabledItems);
             inputBoxs.add("#clusterBackupContainer button");
@@ -275,7 +275,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
                 backupStatusMessageEL.removeClass("status").addClass("error").css("display", "block");
                 return false;
             }
-            
+
             return formdata;
         },
 
