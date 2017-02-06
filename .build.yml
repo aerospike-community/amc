@@ -9,24 +9,15 @@ environment:
   GOPATH: /work/source
   BIN: $GOPATH/bin
   REPO: github.com/citrusleaf/amc
-  CGO_ENABLED: 0
+  CGO_ENABLED: 1
 
 build:
   - name: default
     script:
-      - VERSION=$(cd $GOPATH/src/$REPO && git describe --always --tags)
-      - apt-get update
-      - apt-get install -y build-essential
-      - apt-get install -y curl
-      - curl -sL https://deb.nodesource.com/setup | bash -
-      - apt-get install -y nodejs
-      - npm install npm@latest -g
-      - npm install grunt -g
-      - apt-get install -y ruby ruby-dev rubygems gcc make
-      - gem install --no-ri --no-rdoc fpm
-      - apt-get install -y rpm
       - make.sh enterprise prod linux
       - make.sh community prod linux
+      - make.sh enterprise prod darwin
+      - make.sh community prod darwin
     artifact:
       - aerospike-amc-*.deb
       - aerospike-amc-*.rpm

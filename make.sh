@@ -33,15 +33,25 @@ rm -rf deployment/release/amc/opt/amc/mailer
 mkdir -p deployment/release/amc/opt/amc/mailer/templates
 cp -R mailer/templates/ deployment/release/amc/opt/amc/mailer/
 
-rm -f *.rpm
-rm -f *.deb
 
-rm -f deployment/release/amc/etc/init.d/*
-cp -f deployment/common/amc.rpm deployment/release/amc/etc/init.d/amc
-chmod +x deployment/release/amc/etc/init.d/amc
-fpm -s dir -t rpm -n "aerospike-amc-$edition" -v $version -d 'sqlite' -C deployment/release/amc .
+case $platform in
+	'linux')
+		rm -f *.rpm
+		rm -f *.deb
 
-rm -f deployment/release/amc/etc/init.d/*
-cp -f deployment/common/amc.deb deployment/release/amc/etc/init.d/amc
-chmod +x deployment/release/amc/etc/init.d/amc
-fpm -s dir -t deb -n "aerospike-amc-$edition" -v $version -d 'sqlite3' -C deployment/release/amc .
+		rm -f deployment/release/amc/etc/init.d/*
+		cp -f deployment/common/amc.rpm deployment/release/amc/etc/init.d/amc
+		chmod +x deployment/release/amc/etc/init.d/amc
+		fpm -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C deployment/release/amc .
+
+		rm -f deployment/release/amc/etc/init.d/*
+		cp -f deployment/common/amc.deb deployment/release/amc/etc/init.d/amc
+		chmod +x deployment/release/amc/etc/init.d/amc
+		fpm -s dir -t deb -n "aerospike-amc-$edition" -v $version -C deployment/release/amc .
+		;;
+	'dawin')
+		;;
+	*)
+  		exit(1)
+		;;
+esac
