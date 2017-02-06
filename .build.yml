@@ -18,8 +18,8 @@ build:
       - cd src/$REPO
       - ./make.sh enterprise prod linux
       - ./make.sh community prod linux
-      - ./make.sh enterprise prod darwin
-      - ./make.sh community prod darwin
+      # - ./make.sh enterprise prod darwin
+      # - ./make.sh community prod darwin
     artifact:
       - aerospike-amc-*.deb
       - aerospike-amc-*.rpm
