@@ -29,6 +29,9 @@ define(["underscore", "backbone", "helper/util", "collections/statistics/namespa
             if( Util.setGlobalClusterInfoInModel("clusters", this) ){
                 this.fetchSuccess(this);
             }
+            if(Util.isEnterpriseEdition()) {
+              $('#xdrSelectContainer').show();
+            }
         }, 
         initVariables: function(){
             this.statTableInitialized = false;
