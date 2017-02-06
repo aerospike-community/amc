@@ -81,10 +81,94 @@
 			"revisionTime": "2016-12-26T11:48:27Z"
 		},
 		{
+			"checksumSHA1": "ATs3+0ulN1kwSFm7YcI3SGj5DLc=",
+			"path": "github.com/cznic/b",
+			"revision": "bcff30a622dbdcb425aba904792de1df606dab7c",
+			"revisionTime": "2016-07-16T09:19:50Z"
+		},
+		{
+			"checksumSHA1": "QCNxcEDk2MRVIhL2dDsHNWXv3Fo=",
+			"path": "github.com/cznic/fileutil",
+			"revision": "e618435e3202890725c12ccff676e9e3b2592c71",
+			"revisionTime": "2016-12-22T18:55:26Z"
+		},
+		{
+			"checksumSHA1": "/839m5piLe3TonKs6VGzZ668Rw0=",
+			"path": "github.com/cznic/internal/buffer",
+			"revision": "e5e1c3e9165d0a72507c2bbb0ffac1c02b8d3f7c",
+			"revisionTime": "2017-01-24T16:41:29Z"
+		},
+		{
+			"checksumSHA1": "pMFn6UAmeiQMB62qiod1JRJWs2Y=",
+			"path": "github.com/cznic/internal/file",
+			"revision": "e5e1c3e9165d0a72507c2bbb0ffac1c02b8d3f7c",
+			"revisionTime": "2017-01-24T16:41:29Z"
+		},
+		{
+			"checksumSHA1": "sIFhykv6o1TIyaFHWp8uDio8sTc=",
+			"path": "github.com/cznic/internal/slice",
+			"revision": "e5e1c3e9165d0a72507c2bbb0ffac1c02b8d3f7c",
+			"revisionTime": "2017-01-24T16:41:29Z"
+		},
+		{
+			"checksumSHA1": "Uiy2xCrAwApimIZHuUoSoN44fx8=",
+			"path": "github.com/cznic/lldb",
+			"revision": "bea8611dd5c407f3c5eab9f9c68e887a27dc6f0e",
+			"revisionTime": "2016-11-02T12:47:59Z"
+		},
+		{
+			"checksumSHA1": "WQK3+A7rnSSOuTINYvMedzR84pY=",
+			"path": "github.com/cznic/mathutil",
+			"revision": "4609a45a9e61188d0d69a5d8ad42600c3df35002",
+			"revisionTime": "2016-10-12T10:45:33Z"
+		},
+		{
+			"checksumSHA1": "fbIkQ7H39YdvDGOl0abIeSJPLYU=",
+			"path": "github.com/cznic/ql",
+			"revision": "77151e6627d3f052ab9c993a16d95942b4922ddc",
+			"revisionTime": "2017-01-28T20:55:20Z"
+		},
+		{
+			"checksumSHA1": "/zeOOjyZpzAOAs7OhWTycaNfZsg=",
+			"path": "github.com/cznic/ql/driver",
+			"revision": "77151e6627d3f052ab9c993a16d95942b4922ddc",
+			"revisionTime": "2017-01-28T20:55:20Z"
+		},
+		{
+			"checksumSHA1": "Lzy3qrO6lA6AseE2PIzFRb7bTno=",
+			"path": "github.com/cznic/ql/vendored/github.com/camlistore/go4/lock",
+			"revision": "77151e6627d3f052ab9c993a16d95942b4922ddc",
+			"revisionTime": "2017-01-28T20:55:20Z"
+		},
+		{
+			"checksumSHA1": "z5JpH57/did5gbowLKrvV0V5tWo=",
+			"path": "github.com/cznic/sortutil",
+			"revision": "4c7342852e65c2088c981288f2c5610d10b9f7f4",
+			"revisionTime": "2015-06-17T08:33:42Z"
+		},
+		{
+			"checksumSHA1": "mfA28eyLtohqeB/1KJDa+3o5FXg=",
+			"path": "github.com/cznic/strutil",
+			"revision": "43a89592ed56c227c7fdb1fcaf7d1d08be02ec54",
+			"revisionTime": "2017-01-31T12:30:52Z"
+		},
+		{
+			"checksumSHA1": "cBDjw6mDDHwvI8ji+leQmrpm5qw=",
+			"path": "github.com/cznic/zappy",
+			"revision": "2533cb5b45cc6c07421468ce262899ddc9d53fb7",
+			"revisionTime": "2016-07-23T13:35:15Z"
+		},
+		{
 			"checksumSHA1": "2Fy1Y6Z3lRRX1891WF/+HT4XS2I=",
 			"path": "github.com/dgrijalva/jwt-go",
 			"revision": "9ed569b5d1ac936e6494082958d63a6aa4fff99a",
 			"revisionTime": "2016-11-01T19:39:35Z"
+		},
+		{
+			"checksumSHA1": "zYnPsNAVm1/ViwCkN++dX2JQhBo=",
+			"path": "github.com/edsrzf/mmap-go",
+			"revision": "935e0e8a636ca4ba70b713f3e38a19e1b77739e8",
+			"revisionTime": "2016-05-12T03:30:02Z"
 		},
 		{
 			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
