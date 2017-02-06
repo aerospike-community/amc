@@ -44,8 +44,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
             // set of all nodes that are tls connections
             Util.tls = {};
 
-            // remove loading message
-            $('#cakeMessage').remove();
         },
 
       setTLS: function(address, isTLS) {

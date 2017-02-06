@@ -116,6 +116,8 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
         /****Setting up global services****/
 
+        // remove loading message
+        $('#appLoader').remove();
         Util.initAMC();
         Util.initGlobalEvents();
 
