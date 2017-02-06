@@ -13,7 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/cznic/ql/driver"
 )
 
 var AMCVersion string
@@ -241,60 +241,71 @@ func InitConfig(configFile, configDir string, config *Config) {
 
 func openDB(filepath string) {
 	var schema = []string{`
-		CREATE TABLE alerts (
-			Id          integer,
-			Type        integer,
-			ClusterId   text,
-			NodeAddress text,
-			Desc        text,
-			Created     datetime,
-			LastOccured datetime,
-			Resolved    datetime,
-			Recurrence  integer,
-			Status      text
+		CREATE TABLE IF NOT EXISTS alerts (
+			Id          int64,
+			Type        int64,
+			ClusterId   string,
+			NodeAddress string,
+			Namespace   string,
+			Description string,
+			Created     time,
+			LastOccured time,
+			Resolved    time,
+			Recurrence  int64,
+			Status      string
 		);`,
-		`CREATE TABLE backups (
-			Type      text,
-			Id        text primary key,
-			ClusterId text,
-			Namespace          text,
-			DestinationAddress text,
-			Username           text,
-			Password           text,
-			DestinationPath    text,
-			Sets               text,
-			MetadataOnly       boolean,
-			ProgressFile       text,
-			TerminateOnClusterChange boolean,
-			ScanPriority       integer,
-			Created            datetime,
-			Finished           datetime,
-			Status             text,
+		`CREATE INDEX IF NOT EXISTS idxAlertsNodeAddress ON alerts (NodeAddress);`,
+		`CREATE TABLE IF NOT EXISTS backups (
+			Type      string,
+			Id        string,
+			ClusterId string,
+			Namespace          string,
+			DestinationAddress string,
+			Username           string,
+			Password           string,
+			DestinationPath    string,
+			Sets               string,
+			MetadataOnly       bool,
+			ProgressFile       string,
+			TerminateOnClusterChange bool,
+			ScanPriority       int64,
+			Created            time,
+			Finished           time,
+			Status             string,
 
-			Progress integer,
-			Error	 text
+			Progress int64,
+			Error	 string
 		);`,
-		`CREATE TABLE migrations (
-			Version      integer
+		`CREATE INDEX IF NOT EXISTS idxBackupsId ON backups (Id);`,
+		`CREATE TABLE IF NOT EXISTS migrations (
+			Version      int64
 		);`,
-		`ALTER TABLE alerts ADD COLUMN Namespace test;`,
 	}
 
 	log.Infof("Database path is: %s", filepath)
 
 	var err error
-	db, err = sql.Open("sqlite3", "file:"+filepath+"?cache=shared&mode=rwc")
+	db, err = sql.Open("ql", filepath)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %s", err.Error())
 	}
 
 	// exec the schema or fail; multi-statement Exec behavior varies between
-	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
 	for _, ddl := range schema {
 		// ignore error
-		_, err := db.Exec(ddl)
+
+		tx, err := db.Begin()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = tx.Exec(ddl)
 		if err != nil {
 			log.Warn(err)
+		}
+
+		if err = tx.Commit(); err != nil {
+			log.Fatal(err)
 		}
 	}
 }

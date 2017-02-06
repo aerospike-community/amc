@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"net"
 	"runtime/debug"
 	"strconv"
@@ -24,9 +23,6 @@ type DebugStatus struct {
 	Initiator string
 }
 
-// sqlite3 database
-var db *sql.DB
-
 type ObserverT struct {
 	sessions map[string][]*Cluster
 	config   *common.Config
@@ -40,18 +36,7 @@ type ObserverT struct {
 }
 
 func New(config *common.Config) *ObserverT {
-
-	// try to connect to the database
-	if db != nil {
-		db.Close()
-	}
-
 	var err error
-	if db, err = sql.Open("sqlite3", config.AMC.Database); err != nil {
-		log.Errorln("Cannot connect to the database: %s", err.Error())
-	}
-	db.SetMaxOpenConns(10)
-
 	o := &ObserverT{
 		sessions: map[string][]*Cluster{},
 		clusters: []*Cluster{},

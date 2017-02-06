@@ -13,7 +13,7 @@ import (
 	// "github.com/jmoiron/sqlx"
 )
 
-const _alertFields = "Id, Type, ClusterId, NodeAddress, Namespace, Desc, Created, LastOccured, Resolved, Recurrence, Status"
+const _alertFields = "Id, Type, ClusterId, NodeAddress, Namespace, Description, Created, LastOccured, Resolved, Recurrence, Status"
 
 type AlertType int
 
@@ -50,11 +50,11 @@ type Alert struct {
 	Created     time.Time
 	LastOccured time.Time
 	Resolved    NullTime
-	Recurrence  int
+	Recurrence  int64
 	Status      AlertStatus
 }
 
-var _alertGlobalMutex deadlock.RWMutex
+var _dbGlobalMutex deadlock.RWMutex
 
 type AlertBucket struct {
 	alertQueue []*Alert
@@ -74,15 +74,15 @@ func (a AlertsById) Len() int           { return len(a) }
 func (a AlertsById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a AlertsById) Less(i, j int) bool { return a[i].Id < a[j].Id }
 
-func NewAlertBucket(db *sql.DB, size int) *AlertBucket {
+func NewAlertBucket(size int) *AlertBucket {
 	return &AlertBucket{
 		alertQueue: make([]*Alert, size),
 	}
 }
 
 func (ad *AlertBucket) DrainNewAlerts() []*Alert {
-	_alertGlobalMutex.Lock()
-	defer _alertGlobalMutex.Unlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 
 	res := make([]*Alert, len(ad.newAlerts))
 	if len(ad.newAlerts) > 0 {
@@ -94,11 +94,11 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 }
 
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
-	_alertGlobalMutex.RLock()
-	defer _alertGlobalMutex.RUnlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 
 	latest := Alert{}
-	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ? AND NodeAddress = ? AND Resolved IS NULL AND (Namespace IS NULL OR Namespace = ?) ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress, alert.Namespace.String)
+	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ?1 AND NodeAddress = ?2 AND Resolved IS NULL AND (Namespace IS NULL OR Namespace = ?3) ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress, alert.Namespace.String)
 	if err := latest.fromSQLRow(row); err != nil {
 		if err == sql.ErrNoRows {
 			return nil
@@ -130,16 +130,16 @@ func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 
 	ad.saveAlert(alert)
 
-	_alertGlobalMutex.Lock()
-	defer _alertGlobalMutex.Unlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 	ad.newAlerts = append(ad.newAlerts, alert)
 
 	return false
 }
 
 func (ad *AlertBucket) saveAlert(alert *Alert) {
-	_alertGlobalMutex.Lock()
-	defer _alertGlobalMutex.Unlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 
 	if alert.Created.IsZero() {
 		alert.Created = time.Now()
@@ -160,52 +160,87 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 	ad.alertQueue[ad.pos%len(ad.alertQueue)] = alert
 	ad.pos++
 
-	if _, err := db.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Namespace, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if _, err := tx.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Namespace, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Error(err)
 	}
 }
 
 func (ad *AlertBucket) updateRecurrence(alert *Alert) {
-	_alertGlobalMutex.Lock()
-	defer _alertGlobalMutex.Unlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 
 	alert.LastOccured = time.Now()
 	alert.Recurrence++
-	if _, err := db.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ? WHERE Id = ?", alert.LastOccured, alert.Id); err != nil {
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if _, err := tx.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ?1 WHERE Id = ?2", alert.LastOccured, alert.Id); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Error(err)
 	}
 }
 
 func (ad *AlertBucket) ResolveAlert(alert *Alert) {
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
+
 	// Mark the old alert resolved
 	alert.Resolved.Set(time.Now())
 
 	// Mark the old alert resolved in the DB
 	// Resolve all older alerts
 	log.Warn("Marking the issue as resolved...")
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
 	if alert.Namespace.String == "" {
-		if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ?", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
-			log.Error(err)
+		if _, err := tx.Exec("UPDATE alerts SET Resolved=?1 WHERE Resolved IS NULL and Type = ?2 AND NodeAddress = ?3", alert.Resolved, alert.Type, alert.NodeAddress); err != nil {
+			log.Error(err.Error())
 		}
 	} else {
-		if _, err := db.Exec("UPDATE alerts SET Resolved=? WHERE Resolved IS NULL and Type = ? AND NodeAddress = ? AND Namespace = ?", alert.Resolved, alert.Type, alert.NodeAddress, alert.Namespace.String); err != nil {
-			log.Error(err)
+		if _, err := tx.Exec("UPDATE alerts SET Resolved=?1 WHERE Resolved IS NULL and Type = ?2 AND NodeAddress = ?3 AND Namespace = ?4", alert.Resolved, alert.Type, alert.NodeAddress, alert.Namespace.String); err != nil {
+			log.Error(err.Error())
 		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Error(err.Error())
 	}
 }
 
 func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
-	_alertGlobalMutex.RLock()
-	defer _alertGlobalMutex.RUnlock()
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
 
 	res := []*Alert{}
 	var rows *sql.Rows
 	var err error
 
 	if id == 0 {
-		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where NodeAddress = ? ORDER BY Id DESC LIMIT 20", _alertFields), nodeAddress)
+		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where NodeAddress = ?1 ORDER BY Id DESC LIMIT 20", _alertFields), nodeAddress)
 	} else {
-		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ? AND NodeAddress = ? ORDER BY Id DESC LIMIT 1000", _alertFields), id, nodeAddress)
+		rows, err = db.Query(fmt.Sprintf("SELECT %s FROM alerts where Id > ?1 AND NodeAddress = ?2 ORDER BY Id DESC LIMIT 1000", _alertFields), id, nodeAddress)
 	}
 
 	if err != nil {

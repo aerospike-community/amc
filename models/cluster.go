@@ -79,7 +79,7 @@ func newCluster(observer *ObserverT, client *as.Client, alias *string, user, pas
 		uuid:            uuid.NewV4().String(),
 		seeds:           seeds,
 		_datacenterInfo: *common.NewSyncStats(nil),
-		alerts:          common.NewAlertBucket(db, 50),
+		alerts:          common.NewAlertBucket(50),
 	}
 
 	if user != "" {
