@@ -14,6 +14,7 @@ environment:
 build:
   - name: default
     script:
+      - echo $PWD
       - $REPO/make.sh enterprise prod linux
       - $REPO/make.sh community prod linux
       - $REPO/make.sh enterprise prod darwin
