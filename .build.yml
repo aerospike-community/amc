@@ -17,7 +17,7 @@ build:
       - ls -la
       - cd src/$REPO
       - ./make.sh enterprise prod linux
-      # - ./make.sh community prod linux
+      - ./make.sh community prod linux
       # - ./make.sh enterprise prod darwin
       # - ./make.sh community prod darwin
     artifact:
