@@ -9,7 +9,7 @@ environment:
   GOPATH: /work/source
   BIN: $GOPATH/bin
   REPO: github.com/citrusleaf/amc
-  CGO_ENABLED: 1
+  CGO_ENABLED: 0
 
 build:
   - name: default
