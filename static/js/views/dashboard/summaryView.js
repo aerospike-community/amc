@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "helper/util", "d3"], function($, _, Backbone, Util, D3){
+define(["jquery", "underscore", "backbone", "helper/util", "d3", "helper/modal"], function($, _, Backbone, Util, D3, modal){
     var summaryView = Backbone.View.extend({
         initialize: function(){
             this.el = this.options.el;
@@ -54,15 +54,40 @@ define(["jquery", "underscore", "backbone", "helper/util", "d3"], function($, _,
         updateBuildSummary : function(data){
         	 var that = this;
  			var buildKeys = _.keys(data.buildVersion.version_list);
- 			var buildVersion = "Build : &nbsp;" + data.buildVersion["latest_build_no"];
- 			
- 			if(buildKeys.length == 2){
- 				buildVersion = "Builds : &nbsp;" + buildKeys[0] + " [" + data.buildVersion.version_list[buildKeys[0]].length + "], " 
- 								+ buildKeys[1] + " [" + data.buildVersion.version_list[buildKeys[1]].length + "]";
+      var showMore = buildKeys.length > 1;
+ 			var buildVersion = "Build : &nbsp;";
+      var allBuildVersions = "Build: &nbsp";
+      if(buildKeys.length === 1) {
+        buildVersion += data.buildVersion["latest_build_no"];
+      } else {
+        _.each(buildKeys, function(key, i) {
+          var text = key + " [" + data.buildVersion.version_list[key[0]].length + "]";
+
+          if(i === 0) {
+            buildVersion += text;
+          }
+
+          allBuildVersions += text;
+          if(i !== buildKeys.length-1) {
+            allBuildVersions += ", ";
+          } else {
+            allBuildVersions += " ";
+          }
+        });
  			}		
  			
-             var html = "<span class='version_major'>"+ buildVersion + "<span class='version_warn'></span></span>";    
+             var html = "<span class='version_major'>"+ buildVersion;
+             if(showMore) {
+               html += '<a id="showAllBuilds" style="padding-left: 5px; cursor: pointer; color: #337ab7;"> Show All </a>';
+             }
+             html += "<span class='version_warn'></span></span>";    
              $("#cluster_setup_overview .build_setup").html(html);
+
+             if(showMore) {
+               $('#showAllBuilds').click(function() {
+                 modal.messageModal('Builds', allBuildVersions);
+               });
+             }
 
              if(typeof data.buildVersion !== 'undefined' && data.buildVersion != null && 
                          typeof data.buildVersion.version_list != 'undefined' && data.buildVersion.version_list != null){

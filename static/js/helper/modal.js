@@ -58,7 +58,7 @@ define(['jquery', 'underscore', 'models/common/PopupModel'], function($, _, Popu
         content: '<div style="padding: 15px; font-size: 16px; margin-bottom: 20px">' + content + '</div>',
         modalClass: 'user-popup',
         submitButtonValue: 'OK',
-        title: title,
+        title: '<span style="padding-left: 10px">' + title + '</span>',
       });
       var DOM = _.template($("#ModalTemplate").text(), popupModel.toJSON());
       var modalSettings = {width: '600px', closeOnEscape: true, dialogClass: 'no-dialog-title'};
