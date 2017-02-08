@@ -61,7 +61,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "d3", "helper/modal"]
         buildVersion += data.buildVersion["latest_build_no"];
       } else {
         _.each(buildKeys, function(key, i) {
-          var text = key + " [" + data.buildVersion.version_list[key[0]].length + "]";
+          var text = key + " [" + data.buildVersion.version_list[key].length + "]";
 
           if(i === 0) {
             buildVersion += text;
