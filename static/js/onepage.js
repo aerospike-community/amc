@@ -509,8 +509,13 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             if(Util.isEnterpriseEdition() && typeof window.AMCGLOBALS.persistent.models.alertModel === 'undefined'){
                 window.AMCGLOBALS.persistent.models.alertModel = new AlertModel({"cluster_id" : window.AMCGLOBALS.persistent.clusterID});
                 var alertView = new AlertView({el:AppConfig.alerts.container, model : window.AMCGLOBALS.persistent.models.alertModel});
-                (Util.initPoller(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']))).start();
+
+                var roleList = window.AMCGLOBALS.persistent.roleList;
+                if(roleList && roleList.length > 0) {
+                  (Util.initPoller(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']))).start();
+                }
             }
+
         }
 
         that.initAndValidateCluster = function(address,startClusterHandler){

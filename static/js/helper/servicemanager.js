@@ -34,7 +34,7 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	
  		setLoggedInUserRoles : function(roleList){
  			var serviceList = [];
- 			if(typeof roleList === "undefined" || roleList.length === 0 ){
+ 			if(!roleList || roleList.length === 0 ){
  				window.AMCGLOBALS.persistent.roleList = [];
  			} else {
  				window.AMCGLOBALS.persistent.roleList = roleList;
@@ -65,7 +65,7 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
  	    
  	   showAccessibleModules : function(){
           var serviceList = window.AMCGLOBALS.persistent.serviceList;	 
-          if(!(typeof serviceList === "undefined") || serviceList.length > 0){
+          if(serviceList && serviceList.length > 0){
 	    		var scm = this.serviceComponentMap;
 	    		for(var serviceCode in serviceList) {
 					switch(serviceList[serviceCode]) {
@@ -96,7 +96,9 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    		}
 	    	} else {
 	    		this.hideAllHeaderTab();
-	    		Notification.toastNotification('red',"You don't have access to any module",false,true);
+          window.setTimeout(function() {
+            Notification.toastNotification('red',"You don't have access to any module", 10*1000);
+          }, 1000);
             }
 
           // remove all elements visible only to enterprise edition users
