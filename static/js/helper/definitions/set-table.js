@@ -18,7 +18,7 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config"], function($, _, Backbone, D3, GridHelper, Util, AppConfig){
-    var XdrTable = {   
+    var XdrTable = {
         nodeTableIds: [],
         updateRowData: function(container, data, rowID){
                 data = XdrTable.getNodeListData(data);
@@ -36,7 +36,6 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
         },
         getNodeListData: function(data){
             data['esmt-bytes-shipped'] = GridHelper.formatExpandRow(data['esmt-bytes-shipped'], "size");
-            data['xdr-uptime'] = GridHelper.formatExpandRow(data['xdr-uptime'], "time-seconds");
             data['timediff_lastship_cur_secs'] = GridHelper.formatExpandRow(data['timediff_lastship_cur_secs'], "sec");
             data['xdr_timelag'] = GridHelper.formatExpandRow(data['xdr_timelag'], "sec");
             data['stat_recs_outstanding'] = GridHelper.formatExpandRow(data['stat_recs_outstanding'], "number");
@@ -80,8 +79,8 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 			window.addEventListener('resize', handler, true);
             return grid;
         }
-        
+
     };
-    
+
     return XdrTable;
 });

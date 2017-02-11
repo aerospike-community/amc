@@ -513,7 +513,6 @@ func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 		stats["noship_recs_unknown_namespace"] = stats.Get("xdr_unknown_namespace_error")
 
 		stats["esmt-bytes-shipped"] = stats.Get("esmt_bytes_shipped")
-		stats["xdr-uptime"] = stats.Get("xdr_uptime")
 		stats["free-dlog-pct"] = stats.Get("free_dlog_pct")
 		// stats["xdr_timelag"] = stats.Get("timediff_lastship_cur_secs")
 	}

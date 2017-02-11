@@ -26,7 +26,6 @@ func getClusterXdrNodes(c echo.Context) error {
 		"esmt_bytes_shipped", "stat_recs_relogged",
 		"stat_recs_shipped", "free_dlog_pct", "xdr_uptime",
 		"cur_throughput", "esmt-bytes-shipped", "free-dlog-pct",
-		"xdr-uptime",
 	}
 
 	res := map[string]common.Stats{}

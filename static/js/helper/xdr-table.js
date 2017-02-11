@@ -18,11 +18,11 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config"], function($, _, Backbone, D3, GridHelper, Util, AppConfig){
-    var XdrTable = {   
+    var XdrTable = {
         nodeTableIds: [],
         updateRowData: function(container, data, rowID){
                 data = XdrTable.getNodeListData(data);
-                try{		
+                try{
                     if(!jQuery(container).getInd(rowID)){
                         jQuery(container).addRowData(rowID, data);
                     }else{
@@ -42,7 +42,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 var rowId=rowIds[i];
                 var rowData = grid.jqGrid('getRowData',rowId);
                 if(rowData["xdr_status"] === "off" && rowData["esmt-bytes-shipped"] === "N/A"){
-                    var columnList = AppConfig.xdrListColumn; 
+                    var columnList = AppConfig.xdrListColumn;
                     for(var j=2; j < columnList.length;j++){
                         colName = columnList[j].name;
                         grid.jqGrid('setCell', rowId, colName,'','', {'title': AppConfig.xdr.xdrNotConfiguredMsg + window.AMCGLOBALS.persistent.xdrPort});
@@ -52,7 +52,6 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
         },
         getNodeListData: function(data){
 			data['esmt-bytes-shipped'] = GridHelper.formatExpandRow(data['esmt-bytes-shipped'], "size");
-            data['xdr-uptime'] = GridHelper.formatExpandRow(data['xdr-uptime'], "time-seconds");
             data['xdr_timelag'] = GridHelper.formatExpandRow(data['xdr_timelag'], "sec");
             data['stat_recs_outstanding'] = GridHelper.formatExpandRow(data['stat_recs_outstanding'], "number");
             data['stat_recs_shipped'] = GridHelper.formatExpandRow(data['stat_recs_shipped'], "number");
@@ -89,8 +88,8 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 			}, true);
             return grid;
         }
-        
+
     };
-    
+
     return XdrTable;
 });

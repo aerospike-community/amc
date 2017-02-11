@@ -307,7 +307,7 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
             {name: 'migrate_progress_recv', width: 90, align: 'center', resizable: false, sortable: false, title: 'Number of partitions currently being migrated in to the node'},
             {name: 'migrate_progress_send', width: 90, align: 'center', resizable: false, sortable: false, title: 'Number of partitions pending to be migrated out of the node'}
         ],
-        xdrColumnNames: ['XDR Status', 'Host : Port', 'Bytes Shipped', 'Free Dlog', 'Lag Secs', 'Req Outstanding', 'Req Relog', 'Req Shipped', 'Throughput', 'Uptime'],
+        xdrColumnNames: ['XDR Status', 'Host : Port', 'Bytes Shipped', 'Free Dlog', 'Lag Secs', 'Req Outstanding', 'Req Relog', 'Req Shipped', 'Throughput'],
         xdrListColumn: [
 			{name: 'xdr_status', width: 80, align: 'center', resizable: false, sortable: false, title: 'XDR On/Off Status'},
             {name: 'address', width: 150, align: 'center', resizable: false, sortable: false, title: 'Node IP and port'},
@@ -318,7 +318,6 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
             {name: 'stat_recs_relogged', width: 100, align: 'center', resizable: false, sortable: false, title: 'Number of deletes re-logged'},
             {name: 'stat_recs_shipped', width: 100, align: 'center', resizable: false, sortable: false, title: 'Number of deletes shipped'},
             {name: 'cur_throughput', width: 100, align: 'center', resizable: false, sortable: false, title: 'Number of partitions pending to be migrated out of the node'},
-            {name: 'xdr-uptime', width: 100, align: 'center', resizable: false, sortable: false, title: 'Uptime'}
         ],
         namespaceColumnNames: ['Host', 'Total Objects', 'Master</br> (Objects, Tombstones)', 'Replica</br> (Objects, Tombstones)', 'Repl\'n Factor', /*'Least Avail%'*/'Avail%','Disk </br>Used, HWM', 'RAM </br>Used, HWM, Stop Writes'/*, 'RAM'*/, 'Expired Objects', 'Evicted Objects'],
         namespaceListColumn: [
@@ -443,7 +442,6 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
                 'stat_recs_relogged': displayStr,
                 'stat_recs_shipped': displayStr,
                 'free-dlog-pct': displayStr,
-                'xdr-uptime': displayStr,
                 'cur_throughput': displayStr
             };
             return blankData;
@@ -521,7 +519,6 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
                 'stat_recs_relogged': displayStr,
                 'stat_recs_shipped': displayStr,
                 'free-dlog-pct': displayStr,
-                'xdr-uptime': displayStr,
                 'cur_throughput': displayStr,
                 'build': displayStr,
                 'node_status': nodeStatus,
