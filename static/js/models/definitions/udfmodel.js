@@ -55,7 +55,6 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
 			}
 			model.initUdfView(model);
 			model.initEventHandlers(model.views);
-			this.stop();
 			
 			if(model.clusterID !== window.AMCGLOBALS.persistent.clusterID){
 				model.clusterID = window.AMCGLOBALS.persistent.clusterID;
@@ -73,16 +72,21 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             
             model.udfData = modelData.udfs;
             
-            if(_.isEmpty(model.udfData)){
-                model.views[0] = new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
-                
-            }else{
+            if(!model.isInitialized){
+                // dummy view just to initialize 'Add UDF' button click handler
+                new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
+                model.isInitialized = true;
+            }
                 var removedUDFs = _.difference( _.map( model.views, function(udf){ return udf.viewID; }), _.keys( model.udfData ) );
 
                 removedUDFs.forEach( function( hashID ){
                     var udfView = _.find( model.views, function( udf ){
                         return udf.viewID === hashID;
                     });
+
+                    if(!udfView || !udfView.viewData || !udfView.viewData.filename) {
+                      return;
+                    }
 
                     udfView.clean(udfView.viewData.filename.substr(0, udfView.viewData.filename.length - 4));
                     
@@ -103,10 +107,8 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
                     model.views[udfI].render(model, model.udfData[hashID], filename);
                     udfI++;
                 }
-            }
 
             model.initRemoveUDFListener(model.tableDiv);
-            
         },
 
         initRemoveUDFListener : function(tableDiv){
@@ -164,7 +166,8 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             }
         },
         displayNetworkErrorRow: function(model){
-            model.views[0] = new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
+            // dummy view just to initialize 'Add UDF' button click handler
+            new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
         },
 
         dropUDF: function(filename, callback){
