@@ -570,17 +570,29 @@ func (c *Cluster) checkHealth() error {
 }
 
 func (c *Cluster) updateUsers() error {
+	privileges := []string{}
+
 	users, err := c.client.QueryUsers(nil)
 	if err != nil {
-		return nil
+		if c.user != nil && len(*c.user) > 0 {
+			// this means the user do not have the privileges other than viewing its own roles
+			if u, err := c.client.QueryUser(nil, *c.user); err == nil {
+				users = []*as.UserRoles{u}
+				privileges = append(privileges, u.Roles...)
+			}
+		}
 	}
 
 	roles, err := c.client.QueryRoles(nil)
 	if err != nil {
-		return nil
+		if c.user != nil && len(*c.user) > 0 {
+			if r, err := c.client.QueryRole(nil, *c.user); err == nil {
+				// this means the user do not have the privileges other than viewing its own privs
+				roles = []*as.Role{r}
+			}
+		}
 	}
 
-	privileges := []string{}
 	for _, r := range roles {
 		role, err := c.client.QueryRole(nil, r.Name)
 		if err != nil {
