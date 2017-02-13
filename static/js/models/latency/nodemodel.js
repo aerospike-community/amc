@@ -490,6 +490,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			nullData.timestamp = (timestamp.getHours() < 10 ? ("0" + timestamp.getHours()) : ("" + timestamp.getHours())) + ":";
 			nullData.timestamp += (timestamp.getMinutes() < 10 ? ("0" + timestamp.getMinutes()) : ("" + timestamp.getMinutes())) + ":";
 			nullData.timestamp += (timestamp.getSeconds() < 10 ? ("0" + timestamp.getSeconds()) : ("" + timestamp.getSeconds()));
+      nullData.timestamp_unix = Math.ceil(timestamp/1000);
 
 			var stackPoint = {};
 

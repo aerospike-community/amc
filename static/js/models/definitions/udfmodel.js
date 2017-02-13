@@ -166,7 +166,8 @@ define(["underscore", "backbone", "poller", "views/definitions/udfview", "helper
             }
         },
         displayNetworkErrorRow: function(model){
-            model.views[0] = new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
+            // dummy view just to initialize 'Add UDF' button click handler
+            new UdfView({tableDiv:model.tableDiv, viewID:0 ,model: model});
         },
 
         dropUDF: function(filename, callback){
