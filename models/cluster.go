@@ -579,6 +579,8 @@ func (c *Cluster) updateUsers() error {
 			if u, err := c.client.QueryUser(nil, *c.user); err == nil {
 				users = []*as.UserRoles{u}
 				privileges = append(privileges, u.Roles...)
+			} else {
+				return err
 			}
 		}
 	}
