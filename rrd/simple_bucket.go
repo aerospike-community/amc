@@ -43,6 +43,11 @@ func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 		b.beginTime = &timestamp
 	}
 
+	// protect against values set in the past
+	if timestamp < *b.beginTime {
+		return
+	}
+
 	var newOffset int64 = (timestamp - *b.beginTime) / int64(b.resolution)
 	emptyTicks := int(newOffset) - b.offset
 

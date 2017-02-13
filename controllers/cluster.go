@@ -305,8 +305,6 @@ func getClusterThroughput(c echo.Context) error {
 		res[outStatName] = statRes
 	}
 
-	// log.Info(res)
-
 	return c.JSON(http.StatusOK, res)
 }
 

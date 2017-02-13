@@ -42,6 +42,10 @@ func (b *Bucket) Size() int {
 	return len(b.values)
 }
 
+func (b *Bucket) Resolution() int {
+	return b.resolution
+}
+
 func (b *Bucket) Add(timestamp int64, val float64) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -53,6 +57,11 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 		return
 	} else if b.beginTime == nil {
 		b.beginTime = &timestamp
+	}
+
+	// protect against values set in the past
+	if timestamp < *b.beginTime {
+		return
 	}
 
 	var newOffset int64 = (timestamp - *b.beginTime) / int64(b.resolution)
@@ -110,7 +119,10 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 
 	// if map is empty,
 	if b.offset == -1 || b.beginTime == nil {
-		return []*common.SinglePointValue{b.LastValue()}
+		if b.LastValue() != nil {
+			return []*common.SinglePointValue{b.LastValue()}
+		}
+		return []*common.SinglePointValue{}
 	}
 
 	if tm.Unix() < *b.beginTime {

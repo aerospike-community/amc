@@ -62,7 +62,7 @@ type Node struct {
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
 
-	serverTime int64
+	serverTimeDelta time.Duration
 
 	_alertStates common.SyncStats
 
@@ -160,7 +160,7 @@ func (n *Node) update() error {
 		ns.aggStats(nsAggStats, nsAggCalcStats)
 
 		// update node's server time
-		n.setServerTime(ns.ServerTime().Unix())
+		n.setServerTimeDelta(ns.ServerTime().Unix())
 	}
 
 	stats := common.Info(info).ToInfo("statistics").ToStats()
@@ -289,13 +289,21 @@ func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
 	zeroVal := float64(0)
 	for name, bucket := range n.statsHistory {
-		val := bucket.LastValue()
-		if val == nil {
+		if n.valid() {
+			val := bucket.LastValue()
+			if val == nil {
+				tm := n.ServerTime().Unix()
+				val = common.NewSinglePointValue(&tm, &zeroVal)
+			}
+			res[name] = map[string]*common.SinglePointValue{
+				n.Address(): val,
+			}
+		} else {
 			tm := n.ServerTime().Unix()
-			val = common.NewSinglePointValue(&tm, &zeroVal)
-		}
-		res[name] = map[string]*common.SinglePointValue{
-			n.Address(): val,
+			val := common.NewSinglePointValue(&tm, &zeroVal)
+			res[name] = map[string]*common.SinglePointValue{
+				n.Address(): val,
+			}
 		}
 	}
 
@@ -306,11 +314,20 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
 	zeroVal := float64(0)
+	st := n.ServerTime().Unix()
 	for name, bucket := range n.statsHistory {
 		vs := bucket.ValuesSince(tm)
 		if len(vs) == 0 {
-			tm := n.ServerTime().Unix()
-			vs = []*common.SinglePointValue{common.NewSinglePointValue(&tm, &zeroVal)}
+			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
+		}
+
+		// the following guarantees a straight zero line
+		latest := *vs[len(vs)-1].Timestamp(1) + 1
+
+		// if we have missed two beats
+		if latest < st-2*int64(bucket.Resolution()) {
+			vs = append(vs, common.NewSinglePointValue(&latest, &zeroVal))
+			vs = append(vs, common.NewSinglePointValue(&st, &zeroVal))
 		}
 		res[name] = map[string][]*common.SinglePointValue{
 			n.Address(): vs,
@@ -324,26 +341,26 @@ func (n *Node) getStatsHistory(stat string) *rrd.Bucket {
 	// statsHistory is not written to, so it doesn't need synchronization
 	return n.statsHistory[stat]
 }
+
 func (n *Node) updateHistory() {
 	// this uses a RLock, so we put it before the locks to avoid deadlock
 	// latestLatencyReport, err := n.latestLatencyReportDateTime()
-	tm := n.ServerTime().Unix()
-
-	if tm == 0 {
+	tm := n.ServerTime()
+	if tm.IsZero() {
 		return
 	}
 
 	for _, stat := range _recordedNodeStats {
 		bucket := n.getStatsHistory(stat)
 		if n.nsAggCalcStats.Get(stat) != nil {
-			bucket.Add(tm, n.nsAggCalcStats.TryFloat(stat, 0))
+			bucket.Add(tm.Unix(), n.nsAggCalcStats.TryFloat(stat, 0))
 		} else if n.stats.Get(stat) != nil {
-			bucket.Add(tm, n.stats.TryFloat(stat, 0))
+			bucket.Add(tm.Unix(), n.stats.TryFloat(stat, 0))
 		}
 	}
 
 	if ll := n.LatestLatency(); ll != nil {
-		n.latencyHistory.Add(tm, ll)
+		n.latencyHistory.Add(tm.Unix(), ll)
 	}
 	// n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
 }
@@ -850,18 +867,20 @@ func parseBinInfo(s string) common.Stats {
 	return res
 }
 
-func (n *Node) setServerTime(tm int64) {
+func (n *Node) setServerTimeDelta(tm int64) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
-	if tm > n.serverTime {
-		n.serverTime = tm
+
+	if tm > 0 {
+		n.serverTimeDelta = time.Duration(tm-time.Now().Unix()) * time.Second
 	}
 }
 
 func (n *Node) ServerTime() time.Time {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
-	return time.Unix(n.serverTime, 0)
+
+	return time.Now().Add(n.serverTimeDelta)
 }
 
 func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {

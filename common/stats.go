@@ -29,7 +29,7 @@ func (spv *SinglePointValue) Timestamp(mult int64) *int64 {
 	}
 
 	if spv.timestamp != nil {
-		val := *spv.timestamp * 1000
+		val := *spv.timestamp * mult
 		return &val
 	}
 

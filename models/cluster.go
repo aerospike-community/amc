@@ -496,7 +496,7 @@ func (c *Cluster) shouldUpdate() bool {
 	return time.Since(c.lastUpdate) >= time.Second*time.Duration(c.updateInterval)
 }
 
-func (c *Cluster) updatedAt(tm time.Time) {
+func (c *Cluster) setUpdatedAt(tm time.Time) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -523,7 +523,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.checkHealth()
 	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 
-	c.updatedAt(time.Now())
+	c.setUpdatedAt(time.Now())
 
 	return nil
 }
