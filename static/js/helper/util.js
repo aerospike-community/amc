@@ -2090,7 +2090,13 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                         try{
                             Util.setEnviromentSetupUI();
                             AMCGLOBALS.pageSpecific.GlobalPollingActive = true;
-                            Util.initSelectNodesToggling('.title-bar');
+
+                            // disable toggling latency view. It has weird
+                            // effects on the latency charts
+                            if(page !== 'latency') {
+                              Util.initSelectNodesToggling('.title-bar');
+                            }
+
                             window.AMCGLOBALS.activePageModel = new ClusterModel({"update_interval" : 5});
                             var polOptions = AppConfig.pollerOptions(AppConfig.updateInterval['cluster']);
                             Util.initPoller(window.AMCGLOBALS.activePageModel, polOptions).start();
