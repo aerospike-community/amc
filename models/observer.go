@@ -66,7 +66,7 @@ func New(config *common.Config) *ObserverT {
 
 		}
 		// mark it so it won't be removed automatically
-		cluster.permanent = true
+		cluster.setPermanent(true)
 	}
 
 	return o
@@ -83,13 +83,20 @@ func (o *ObserverT) updateClusters() {
 	wg := new(sync.WaitGroup)
 	wg.Add(len(clusters))
 	for _, c := range clusters {
-		// No need to manage panics here, since update codes are
-		// running in an isolated go routine
-		if c.IsSet() {
-			go c.update(wg)
-		}
+		go c.update(wg)
 	}
 	wg.Wait()
+}
+
+func (o *ObserverT) removeIdleClusters() {
+	clusters := o.Clusters()
+
+	for _, c := range clusters {
+		if c.shouldAutoRemove() {
+			c.closeAndUnset()
+			o.removeClusterFromAllSessions(c)
+		}
+	}
 }
 
 func (o *ObserverT) Clusters() []*Cluster {
@@ -121,6 +128,7 @@ func (o *ObserverT) observe(config *common.Config) {
 				o.StopDebug()
 			}
 
+			o.removeIdleClusters()
 			o.updateClusters()
 
 		case <-o.notifyCloseChan:
@@ -164,6 +172,32 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.sessions[sessionId] = append(o.sessions[sessionId], cluster)
 }
 
+func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	// Remove cluster from the session
+	for sessionId, s := range o.sessions {
+		newClusters := make([]*Cluster, 0, len(o.sessions[sessionId]))
+		for _, c := range s {
+			if c != cluster {
+				newClusters = append(newClusters, c)
+			}
+		}
+		o.sessions[sessionId] = newClusters
+	}
+
+	newClusters := make([]*Cluster, 0, len(o.clusters))
+	for _, c := range o.clusters {
+		if c != cluster {
+			newClusters = append(newClusters, c)
+		}
+	}
+	o.clusters = newClusters
+
+	log.Info("Automatically removed idle cluster " + cluster.Id() + " from session all sessions")
+}
+
 func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
@@ -172,7 +206,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	newClusters := make([]*Cluster, 0, len(o.sessions[sessionId]))
 	for _, c := range o.sessions[sessionId] {
 		if c != cluster {
-			newClusters = append(newClusters, cluster)
+			newClusters = append(newClusters, c)
 		}
 	}
 	o.sessions[sessionId] = newClusters
@@ -194,7 +228,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 			newClusters = make([]*Cluster, 0, len(o.clusters))
 			for _, c := range o.clusters {
 				if c != cluster {
-					newClusters = append(newClusters, cluster)
+					newClusters = append(newClusters, c)
 				} else {
 					c.close()
 				}

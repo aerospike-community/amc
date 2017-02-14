@@ -33,10 +33,11 @@ func AMCIsEnterprise() bool {
 
 type Config struct {
 	AMC struct {
-		UpdateInterval int    `toml:"update_interval"`
-		CertFile       string `toml:"certfile"`
-		KeyFile        string `toml:"keyfile"`
-		StaticPath     string `toml:"static_dir"`
+		UpdateInterval           int    `toml:"update_interval"`
+		InactiveDurBeforeRemoval int    `toml:"cluster_inactive_before_removal"`
+		CertFile                 string `toml:"certfile"`
+		KeyFile                  string `toml:"keyfile"`
+		StaticPath               string `toml:"static_dir"`
 
 		// BackupHost         string `toml:"backup_host"`
 		// BackupHostUser     string `toml:"backup_host_user"`

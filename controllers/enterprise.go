@@ -26,39 +26,10 @@ func postClusterFireCmd(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid command"))
 	}
 
-	type nodeCommand struct {
-		Node *models.Node
-		Res  map[string]string
-		Err  error
-	}
-
-	nodes := cluster.Nodes()
-	ch := make(chan nodeCommand, len(nodes))
-
-	wg := new(sync.WaitGroup)
-	for _, node := range nodes {
-		if node != nil {
-			wg.Add(1)
-			go func(node *models.Node) {
-				defer wg.Done()
-
-				result, err := node.RequestInfo(1, cmd)
-				ch <- nodeCommand{Node: node, Res: result, Err: err}
-			}(node)
-		} else {
-			ch <- nodeCommand{Node: node, Res: nil, Err: nil}
-		}
-	}
-
-	wg.Wait()
-	close(ch)
-
+	infos, _ := cluster.RequestInfoAll(cmd)
 	res := map[string][]string{}
-	for r := range ch {
-		res[r.Node.Address()] = nil
-		if r.Err == nil && len(r.Res) > 0 && len(r.Res[cmd]) > 0 {
-			res[r.Node.Address()] = strings.Split(r.Res[cmd], ";")
-		}
+	for node, r := range infos {
+		res[node.Address()] = strings.Split(r, ";")
 	}
 
 	return c.JSON(http.StatusOK, res)

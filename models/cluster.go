@@ -5,6 +5,7 @@ import (
 	// "strconv"
 	"errors"
 	"html/template"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -95,6 +96,38 @@ func newCluster(observer *ObserverT, client *as.Client, alias *string, user, pas
 	}
 
 	return &newCluster
+}
+
+func (c *Cluster) setPermanent(v bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.permanent = v
+}
+
+func (c *Cluster) closeAndUnset() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if c.client != nil {
+		c.client.Close()
+		c.client = nil
+	}
+}
+
+func (c *Cluster) updateLastestPing() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.lastPing = time.Now()
+}
+
+func (c *Cluster) shouldAutoRemove() bool {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	// InactiveDurBeforeRemoval <= 0 means never remove
+	return !c.permanent && c.observer.config.AMC.InactiveDurBeforeRemoval > 0 && time.Since(c.lastPing) > time.Duration(c.observer.config.AMC.InactiveDurBeforeRemoval)*time.Second
 }
 
 func (c *Cluster) AddNode(address string, port int) error {
@@ -510,10 +543,21 @@ func (c *Cluster) setUpdatedAt(tm time.Time) {
 }
 
 func (c *Cluster) update(wg *sync.WaitGroup) error {
+	// make sure panics do not bring the observer down
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(debug.Stack())
+		}
+	}()
+
 	if wg != nil {
 		defer wg.Done()
 	}
 	defer func() { go c.SendEmailNotifications() }()
+
+	if !c.IsSet() {
+		return nil
+	}
 
 	// update only on update intervals
 	if !c.shouldUpdate() {
@@ -610,6 +654,54 @@ func (c *Cluster) updateUsers() error {
 	c.roles = roles
 
 	return nil
+}
+
+func (c *Cluster) RequestInfoAll(cmd string) (map[*Node]string, error) {
+	type nodeCommand struct {
+		Node *Node
+		Res  map[string]string
+		Err  error
+	}
+
+	nodes := c.Nodes()
+	ch := make(chan nodeCommand, len(nodes))
+
+	wg := new(sync.WaitGroup)
+	for _, node := range nodes {
+		if node != nil {
+			wg.Add(1)
+			go func(node *Node) {
+				defer wg.Done()
+
+				result, err := node.RequestInfo(1, cmd)
+				ch <- nodeCommand{Node: node, Res: result, Err: err}
+			}(node)
+		} else {
+			ch <- nodeCommand{Node: node, Res: nil, Err: nil}
+		}
+	}
+
+	wg.Wait()
+	close(ch)
+
+	res := make(map[*Node]string, len(nodes))
+	errsStr := []string{}
+	for r := range ch {
+		res[r.Node] = ""
+		if r.Err != nil {
+			errsStr = append(errsStr, r.Err.Error())
+			res[r.Node] = r.Err.Error()
+		} else if len(r.Res) > 0 && len(r.Res[cmd]) > 0 {
+			res[r.Node] = r.Res[cmd]
+		}
+	}
+
+	var err error
+	if len(errsStr) > 0 {
+		err = errors.New(strings.Join(errsStr, ", "))
+	}
+
+	return res, err
 }
 
 func (c *Cluster) registerNode(h *as.Host, n *Node) {
@@ -711,6 +803,7 @@ func (c *Cluster) BuildDetails() map[string]interface{} {
 	result["version_list"] = versionList
 	result["latest_build_no"] = latestBuild
 
+	c.updateLastestPing()
 	return result
 }
 
