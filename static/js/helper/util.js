@@ -910,7 +910,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     var el = divs.eq( items.index( container ) )
                                 .addClass("outside-assigned-roles");
 
-                    if(AMCGLOBALS.persistent.roleList.indexOf( container.attributes["data-min-role-required"].value ) === -1) {
+                    if(container.attributes["inaccessible-module"]) {
                         el.prepend("<div class='permission-overlay'>Module not accessible. " + roleToken + " required : [" +
                                 (container.attributes["data-min-role-required"] && container.attributes["data-min-role-required"].value) +
                                 "]. " + roleToken + "s Available : [" + AMCGLOBALS.persistent.roleList +  "].</div>");
@@ -2090,7 +2090,13 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                         try{
                             Util.setEnviromentSetupUI();
                             AMCGLOBALS.pageSpecific.GlobalPollingActive = true;
-                            Util.initSelectNodesToggling('.title-bar');
+
+                            // disable toggling latency view. It has weird
+                            // effects on the latency charts
+                            if(page !== 'latency') {
+                              Util.initSelectNodesToggling('.title-bar');
+                            }
+
                             window.AMCGLOBALS.activePageModel = new ClusterModel({"update_interval" : 5});
                             var polOptions = AppConfig.pollerOptions(AppConfig.updateInterval['cluster']);
                             Util.initPoller(window.AMCGLOBALS.activePageModel, polOptions).start();

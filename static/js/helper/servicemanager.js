@@ -110,25 +110,25 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
         },
     
         showComponentsInActivePage : function(activePage){
-	    	var componentList = this._getAccesssibleComponents(this._getModuleObject_(activePage));
-			var inaccessibleComponents = _.difference(
-					this._getAllComponents(this._getModuleObject_(activePage)),
-					componentList);
+          var componentList = this._getAccesssibleComponents(this._getModuleObject_(activePage));
+          var inaccessibleComponents = _.difference(
+              this._getAllComponents(this._getModuleObject_(activePage)),
+              componentList);
 
-	    	if(componentList.length > 0) {
-	    		for(var index in componentList) {
-	    			this.showComponent($(componentList[index]));
-	    		}
-	    	} 
+          if(componentList.length > 0) {
+            for(var index in componentList) {
+              this.showComponent($(componentList[index]));
+            }
+          } 
 
-			if(this.isSecurityEnable() && inaccessibleComponents.length > 0){
-				for(var index in inaccessibleComponents) {
-					var component = $(inaccessibleComponents[index]);
-	    			this.showComponent( component );
-	    			this.markModuleUnavailable( inaccessibleComponents[index] );
-	    		}	
-			}
-	    },
+          if(this.isSecurityEnable() && inaccessibleComponents.length > 0){
+            for(var index in inaccessibleComponents) {
+              var component = $(inaccessibleComponents[index]);
+              this.showComponent( component );
+              this.markModuleUnavailable( inaccessibleComponents[index] );
+            }	
+          }
+        },
 
 	    getMinimumRoleRequired : function(obj){
 	    	if(obj !== null){
@@ -139,6 +139,12 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    			if( this._roleserviceMap_[roles[role]].indexOf(key) !== -1)
 	    				return roles[role];
 	    		}
+
+          if(key === 'BACKUP') {
+            return 'read, data-admin';
+          } else if(key === 'RESTORE_BACKUP') {
+            return 'write, data-admin';
+          }
 	    	}
 
 	    	return null;
@@ -171,6 +177,7 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    	var el = $(element);
 	    	el.addClass("outside-assigned-roles");
 	    	el.attr("data-min-role-required", this.getMinimumRoleRequired( this.getServiceObject(element) ));
+	    	el.attr("inaccessible-module", true);
 	    },
 
 	    hideComponent : function(element){
@@ -263,6 +270,25 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    			 serviceList = _.union(serviceList,this._roleserviceMap_[roleList[roleIndex]]);
 	    		 }
 	    	 }
+
+         // backup/restore require both "data-admin" and "read/write", because
+         // backup/restore does sindex & udf registration.
+         var hasRead = _.find(roleList, function(role) { 
+           return ['read', 'read-write', 'read-write-udf'].indexOf(role) !== -1;
+         });
+         var hasWrite = _.find(roleList, function(role) { 
+           return ['read-write', 'read-write-udf'].indexOf(role) !== -1;
+         });
+         var hasDataAdmin = _.values(roleList).indexOf('data-admin') !== -1;
+
+         if(hasDataAdmin) {
+           if(hasWrite) {
+             serviceList = _.union(serviceList, ['BACKUP', 'RESTORE_BACKUP']);
+           } else if(hasRead) {
+             serviceList = _.union(serviceList, ['BACKUP']);
+           }
+         }
+
 	    	 return serviceList;
    	    },
    	    
@@ -337,7 +363,6 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    	        "JOBS_RUNNING",
 	    	        "JOBS_COMPLETED",
 	    	        "LATENCY_PAGE",
-	    	        "BACKUP",
 	    	        "MANAGE_PAGE",
 	    	        "DASHBOARD_NODE_ON_OFF",
 	    			"DASHBOARD_XDR_ON_OFF",
@@ -359,8 +384,6 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    	              "JOBS_RUNNING",
 	    	              "JOBS_COMPLETED",
 	    	              "LATENCY_PAGE", 
-	    	              "BACKUP",	
-	    	              "RESTORE_BACKUP",
                           "MANAGE_PAGE",
 	    				  "USER_SELF_ACCOUNT",
 	    				  "COMMAND_LINE"
@@ -380,8 +403,6 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    	              "JOBS_RUNNING",
 	    	              "JOBS_COMPLETED",
 	    	              "LATENCY_PAGE", 
-	    	              "BACKUP",	
-	    	              "RESTORE_BACKUP",
                           "MANAGE_PAGE",
 	    				  "USER_SELF_ACCOUNT",
 	    				  "COMMAND_LINE"
