@@ -910,7 +910,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     var el = divs.eq( items.index( container ) )
                                 .addClass("outside-assigned-roles");
 
-                    if(AMCGLOBALS.persistent.roleList.indexOf( container.attributes["data-min-role-required"].value ) === -1) {
+                    if(container.attributes["inaccessible-module"]) {
                         el.prepend("<div class='permission-overlay'>Module not accessible. " + roleToken + " required : [" +
                                 (container.attributes["data-min-role-required"] && container.attributes["data-min-role-required"].value) +
                                 "]. " + roleToken + "s Available : [" + AMCGLOBALS.persistent.roleList +  "].</div>");
