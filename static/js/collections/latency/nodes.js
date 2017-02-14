@@ -13,6 +13,7 @@ function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable, AjaxM
             this.clusterIntegrityAlertShown = false;
             this.parent = {};
             this.latencyHistory = {}; // map of node address to latency history
+            this.historyFetched = false;
             this.latencyFetchError = false;
         },
         initialize : function(){
@@ -34,9 +35,11 @@ function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable, AjaxM
 
           AjaxManager.sendRequest(url, {}, 
             function success(history) {
+              that.historyFetched = true;
               that.latencyHistory = history;
               that._initNodes();
             }, function error() {
+              that.historyFetched = true;
               that.latencyFetchError = true;
               that._initNodes();
             }
@@ -70,8 +73,24 @@ function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable, AjaxM
         addModel: function(modelID, address, clusterID, totalNodes){
             var node = new NodeModel({model_id:modelID, address: address, cluster_id:clusterID, total_nodes:totalNodes});
             var history = this.latencyHistory[address];
+            var that = this;
+            var url;
+
             this.add(node);
-            this._initNode(node);
+
+            if(this.historyFetched) {
+              if(history) {
+                this._initNode(node);
+              } else {
+                url = AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/latency_history/' + address;
+                AjaxManager.sendRequest(url, {},
+                  function success(data) {
+                    that.latencyHistory[address] = data;
+                    that._initNode(node);
+                  }
+                );
+              }
+            }
         },
         onModelAdded: function(model, collection, options){
             this.parent.nodes.push(model.address);

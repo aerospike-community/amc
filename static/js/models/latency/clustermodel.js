@@ -24,6 +24,9 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
 					this.validateNodeChange();
                     $("#nodeListSelectBtn").trigger('click');
                 }
+        
+        // set selected latency window
+        this.initLatencyWindow();
             });
 			this.on('change:update_interval', function(){
 				if(typeof this.previous("update_interval") !== 'undefined'){
