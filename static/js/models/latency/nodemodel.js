@@ -232,9 +232,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
         },
 
         insertSliceHistory: function(model){
-			var startTime = model.lastTimestamp[(_.keys(model.lastTimestamp)[0])].toString();
-			startTime = startTime.substr(startTime.indexOf(":") - 2, 8);
-			AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/latency_history/' + this.address + "?start_time="  + startTime,
+			AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + '/latency_history/' + this.address,
 				{async: true},
 				successHandler,
 				errorHandler
