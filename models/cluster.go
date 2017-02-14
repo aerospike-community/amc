@@ -47,7 +47,7 @@ type Cluster struct {
 	seeds    []*as.Host
 	alias    *string
 	user     *string
-	password *string
+	password *string // TODO: Keep hashed values only
 
 	// Permanent clusters are loaded from the config file
 	// They will not removed automatically after a period of inactivity
@@ -55,9 +55,9 @@ type Cluster struct {
 
 	alerts *common.AlertBucket
 
-	users      []*as.UserRoles
-	roles      []*as.Role
-	privileges []string
+	users                 []*as.UserRoles
+	roles                 []*as.Role
+	currentUserPrivileges []string
 
 	activeBackup  *Backup
 	activeRestore *Restore
@@ -249,7 +249,13 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 		return errors.New("Invalid current user")
 	}
 
-	return c.client.ChangePassword(nil, user, newPass)
+	err := c.client.ChangePassword(nil, user, newPass)
+	// update password
+	if err == nil {
+		c.password = &newPass
+	}
+
+	return err
 }
 
 func (c *Cluster) ChangeUserPassword(user, pass string) error {
@@ -570,48 +576,38 @@ func (c *Cluster) checkHealth() error {
 }
 
 func (c *Cluster) updateUsers() error {
-	privileges := []string{}
+	// update current user's privileges
+	if c.user != nil && len(*c.user) > 0 {
+		currentUserPrivileges := []string{}
 
-	users, err := c.client.QueryUsers(nil)
-	if err != nil {
-		if c.user != nil && len(*c.user) > 0 {
-			// this means the user do not have the privileges other than viewing its own roles
-			if u, err := c.client.QueryUser(nil, *c.user); err == nil {
-				users = []*as.UserRoles{u}
-				privileges = append(privileges, u.Roles...)
-			} else {
-				return err
+		// this means the user do not have the privileges other than viewing its own roles
+		if u, err := c.client.QueryUser(nil, *c.user); err == nil {
+			for _, r := range u.Roles {
+				role, err := c.client.QueryRole(nil, r)
+				if err != nil {
+					continue
+				}
+
+				for _, priv := range role.Privileges {
+					currentUserPrivileges = append(currentUserPrivileges, string(priv.Code))
+				}
 			}
-		}
-	}
 
-	roles, err := c.client.QueryRoles(nil)
-	if err != nil {
-		if c.user != nil && len(*c.user) > 0 {
-			if r, err := c.client.QueryRole(nil, *c.user); err == nil {
-				// this means the user do not have the privileges other than viewing its own privs
-				roles = []*as.Role{r}
-			}
-		}
-	}
-
-	for _, r := range roles {
-		role, err := c.client.QueryRole(nil, r.Name)
-		if err != nil {
-			continue
+			c.currentUserPrivileges = currentUserPrivileges
+		} else {
+			return err
 		}
 
-		for _, priv := range role.Privileges {
-			privileges = append(privileges, string(priv.Code))
-		}
 	}
+
+	users, _ := c.client.QueryUsers(nil)
+	roles, _ := c.client.QueryRoles(nil)
 
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	c.users = users
 	c.roles = roles
-	c.privileges = common.SortStrings(common.StrUniq(privileges))
 
 	return nil
 }
@@ -897,34 +893,11 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 
 }
 
-func (c *Cluster) CurrentUserRoles() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	if c.user == nil {
-		return nil
-	}
-
-	var user *as.UserRoles
-	for _, u := range c.users {
-		if u.User == *c.user {
-			user = u
-			break
-		}
-	}
-
-	if user == nil {
-		return nil
-	}
-
-	return user.Roles
-}
-
 func (c *Cluster) CurrentUserPrivileges() []string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	return c.privileges
+	return c.currentUserPrivileges
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
