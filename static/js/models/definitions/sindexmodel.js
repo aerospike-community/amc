@@ -350,7 +350,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
                         tempData = that.replaceTempData(versionCheck, tempData);  
                     }
                     
-                    indexData.push( tempData );
+                    indexData[tempData.indexname] = tempData;
                 }
             }
 

@@ -669,8 +669,6 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             Util.remove_cluster();
         };
 
-        Util.setUpVisibilityStateListener();
-        Util.stopIfWindowNotVisible();
         /************* Routing Table *************/
 
 
