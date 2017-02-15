@@ -398,7 +398,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     }
                 }
             }catch(e){
-                console.log(e.toString());
+                console.log(e);
             }
         },
         stopPollingCollection: function(clusterModel){
@@ -413,7 +413,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     window.clearTimeout(model.setTimeOut);
                 }
             }catch(e){
-                console.log(e.toString());
+                console.log(e);
             }
         },
         startPollingCollection: function(clusterModel){
@@ -425,7 +425,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     window.clearTimeout(model.setTimeOut);
                 }
             }catch(e){
-                console.log(e.toString());
+                console.log(e);
             }
         },
         stopPollingModel: function(clusterModel, modelAddress){
@@ -482,79 +482,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
             return visibileColList;
         },
 
-        setUpVisibilityStateListener : function(){
-
-            var hidden = "hidden";
-
-            // Standards:
-            if (hidden in document)
-                document.addEventListener("visibilitychange", onchange);
-            else if ((hidden = "mozHidden") in document)
-                document.addEventListener("mozvisibilitychange", onchange);
-            else if ((hidden = "webkitHidden") in document)
-                document.addEventListener("webkitvisibilitychange", onchange);
-            else if ((hidden = "msHidden") in document)
-                document.addEventListener("msvisibilitychange", onchange);
-            // IE 9 and lower:
-            else if ('onfocusin' in document)
-                document.onfocusin = document.onfocusout = onchange;
-            // All others:
-            else
-                window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
-
-            function onchange (evt) {
-                var v = 'visible', h = 'hidden',
-                evtMap = {
-                    focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
-                };
-
-                evt = evt || window.event;
-
-                $("body").removeClass(v).removeClass(h);
-
-                if (evt.type in evtMap){
-                    if(!window.$("#changeClusterButton").hasClass("active")){
-                        $("body").addClass(evtMap[evt.type]);
-                        document.dispatchEvent(new CustomEvent(evtMap[evt.type]));
-                    }
-                    console.info(evtMap[evt.type]);
-                } else if(this[hidden]){
-                    if(!window.$("#changeClusterButton").hasClass("active")){
-                        $("body").addClass(h);
-                        document.dispatchEvent(new CustomEvent(h));
-                    }
-                    console.info(h);
-                } else{
-                    if(!window.$("#changeClusterButton").hasClass("active")){
-                        $("body").addClass(v);
-                        document.dispatchEvent(new CustomEvent(v));
-                    }
-                    console.info(v);
-                }
-            }
-        },
-
-        //VISIBILTY CHECK: Disable all ajax request if window is hidden
-
-        stopIfWindowNotVisible: function(){
-            var Util = this;
-
-            function pausePollers() {
-                if(!window.AMCGLOBALS.pageSpecific.keepPollersAlive){
-                    Util.pauseAllActivePollers(!Util.isMobile.any());
-                    console.info('Window out of focus : polling stopped');
-                }
-            };
-
-            function resumePollers(){
-                Util.resumeAllActivePollers();
-                console.info('Window in focus : polling started');
-            }
-
-            $(document).off("hidden", pausePollers).on("hidden", pausePollers);
-            $(document).off("visible", resumePollers).on("visible", resumePollers);
-        },
-
         startVisibleColPolling: function(clusterModel){
             try{
                 var visibleColList = Util.saveColumnVisibiltyState();
@@ -567,7 +494,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     }
                 }
             }catch(e){
-                console.log(e.toString());
+                console.log(e);
             }
         },
         //INPUT VALIDATIONS

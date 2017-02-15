@@ -51,7 +51,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                                        }
                                         
                                     }catch(e){
-                                        console.log(e.toString());
+                                        console.log(e);
                                     } 
                              }    
                             
@@ -74,7 +74,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 var grid = jQuery(container);
                 that.setRowTitle(grid);
             }catch(e){
-                console.info(e.toString());
+                console.info(e);
             }   
         },
         setRowTitle : function(grid){
@@ -98,7 +98,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                   try{
                       $(container).setCell(rowIDS[i],address, errordata);
                   }catch(e){
-                      console.log(e.toString());
+                      console.log(e);
                   } 
               } 
       },
@@ -210,7 +210,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                                     //totalDetailsFound++;
                                 }
                             }catch(e){
-                                console.log(e.toString());
+                                console.log(e);
                             } 
                         }
                         //console.info(totalDetailsFound+"/"+rowIDS.length);

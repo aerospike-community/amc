@@ -73,7 +73,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 var grid = jQuery(container);
                 that.setRowTitle(grid);
             }catch(e){
-                console.info(e.toString());
+                console.info(e);
             }               
         },
         setRowTitle : function(grid){
@@ -209,7 +209,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                                     //totalDetailsFound++;
                                 }
                             }catch(e){
-                                console.log(e.toString());
+                                console.log(e);
                             } 
                         }
                         var inputBox = $("table tr td .updateBox");                        

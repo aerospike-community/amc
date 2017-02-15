@@ -95,7 +95,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 newData["memory-arr"] = [usedMemory, freeMemory];
                 newData["disk-arr"] =  [usedDisk, freeDisk];
             }catch(e){
-                console.info(e.toString());
+                console.info(e);
             }
             return newData;
         },
