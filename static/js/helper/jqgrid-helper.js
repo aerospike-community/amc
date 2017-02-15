@@ -136,13 +136,22 @@ define(["jquery", "underscore", "backbone", "helper/piechart", "helper/util", "c
             }else if(formatType === 'time-milliseconds'){
                 value = Util.msecToTime(data);
             }else if(formatType === 'pct'){
-                value = data + '%';
+                value = data;
+                if(value.indexOf('%') === -1) {
+                 value += ' %';
+                }
             }else if(formatType === 'sec'){
                 data = data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                value = data + ' sec';
+                value = data;
+                if(value.indexOf('sec') === -1) {
+                 value += ' sec';
+                }
             }if(formatType === 'millisec'){
                 data = data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                value = data + ' millisec';
+                value = data;
+                if(value.indexOf('millisec') === -1) {
+                  value += ' millisec';
+                }
             }
             return value;
         },
