@@ -18,6 +18,9 @@ type SimpleBucket struct {
 	values []interface{}
 	offset int // determines the offset from beginTime in resolution steps
 
+	lastValue     interface{}
+	lastTimestamp *int64
+
 	mutex deadlock.RWMutex
 }
 
@@ -38,6 +41,11 @@ func (b *SimpleBucket) Size() int {
 func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
+
+	// don't add out of order timestamps
+	if b.lastTimestamp != nil && *b.lastTimestamp > timestamp {
+		return
+	}
 
 	if b.beginTime == nil {
 		b.beginTime = &timestamp
@@ -63,6 +71,8 @@ func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 
 	b.offset = int(newOffset)
 	b.values[b.offset%b.Size()] = &val
+	b.lastTimestamp = &timestamp
+	b.lastValue = val
 }
 
 func (b *SimpleBucket) ValuesSince(tm time.Time) []interface{} {
@@ -105,15 +115,5 @@ func (b *SimpleBucket) LastValue() interface{} {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
-	// if bucket is empty,
-	if b.beginTime == nil {
-		return nil
-	}
-
-	offset := b.offset % b.Size()
-	// tm := *b.beginTime + int64(b.offset)*int64(b.resolution)
-	if b.values[offset] != nil {
-		return b.values[offset]
-	}
-	return nil
+	return b.lastValue
 }

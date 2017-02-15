@@ -14,8 +14,10 @@ import (
 type Bucket struct {
 	// this flag determines if the values passed to the bucket are total counts,
 	// and should be converted to deltas
-	rollingTotal bool
-	lastValue    *float64
+	rollingTotal      bool
+	lastValue         *float64
+	lastHistoricValue *float64
+	lastTimestamp     *int64
 
 	resolution int // secs
 
@@ -49,6 +51,11 @@ func (b *Bucket) Resolution() int {
 func (b *Bucket) Add(timestamp int64, val float64) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
+
+	// don't add out of order timestamps
+	if b.lastTimestamp != nil && *b.lastTimestamp > timestamp {
+		return
+	}
 
 	originalVal := val
 
@@ -111,6 +118,8 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 	b.offset = int(newOffset)
 	b.values[b.offset%b.Size()] = &val
 	b.lastValue = &originalVal
+	b.lastHistoricValue = &val
+	b.lastTimestamp = &timestamp
 }
 
 func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
@@ -161,16 +170,11 @@ func (b *Bucket) LastValue() *common.SinglePointValue {
 	defer b.mutex.RUnlock()
 
 	// if bucket is empty,
-	if b.beginTime == nil {
+	if b.lastTimestamp == nil {
 		return nil
 	}
 
-	offset := b.offset % b.Size()
-	tm := *b.beginTime + int64(b.offset)*int64(b.resolution)
-	var val *float64
-	if b.values[offset] != nil {
-		v := math.Floor(*b.values[offset] / float64(b.resolution))
-		val = &v
-	}
-	return common.NewSinglePointValue(&tm, val)
+	tm := *b.lastTimestamp
+	val := *b.lastHistoricValue
+	return common.NewSinglePointValue(&tm, &val)
 }
