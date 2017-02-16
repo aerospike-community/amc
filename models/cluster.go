@@ -232,8 +232,8 @@ func (c *Cluster) Status() string {
 
 func (c *Cluster) Disk() common.Stats {
 	result := common.Stats{
-		"used": c.aggNodeCalcStats["used-bytes-disk"],
-		"free": c.aggNodeCalcStats["free-bytes-disk"],
+		"used": c.aggNodeCalcStats.TryInt("used-bytes-disk", 0),
+		"free": c.aggNodeCalcStats.TryInt("free-bytes-disk", 0),
 	}
 
 	details := common.Stats{}
@@ -247,8 +247,8 @@ func (c *Cluster) Disk() common.Stats {
 
 func (c *Cluster) Memory() common.Stats {
 	result := common.Stats{
-		"used": c.aggNodeCalcStats["used-bytes-memory"],
-		"free": c.aggNodeCalcStats["free-bytes-memory"],
+		"used": c.aggNodeCalcStats.TryInt("used-bytes-memory", 0),
+		"free": c.aggNodeCalcStats.TryInt("free-bytes-memory", 0),
 	}
 
 	details := common.Stats{}

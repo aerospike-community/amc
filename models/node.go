@@ -167,7 +167,7 @@ func (n *Node) update() error {
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 	n.updateHistory()
 
-	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats["objects"], time.Since(tm))
+	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats.TryInt("objects", 0), time.Since(tm))
 
 	return nil
 }
