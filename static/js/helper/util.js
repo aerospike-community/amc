@@ -1678,6 +1678,7 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
             var selectHistoryInnerHtml = '';
             selectHistoryInnerHtml += Util.createSelectHistoryOption(30, multiplier);
             selectHistoryInnerHtml += Util.createSelectHistoryOption(60, multiplier);
+            selectHistoryInnerHtml += Util.createSelectHistoryOption(300, multiplier);
             selectHistoryInnerHtml += Util.createSelectHistoryOption(600, multiplier);
             selectHistoryInnerHtml += Util.createSelectHistoryOption(900, multiplier);
             selectHistoryInnerHtml += Util.createSelectHistoryOption(1800, multiplier);

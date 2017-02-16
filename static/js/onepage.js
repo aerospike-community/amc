@@ -91,7 +91,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             window.AMCGLOBALS.persistent.seedNode = null;
             window.AMCGLOBALS.persistent.models = {};
             window.AMCGLOBALS.persistent.xdrPort = 3004;
-            window.AMCGLOBALS.persistent.snapshotTime = 30;
+            window.AMCGLOBALS.persistent.snapshotTime = 60;
 
         }
 
