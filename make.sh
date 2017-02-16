@@ -5,9 +5,10 @@ set -e
 
 cd $GOPATH/src/github.com/citrusleaf/amc
 
-edition=$1
-environ=$2
+edition=${1:-enterprise}
+environ=${2:-dev}
 platform=${3:-linux}
+release=${4:-internal}
 sysname=$(uname | tr '[:upper:]' '[:lower:]')
 
 maintainer="Khosrow Afroozeh (khosrow@aerospike.com)"
@@ -18,7 +19,10 @@ echo "sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
 version=`git describe --tags $(git rev-list --tags --max-count=1)`
-# tag=`git rev-parse --short HEAD`
+if [ $release != "release" ];	then
+	version=`git describe --tags`;
+fi
+
 version_build="$edition-$version"
 
 # build binary
