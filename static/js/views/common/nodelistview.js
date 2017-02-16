@@ -86,6 +86,7 @@ define(["jquery", "underscore", "backbone", "config/app-config", "helper/util"],
 				}
 				
 			$(container).html(nodeListStr);
+      $(container).css({'max-height': '400px', 'overflow': 'auto'});
                 
                 // if(window.AMCGLOBALS.activePage === "dashboard"){
                 //     $(".nodes-legend-color").show();

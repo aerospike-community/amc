@@ -137,19 +137,19 @@ define(["jquery", "underscore", "backbone", "helper/piechart", "helper/util", "c
                 value = Util.msecToTime(data);
             }else if(formatType === 'pct'){
                 value = data;
-                if(value.indexOf('%') === -1) {
+                if(typeof(value) !== 'string' || value.indexOf('%') === -1) {
                  value += ' %';
                 }
             }else if(formatType === 'sec'){
                 data = data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 value = data;
-                if(value.indexOf('sec') === -1) {
+                if(typeof(value) !== 'string' || value.indexOf('sec') === -1) {
                  value += ' sec';
                 }
-            }if(formatType === 'millisec'){
+            }else if(formatType === 'millisec'){
                 data = data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 value = data;
-                if(value.indexOf('millisec') === -1) {
+                if(typeof(value) !== 'string' || value.indexOf('millisec') === -1) {
                   value += ' millisec';
                 }
             }
