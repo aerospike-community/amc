@@ -1981,15 +1981,6 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
 
             if(window.AMCGLOBALS.activePageModel !== null && (window.AMCGLOBALS.activePage !== page || !window.AMCGLOBALS.clusterInitiated)){
                 Poller.reset();
-                // alerts only for enterprise
-                if(Util.isEnterpriseEdition()) {
-                  var poller = Poller.get(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']));
-                  if(!poller.active()){
-                      poller.off("success").on('success', window.AMCGLOBALS.persistent.models.alertModel.fetchSuccess);
-                      poller.off("error").on('error', window.AMCGLOBALS.persistent.models.alertModel.fetchError);
-                      poller.start();
-                  }
-                }
                 window.$.event.trigger("view:Destroy",window.AMCGLOBALS.activePage);
                 delete window.AMCGLOBALS.activePageModel;
                 delete window.AMCGLOBALS.pageSpecific;
@@ -2022,6 +2013,16 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                             // effects on the latency charts
                             if(page !== 'latency') {
                               Util.initSelectNodesToggling('.title-bar');
+                            }
+
+                            // alerts only for enterprise
+                            if(Util.isEnterpriseEdition()) {
+                              var poller = Poller.get(window.AMCGLOBALS.persistent.models.alertModel, AppConfig.pollerOptions(AppConfig.updateInterval['alerts']));
+                              if(!poller.active()){
+                                  poller.off("success").on('success', window.AMCGLOBALS.persistent.models.alertModel.fetchSuccess);
+                                  poller.off("error").on('error', window.AMCGLOBALS.persistent.models.alertModel.fetchError);
+                                  poller.start();
+                              }
                             }
 
                             window.AMCGLOBALS.activePageModel = new ClusterModel({"update_interval" : 5});
