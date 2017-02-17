@@ -6,12 +6,10 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
-	"github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/rrd"
@@ -41,18 +39,18 @@ var nodeVisibilityStatus = struct {
 
 type Node struct {
 	cluster   *Cluster
-	_origNode *as.Node
+	_origNode common.SyncValue //*as.Node
 	origHost  *as.Host
 
-	status  NodeStatus
-	visible NodeVisibilityStatus
+	status  common.SyncValue //NodeStatus
+	visible common.SyncValue //NodeVisibilityStatus
 
-	namespaces atomic.Value //map[string]*Namespace
+	namespaces common.SyncValue //map[string]*Namespace
 
 	// latestInfo, oldInfo common.SyncInfo
 	latestInfo        common.SyncInfo
 	latestConfig      common.SyncStats
-	latestNodeLatency atomic.Value //map[string]common.SyncStats
+	latestNodeLatency common.SyncValue //map[string]common.SyncStats
 
 	stats, nsAggStats common.SyncStats
 	nsAggCalcStats    common.SyncStats
@@ -62,11 +60,9 @@ type Node struct {
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
 
-	serverTimeDelta time.Duration
+	serverTimeDelta common.SyncValue //time.Duration
 
 	_alertStates common.SyncStats
-
-	mutex deadlock.RWMutex
 }
 
 var _recordedNodeStats = [...]string{
@@ -93,13 +89,14 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 	lh := rrd.NewSimpleBucket(cluster.UpdateInterval(), 3600)
 
 	node := &Node{
-		cluster:        cluster,
-		_origNode:      origNode,
-		origHost:       host,
-		status:         nodeStatus.On,
-		namespaces:     atomic.Value{},
-		latencyHistory: lh,
-		_alertStates:   *common.NewSyncStats(common.Stats{}),
+		cluster:         cluster,
+		_origNode:       common.NewSyncValue(origNode),
+		origHost:        host,
+		status:          common.NewSyncValue(nodeStatus.On),
+		namespaces:      common.NewSyncValue(map[string]*Namespace{}),
+		latencyHistory:  lh,
+		_alertStates:    *common.NewSyncStats(common.Stats{}),
+		serverTimeDelta: common.NewSyncValue(time.Duration(0)),
 	}
 
 	statsHistory := make(map[string]*rrd.Bucket, len(_recordedNodeStats))
@@ -112,10 +109,8 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 }
 
 func (n *Node) valid() bool {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	return n._origNode != nil && n._origNode.IsActive()
+	origNode := n._origNode.Get()
+	return origNode != nil && origNode.(*as.Node).IsActive()
 }
 
 func (n *Node) update() error {
@@ -221,8 +216,13 @@ func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string,
 		return map[string]string{}, nil
 	}
 
+	origNode := n.origNode()
+	if origNode == nil {
+		return map[string]string{}, errors.New(fmt.Sprintf("Failed to request info. Node %s is not active.", *n.origHost))
+	}
+
 	for i := 0; i < reties; i++ {
-		result, err = n._origNode.RequestInfo(cmd...)
+		result, err = origNode.RequestInfo(cmd...)
 		if err == nil {
 			return result, nil
 		}
@@ -250,13 +250,13 @@ func (n *Node) updateNamespaceNames() error {
 			namespaceMap[nsName] = namespace
 		}
 	}
-	n.namespaces.Store(namespaceMap)
+	n.namespaces.Set(namespaceMap)
 
 	return nil
 }
 
 func (n *Node) LatestLatency() map[string]common.Stats {
-	res := n.latestNodeLatency.Load()
+	res := n.latestNodeLatency.Get()
 	if res == nil {
 		return nil
 	}
@@ -545,7 +545,7 @@ func (n *Node) setConfig(stats common.Info) {
 }
 
 func (n *Node) setNodeLatency(stats map[string]common.Stats) {
-	n.latestNodeLatency.Store(stats)
+	n.latestNodeLatency.Set(stats)
 }
 
 func (n *Node) ConfigAttrs(names ...string) common.Stats {
@@ -638,9 +638,7 @@ func (n *Node) StatsAttr(name string) interface{} {
 }
 
 func (n *Node) Status() NodeStatus {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.status
+	return n.status.Get().(NodeStatus)
 }
 
 func (n *Node) Enterprise() bool {
@@ -656,9 +654,7 @@ func (n *Node) VisibilityStatus() NodeVisibilityStatus {
 }
 
 func (n *Node) setStatus(status NodeStatus) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-	n.status = status
+	n.status.Set(status)
 }
 
 func (n *Node) Build() string {
@@ -709,7 +705,7 @@ func (n *Node) DataCenters() map[string]common.Stats {
 }
 
 func (n *Node) Namespaces() map[string]*Namespace {
-	res := n.namespaces.Load()
+	res := n.namespaces.Get()
 	if res == nil {
 		return map[string]*Namespace{}
 	}
@@ -798,20 +794,20 @@ func (n *Node) MigrationStats() common.Info {
 }
 
 func (n *Node) setOrigNode(node *as.Node) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-
-	if n._origNode != nil {
-		n._origNode.Close()
+	origNode := n._origNode.Get()
+	if origNode != nil {
+		origNode.(*as.Node).Close()
 	}
-	n._origNode = node
+	n._origNode.Set(node)
 }
 
 func (n *Node) origNode() *as.Node {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
+	origNode := n._origNode.Get()
+	if origNode != nil {
+		return origNode.(*as.Node)
+	}
 
-	return n._origNode
+	return nil
 }
 
 func parseBinInfo(s string) common.Stats {
@@ -868,19 +864,14 @@ func parseBinInfo(s string) common.Stats {
 }
 
 func (n *Node) setServerTimeDelta(tm int64) {
-	n.mutex.Lock()
-	defer n.mutex.Unlock()
-
 	if tm > 0 {
-		n.serverTimeDelta = time.Duration(tm-time.Now().Unix()) * time.Second
+		n.serverTimeDelta.Set(time.Duration(tm-time.Now().Unix()) * time.Second)
 	}
 }
 
 func (n *Node) ServerTime() time.Time {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-
-	return time.Now().Add(n.serverTimeDelta)
+	serverTimeDelta := n.serverTimeDelta.Get().(time.Duration)
+	return time.Now().Add(serverTimeDelta)
 }
 
 func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
