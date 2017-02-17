@@ -19,26 +19,55 @@ under the License.
 
 define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helper/util", "config/app-config", "config/var-details","helper/AjaxManager"], function($, _, Backbone, D3, GridHelper, Util, AppConfig, VarDetails,AjaxManager){
 
-    var STATIC_CONFIGS = {
-      namespace : ['storage-engine', 'device', 'file', 'filesize', 'data-in-memory', 'defrag-startup-minimum', 'write-block-size', 
-                  'scheduler-mode', 'cold-start-empty', 'partition-tree-locks', 'partition-tree-sprigs', 'replication-factor',
-                  'single-bin', 'data-in-index', 'cold-start-evict-ttl', 'si', 'set'],
-      node      : ['enable-xdr', 'xdr-digestlog-path', 'xdr-client-threads', 'xdr-errorlog-path', 
-                  'xdr-local-node-port', 'xdr-info-port', 'xdr-pidfile', 'address', 'node_status'],
-      xdr       : ['xdr_status', 'enable-xdr', 'xdr-digestlog-path', 'xdr-client-threads', 
-                  'xdr-errorlog-path', 'xdr-local-node-port', 'xdr-info-port', 'xdr-pidfile'],
+    var DYNAMIC_CONFIGS = {
+        namespace: ['max-write-cache', 'defrag-lwm-pct', 'defrag-sleep', 'defrag-queue-min', 'post-write-queue', 
+                    'fsync-max-sec', 'flush-max-ms', 'enable-osync', 'obj-size-hist-max', 'migrate-order', 
+                    'migrate-retransmit-ms', 'migrate-sleep', 'low-water-pct', 'high-water-memory-pct', 
+                    'high-water-disk-pct', 'evict-hist-buckets', 'evict-tenths-pct', 'stop-writes-pct', 
+                    'memory-size', 'default-ttl', 'max-ttl', 'enable-xdr', 'ns-forward-xdr-writes', 
+                    'allow-xdr-writes', 'allow-nonxdr-writes', 'set-delete', 'set-disable-eviction', 'read-consistency-level-override',
+                    'write-commit-level-override', 'min-avail-pct', 'conflict-resolution-policy', 'tomb-raider-eligible-age',
+                    'tomb-raider-period', 'tomb-raider-sleep', 'set-stop-writes-count', 'xdr-remote-datacenter',
+                    'si-gc-period', 'si-gc-max-units', 'si-tracing', 'sets-enable-xdr', 'set-enable-xdr', 
+                    'defrag-period', 'defrag-max-blocks', 'set-evict-hwm-count', 'set-stop-write-count'],
+
+        node:      ['cluster-name', 'proto-fd-max', 'transaction-threads-per-queue', 'nsup-delete-sleep', 
+                    'nsup-period', 'migrate-threads', 'migrate-max-num-incoming', 'transaction-retry-ms', 
+                    'transaction-max-ms', 'transaction-pending-limit', 'generation-disable', 'query-in-transaction-thread', 
+                    'query-priority-sleep-us', 'query-priority', 'query-threads', 'query-worker-threads', 'query-batch-size', 
+                    'query-req-max-inflight', 'query-long-q-max-size', 'query-short-q-max-size', 'query-threshold', 
+                    'hist-track-back', 'hist-track-slice', 'batch-max-requests', 'batch-priority', 'batch-threads', 
+                    'batch-index-threads', 'batch-max-buffer-per-queue', 'batch-max-unused-buffers', 'microbenchmarks', 
+                    'paxos-protocol', 'paxos-retransmit-period', 'paxos-recovery-policy', 'proto-fd-idle-ms', 
+                    'scan-max-active', 'scan-max-done', 'scan-max-udf-transactions', 'scan-threads', 'storage-benchmarks', 
+                    'ticker-interval', 'write-duplicate-resolution-disable', 'nsup-queue-escape', 'nsup-queue-hwm', 
+                    'nsup-queue-lwm', 'allow-inline-transactions', 'migrate-xmit-hwm', 'migrate-xmit-lwm', 'migrate-xmit-priority', 
+                    'migrate-xmit-sleep', 'migrate-read-priority', 'migrate-read-sleep', 'defrag-queue-hwm', 'defrag-queue-lwm', 
+                    'defrag-queue-escape', 'defrag-queue-priority', 'transaction-repeatable-read', 'respond-client-on-master-completion', 
+                    'replication-fire-and-forget', 'scan-priority', 'scan-retransmit', ],
+
+
+        xdr:       ['enable-xdr', 'forward-xdr-writes', 'xdr-ship-bins', 'xdr-delete-shipping-enabled', 'xdr-nsup-deletes-enabled', 
+                    'xdr-max-ship-throughput', 'xdr-read-threads', 'xdr-compression-threshold', 'xdr-hotkey-time-ms', 
+                    'xdr-shipping-enabled', 'xdr-write-timeout', 'xdr-info-timeout', 'dc-node-address-port', 'dc-int-ext-ipmap', 
+                    'dc-use-alternate-services', 'dc-security-config-file', 'xdr-namedpipe-path', 'stop-writes-noxdr', 
+                    'xdr-replace-record', 'xdr-threads', 'xdr-max-recs-inflight', 'xdr-read-mode', 'xdr-read-batch-size', 
+                    'xdr-write-batch-size', 'xdr-hotkey-maxskip', 'xdr-forward-with-gencheck', 'xdr-check-data-before-delete', 
+                    'xdr-timeout', 'xdr-batch-retry-sleep', 'xdr-batch-num-retry']
     };
 
-    function isStaticConfig(context, config) {
+
+    function isDynamicConfig(context, config) {
       var list = [];
       var found;
 
       if(context === 'nodes') {
-        list = STATIC_CONFIGS.node;
+        // for a node the server returns the xdr values as well
+        list = _.union(DYNAMIC_CONFIGS.node, DYNAMIC_CONFIGS.xdr);
       } else if(context === 'namespace') {
-        list = STATIC_CONFIGS.namespace;
+        list = DYNAMIC_CONFIGS.namespace;
       } else if(context === 'xdr') {
-        list = STATIC_CONFIGS.xdr;
+        list = DYNAMIC_CONFIGS.xdr;
       }
 
       found = _.find(list, function(c) { return c === config;});
@@ -122,16 +151,16 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 				}	
 				
 				function setData(stats, index){
-          var disabled = false;
+          var editable;
 					for(var i = index; i < index + 10 && i < stats.length; i++){
 						if(!StatTable.isDisabled(newStats[i])){
 							var data = {};
 							data.stat = newStats[i];
-              disabled = isStaticConfig(context, data.stat);
-              if(disabled){
-                  data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
-              } else{
+              editable = isDynamicConfig(context, data.stat);
+              if(editable){
                   data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='New Value'></input>";
+              } else{
+                  data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
               }
               jQuery(container).addRowData(newStats[i], data);
 						}
@@ -345,17 +374,17 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
         initEmptyGridData: function(statList, context){
             var myGridData = [];
             var counter=0;
-            var disabled = false;
+            var editable;
             for(var i in statList){
                 var data = {};
                 
                 if(!StatTable.isDisabled(statList[i])){
                     data.stat = statList[i];
-                    disabled = isStaticConfig(context, data.stat);
-                    if(disabled){
-                        data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
-                    } else{
+                    editable = isDynamicConfig(context, data.stat);
+                    if(editable){
                         data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='New Value'></input>";
+                    } else{
+                        data.updateConfig = "<input class='updateBox' name='"+ data.stat +"' type='text' value='' disabled='disabled'></input>";
                     }
                     myGridData[counter++] = data;
                 }
@@ -547,6 +576,9 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 $("#configApplyingChanges").dialog("close");    
                 notyAlert = noty({text : failMsg, layout : "center", type : "red" ,closeWith: ['click'], timeout : 5000});
             });
+
+            // reload the configs
+            document.dispatchEvent(new CustomEvent('UpdateConfig'));
         },
         
         getResourceURL : function(){
