@@ -68,8 +68,8 @@ func (r *Restore) Execute() error {
 		optionalArgs += " -n " + r.Namespace
 	}
 
-	if r.cluster.user != nil {
-		optionalArgs += fmt.Sprintf(" -U%s -P%s", *r.cluster.user, *r.cluster.password)
+	if r.cluster.User() != nil {
+		optionalArgs += fmt.Sprintf(" -U%s -P%s", *r.cluster.User(), *r.cluster.Password())
 	}
 
 	node := r.cluster.RandomActiveNode()

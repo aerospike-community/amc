@@ -8,14 +8,13 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/kennygrant/sanitize"
 	"github.com/mcuadros/go-version"
-	"github.com/sasha-s/go-deadlock"
+	// "github.com/sasha-s/go-deadlock"
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
@@ -24,113 +23,107 @@ import (
 
 type Cluster struct {
 	observer *ObserverT
-	client   *as.Client
-	nodes    map[as.Host]*Node
+	client   common.SyncValue //*as.Client
+	nodes    common.SyncValue //map[as.Host]*Node
 
 	// last time updated
-	lastUpdate time.Time
+	lastUpdate common.SyncValue //time.Time
 
 	//pinged by user
-	lastPing time.Time
+	lastPing common.SyncValue //time.Time
 
 	_datacenterInfo                      common.SyncStats
-	aggNodeStats, aggNodeCalcStats       common.Stats
-	aggNsStats, aggNsCalcStats           map[string]common.Stats
-	aggTotalNsStats, aggTotalNsCalcStats common.Stats
-	aggNsSetStats                        map[string]map[string]common.Stats // [namespace][set]aggregated stats
-	jobs                                 atomic.Value                       // []common.Stats
+	aggNodeStats, aggNodeCalcStats       common.SyncStats
+	aggNsStats, aggNsCalcStats           common.SyncValue //map[string]common.Stats
+	aggTotalNsStats, aggTotalNsCalcStats common.SyncStats
+	aggNsSetStats                        common.SyncValue //map[string]map[string]common.Stats // [namespace][set]aggregated stats
+	jobs                                 common.SyncValue //[]common.Stats
 
 	// either a uuid.V4, or a sorted comma delimited string of host:port
 	uuid            string
 	securityEnabled bool
-	updateInterval  int // seconds
+	updateInterval  common.SyncValue //int // seconds
 
-	seeds    []*as.Host
-	alias    *string
-	user     *string
-	password *string // TODO: Keep hashed values only
+	seeds    common.SyncValue //[]*as.Host
+	alias    common.SyncValue //string
+	user     common.SyncValue //string
+	password common.SyncValue //string // TODO: Keep hashed values only
 
 	// Permanent clusters are loaded from the config file
 	// They will not removed automatically after a period of inactivity
-	permanent bool
+	permanent common.SyncValue //bool
 
 	alerts *common.AlertBucket
 
-	users                 []*as.UserRoles
-	roles                 []*as.Role
-	currentUserPrivileges []string
+	users                 common.SyncValue //[]*as.UserRoles
+	roles                 common.SyncValue //[]*as.Role
+	currentUserPrivileges common.SyncValue //[]string
 
-	activeBackup  *Backup
-	activeRestore *Restore
+	activeBackup  common.SyncValue //*Backup
+	activeRestore common.SyncValue //*Restore
 
-	mutex deadlock.RWMutex
+	// mutex deadlock.RWMutex
 }
 
-func newCluster(observer *ObserverT, client *as.Client, alias *string, user, password string, seeds []*as.Host) *Cluster {
-	if alias != nil && len(*alias) == 0 {
-		alias = nil
-	}
-
+func newCluster(observer *ObserverT, client *as.Client, alias, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
 		observer:        observer,
-		client:          client,
-		nodes:           map[as.Host]*Node{},
-		alias:           alias,                              //seconds
-		updateInterval:  observer.config.AMC.UpdateInterval, //seconds
+		client:          common.NewSyncValue(client),
+		nodes:           common.NewSyncValue(map[as.Host]*Node{}),
+		updateInterval:  common.NewSyncValue(observer.config.AMC.UpdateInterval), //seconds
+		lastUpdate:      common.NewSyncValue(time.Time{}),                        //seconds
+		lastPing:        common.NewSyncValue(time.Time{}),                        //seconds
+		permanent:       common.NewSyncValue(false),                              //seconds
 		uuid:            uuid.NewV4().String(),
-		seeds:           seeds,
+		seeds:           common.NewSyncValue(seeds),
 		_datacenterInfo: *common.NewSyncStats(nil),
 		alerts:          common.NewAlertBucket(50),
 	}
 
+	newCluster.SetAlias(alias)
+
 	if user != "" {
-		newCluster.user = &user
-		newCluster.password = &password
+		newCluster.user = common.NewSyncValue(user)
+		newCluster.password = common.NewSyncValue(password)
 	}
 
+	newNodes := map[as.Host]*Node{}
 	if client != nil {
 		nodes := client.GetNodes()
 		for _, node := range nodes {
-			newCluster.nodes[*node.GetHost()] = newNode(&newCluster, node)
+			newNodes[*node.GetHost()] = newNode(&newCluster, node)
 		}
 	}
+	newCluster.nodes.Set(newNodes)
 
 	return &newCluster
 }
 
 func (c *Cluster) setPermanent(v bool) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.permanent = v
+	c.permanent.Set(v)
 }
 
-func (c *Cluster) closeAndUnset() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	if c.client != nil {
-		c.client.Close()
-		c.client = nil
-	}
+func (c *Cluster) origClient() *as.Client {
+	return c.client.Get().(*as.Client)
 }
 
 func (c *Cluster) updateLastestPing() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.lastPing = time.Now()
+	c.lastPing.Set(time.Now())
 }
 
 func (c *Cluster) shouldAutoRemove() bool {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+	lastPing := c.lastPing.Get().(time.Time)
+
+	if lastPing.IsZero() || c.permanent.Get().(bool) {
+		return false
+	}
 
 	// InactiveDurBeforeRemoval <= 0 means never remove
-	return !c.permanent && c.observer.config.AMC.InactiveDurBeforeRemoval > 0 && time.Since(c.lastPing) > time.Duration(c.observer.config.AMC.InactiveDurBeforeRemoval)*time.Second
+	return c.observer.config.AMC.InactiveDurBeforeRemoval > 0 && time.Since(lastPing) > time.Duration(c.observer.config.AMC.InactiveDurBeforeRemoval)*time.Second
 }
 
 func (c *Cluster) AddNode(address string, port int) error {
+	nodes := c.nodesCopy()
 
 	hostAddrList, err := resolveHost(address)
 	if err != nil || len(hostAddrList) == 0 {
@@ -139,7 +132,7 @@ func (c *Cluster) AddNode(address string, port int) error {
 
 	for _, address := range hostAddrList {
 		host := as.NewHost(address, port)
-		if _, exists := c.nodes[*host]; exists {
+		if _, exists := nodes[*host]; exists {
 			return errors.New("Node already exists")
 		}
 	}
@@ -148,15 +141,18 @@ func (c *Cluster) AddNode(address string, port int) error {
 
 	// This is to make sure the client will have the seed for this node
 	// In case ALL nodes are removed
-	c.client.Cluster().AddSeeds([]*as.Host{host})
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	client.Cluster().AddSeeds([]*as.Host{host})
 
 	// Node will be automatically assigned when available on cluster
 	newNode := newNode(c, nil)
 	newNode.origHost = host
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.nodes[*host] = newNode
+	nodes[*host] = newNode
+	c.nodes.Set(nodes)
 
 	return nil
 }
@@ -171,32 +167,24 @@ func (c *Cluster) RemoveNodeByAddress(address string) error {
 		return errors.New(fmt.Sprintf("Node %s is active. Only inactive nodes can be removed.", address))
 	}
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	newNodes := make(map[as.Host]*Node, len(c.nodes))
-	for host, oldNode := range c.nodes {
+	oldNodes := c.nodesCopy()
+	newNodes := make(map[as.Host]*Node, len(oldNodes))
+	for host, oldNode := range oldNodes {
 		if node != oldNode {
 			newNodes[host] = oldNode
 		}
 	}
 
-	c.nodes = newNodes
+	c.nodes.Set(newNodes)
 	return nil
 }
 
 func (c *Cluster) UpdateInterval() int {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.updateInterval
+	return c.updateInterval.Get().(int)
 }
 
 func (c *Cluster) SetUpdateInterval(val int) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.updateInterval = val
+	c.updateInterval.Set(val)
 }
 
 func (c *Cluster) OffNodes() []string {
@@ -221,10 +209,7 @@ func (c *Cluster) RandomActiveNode() *Node {
 }
 
 func (c *Cluster) Status() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	if c.client != nil && c.client.IsConnected() {
+	if client := c.origClient(); client != nil && client.IsConnected() {
 		return "on"
 	}
 	return "off"
@@ -261,11 +246,9 @@ func (c *Cluster) Memory() common.Stats {
 }
 
 func (c *Cluster) Users() []*as.UserRoles {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	res := make([]*as.UserRoles, len(c.users))
-	copy(res, c.users)
+	oldUsers := c.users.Get().([]*as.UserRoles)
+	res := make([]*as.UserRoles, len(oldUsers))
+	copy(res, oldUsers)
 	return res
 }
 
@@ -274,84 +257,150 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 		return errors.New("New password cannot be same as current password")
 	}
 
-	if c.password != nil && currentPass != *c.password {
+	if pass := c.Password(); pass != nil && currentPass != *pass {
 		return errors.New("Invalid current password")
 	}
 
-	if c.user != nil && user != *c.user {
+	if u := c.User(); u != nil && user != *u {
 		return errors.New("Invalid current user")
 	}
 
-	err := c.client.ChangePassword(nil, user, newPass)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+
+	err := client.ChangePassword(nil, user, newPass)
 	// update password
 	if err == nil {
-		c.password = &newPass
+		c.password.Set(&newPass)
 	}
 
 	return err
 }
 
 func (c *Cluster) ChangeUserPassword(user, pass string) error {
-	return c.client.ChangePassword(nil, user, pass)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+
+	return client.ChangePassword(nil, user, pass)
 }
 
 func (c *Cluster) CreateUser(user, password string, roles []string) error {
-	return c.client.CreateUser(nil, user, password, roles)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.CreateUser(nil, user, password, roles)
 }
 
 func (c *Cluster) DropUser(user string) error {
-	return c.client.DropUser(nil, user)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.DropUser(nil, user)
 }
 
 func (c *Cluster) GrantRoles(user string, roles []string) error {
-	return c.client.GrantRoles(nil, user, roles)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.GrantRoles(nil, user, roles)
 }
 
 func (c *Cluster) RevokeRoles(user string, roles []string) error {
-	return c.client.RevokeRoles(nil, user, roles)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.RevokeRoles(nil, user, roles)
 }
 
 func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
-	return c.client.CreateRole(nil, role, privileges)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.CreateRole(nil, role, privileges)
 }
 
 func (c *Cluster) DropRole(role string) error {
-	return c.client.DropRole(nil, role)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.DropRole(nil, role)
 }
 
 func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
-	return c.client.GrantPrivileges(nil, role, privileges)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.GrantPrivileges(nil, role, privileges)
 }
 
 func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error {
-	return c.client.RevokePrivileges(nil, role, privileges)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.RevokePrivileges(nil, role, privileges)
 }
 
 func (c *Cluster) CreateUDF(name, body string) error {
-	_, err := c.client.RegisterUDF(nil, []byte(body), name, as.LUA)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	_, err := client.RegisterUDF(nil, []byte(body), name, as.LUA)
 	return err
 }
 
 func (c *Cluster) DropUDF(udf string) error {
-	_, err := c.client.RemoveUDF(nil, udf)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	_, err := client.RemoveUDF(nil, udf)
 	return err
 }
 
 func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType string) error {
-	_, err := c.client.CreateIndex(nil, namespace, setName, indexName, binName, as.IndexType(indexType))
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	_, err := client.CreateIndex(nil, namespace, setName, indexName, binName, as.IndexType(indexType))
 	return err
 }
 
 func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
-	return c.client.DropIndex(nil, namespace, setName, indexName)
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+	return client.DropIndex(nil, namespace, setName, indexName)
 }
 
 func (c *Cluster) Nodes() (nodes []*Node) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	for _, node := range c.nodes {
+	cNodes := c.nodes.Get().(map[as.Host]*Node)
+	for _, node := range cNodes {
 		nodes = append(nodes, node)
+	}
+
+	return nodes
+}
+
+func (c *Cluster) nodesCopy() map[as.Host]*Node {
+	cNodes := c.nodes.Get().(map[as.Host]*Node)
+	nodes := make(map[as.Host]*Node, len(cNodes))
+	for host, node := range cNodes {
+		nodes[host] = node
 	}
 
 	return nodes
@@ -415,28 +464,29 @@ func (c *Cluster) NodeCompatibility() string {
 }
 
 func (c *Cluster) SeedAddress() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.seeds[0].String()
+	return c.seeds.Get().([]*as.Host)[0].String()
 }
 
 func (c *Cluster) Id() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	return c.uuid
 }
 
 func (c *Cluster) User() *string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	if c.user == nil || *c.user == "" {
+	user := c.user.Get()
+	if user == nil || user.(string) == "" {
 		return nil
 	}
-	u := *c.user
+	u := user.(string)
 	return &u
+}
+
+func (c *Cluster) Password() *string {
+	pass := c.password.Get()
+	if pass == nil || pass.(string) == "" {
+		return nil
+	}
+	p := pass.(string)
+	return &p
 }
 
 func (c *Cluster) Name() *string {
@@ -450,11 +500,9 @@ func (c *Cluster) Name() *string {
 }
 
 func (c *Cluster) Alias() *string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	if c.alias != nil && len(*c.alias) > 0 {
-		alias := *c.alias
+	alias := c.alias.Get()
+	if alias != nil && len(alias.(string)) > 0 {
+		alias := alias.(string)
 		return &alias
 	}
 
@@ -466,40 +514,36 @@ func (c *Cluster) Alias() *string {
 }
 
 func (c *Cluster) SetAlias(alias string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
+	alias = strings.Trim(alias, " \t")
 	if len(alias) == 0 {
-		c.alias = nil
+		c.alias.Set(nil)
 		return
 	}
 
-	c.alias = &alias
+	c.alias.Set(alias)
 }
 
 func (c *Cluster) Roles() []*as.Role {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+	oldRoles := c.roles.Get().([]*as.Role)
 
-	if len(c.roles) == 0 {
+	if len(oldRoles) == 0 {
 		return nil
 	}
 
-	res := make([]*as.Role, len(c.roles))
-	copy(res, c.roles)
+	res := make([]*as.Role, len(oldRoles))
+	copy(res, oldRoles)
 	return res
 }
 
 func (c *Cluster) RoleNames() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+	oldRoles := c.roles.Get().([]*as.Role)
 
-	if len(c.roles) == 0 {
+	if len(oldRoles) == 0 {
 		return []string{}
 	}
 
-	res := make([]string, 0, len(c.roles))
-	for _, r := range c.roles {
+	res := make([]string, 0, len(oldRoles))
+	for _, r := range oldRoles {
 		res = append(res, r.Name)
 	}
 
@@ -507,46 +551,40 @@ func (c *Cluster) RoleNames() []string {
 }
 
 func (c *Cluster) close() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.client.Close()
-	c.client = nil
+	if cl := c.origClient(); cl != nil {
+		cl.Close()
+		c.client.Set(nil)
+	}
 }
 
 func (c *Cluster) IsSet() bool {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.client != nil
+	return c.client.Get() != nil
 }
 
 func (c *Cluster) SecurityEnabled() bool {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.user != nil && len(*c.user) > 0
+	user := c.User()
+	return user != nil && len(*user) > 0
 }
 
 func (c *Cluster) shouldUpdate() bool {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return time.Since(c.lastUpdate) >= time.Second*time.Duration(c.updateInterval)
+	lastUpdateIfc := c.lastUpdate.Get()
+	if lastUpdateIfc == nil {
+		return true
+	}
+	lastUpdate := lastUpdateIfc.(time.Time)
+	updateInterval := c.updateInterval.Get().(int)
+	return lastUpdate.IsZero() || time.Since(lastUpdate) >= time.Second*time.Duration(updateInterval)
 }
 
 func (c *Cluster) setUpdatedAt(tm time.Time) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.lastUpdate = tm
+	c.lastUpdate.Set(tm)
 }
 
 func (c *Cluster) update(wg *sync.WaitGroup) error {
 	// make sure panics do not bring the observer down
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(debug.Stack())
+			log.Error(string(debug.Stack()))
 		}
 	}()
 
@@ -620,14 +658,20 @@ func (c *Cluster) checkHealth() error {
 }
 
 func (c *Cluster) updateUsers() error {
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+
+	user := c.User()
 	// update current user's privileges
-	if c.user != nil && len(*c.user) > 0 {
+	if user != nil && len(*user) > 0 {
 		currentUserPrivileges := []string{}
 
 		// this means the user do not have the privileges other than viewing its own roles
-		if u, err := c.client.QueryUser(nil, *c.user); err == nil {
+		if u, err := client.QueryUser(nil, *user); err == nil {
 			for _, r := range u.Roles {
-				role, err := c.client.QueryRole(nil, r)
+				role, err := client.QueryRole(nil, r)
 				if err != nil {
 					continue
 				}
@@ -637,21 +681,18 @@ func (c *Cluster) updateUsers() error {
 				}
 			}
 
-			c.currentUserPrivileges = currentUserPrivileges
+			c.currentUserPrivileges.Set(currentUserPrivileges)
 		} else {
 			return err
 		}
 
 	}
 
-	users, _ := c.client.QueryUsers(nil)
-	roles, _ := c.client.QueryRoles(nil)
+	users, _ := client.QueryUsers(nil)
+	roles, _ := client.QueryRoles(nil)
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.users = users
-	c.roles = roles
+	c.users.Set(users)
+	c.roles.Set(roles)
 
 	return nil
 }
@@ -705,13 +746,18 @@ func (c *Cluster) RequestInfoAll(cmd string) (map[*Node]string, error) {
 }
 
 func (c *Cluster) registerNode(h *as.Host, n *Node) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.nodes[*h] = n
+	nodes := c.nodesCopy()
+	nodes[*h] = n
+	c.nodes.Set(nodes)
 }
 
 func (c *Cluster) updateCluster() error {
-	for _, n := range c.client.GetNodes() {
+	client := c.origClient()
+	if client == nil {
+		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+	}
+
+	for _, n := range client.GetNodes() {
 		node := c.FindNodeByAddress(n.GetHost().String())
 		if node == nil {
 			node = c.FindNodeById(n.GetName())
@@ -733,10 +779,12 @@ func (c *Cluster) updateCluster() error {
 }
 
 func (c *Cluster) updateStats() error {
+	nodes := c.nodesCopy()
+
 	// do the info calls in parallel
 	wg := sync.WaitGroup{}
-	wg.Add(len(c.nodes))
-	for _, node := range c.nodes {
+	wg.Add(len(nodes))
+	for _, node := range nodes {
 		go func(node *Node) {
 			defer wg.Done()
 			node.update()
@@ -751,7 +799,7 @@ func (c *Cluster) updateStats() error {
 	aggNsSetStats := map[string]map[string]common.Stats{}
 
 	// then do the calculations synchronously, since they are fast and need synchronization anyway
-	for _, node := range c.nodes {
+	for _, node := range nodes {
 		node.applyStatsToAggregate(aggNodeStats, aggNodeCalcStats)
 		node.applyNsStatsToAggregate(aggNsStats, aggNsCalcStats)
 		aggNsSetStats = node.applyNsSetStatsToAggregate(aggNsSetStats)
@@ -762,14 +810,13 @@ func (c *Cluster) updateStats() error {
 		aggTotalNsStats.AggregateStats(v)
 	}
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.aggNodeStats = aggNodeStats
-	c.aggNodeCalcStats = aggNodeCalcStats
-	c.aggNsStats = aggNsStats
-	c.aggNsCalcStats = aggNsCalcStats
-	c.aggTotalNsStats = aggTotalNsStats
-	c.aggNsSetStats = aggNsSetStats
+	c.aggNodeStats.SetStats(aggNodeStats)
+	c.aggNodeCalcStats.SetStats(aggNodeCalcStats)
+	c.aggTotalNsStats.SetStats(aggTotalNsStats)
+
+	c.aggNsStats.Set(aggNsStats)
+	c.aggNsCalcStats.Set(aggNsCalcStats)
+	c.aggNsSetStats.Set(aggNsSetStats)
 
 	return nil
 }
@@ -987,10 +1034,7 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 }
 
 func (c *Cluster) CurrentUserPrivileges() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.currentUserPrivileges
+	return c.currentUserPrivileges.Get().([]string)
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
@@ -1004,9 +1048,6 @@ func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
 }
 
 func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	attrs := []string{
 		"delete", "deleting", "disable-eviction", "enable-xdr",
 		"evict-hwm-count", "memory_data_bytes", "n_objects", "node_status",
@@ -1015,7 +1056,7 @@ func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	}
 
 	res := []common.Stats{}
-	if setInfo := c.aggNsSetStats[namespace]; setInfo != nil {
+	if setInfo := c.aggNsSetStats.Get().(map[string]map[string]common.Stats)[namespace]; setInfo != nil {
 		for _, v := range setInfo {
 			res = append(res, v.GetMulti(attrs...))
 		}
@@ -1039,11 +1080,11 @@ func (c *Cluster) updateJobs() {
 		}
 	}
 
-	c.jobs.Store(res)
+	c.jobs.Set(res)
 }
 
 func (c *Cluster) Jobs() []common.Stats {
-	res := c.jobs.Load()
+	res := c.jobs.Get()
 	if res == nil {
 		return []common.Stats{}
 	}
@@ -1095,7 +1136,7 @@ func (c *Cluster) datacenterInfo() common.Stats {
 			datacenterList = append(datacenterList, dcName)
 
 			for _, nodeAddr := range dcStats["Nodes"].([]string) {
-				remoteNodeStats[nodeAddr] = c.DiscoverDatacenter(dcStats)
+				remoteNodeStats[nodeAddr] = c.discoverDatacenter(dcStats)
 				oldCluster := c.observer.NodeHasBeenDiscovered(nodeAddr)
 				if oldCluster == nil {
 					xdrInfo[nodeAddr] = common.Stats{"shipping_namespaces": dcStats["namespaces"].([]string)}
@@ -1119,7 +1160,6 @@ func (c *Cluster) datacenterInfo() common.Stats {
 			"ip":             node.Host(),
 			"port":           node.Port(),
 			"cur_throughput": 0,
-			"xdr_uptime":     node.StatsAttr("xdr_uptime"),
 			"lag":            node.StatsAttr("xdr_timelag"),
 		}
 	}
@@ -1171,7 +1211,7 @@ func (c *Cluster) datacenterInfo() common.Stats {
 	}
 }
 
-func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
+func (c *Cluster) discoverDatacenter(dc common.Stats) common.Stats {
 	for _, nodeAddr := range dc["Nodes"].([]string) {
 		host, port, err := common.SplitHostPort(nodeAddr)
 		if err != nil {
@@ -1193,7 +1233,6 @@ func (c *Cluster) DiscoverDatacenter(dc common.Stats) common.Stats {
 						"ip":             host,
 						"access_port":    port,
 						"xdr_uptime":     nil,
-						"port":           port,
 						"lag":            nil,
 					},
 				}, "read_tps": common.Stats{
@@ -1235,11 +1274,11 @@ func (c *Cluster) Backup(
 	TerminateOnChange bool,
 	ScanPriority int) (*Backup, error) {
 
-	if c.activeBackup != nil && c.activeBackup.Status == common.BackupStatusInProgress {
+	if c.CurrentBackup() != nil && c.CurrentBackup().Status == common.BackupStatusInProgress {
 		return nil, errors.New("Another backup operation already exists and is in progress.")
 	}
 
-	c.activeBackup = &Backup{
+	newBackup := &Backup{
 		BackupRestore: common.NewBackupRestore(
 			common.BackupRestoreTypeBackup,
 			c.Id(),
@@ -1258,20 +1297,18 @@ func (c *Cluster) Backup(
 		cluster: c,
 	}
 
-	if err := c.activeBackup.Save(); err != nil {
-		c.activeBackup = nil
+	if err := newBackup.Save(); err != nil {
 		return nil, err
 	}
 
+	c.activeBackup.Set(newBackup)
+
 	// no need to set the activeBackup to nil, since it will be ignored in the condition above
-	return c.activeBackup, c.activeBackup.Execute()
+	return newBackup, newBackup.Execute()
 }
 
 func (c *Cluster) CurrentBackup() *Backup {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.activeBackup
+	return c.activeBackup.Get().(*Backup)
 }
 
 func (c *Cluster) Restore(
@@ -1284,11 +1321,11 @@ func (c *Cluster) Restore(
 	MissingRecordsOnly bool,
 	IgnoreGenerationNum bool) (*Restore, error) {
 
-	if c.activeRestore != nil && c.activeRestore.Status == common.BackupStatusInProgress {
+	if c.CurrentRestore() != nil && c.CurrentRestore().Status == common.BackupStatusInProgress {
 		return nil, errors.New("Another backup operation already exists and is in progress.")
 	}
 
-	c.activeRestore = &Restore{
+	newRestore := &Restore{
 		BackupRestore: common.NewBackupRestore(
 			common.BackupRestoreTypeRestore,
 			c.Id(),
@@ -1311,19 +1348,17 @@ func (c *Cluster) Restore(
 		cluster: c,
 	}
 
-	if err := c.activeRestore.Save(); err != nil {
-		c.activeRestore = nil
+	if err := newRestore.Save(); err != nil {
 		return nil, err
 	}
 
+	c.activeRestore.Set(newRestore)
+
 	// no need to set the activeRestore to nil, since it will be ignored in the condition above
-	return c.activeRestore, c.activeRestore.Execute()
+	return newRestore, newRestore.Execute()
 }
 
 func (c *Cluster) CurrentRestore() *Restore {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	return c.activeRestore
+	return c.activeRestore.Get().(*Restore)
 
 }

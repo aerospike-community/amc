@@ -5,6 +5,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
+	"runtime/debug"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -20,8 +21,8 @@ var (
 
 func main() {
 	defer func() {
-		if r := recover(); r != nil {
-			log.Error(r)
+		if err := recover(); err != nil {
+			log.Fatal(string(debug.Stack()))
 		}
 	}()
 

@@ -58,7 +58,7 @@ func New(config *common.Config) *ObserverT {
 			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User, " Pass: ", server.Password)
 			host := as.NewHost(server.Host, int(server.Port))
 			host.TLSName = server.TLSName
-			cluster, err = o.Register("automatic", cp, &server.Alias, host)
+			cluster, err = o.Register("automatic", cp, server.Alias, host)
 			if err != nil {
 				log.Error("Error while trying to add database from config file for monitoring: ", err.Error())
 				continue
@@ -93,7 +93,7 @@ func (o *ObserverT) removeIdleClusters() {
 
 	for _, c := range clusters {
 		if c.shouldAutoRemove() {
-			c.closeAndUnset()
+			c.close()
 			o.removeClusterFromAllSessions(c)
 		}
 	}
@@ -112,7 +112,7 @@ func (o *ObserverT) observe(config *common.Config) {
 	// make sure panics do not bring the observer down
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(debug.Stack())
+			log.Error(string(debug.Stack()))
 			go o.observe(config)
 		}
 	}()
@@ -212,7 +212,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	o.sessions[sessionId] = newClusters
 
 	// check if cluster exists in any session
-	if !cluster.permanent {
+	if !cluster.permanent.Get().(bool) {
 		exists := false
 		for _, session := range o.sessions {
 			for _, c := range session {
@@ -241,7 +241,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	return len(o.sessions[sessionId])
 }
 
-func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias *string, hosts ...*as.Host) (*Cluster, error) {
+func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {
 	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
 	if err != nil {
 		return nil, err
@@ -295,7 +295,11 @@ func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 	defer o.mutex.RUnlock()
 
 	for _, cluster := range o.clusters {
-		for _, node := range cluster.client.Cluster().GetNodes() {
+		client := cluster.origClient()
+		if client == nil || client.Cluster() == nil {
+			continue
+		}
+		for _, node := range client.Cluster().GetNodes() {
 			for _, host := range node.GetAliases() {
 				if strings.ToLower(host.Name+":"+strconv.Itoa(host.Port)) == strings.ToLower(alias) {
 					return cluster
@@ -341,8 +345,9 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 
 	for _, cluster := range clusters {
 		for _, alias := range aliases {
-			if node := cluster.nodes[alias]; node != nil {
-				if !checkUserPass || (cluster.User() == nil || (*cluster.user == user && *cluster.password == password)) {
+			clusterNodes := cluster.nodesCopy()
+			if node := clusterNodes[alias]; node != nil {
+				if !checkUserPass || (cluster.User() == nil || (*cluster.User() == user && *cluster.Password() == password)) {
 					return cluster
 				}
 			}

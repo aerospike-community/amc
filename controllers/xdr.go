@@ -24,7 +24,7 @@ func getClusterXdrNodes(c echo.Context) error {
 	keys := []string{
 		"stat_recs_outstanding", "timediff_lastship_cur_secs", "xdr_timelag",
 		"esmt_bytes_shipped", "stat_recs_relogged",
-		"stat_recs_shipped", "free_dlog_pct", "xdr_uptime",
+		"stat_recs_shipped", "free_dlog_pct",
 		"cur_throughput", "esmt-bytes-shipped", "free-dlog-pct",
 	}
 

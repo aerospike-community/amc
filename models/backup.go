@@ -60,8 +60,8 @@ func (b *Backup) Execute() error {
 	if b.ScanPriority != 2 {
 		optionalArgs += fmt.Sprintf(" -f %d ", b.ScanPriority)
 	}
-	if b.cluster.user != nil {
-		optionalArgs += fmt.Sprintf(" -U%s -P%s", *b.cluster.user, *b.cluster.password)
+	if b.cluster.User() != nil {
+		optionalArgs += fmt.Sprintf(" -U%s -P%s", *b.cluster.User(), *b.cluster.Password())
 	}
 
 	node := b.cluster.RandomActiveNode()

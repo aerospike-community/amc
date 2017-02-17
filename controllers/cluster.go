@@ -87,7 +87,7 @@ func postGetClusterId(c echo.Context) error {
 		// 	}
 		// }
 
-		cluster, err = _observer.Register(sid, &clientPolicy, &form.ClusterAlias, seedHost)
+		cluster, err = _observer.Register(sid, &clientPolicy, strings.Trim(form.ClusterAlias, " \t"), seedHost)
 		if err != nil {
 			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
 				// create output
