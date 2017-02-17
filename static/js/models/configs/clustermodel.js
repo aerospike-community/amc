@@ -485,6 +485,10 @@ define(["jquery", "underscore", "backbone", "helper/util", "collections/configs/
             });
             this.refreshIntervalInputValidation(this);
 
+            document.addEventListener('UpdateConfig', function(evt) {
+                that.reInitializeCollection(that);
+            });
+
             $("#nodesCheckBox").off('change').on('change',function(e){
                 e.preventDefault();
                 e.stopPropagation();

@@ -576,6 +576,9 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                 $("#configApplyingChanges").dialog("close");    
                 notyAlert = noty({text : failMsg, layout : "center", type : "red" ,closeWith: ['click'], timeout : 5000});
             });
+
+            // reload the configs
+            document.dispatchEvent(new CustomEvent('UpdateConfig'));
         },
         
         getResourceURL : function(){
