@@ -24,12 +24,22 @@ func main() {
 
 	var wg sync.WaitGroup
 	for i := 0; i < len(clients); i++ {
-		c := clients[i]
-		err := c.Connect()
-		if err != nil {
-			log.Println(err.Error())
+		cc := clients[i]
+		for j := 0; j < nconn; j++ {
+			c := load.Client{
+				IP:       cc.IP,
+				Port:     cc.Port,
+				Username: cc.Username,
+				Password: cc.Password,
+				TLSName:  cc.TLSName,
+			}
+			err := c.Connect()
+			if err != nil {
+				log.Println(err.Error())
+				break
+			}
+			c.Start(&wg)
 		}
-		c.Start(&wg)
 	}
 
 	wg.Wait()

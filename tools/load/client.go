@@ -3,6 +3,7 @@ package load
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -56,12 +57,16 @@ func (c *Client) Connect() error {
 	var buf bytes.Buffer
 	buf.ReadFrom(resp.Body)
 
-	log.Println(buf.String())
 	var b response.Connect
 	err = json.Unmarshal(buf.Bytes(), &b)
 	if err != nil {
 		return err
 	}
+
+	if b.Status == "failure" {
+		return errors.New("Failed to connect to " + c.IP + ":" + c.Port)
+	}
+	log.Println(buf.String())
 
 	c.clusterID = b.ClusterID
 	return nil

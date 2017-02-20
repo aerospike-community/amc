@@ -7,4 +7,5 @@ type Basic struct {
 
 type Connect struct {
 	ClusterID string `json:"cluster_id"`
+	Status    string
 }
