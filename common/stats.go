@@ -401,6 +401,12 @@ func (s Stats) GetMulti(names ...string) Stats {
 	return res
 }
 
+func (s Stats) Del(names ...string) {
+	for _, name := range names {
+		delete(s, name)
+	}
+}
+
 // Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Stats) TryInt(name string, defValue int64, aliases ...string) int64 {
@@ -645,6 +651,12 @@ func (s *SyncStats) GetMulti(names ...string) Stats {
 	defer s.mutex.RUnlock()
 
 	return s._Stats.GetMulti(names...)
+}
+
+func (s *SyncStats) Del(names ...string) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	s._Stats.Del(names...)
 }
 
 // Value MUST exist, and MUST be an int64 or a convertible string.

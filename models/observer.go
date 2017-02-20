@@ -11,7 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	asl "github.com/aerospike/aerospike-client-go/logger"
-	"github.com/sasha-s/go-deadlock"
+	// "github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
 )
@@ -30,7 +30,7 @@ type ObserverT struct {
 	debug common.SyncValue //DebugStatus
 
 	clusters common.SyncValue //[]*Cluster
-	mutex    deadlock.RWMutex
+	mutex    sync.RWMutex
 
 	notifyCloseChan chan struct{}
 }
@@ -266,7 +266,12 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	}
 
 	log.Info("Removing cluster " + cluster.Id() + " from session " + sessionId)
-	return len(o.sessionClusters(sessionId))
+	remainingClusters := o.sessionClusters(sessionId)
+	if len(remainingClusters) == 0 {
+		// remove session
+		o.sessions.Del(sessionId)
+	}
+	return len(remainingClusters)
 }
 
 func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {

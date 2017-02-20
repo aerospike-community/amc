@@ -2,10 +2,10 @@ package rrd
 
 import (
 	"math"
-	// "sync"
+	"sync"
 	"time"
 
-	"github.com/sasha-s/go-deadlock"
+	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
@@ -26,7 +26,7 @@ type Bucket struct {
 	values []*float64
 	offset int // determines the offset from beginTime in resolution steps
 
-	mutex deadlock.RWMutex
+	mutex sync.RWMutex
 }
 
 func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
