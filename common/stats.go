@@ -383,6 +383,11 @@ func (s Stats) Get(name string, aliases ...string) interface{} {
 	return nil
 }
 
+func (s Stats) ExistsGet(name string) (interface{}, bool) {
+	val, exists := s[name]
+	return val, exists
+}
+
 func (s Stats) GetMulti(names ...string) Stats {
 	res := make(Stats, len(names))
 	for _, name := range names {
@@ -604,6 +609,14 @@ func (s *SyncStats) Clone() Stats {
 	return s._Stats.Clone()
 }
 
+func (s *SyncStats) Exists(name string) bool {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	_, exists := s._Stats[name]
+	return exists
+}
+
 func (s *SyncStats) CloneInto(res Stats) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -618,6 +631,13 @@ func (s *SyncStats) Get(name string, aliases ...string) interface{} {
 	defer s.mutex.RUnlock()
 
 	return s._Stats.Get(name, aliases...)
+}
+
+func (s *SyncStats) ExistsGet(name string) (interface{}, bool) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Stats.ExistsGet(name)
 }
 
 func (s *SyncStats) GetMulti(names ...string) Stats {

@@ -24,12 +24,12 @@ type DebugStatus struct {
 }
 
 type ObserverT struct {
-	sessions map[string][]*Cluster
+	sessions common.SyncStats // map[string][]*Cluster
 	config   *common.Config
 
-	debug DebugStatus
+	debug common.SyncValue //DebugStatus
 
-	clusters []*Cluster
+	clusters common.SyncValue //[]*Cluster
 	mutex    deadlock.RWMutex
 
 	notifyCloseChan chan struct{}
@@ -38,9 +38,10 @@ type ObserverT struct {
 func New(config *common.Config) *ObserverT {
 	var err error
 	o := &ObserverT{
-		sessions: map[string][]*Cluster{},
-		clusters: []*Cluster{},
+		sessions: *common.NewSyncStats(common.Stats{}),
+		clusters: common.NewSyncValue([]*Cluster{}),
 		config:   config,
+		debug:    common.NewSyncValue(DebugStatus{}),
 	}
 	go o.observe(config)
 
@@ -100,12 +101,15 @@ func (o *ObserverT) removeIdleClusters() {
 }
 
 func (o *ObserverT) Clusters() []*Cluster {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
+	c := o.clusters.Get().([]*Cluster)
 
-	clusters := make([]*Cluster, len(o.clusters))
-	copy(clusters, o.clusters)
+	clusters := make([]*Cluster, len(c))
+	copy(clusters, c)
 	return clusters
+}
+
+func (o *ObserverT) clustersRef() []*Cluster {
+	return o.clusters.Get().([]*Cluster)
 }
 
 func (o *ObserverT) observe(config *common.Config) {
@@ -132,24 +136,38 @@ func (o *ObserverT) observe(config *common.Config) {
 			o.updateClusters()
 
 		case <-o.notifyCloseChan:
-			o.mutex.Lock()
-			for _, c := range o.clusters {
-				go c.close()
+			clusters := o.Clusters()
+			o.clusters.Set([]*Cluster{})
+			for _, c := range clusters {
+				c.close()
 			}
-			o.clusters = nil
-			o.mutex.Unlock()
 
 			return
 		}
 	}
 }
 
+func (o *ObserverT) sessionClusters(sessionId string) []*Cluster {
+	clustersIfc := o.sessions.Get(sessionId)
+
+	if clustersIfc == nil {
+		return nil
+	}
+
+	clusters := clustersIfc.([]*Cluster)
+	res := make([]*Cluster, len(clusters))
+	copy(res, clusters)
+	return res
+}
+
 func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
+	clusters := o.Clusters()
+
 	cExists := false
-	for _, c := range o.clusters {
+	for _, c := range clusters {
 		if c == cluster {
 			cExists = true
 			break
@@ -158,18 +176,23 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 
 	if !cExists {
 		log.Info("Appending cluster " + cluster.Id() + " to the models...")
-		o.clusters = append(o.clusters, cluster)
+		clusters = append(clusters, cluster)
+		o.clusters.Set(clusters)
 	}
 
+	sessionClusters := o.sessionClusters(sessionId)
+
 	// make sure the cluster is not already included in the session
-	for _, c := range o.sessions[sessionId] {
+	for _, c := range sessionClusters {
 		if c == cluster {
 			return
 		}
 	}
 
 	log.Info("Appending cluster " + cluster.Id() + " to session " + sessionId)
-	o.sessions[sessionId] = append(o.sessions[sessionId], cluster)
+
+	sessionClusters = append(sessionClusters, cluster)
+	o.sessions.Set(sessionId, sessionClusters)
 }
 
 func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
@@ -177,23 +200,26 @@ func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
 	defer o.mutex.Unlock()
 
 	// Remove cluster from the session
-	for sessionId, s := range o.sessions {
-		newClusters := make([]*Cluster, 0, len(o.sessions[sessionId]))
-		for _, c := range s {
+	sessions := o.sessions.Clone()
+	for sessionId, s := range sessions {
+		newClusters := make([]*Cluster, 0, len(sessions[sessionId].([]*Cluster)))
+		for _, c := range s.([]*Cluster) {
 			if c != cluster {
 				newClusters = append(newClusters, c)
 			}
 		}
-		o.sessions[sessionId] = newClusters
+		sessions[sessionId] = newClusters
 	}
+	o.sessions.SetStats(sessions)
 
-	newClusters := make([]*Cluster, 0, len(o.clusters))
-	for _, c := range o.clusters {
+	clusters := o.Clusters()
+	newClusters := make([]*Cluster, 0, len(clusters))
+	for _, c := range clusters {
 		if c != cluster {
 			newClusters = append(newClusters, c)
 		}
 	}
-	o.clusters = newClusters
+	o.clusters.Set(newClusters)
 
 	log.Info("Automatically removed idle cluster " + cluster.Id() + " from session all sessions")
 }
@@ -203,19 +229,20 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	defer o.mutex.Unlock()
 
 	// Remove cluster from the session
-	newClusters := make([]*Cluster, 0, len(o.sessions[sessionId]))
-	for _, c := range o.sessions[sessionId] {
+	sessionClusters := o.sessionClusters(sessionId)
+	newClusters := make([]*Cluster, 0, len(sessionClusters))
+	for _, c := range sessionClusters {
 		if c != cluster {
 			newClusters = append(newClusters, c)
 		}
 	}
-	o.sessions[sessionId] = newClusters
+	o.sessions.Set(sessionId, newClusters)
 
 	// check if cluster exists in any session
 	if !cluster.permanent.Get().(bool) {
 		exists := false
-		for _, session := range o.sessions {
-			for _, c := range session {
+		for _, session := range o.sessions.Clone() {
+			for _, c := range session.([]*Cluster) {
 				if c == cluster {
 					exists = true
 					break
@@ -223,22 +250,23 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 			}
 		}
 
-		// if the cluster does not exist in any other session remove it
+		// if the cluster does not exist in any other session, remove it
 		if !exists {
-			newClusters = make([]*Cluster, 0, len(o.clusters))
-			for _, c := range o.clusters {
+			clusters := o.Clusters()
+			newClusters = make([]*Cluster, 0, len(clusters))
+			for _, c := range clusters {
 				if c != cluster {
 					newClusters = append(newClusters, c)
 				} else {
 					c.close()
 				}
 			}
-			o.clusters = newClusters
+			o.clusters.Set(newClusters)
 		}
 	}
 
 	log.Info("Removing cluster " + cluster.Id() + " from session " + sessionId)
-	return len(o.sessions[sessionId])
+	return len(o.sessionClusters(sessionId))
 }
 
 func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {
@@ -263,26 +291,20 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias st
 }
 
 func (o *ObserverT) SessionExists(sessionId string) bool {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	_, exists := o.sessions[sessionId]
+	_, exists := o.sessions.ExistsGet(sessionId)
 	return exists
 }
 
 func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	clusters, sessionExists := o.sessions[sessionId]
-	return clusters, sessionExists
+	clusters, sessionExists := o.sessions.ExistsGet(sessionId)
+	if clusters == nil {
+		return nil, sessionExists
+	}
+	return clusters.([]*Cluster), sessionExists
 }
 
 func (o *ObserverT) FindClusterById(id string) *Cluster {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	for _, cluster := range o.clusters {
+	for _, cluster := range o.clustersRef() {
 		if cluster.Id() == id {
 			return cluster
 		}
@@ -291,10 +313,7 @@ func (o *ObserverT) FindClusterById(id string) *Cluster {
 }
 
 func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	for _, cluster := range o.clusters {
+	for _, cluster := range o.clustersRef() {
 		client := cluster.origClient()
 		if client == nil || client.Cluster() == nil {
 			continue
@@ -313,9 +332,6 @@ func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
 // Checks for the cluster; If the cluster exists in the session, it won't check the user/pass since it has already been checked
 // Otherwise, will search for the cluster in all the list and check user/pass in case the cluster exists
 func (o *ObserverT) FindClusterBySeed(sid string, host *as.Host, user, password string) *Cluster {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
 	hostAddrs := strings.Split(host.Name, ",")
 	for _, hostAddr := range hostAddrs {
 		aliases := findAliases(hostAddr, host.TLSName, host.Port)
@@ -330,8 +346,8 @@ func (o *ObserverT) FindClusterBySeed(sid string, host *as.Host, user, password 
 
 		// try to find the cluster in all monitored clusters
 		// CHECK for user/pass
-		if len(o.clusters) > 0 {
-			if cluster := o.findClusterBySeed(o.clusters, aliases, user, password, true); cluster != nil {
+		if len(o.clustersRef()) > 0 {
+			if cluster := o.findClusterBySeed(o.clustersRef(), aliases, user, password, true); cluster != nil {
 				return cluster
 			}
 		}
@@ -340,9 +356,6 @@ func (o *ObserverT) FindClusterBySeed(sid string, host *as.Host, user, password 
 }
 
 func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, user, password string, checkUserPass bool) *Cluster {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
 	for _, cluster := range clusters {
 		for _, alias := range aliases {
 			clusterNodes := cluster.nodesCopy()
@@ -357,11 +370,8 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 }
 
 func (o *ObserverT) DatacenterInfo() common.Stats {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
 	res := map[string]common.Stats{}
-	for _, cluster := range o.clusters {
+	for _, cluster := range o.clustersRef() {
 		res[cluster.Id()] = cluster.DatacenterInfo()
 	}
 
@@ -393,41 +403,34 @@ func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugSt
 	log.SetLevel(log.DebugLevel)
 	asl.Logger.SetLevel(asl.DEBUG)
 
-	o.mutex.Lock()
-	defer o.mutex.Unlock()
+	debug := o.debug.Get().(DebugStatus)
+	debug.On = true
+	debug.StartTime = time.Now()
+	debug.Duration = duration
+	debug.Initiator = initiator
+	o.debug.Set(debug)
 
-	o.debug.On = true
-	o.debug.StartTime = time.Now()
-	o.debug.Duration = duration
-	o.debug.Initiator = initiator
-
-	return o.debug
+	return debug
 }
 
 func (o *ObserverT) StopDebug() DebugStatus {
 	log.SetLevel(o.config.LogLevel())
 	asl.Logger.SetLevel(o.config.AeroLogLevel())
 
-	o.mutex.Lock()
-	defer o.mutex.Unlock()
+	debug := o.debug.Get().(DebugStatus)
+	debug.On = false
+	o.debug.Set(debug)
 
-	o.debug.On = false
-
-	return o.debug
+	return debug
 }
 
 func (o *ObserverT) DebugStatus() DebugStatus {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	return o.debug
+	return o.debug.Get().(DebugStatus)
 }
 
 func (o *ObserverT) debugExpired() bool {
-	o.mutex.RLock()
-	defer o.mutex.RUnlock()
-
-	return o.debug.On && time.Now().After(o.debug.StartTime.Add(o.debug.Duration))
+	debug := o.debug.Get().(DebugStatus)
+	return debug.On && time.Now().After(debug.StartTime.Add(debug.Duration))
 }
 
 func findAliases(address, tlsName string, port int) []as.Host {
