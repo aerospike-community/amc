@@ -36,7 +36,7 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case nodeStatus.On:
-		if latestState.TryString("status", "") == string(nodeStatus.Off) {
+		if latestState.TryString("status", string(nodeStatus.Off)) == string(nodeStatus.Off) {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),
@@ -75,7 +75,7 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case nodeVisibilityStatus.On:
-		if latestState.TryString("visibility", "") == string(nodeVisibilityStatus.Off) {
+		if latestState.TryString("visibility", string(nodeVisibilityStatus.Off)) == string(nodeVisibilityStatus.Off) {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),
@@ -126,7 +126,7 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case "off":
-		if latestState.TryString("queueAlert", "") == "on" {
+		if latestState.TryString("queueAlert", "on") == "on" {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),
@@ -188,7 +188,7 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case "off":
-		if latestState.TryString("fdAlert", "") == "on" {
+		if latestState.TryString("fdAlert", "on") == "on" {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),
@@ -242,7 +242,7 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case "off":
-		if latestState.TryString("diskSpaceAlert", "") == "on" {
+		if latestState.TryString("diskSpaceAlert", "on") == "on" {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),
@@ -296,7 +296,7 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 
 		n.alerts().Register(&alert)
 	case "off":
-		if latestState.TryString("memSpaceAlert", "") == "on" {
+		if latestState.TryString("memSpaceAlert", "on") == "on" {
 			alert := common.Alert{
 				Id:          time.Now().UnixNano(),
 				ClusterId:   n.cluster.Id(),

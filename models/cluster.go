@@ -62,6 +62,8 @@ type Cluster struct {
 	activeBackup  common.SyncValue //*Backup
 	activeRestore common.SyncValue //*Restore
 
+	redAlertCount common.SyncValue
+
 	// mutex deadlock.RWMutex
 }
 
@@ -78,6 +80,7 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 		seeds:           common.NewSyncValue(seeds),
 		_datacenterInfo: *common.NewSyncStats(nil),
 		alerts:          common.NewAlertBucket(50),
+		redAlertCount:   common.NewSyncValue(0),
 	}
 
 	newCluster.SetAlias(alias)
@@ -609,6 +612,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateUsers()
 	c.updateDatacenterInfo()
 	c.checkHealth()
+	c.updateRedAlertCount()
 	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 
 	c.setUpdatedAt(time.Now())
@@ -1261,6 +1265,19 @@ func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 	}
 
 	return alerts
+}
+
+func (c *Cluster) updateRedAlertCount() {
+	count := 0
+	for _, node := range c.Nodes() {
+		count += c.alerts.RedAlertsFrom(node.Address(), 0)
+	}
+
+	c.redAlertCount.Set(count)
+}
+
+func (c *Cluster) RedAlertCount() int {
+	return c.redAlertCount.Get().(int)
 }
 
 func (c *Cluster) Backup(

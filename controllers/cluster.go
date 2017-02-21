@@ -183,7 +183,7 @@ func getClusterBasic(c echo.Context) error {
 		"cluster_builds":         builds,
 		"cluster_name":           cluster.Alias(),
 		"build_details":          cluster.BuildDetails(),
-		"active_red_alert_count": 0, // TODO: implement
+		"active_red_alert_count": cluster.RedAlertCount(), // TODO: implement
 		"users":                  users,
 		"off_nodes":              cluster.OffNodes(),
 		"nodes_compatibility":    cluster.NodeCompatibility(),
