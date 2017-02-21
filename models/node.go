@@ -458,7 +458,7 @@ func (n *Node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
+		"sindex", "udf-list", "latency:", "get-config:", "cluster-name", "service",
 	}
 
 	if n.Enterprise() {
@@ -762,16 +762,33 @@ func (n *Node) UDFs() map[string]common.Stats {
 }
 
 func (n *Node) Address() string {
+	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+		return s
+	}
 	h := *n.origHost
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
 
 func (n *Node) Host() string {
+	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+		host, _, err := common.SplitHostPort(s)
+		if err == nil && len(host) > 0 {
+			return host
+		}
+	}
+
 	h := *n.origHost
 	return h.Name
 }
 
 func (n *Node) Port() uint16 {
+	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+		_, port, err := common.SplitHostPort(s)
+		if err == nil {
+			return uint16(port)
+		}
+	}
+
 	h := *n.origHost
 	return uint16(h.Port)
 }

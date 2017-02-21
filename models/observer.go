@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"net"
 	"runtime/debug"
 	"strconv"
@@ -418,6 +419,17 @@ func (o *ObserverT) DatacenterInfo() common.Stats {
 		}
 	}
 
+	// remove clusters with the same nodes as cluster Id
+	for _, cluster := range res {
+		if nodesIfc, exists := cluster["nodes"]; exists {
+			for _, nodeStatsIfc := range nodesIfc.(common.Stats) {
+				nodeStats := nodeStatsIfc.(common.Stats)
+				delete(res, fmt.Sprintf("%s:%v", nodeStats.TryString("ip", ""), nodeStats.Get("port")))
+				delete(res, fmt.Sprintf("%s:%v", nodeStats.TryString("access_ip", ""), nodeStats.Get("access_port")))
+			}
+		}
+	}
+
 	return common.Stats{
 		"status": "success",
 		"data":   res,
@@ -489,3 +501,37 @@ func resolveHost(address string) ([]string, error) {
 
 	return net.LookupHost(address)
 }
+
+// func externalIPs() []string {
+// 	res := []string{}
+// 	ifaces, err := net.Interfaces()
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	for _, iface := range ifaces {
+// 		if iface.Flags&net.FlagUp == 0 {
+// 			continue // interface down
+// 		}
+// 		if iface.Flags&net.FlagLoopback != 0 {
+// 			continue // loopback interface
+// 		}
+// 		addrs, err := iface.Addrs()
+// 		if err != nil {
+// 			return nil
+// 		}
+// 		for _, addr := range addrs {
+// 			var ip net.IP
+// 			switch v := addr.(type) {
+// 			case *net.IPNet:
+// 				ip = v.IP
+// 			case *net.IPAddr:
+// 				ip = v.IP
+// 			}
+// 			if ip == nil || ip.IsLoopback() {
+// 				continue
+// 			}
+// 			res = append(res, ip.String())
+// 		}
+// 	}
+// 	return res
+// }
