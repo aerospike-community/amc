@@ -4624,8 +4624,8 @@ a.cluster_link.current-cluster {
     right: 0;
     margin-right: -250px;
     box-shadow: 0 0 10px 1px #000;
-    background: -webkit-repeating-linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3) 2px, transparent 8px, transparent), url(../images/sidepanelpattern.png), #3E3E3E;
-    background: -moz-repeating-linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3) 2px, transparent 8px, transparent), url(../images/sidepanelpattern.png), #3E3E3E;
+    background: -webkit-repeating-linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3) 2px, transparent 8px, transparent),  #3E3E3E;
+    background: -moz-repeating-linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3) 2px, transparent 8px, transparent),  #3E3E3E;
     transition: margin-right 200ms ease;
 }
 .right-panel.active {

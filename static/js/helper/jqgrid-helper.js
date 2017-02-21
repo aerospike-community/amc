@@ -65,7 +65,7 @@ define(["jquery", "underscore", "backbone", "helper/piechart", "helper/util", "c
 
                     return pieChart;
                 }catch(e){
-                   console.info(e.toString());
+                   console.log(e);
                 }
         },
         jqCustomBulletChartFormatter: function(container, rowID, config, tickLabels, usedPct, availablePct, colIndex, propName, used){
