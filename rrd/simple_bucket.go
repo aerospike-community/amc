@@ -2,10 +2,10 @@ package rrd
 
 import (
 	"math"
-	// "sync"
+	"sync"
 	"time"
 
-	"github.com/sasha-s/go-deadlock"
+	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
@@ -21,7 +21,7 @@ type SimpleBucket struct {
 	lastValue     interface{}
 	lastTimestamp *int64
 
-	mutex deadlock.RWMutex
+	mutex sync.RWMutex
 }
 
 func NewSimpleBucket(resolution, size int) *SimpleBucket {

@@ -392,6 +392,30 @@ func (o *ObserverT) DatacenterInfo() common.Stats {
 			}
 		}
 		delete(v, "_remotes")
+
+		// convert the ones whose seed node is a different node
+		for addr, stats := range res {
+			if seednodeAddr := stats.TryString("seednode", ""); seednodeAddr != "" && seednodeAddr != addr {
+				// try to find the seednode in the results
+				if seedNode, exists := res[seednodeAddr]; exists {
+					nodeList := seedNode["nodes"].(common.Stats)
+					host, port, err := common.SplitHostPort(addr)
+					if err != nil {
+						continue
+					}
+					nodeList[addr] = common.Stats{
+						"status":         "off",
+						"access_ip":      host,
+						"access_port":    port,
+						"ip":             host,
+						"port":           port,
+						"cur_throughput": 0,
+						"lag":            nil,
+					}
+					delete(res, addr)
+				}
+			}
+		}
 	}
 
 	return common.Stats{
