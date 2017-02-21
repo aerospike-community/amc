@@ -61,7 +61,9 @@ define(["jquery", "underscore", "backbone", "helper/job-table", "helper/jqgrid-h
             JobTable.createOrUpdateRow(container, data, rowID, model, isError);
             JobTable.updateRow(container, data, rowID);
             if(!isError){
-                data['mem_pie_chart'] = GridHelper.jqCustomPieFormatter(null, container, rowID, ViewConfig.tablePieConfig, data['mem_arr'], 5);
+                window.setTimeout(function() {
+                  data['mem_pie_chart'] = GridHelper.jqCustomPieFormatter(null, container, rowID, ViewConfig.tablePieConfig, data['mem_arr'], 5);
+                }, 200);
             }
 
             if(model.subGridEnabled[rowID] === true){

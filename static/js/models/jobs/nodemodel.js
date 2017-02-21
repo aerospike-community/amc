@@ -237,9 +237,16 @@ function(_, Backbone, Poller, AppConfig, NodeView, Util, JobTable){
       },
 
       sortTable: function(sortBy, sortOrder) {
-        this.sortBy = sortBy;
-        this.sortOrder = sortOrder;
-        this.fetchJobs();
+        if(sortBy) {
+          sortBy = sortBy.replace(/_/g, '-');
+          if(sortBy === 'mem-pie-chart') {
+              sortBy = 'mem-usage';
+          }
+
+          this.sortBy = sortBy;
+          this.sortOrder = sortOrder;
+          this.fetchJobs();
+        }
       },
 
         updatePages: function() {

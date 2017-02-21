@@ -18,7 +18,7 @@ under the License.
 ******************************************************************************/
 
 define(["jquery", "underscore", "backbone", "helper/util", "models/jobs/nodemodel", "views/jobs/nodeview", "config/app-config", "config/view-config", "helper/job-table"], function($, _, Backbone, Util, NodeModel, NodeView, AppConfig, ViewConfig, JobTable){
-    var PAGE_SIZE = 20;
+    var PAGE_SIZE = 10;
     var NodeCollection = Backbone.Collection.extend({
         model: NodeModel,
         initVariables :function(){

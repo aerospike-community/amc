@@ -26,7 +26,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
             this.startEventListeners();          
         },
         initVariables: function(){
-            var secondaryIndexDefListColumn = $.extend(true,[], AppConfig.secondaryIndexDefListColumn);
+            var secondaryIndexDefListColumn;
             this.clusterID = window.AMCGLOBALS.persistent.clusterID;//this.get("cluster_id");
             this.views = {};
             this.indexListFull = {};
@@ -51,6 +51,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
 
             var versionCheck = this.versionCompare(this.version);
 
+            secondaryIndexDefListColumn = $.extend(true,[], AppConfig.secondaryIndexDefListColumn);
             if(versionCheck > 0){
                 secondaryIndexDefListColumn[1].name = "bin";
             }
@@ -224,11 +225,13 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
                 {async: true, data: {index_name : indexData.index_name}, type: AjaxManager.POST},
                 function(response){//SUCCESS
 
-                	setTimeout(function(){					//Delay for changes to reflect
-                		addRemoveToPending();
-                	}, 1000);
+                  if(response.status === "success") {
+                    setTimeout(function(){					//Delay for changes to reflect
+                      addRemoveToPending();
+                    }, 1000);
+                  }
                     
-                    callback && callback(response.status, (response.status === "success" ? "Drop Index Successful" : response.error));
+                    callback && callback(response.status, (response.status === "success" ? "Drop Index Successful" : "Unable to drop index. " + response.error));
                     console.log(response);
                 },
                 function(response){//FAILURE

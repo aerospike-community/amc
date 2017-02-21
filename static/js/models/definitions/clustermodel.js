@@ -62,6 +62,7 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "models/de
         },
         fetchSuccess: function(clusterModel) {
             this.version = clusterModel.get('build');
+            clusterModel.version = clusterModel.get('build');
 
             Util.setGlobalClusterInfo({type : "clusters", attributes : clusterModel.attributes});
             Util.removeEnviromentSetupUI();
