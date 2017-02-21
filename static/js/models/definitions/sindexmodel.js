@@ -26,7 +26,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
             this.startEventListeners();          
         },
         initVariables: function(){
-            var secondaryIndexDefListColumn = $.extend(true,[], AppConfig.secondaryIndexDefListColumn);
+            var secondaryIndexDefListColumn;
             this.clusterID = window.AMCGLOBALS.persistent.clusterID;//this.get("cluster_id");
             this.views = {};
             this.indexListFull = {};
@@ -51,6 +51,7 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
 
             var versionCheck = this.versionCompare(this.version);
 
+            secondaryIndexDefListColumn = $.extend(true,[], AppConfig.secondaryIndexDefListColumn);
             if(versionCheck > 0){
                 secondaryIndexDefListColumn[1].name = "bin";
             }

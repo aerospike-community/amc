@@ -3,8 +3,8 @@
 *THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE. THE COPYRIGHT NOTICE
 *ABOVE DOES NOT EVIDENCE ANY ACTUAL OR INTENDED PUBLICATION.
 ******************************************************************************/
-define(["jquery","underscore","backbone", "config/app-config", "models/common/PopupModel","helper/AjaxManager","helper/servicemanager","helper/notification","helper/sessionmanager", "helper/util"],
-	function($,_, Backbone, AppConfig ,PopupModel,AjaxManager,ServiceManager,Notification,SessionManager, Util){
+define(["jquery","underscore","backbone", "config/app-config", "models/common/PopupModel","helper/AjaxManager","helper/servicemanager","helper/notification","helper/sessionmanager", "helper/util", "poller"],
+	function($,_, Backbone, AppConfig ,PopupModel,AjaxManager,ServiceManager,Notification,SessionManager, Util, Poller){
 
   var _tlsProps = {};
 	var AuthManager = {
@@ -340,6 +340,7 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
 	        	postData.cluster_id = clusterId;
 	        	AjaxManager.sendRequest(AppConfig.urls.SESSION_TERMINATE, {type:AjaxManager.POST,async : false,data:postData}, function(response){
 	        		that._resetLogin_();
+              Poller.reset();
             		result = true;
             	}, function(data){
             		 if(typeof data === "object" && data.status === 401){
