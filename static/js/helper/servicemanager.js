@@ -280,8 +280,9 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
            return ['read-write', 'read-write-udf'].indexOf(role) !== -1;
          });
          var hasDataAdmin = _.values(roleList).indexOf('data-admin') !== -1;
+         var hasSysAdmin  = _.values(roleList).indexOf('sys-admin') !== -1;
 
-         if(hasDataAdmin) {
+         if(hasDataAdmin || hasSysAdmin) {
            if(hasWrite) {
              serviceList = _.union(serviceList, ['BACKUP', 'RESTORE_BACKUP']);
            } else if(hasRead) {
@@ -416,6 +417,10 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
 	    				  "DASHBOARD_XDR_SECTION",
 	    				  "STATISTIC_PAGE",
 	    				  "DEFINITION_PAGE",
+	    				  "CREATE_INDEX",
+	    				  "DROP_INDEX",
+	    				  "REGISTER_UDF",
+	    				  "REMOVE_UDF",
 	    				  "LATENCY_PAGE",
 	    				  "MANAGE_PAGE",
 	    				  "DASHBOARD_NODE_ON_OFF",
