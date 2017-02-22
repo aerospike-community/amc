@@ -18,12 +18,13 @@ echo "platform is ${platform}"
 echo "sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
-version=`git describe --tags $(git rev-list --tags --max-count=1)`
+# version=`git describe --tags $(git rev-list --tags --max-count=1)`
+version=`git describe`
 
 amc_version=version
-if [ $release != "release" ];	then
-	amc_version=`git describe --tags`;
-fi
+# if [ $release != "release" ];	then
+#	amc_version=`git describe --tags`;
+# fi
 
 # build binary
 CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
