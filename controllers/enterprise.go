@@ -58,8 +58,13 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 }
 
 func getMultiClusterView(c echo.Context) error {
+	sid, err := sessionId(c)
+	if err != nil {
+		invalidateSession(c)
+		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+	}
 
-	return c.JSON(http.StatusOK, _observer.DatacenterInfo())
+	return c.JSON(http.StatusOK, _observer.DatacenterInfo(sid))
 }
 
 var opMapper = map[string]string{

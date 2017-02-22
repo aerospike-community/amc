@@ -610,7 +610,6 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateStats()
 	c.updateJobs()
 	c.updateUsers()
-	c.updateDatacenterInfo()
 	c.checkHealth()
 	c.updateRedAlertCount()
 	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
@@ -1121,15 +1120,7 @@ func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 	}
 }
 
-func (c *Cluster) updateDatacenterInfo() {
-	c._datacenterInfo.SetStats(c.datacenterInfo())
-}
-
-func (c *Cluster) DatacenterInfo() common.Stats {
-	return c._datacenterInfo.Clone()
-}
-
-func (c *Cluster) datacenterInfo() common.Stats {
+func (c *Cluster) DatacenterInfo(sessionId string) common.Stats {
 	xdrInfo := map[string]common.Stats{}
 	datacenterList := []string{}
 	nodeStats := common.Stats{}
@@ -1140,8 +1131,8 @@ func (c *Cluster) datacenterInfo() common.Stats {
 			datacenterList = append(datacenterList, dcName)
 
 			for _, nodeAddr := range dcStats["Nodes"].([]string) {
-				remoteNodeStats[nodeAddr] = c.discoverDatacenter(dcStats)
-				oldCluster := c.observer.NodeHasBeenDiscovered(nodeAddr)
+				remoteNodeStats[nodeAddr] = c.discoverDatacenter(sessionId, dcStats)
+				oldCluster := c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr)
 				if oldCluster == nil {
 					xdrInfo[nodeAddr] = common.Stats{"shipping_namespaces": dcStats["namespaces"].([]string)}
 				} else {
@@ -1215,13 +1206,13 @@ func (c *Cluster) datacenterInfo() common.Stats {
 	}
 }
 
-func (c *Cluster) discoverDatacenter(dc common.Stats) common.Stats {
+func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.Stats {
 	for _, nodeAddr := range dc["Nodes"].([]string) {
 		host, port, err := common.SplitHostPort(nodeAddr)
 		if err != nil {
 			return nil
 		}
-		if c.observer.NodeHasBeenDiscovered(nodeAddr) == nil {
+		if c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr) == nil {
 			return common.Stats{
 				"dc_name":      []string{dc["DC_Name"].(string)},
 				"discovery":    "secured", // TODO: think about this

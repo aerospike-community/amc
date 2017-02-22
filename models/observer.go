@@ -318,8 +318,8 @@ func (o *ObserverT) FindClusterById(id string) *Cluster {
 	return nil
 }
 
-func (o *ObserverT) NodeHasBeenDiscovered(alias string) *Cluster {
-	for _, cluster := range o.clustersRef() {
+func (o *ObserverT) NodeHasBeenDiscovered(sessionId string, alias string) *Cluster {
+	for _, cluster := range o.sessionClusters(sessionId) {
 		client := cluster.origClient()
 		if client == nil || client.Cluster() == nil {
 			continue
@@ -375,10 +375,10 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 	return nil
 }
 
-func (o *ObserverT) DatacenterInfo() common.Stats {
+func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	res := map[string]common.Stats{}
-	for _, cluster := range o.clustersRef() {
-		res[cluster.Id()] = cluster.DatacenterInfo()
+	for _, cluster := range o.sessionClusters(sessionId) {
+		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
 	}
 
 	for _, v := range res {
