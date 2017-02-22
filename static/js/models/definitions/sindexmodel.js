@@ -43,7 +43,11 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
 
             if( ServiceManager.isUserHasAccessToService("DROP_INDEX") ){
                 model.formatter = function( cellvalue, options, rowObject ){
+                  if(rowObject.action_pending) {
+                    return "<span>" + cellvalue + "</span>";
+                  } else {
                     return "<span class='drop-index-btn hover-drop-btn icon-cancel-circle remove-node-icon' style='display: inline-block'></span><span>" + cellvalue + "</span>";
+                  }
                 };
             } else {
             	delete model.formatter;
@@ -124,23 +128,23 @@ define(["underscore", "backbone", "poller", "views/definitions/sindexview", "hel
                         }
                     }
                 }
+            }
 
-                var deletedViews = _.difference( _.keys( model.indexListFull ), model.indexList );
+            var deletedViews = _.difference( _.keys( model.indexListFull ), model.indexList );
 
-                for(var index in deletedViews ){
-                    model.views[deletedViews[index]].clean(deletedViews[index]);
-                    delete model.views[deletedViews[index]];
-                    delete model.indexListFull[deletedViews[index]];
-                }
+            for(var index in deletedViews ){
+              model.views[deletedViews[index]].clean(deletedViews[index]);
+              delete model.views[deletedViews[index]];
+              delete model.indexListFull[deletedViews[index]];
+            }
 
-                for(var index in model.indexListFull){
-                    if( model.views[index] == null ){
-                        model.views[index] = new SIndexView({tableDiv:this.tableDiv,indexName:index ,model: model});
-                    }
+            for(var index in model.indexListFull){
+              if( model.views[index] == null ){
+                model.views[index] = new SIndexView({tableDiv:this.tableDiv,indexName:index ,model: model});
+              }
 
-                    model.views[index].render(model, model.indexListFull[index], index || "_blank");
+              model.views[index].render(model, model.indexListFull[index], index || "_blank");
 
-                }
             }
 
             model.initDropIndexListener(model.tableDiv);
