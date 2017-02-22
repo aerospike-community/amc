@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -947,7 +948,7 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 		}
 
 		valBucketsStr, err := ip.ReadUntil(';')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			break
 		}
 		valBuckets := strings.Split(valBucketsStr, ",")
