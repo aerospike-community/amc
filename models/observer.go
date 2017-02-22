@@ -420,12 +420,18 @@ func (o *ObserverT) DatacenterInfo() common.Stats {
 	}
 
 	// remove clusters with the same nodes as cluster Id
-	for _, cluster := range res {
+	for addr, cluster := range res {
 		if nodesIfc, exists := cluster["nodes"]; exists {
 			for _, nodeStatsIfc := range nodesIfc.(common.Stats) {
 				nodeStats := nodeStatsIfc.(common.Stats)
-				delete(res, fmt.Sprintf("%s:%v", nodeStats.TryString("ip", ""), nodeStats.Get("port")))
-				delete(res, fmt.Sprintf("%s:%v", nodeStats.TryString("access_ip", ""), nodeStats.Get("access_port")))
+				nodeAddr1 := fmt.Sprintf("%s:%v", nodeStats.TryString("ip", ""), nodeStats.Get("port"))
+				if nodeAddr1 != addr {
+					delete(res, nodeAddr1)
+				}
+				nodeAddr2 := fmt.Sprintf("%s:%v", nodeStats.TryString("access_ip", ""), nodeStats.Get("access_port"))
+				if nodeAddr2 != addr {
+					delete(res, nodeAddr2)
+				}
 			}
 		}
 	}
