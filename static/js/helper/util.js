@@ -2782,6 +2782,12 @@ define(["jquery", "backbone", "poller", "config/app-config", "underscore", "help
                     $(this).removeClass("active");
                 });
 
+            $(document)
+                .off("switch-cluster:activate").on("switch-cluster:activate", function() {
+                    Util.closeRightPanel();
+                    openClusterDialog("enableCancel");
+                });
+
             $("#multiple-cluster-list-container")
                 .off("panel:activate").on("panel:activate", function(){
                     $(AppConfig.header.multipleClusterListContainer).addClass("active");

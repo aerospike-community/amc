@@ -101,10 +101,15 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
           }, 1000);
             }
 
-          // remove all elements visible only to enterprise edition users
           if(window.AMCGLOBALS.APP_CONSTANTS.AMC_TYPE === AppConfig.amc_type[0]) {
+            // remove all elements visible only to enterprise edition users
             _.each(this._enterpriseOnlyElements_, function(elm) {
               $(elm).remove();
+            });
+
+            // add all elements visible only to community edition users
+            _.each(this._communityOnlyElements_, function(elm) {
+              $(elm).show();
             });
           }
         },
@@ -342,6 +347,8 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
       // elements visible only in the enterprise edition
       _enterpriseOnlyElements_: ["#AlertDropdownButton", "#amcSettingsButton", "#activityLogger", '#clusterUser',
                                  "#renameClusterBtn", "#removeClusterBtn", "#changeClusterButton"],
+
+      _communityOnlyElements_: ['#switchClusterButton'],
 
 	    _headerTabElements_ : ["ul.tab-list li.tab a#dasboardTabLink",
 	                     "ul.tab-list li.tab a#statTabLink",
