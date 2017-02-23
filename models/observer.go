@@ -436,6 +436,57 @@ func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 		}
 	}
 
+	// append reported unknown nodes to the discovered clusters if they have other nodes in common
+	for addr, cluster := range res {
+		// make sure the cluster is not a discovered one
+		if cluster.TryString("discovery", "") == "complete" {
+			continue
+		}
+
+		host, port, err := common.SplitHostPort(addr)
+		if err != nil {
+			continue
+		}
+
+		if nodesIfc, exists := cluster["nodes"]; exists {
+			for _, nodeStatsIfc := range nodesIfc.(common.Stats) {
+				nodeStats := nodeStatsIfc.(common.Stats)
+				nodeAddr1 := fmt.Sprintf("%s:%v", nodeStats.TryString("ip", ""), nodeStats.Get("port"))
+				nodeAddr2 := fmt.Sprintf("%s:%v", nodeStats.TryString("access_ip", ""), nodeStats.Get("access_port"))
+
+				// see if there are other clusters with similar nodes
+				for id, otherCluster := range res {
+					// make sure the cluster is a discovered one
+					if otherCluster.TryString("discovery", "") != "complete" || addr == id {
+						continue
+					}
+
+					if nodesIfc2, exists := otherCluster["nodes"]; exists {
+						nodes2 := nodesIfc2.(common.Stats)
+						for _, nodeStatsIfc2 := range nodes2 {
+							nodeStats2 := nodeStatsIfc2.(common.Stats)
+							if nodeAddr1 == fmt.Sprintf("%s:%v", nodeStats2.TryString("ip", ""), nodeStats2.Get("port")) || nodeAddr2 == fmt.Sprintf("%s:%v", nodeStats2.TryString("access_ip", ""), nodeStats2.Get("access_port")) {
+								nodes2[addr] = common.Stats{
+									"status":         "off",
+									"access_ip":      host,
+									"access_port":    port,
+									"ip":             host,
+									"port":           port,
+									"cur_throughput": 0,
+									"lag":            nil,
+								}
+
+								// remove this unknown cluster from res
+								delete(res, addr)
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return common.Stats{
 		"status": "success",
 		"data":   res,
