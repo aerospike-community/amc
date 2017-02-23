@@ -49,7 +49,9 @@ func postGetClusterId(c echo.Context) error {
 	sid := manageSession(c)
 
 	seedHost := as.NewHost(host, port)
-	seedHost.TLSName = form.TLSName
+	if common.AMCIsEnterprise() {
+		seedHost.TLSName = form.TLSName
+	}
 
 	cluster := _observer.FindClusterBySeed(sid, seedHost, form.Username, form.Password)
 	if cluster != nil {
@@ -57,45 +59,36 @@ func postGetClusterId(c echo.Context) error {
 		_observer.AppendCluster(sid, cluster)
 	} else {
 		clientPolicy := *_defaultClientPolicy
-		clientPolicy.User = form.Username
-		clientPolicy.Password = form.Password
 
-		if len(form.TLSName) > 0 || form.EncryptOnly == true {
-			// Setup TLS Config
-			tlsConfig := &tls.Config{
-				Certificates:             _observer.Config().ClientPool(),
-				RootCAs:                  _observer.Config().ServerPool(),
-				InsecureSkipVerify:       form.EncryptOnly,
-				PreferServerCipherSuites: true,
+		if common.AMCIsEnterprise() {
+			clientPolicy.User = form.Username
+			clientPolicy.Password = form.Password
+
+			if len(form.TLSName) > 0 || form.EncryptOnly == true {
+				// Setup TLS Config
+				tlsConfig := &tls.Config{
+					Certificates:             _observer.Config().ClientPool(),
+					RootCAs:                  _observer.Config().ServerPool(),
+					InsecureSkipVerify:       form.EncryptOnly,
+					PreferServerCipherSuites: true,
+				}
+				tlsConfig.BuildNameToCertificate()
+
+				clientPolicy.TlsConfig = tlsConfig
 			}
-			tlsConfig.BuildNameToCertificate()
-
-			clientPolicy.TlsConfig = tlsConfig
 		}
-
-		// hostAddrs := strings.Split(host, ",")
-		// hosts := make([]*as.Host, 0, len(hostAddrs))
-
-		// for _, addr := range hostAddrs {
-		// 	resolved, err := resolveHost(addr)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-
-		// 	for _, ip := range resolved {
-		// 		hosts = append(hosts, as.NewHost(ip, int(port)))
-		// 	}
-		// }
 
 		cluster, err = _observer.Register(sid, &clientPolicy, strings.Trim(form.ClusterAlias, " \t"), seedHost)
 		if err != nil {
-			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
-				// create output
-				response := map[string]interface{}{
-					"security_enabled": true,
-					"cluster_id":       nil,
+			if common.AMCIsEnterprise() {
+				if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
+					// create output
+					response := map[string]interface{}{
+						"security_enabled": true,
+						"cluster_id":       nil,
+					}
+					return c.JSON(http.StatusOK, response)
 				}
-				return c.JSON(http.StatusOK, response)
 			}
 
 			log.Error(err)
@@ -183,7 +176,7 @@ func getClusterBasic(c echo.Context) error {
 		"cluster_builds":         builds,
 		"cluster_name":           cluster.Alias(),
 		"build_details":          cluster.BuildDetails(),
-		"active_red_alert_count": cluster.RedAlertCount(), // TODO: implement
+		"active_red_alert_count": cluster.RedAlertCount(),
 		"users":                  users,
 		"off_nodes":              cluster.OffNodes(),
 		"nodes_compatibility":    cluster.NodeCompatibility(),
