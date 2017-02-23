@@ -220,6 +220,13 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                     }
 
                     if(response.security_enabled) {
+                      if(Util.isCommunityEdition()) {
+                        msgStr = 'error';
+                        $("#error_message").text('Cannot access a secure cluster in Community Edition');
+                        $(AppConfig.cursorStyler.cursorStylerDiv).remove();
+                        callback && callback(msgStr);
+                        return;
+                      } else {
                         if(response.cluster_id == null){
                             AuthManager.showUserLoginPopup({"seedNode" : seedNode},function(response, forceRefresh){
                                 clusterIdHandler(response, forceRefresh);
@@ -232,8 +239,13 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                 window.AMCGLOBALS.persistent.seedNode = response.seed_address;
                                 window.AMCGLOBALS.persistent.nodeList = response.nodes;
                             }
-                            clusterIdHandler(response);
+
+                            var roleList = window.AMCGLOBALS.persistent.roleList;
+                            if(roleList && roleList.length > 0) {
+                              clusterIdHandler(response);
+                            }
                         }
+                      }
                     } else {
                         AuthManager._resetLogin_();
                         if(multiclusterview !== true){
@@ -356,7 +368,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                         "<span>:</span>" +
                                         "<input id='port_dialog' class='dialog_input' type='number' style='width: 55px;' maxlength='5' placeholder='PORT' value='" + port + "'/>" +
                                         "<div><input type='text' style='width: 200px; text-align:center;' placeholder='Cluster Label (OPTIONAL)' class='dialog_input' value='' id='cluster_name_dialog'/></div>"+
-                                        "<div>" +
+                                        "<div id='multicluster_check_view' style='display: none'>" +
                                           "<label class='dialog_input'>" +
                                             "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
                                               "title='Multicluster View check' name='multiclusterview_check' id='multiclusterview_check'>" +
@@ -451,6 +463,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             // disable TLS for now
             if(Util.isEnterpriseEdition()) {
               var shown = false;
+              $('#multicluster_check_view').show();
               $('#tls_container').show();
               $('#tls_container').click(function() {
                 $('#tls_params').toggle();
