@@ -5726,3 +5726,8 @@ ul.ui-autocomplete .ui-state-focus{
   margin-top: 20px;
   line-height: 20px;
 }
+
+#nodeListTable tr td {
+  white-space: normal;
+  height: auto;
+}
