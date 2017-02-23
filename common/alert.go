@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	// "sync"
+	"sync"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/sasha-s/go-deadlock"
+	// "github.com/sasha-s/go-sync"
 	// "github.com/satori/go.uuid"
 	// "github.com/jmoiron/sqlx"
 )
@@ -54,7 +54,7 @@ type Alert struct {
 	Status      AlertStatus
 }
 
-var _dbGlobalMutex deadlock.RWMutex
+var _dbGlobalMutex sync.RWMutex
 
 type AlertBucket struct {
 	alertQueue []*Alert
@@ -63,7 +63,7 @@ type AlertBucket struct {
 	// Alerts which should be sent for notification system
 	newAlerts []*Alert
 
-	mutex deadlock.RWMutex
+	mutex sync.RWMutex
 }
 
 // AlertsById implements sort.Interface for []*Alert based on
@@ -81,8 +81,8 @@ func NewAlertBucket(size int) *AlertBucket {
 }
 
 func (ad *AlertBucket) DrainNewAlerts() []*Alert {
-	_dbGlobalMutex.Lock()
-	defer _dbGlobalMutex.Unlock()
+	ad.mutex.Lock()
+	defer ad.mutex.Unlock()
 
 	res := make([]*Alert, len(ad.newAlerts))
 	if len(ad.newAlerts) > 0 {
@@ -94,8 +94,8 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 }
 
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
-	_dbGlobalMutex.Lock()
-	defer _dbGlobalMutex.Unlock()
+	ad.mutex.Lock()
+	defer ad.mutex.Unlock()
 
 	latest := Alert{}
 	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM alerts where Type = ?1 AND NodeAddress = ?2 AND Resolved IS NULL AND (Namespace IS NULL OR Namespace = ?3) ORDER BY Id DESC LIMIT 1", _alertFields), alert.Type, alert.NodeAddress, alert.Namespace.String)
