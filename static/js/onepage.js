@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ******************************************************************************/
 
-define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters",
+define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/common/nodelistview","models/common/PopupModel","helper/AjaxManager","models/common/alertmodel","views/common/alertview","poller","helper/servicemanager","helper/authmanager","helper/notification","helper/sessionmanager","helper/usermanager","collections/common/MultiClusters", "helper/modal",
     // From the requirejs optimizer docs
     //  "The optimizer will only combine modules that are specified in arrays of
     //   string literals that are passed to top-level require and define calls,
@@ -31,7 +31,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
     // authmanager. Hence including these models here.
     'models/latency/clustermodel', 'models/jobs/clustermodel', 'models/configs/clustermodel',
     'models/definitions/clustermodel', 'models/dashboard/clustermodel', 'models/statistics/clustermodel'
- ], function($, _, Backbone, Util, AppConfig, NodeListView,PopupModel,AjaxManager,AlertModel,AlertView,Poller,ServiceManager,AuthManager,Notification,SessionManager,UserManager,MultiClusters) {
+ ], function($, _, Backbone, Util, AppConfig, NodeListView,PopupModel,AjaxManager,AlertModel,AlertView,Poller,ServiceManager,AuthManager,Notification,SessionManager,UserManager,MultiClusters, modal) {
 
     var onepage = function(){
         window.Util = Util;
@@ -249,7 +249,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                     msgStr = "error";
                     $("#error_message").text(response.error);
                     $(AppConfig.cursorStyler.cursorStylerDiv).remove();
-                    callback && callback(msgStr);
+                    callback && callback(msgStr, response.error);
                 }
 
                 return msgStr;
@@ -783,7 +783,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                 window.AMCGLOBALS.activePage = "dashboard";
             }
             var addressArg = Util.setSeedNodeDialogValues(address);
-            getClusterID(addressArg[0], addressArg[1], function(response){
+            getClusterID(addressArg[0], addressArg[1], function(response, errorMsg){
                 if (response === "success" || response === "switch") {
 
                     if(window.AMCGLOBALS.persistent.seedNode !== address)
@@ -809,8 +809,11 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                     $(AppConfig.throughput.historySelect).find("option[value='" + window.AMCGLOBALS.persistent.snapshotTime + "']").prop('selected', true);
                     $(AppConfig.throughput.historySelect).change();
                 } else {
-                    var url = window.location.protocol + "//" + window.location.host;
-                    window.location = url;
+                    errorMsg = errorMsg || 'Login Error';
+                    modal.messageModal('Login Error', errorMsg, function() {
+                      var url = window.location.protocol + "//" + window.location.host;
+                      window.location = url;
+                    });
                     /*if (window.AMCGLOBALS.persistent.seedNode === null){
                         openClusterDialog("disableCancel",function(){
                             var activePage = "dashboard";
