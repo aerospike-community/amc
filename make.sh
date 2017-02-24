@@ -14,8 +14,8 @@ sysname=$(uname | tr '[:upper:]' '[:lower:]')
 maintainer="Khosrow Afroozeh (khosrow@aerospike.com)"
 description="Aerospike Management Console"
 
-echo "platform is ${platform}"
-echo "sysname is ${sysname}"
+echo "Platform is ${platform}"
+echo "Sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
 # version=`git describe --tags $(git rev-list --tags --max-count=1)`
@@ -61,25 +61,25 @@ case $platform in
 		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 
 		# zip, for all others
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
+		# rm -f deployment/release/amc/etc/init.d/*
+		# cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
+		# chmod +x deployment/release/amc/etc/init.d/amc
+		# fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		# mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
 		;;
 	'darwin')
-		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
+		# # build binary
+		# CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
 
-		# zip
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
+		# # zip
+		# rm -f deployment/release/amc/etc/init.d/*
+		# cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
+		# chmod +x deployment/release/amc/etc/init.d/amc
+		# fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		# mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
 		;;
 	*)
-		echo "unrecognized platform ${platform}"
+		echo "Unrecognized platform ${platform}"
 		exit 1
 		;;
 esac
