@@ -18,3 +18,5 @@ RUN npm install grunt -g
 RUN apt-get install -y ruby ruby-dev rubygems gcc make
 RUN gem install --no-ri --no-rdoc fpm
 RUN apt-get install -y rpm
+
+RUN apt-get install -y zip tar gzip
