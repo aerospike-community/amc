@@ -65,7 +65,7 @@ case $platform in
 		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
 		chmod +x deployment/release/amc/etc/init.d/amc
 		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
+		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version-linux.zip"
 		;;
 	'darwin')
 		# build binary
@@ -76,7 +76,7 @@ case $platform in
 		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
 		chmod +x deployment/release/amc/etc/init.d/amc
 		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version.zip"
+		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version-darwin.zip"
 		;;
 	*)
 		echo "unrecognized platform ${platform}"
