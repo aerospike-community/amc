@@ -116,6 +116,7 @@ func (n *Node) valid() bool {
 
 func (n *Node) update() error {
 	defer n.notifyAboutChanges()
+	defer n.updateHistory() // always update the stats; when node is down, the stats will be zero
 
 	if !n.valid() {
 		n.setStatus(nodeStatus.Off)
@@ -161,7 +162,6 @@ func (n *Node) update() error {
 
 	stats := common.Info(info).ToInfo("statistics").ToStats()
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
-	n.updateHistory()
 
 	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats.TryInt("objects", 0), time.Since(tm))
 
@@ -322,14 +322,6 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
 		}
 
-		// the following guarantees a straight zero line
-		latest := *vs[len(vs)-1].Timestamp(1) + 1
-
-		// if we have missed two beats
-		if latest < st-2*int64(bucket.Resolution()) {
-			vs = append(vs, common.NewSinglePointValue(&latest, &zeroVal))
-			vs = append(vs, common.NewSinglePointValue(&st, &zeroVal))
-		}
 		res[name] = map[string][]*common.SinglePointValue{
 			n.Address(): vs,
 		}
@@ -344,6 +336,8 @@ func (n *Node) getStatsHistory(stat string) *rrd.Bucket {
 }
 
 func (n *Node) updateHistory() {
+	active := n.valid()
+
 	// this uses a RLock, so we put it before the locks to avoid deadlock
 	// latestLatencyReport, err := n.latestLatencyReportDateTime()
 	tm := n.ServerTime()
@@ -353,15 +347,21 @@ func (n *Node) updateHistory() {
 
 	for _, stat := range _recordedNodeStats {
 		bucket := n.getStatsHistory(stat)
-		if n.nsAggCalcStats.Get(stat) != nil {
-			bucket.Add(tm.Unix(), n.nsAggCalcStats.TryFloat(stat, 0))
-		} else if n.stats.Get(stat) != nil {
-			bucket.Add(tm.Unix(), n.stats.TryFloat(stat, 0))
+		if active {
+			if n.nsAggCalcStats.Get(stat) != nil {
+				bucket.Add(tm.Unix(), n.nsAggCalcStats.TryFloat(stat, 0))
+			} else if n.stats.Get(stat) != nil {
+				bucket.Add(tm.Unix(), n.stats.TryFloat(stat, 0))
+			}
+		} else {
+			bucket.Skip(tm.Unix())
 		}
 	}
 
-	if ll := n.LatestLatency(); ll != nil {
-		n.latencyHistory.Add(tm.Unix(), ll)
+	if active {
+		if ll := n.LatestLatency(); ll != nil {
+			n.latencyHistory.Add(tm.Unix(), ll)
+		}
 	}
 	// n.latencyHistory.Add(latestLatencyReport.Unix(), n.LatestLatency())
 }
@@ -882,7 +882,7 @@ func parseBinInfo(s string) common.Stats {
 }
 
 func (n *Node) setServerTimeDelta(tm int64) {
-	if tm > 0 {
+	if tm > 0 && n.serverTimeDelta.Get().(time.Duration) == 0 {
 		n.serverTimeDelta.Set(time.Duration(tm-time.Now().Unix()) * time.Second)
 	}
 }
