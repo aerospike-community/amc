@@ -64,6 +64,9 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 		return
 	} else if b.beginTime == nil {
 		b.beginTime = &timestamp
+	} else if b.rollingTotal && b.lastValue != nil && *b.lastValue > val {
+		*b.lastValue = val
+		return
 	}
 
 	// protect against values set in the past
@@ -122,6 +125,12 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 	b.lastTimestamp = &timestamp
 }
 
+func (b *Bucket) Skip(tm int64) {
+	if b.lastValue != nil {
+		b.Add(tm, *b.lastValue)
+	}
+}
+
 func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
@@ -175,6 +184,6 @@ func (b *Bucket) LastValue() *common.SinglePointValue {
 	}
 
 	tm := *b.lastTimestamp
-	val := *b.lastHistoricValue
+	val := float64(*b.lastHistoricValue) / float64(b.resolution)
 	return common.NewSinglePointValue(&tm, &val)
 }
