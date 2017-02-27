@@ -53,7 +53,7 @@ Configuration file is in `/Library/amc/amc.conf`
 `sudo tar -xvf aerospike-amc-<edition>-<version>-darwin.tar.gz -C /Library`
 
 ## Start
-`sudo launchctl unload  /Library/LaunchAgents/com.aerospike.amc.plist`
+`sudo launchctl load  /Library/LaunchAgents/com.aerospike.amc.plist`
 
 ## Stop
 `sudo launchctl unload  /Library/LaunchAgents/com.aerospike.amc.plist`
