@@ -87,6 +87,9 @@ function($, _, Backbone, Util, NodeModel, AppConfig, ViewConfig, JobTable, AjaxM
                   function success(data) {
                     that.latencyHistory[address] = data;
                     that._initNode(node);
+                  },
+                  function failure() {
+                    node.initLatencyHistoryOnError();
                   }
                 );
               }

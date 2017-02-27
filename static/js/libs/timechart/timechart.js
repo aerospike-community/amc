@@ -630,14 +630,14 @@ under the License.
 								if(w.x >= that.config.axis.x.extremes.min && w.x <= that.config.axis.x.extremes.max){
 									return w.y;
 								}
-								return null;
+								return 0;
 							});
 
 							that.config.axis.y.extremes.min = Math.min(that.config.axis.y.extremes.min, d3.min(d.data[cat].data, function(w){
 									if(w.x >= that.config.axis.x.extremes.min && w.x <= that.config.axis.x.extremes.max){
 										return w.y;
 									}
-									return null;
+									return 0;
 								})
 							);
 						}
