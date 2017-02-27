@@ -86,7 +86,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/amc .
 
 		# zip
 		fpm --verbose -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C deployment/release/darwin  -m "$maintainer" --description "$description" --vendor "Aerospike" .
