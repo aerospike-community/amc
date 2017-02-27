@@ -44,3 +44,20 @@ The built files will be in `build/static`
 
 Keep in mind that you don't need to build the UI to be able to develop. The original source files are used for the development.
 
+# MacOS instructions:
+
+You can find the log file in `/Library/Logs/amc/amc.log`
+Configuration file is in `/Library/amc/amc.conf`
+
+## installation
+`sudo tar -xvf aerospike-amc-<edition>-<version>-darwin.tar.gz -C /Library`
+
+## Start
+`sudo launchctl unload  /Library/LaunchAgents/com.aerospike.amc.plist`
+
+## Stop
+`sudo launchctl unload  /Library/LaunchAgents/com.aerospike.amc.plist`
+
+## Uninstallation
+`sudo /Library/amc/uninstall.sh`
+
