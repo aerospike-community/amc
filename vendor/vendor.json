@@ -201,6 +201,12 @@
 			"revisionTime": "2016-12-02T19:38:09Z"
 		},
 		{
+			"checksumSHA1": "Mnp6EGM0pdGxMe19f6dg+ipjaSo=",
+			"path": "github.com/kardianos/osext",
+			"revision": "9b883c5eb462dd5cb1b0a7a104fe86bc6b9bd391",
+			"revisionTime": "2017-02-07T19:16:55Z"
+		},
+		{
 			"checksumSHA1": "4vSH/DC3vuD2f8InP/9ryeiOWfg=",
 			"path": "github.com/kennygrant/sanitize",
 			"revision": "7fdd72ab580907c39c5f0b8b98b8d89e5476f424",
@@ -487,6 +493,12 @@
 			"path": "github.com/satori/go.uuid",
 			"revision": "b061729afc07e77a8aa4fad0a2fd840958f1942a",
 			"revisionTime": "2016-09-27T10:08:44Z"
+		},
+		{
+			"checksumSHA1": "BKf1LKBNe278ySHmpcZPjR5DmBI=",
+			"path": "github.com/sevlyar/go-daemon",
+			"revision": "8577c7ddef908e104dae56c9e46f0956cb33c844",
+			"revisionTime": "2016-11-17T05:31:40Z"
 		},
 		{
 			"checksumSHA1": "USE8noRDp4jM3zj2pA/4t1b6700=",

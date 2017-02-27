@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC -//Apple Computer//DTD PLIST 1.0//EN
+           http://www.apple.com/DTDs/PropertyList-1.0.dtd >
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.aerospike.amc</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Library/amc/amc</string>
+      <string>-config-file=/Library/amc/amc.conf</string>
+    </array>
+   <key>Sockets</key>
+   <dict>
+      <key>Listeners</key>
+      <dict>
+         <key>SockServiceName</key>
+         <string>6060</string>
+      </dict>
+   </dict>
+   <key>KeepAlive</key>
+    <true />
+    <key>StandardOutPath</key>
+    <string>/Library/amc/amc.txt</string>
+    <key>StandardErrorPath</key>
+    <string>/Library/amc/amc.txt</string>
+  </dict>
+</plist>

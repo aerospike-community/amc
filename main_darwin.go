@@ -1,3 +1,5 @@
+// +build darwin
+
 package main
 
 import (
@@ -14,9 +16,12 @@ import (
 )
 
 var (
-	configFile  = flag.String("config-file", "", "Configuration file.")
-	configDir   = flag.String("config-dir", "", "Configuration dir.")
-	profileMode = flag.Bool("profile", false, "Run benchmarks with profiler active on port 6060.")
+	configFile   = flag.String("config-file", "/etc/amc/amc.conf", "Configuration file.")
+	configDir    = flag.String("config-dir", "/etc/amc/", "Configuration dir.")
+	profileMode  = flag.Bool("profile", false, "Run benchmarks with profiler active on port 6060.")
+	daemonMode   = flag.Bool("daemon", false, "Run AMC in daemon mode.")
+	daemonSignal = flag.String("signal", "", `send signal to the daemon
+		stop — graceful shutdown.`)
 )
 
 func main() {
@@ -42,5 +47,6 @@ func main() {
 	config := common.Config{}
 	common.InitConfig(*configFile, *configDir, &config)
 
+	common.SetupDatabase(config.AMC.Database)
 	controllers.Server(&config)
 }

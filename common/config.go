@@ -60,6 +60,7 @@ type Config struct {
 		ErrorLog string `toml:"errorlog"`
 		Chdir    string `toml:"chdir"`
 		Timeout  int    `toml:"timeout"`
+		PIDFile  string `toml:"pidfile"`
 	}
 
 	Mailer struct {
@@ -237,10 +238,9 @@ func InitConfig(configFile, configDir string, config *Config) {
 	aslog.Logger.SetLogger(log.StandardLogger())
 
 	setLogLevel(config.AMC.LogLevel)
-	openDB(config.AMC.Database)
 }
 
-func openDB(filepath string) {
+func SetupDatabase(filepath string) {
 	var schema = []string{`
 		CREATE TABLE IF NOT EXISTS alerts (
 			Id          int64,

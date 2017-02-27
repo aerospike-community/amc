@@ -34,49 +34,64 @@ grunt
 
 cd ..
 
-rm -rf deployment/release/amc/opt/amc/static
-mkdir -p deployment/release/amc/opt/amc/static/
-cp -R build/static/ deployment/release/amc/opt/amc/
-
-rm -rf deployment/release/amc/opt/amc/mailer
-mkdir -p deployment/release/amc/opt/amc/mailer/templates
-cp -R mailer/templates/ deployment/release/amc/opt/amc/mailer/
-
-
 case $platform in
 	'linux')
+		BASE_DIR="deployment/release/linux"
+
+		rm -rf $BASE_DIR/opt/amc/static
+		rm -rf $BASE_DIR/opt/amc/mailer
+
+		mkdir -p $BASE_DIR/var/log
+		mkdir -p $BASE_DIR/opt
+		mkdir -p $BASE_DIR/etc
+		mkdir -p $BASE_DIR/etc/amc
+
+		cp -R build/static $BASE_DIR/opt/amc/
+		mkdir -p $BASE_DIR/opt/amc/mailer
+		cp -R mailer/templates $BASE_DIR/opt/amc/mailer/
+
 		# build binary
 		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
 
 		# rpm
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.rpm deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C deployment/release/amc -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		rm -f $BASE_DIR/etc/init.d/*
+		cp -f deployment/common/amc.rpm $BASE_DIR/etc/init.d/amc
+		chmod +x $BASE_DIR/etc/init.d/amc
+		fpm -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
 
 		# deb
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.deb deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		rm -f $BASE_DIR/etc/init.d/*
+		cp -f deployment/common/amc.deb $BASE_DIR/etc/init.d/amc
+		chmod +x $BASE_DIR/etc/init.d/amc
+		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 
 		# zip, for all others
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version-linux.zip"
+		rm -f $BASE_DIR/etc/init.d/*
+		cp -f deployment/common/amc.other.sh $BASE_DIR/etc/init.d/amc
+		chmod +x $BASE_DIR/etc/init.d/amc
+		fpm -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		gzip "aerospike-amc-$edition.tar"
+		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-linux.tar.gz"
 		;;
 	'darwin')
+		BASE_DIR="deployment/release/darwin/amc"
+
+		mkdir -p $BASE_DIR
+
+		rm -rf $BASE_DIR/static
+		rm -rf $BASE_DIR/mailer
+
+		cp -R build/static $BASE_DIR/
+		mkdir -p $BASE_DIR/mailer
+		cp -R mailer/templates $BASE_DIR/mailer/
+
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR .
 
 		# zip
-		rm -f deployment/release/amc/etc/init.d/*
-		cp -f deployment/common/amc.other.sh deployment/release/amc/etc/init.d/amc
-		chmod +x deployment/release/amc/etc/init.d/amc
-		fpm -f -s dir -t zip -n "aerospike-amc-$edition" -v $version -C deployment/release/amc  -m "$maintainer" --description "$description" --vendor "Aerospike" .
-		mv "aerospike-amc-$edition.zip" "aerospike-amc-$edition-$version-darwin.zip"
+		fpm --verbose -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C deployment/release/darwin  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		gzip "aerospike-amc-$edition.tar"
+		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-darwin.tar.gz"
 		;;
 	*)
 		echo "unrecognized platform ${platform}"

@@ -22,6 +22,8 @@ var (
 	_defaultClientPolicy = as.NewClientPolicy()
 
 	registerEnterpriseAPI func(*echo.Echo)
+
+	_server *echo.Echo
 )
 
 func postSessionTerminate(c echo.Context) error {
@@ -89,6 +91,10 @@ func postDebug(c echo.Context) error {
 
 func getAMCVersion(c echo.Context) error {
 	return c.JSONBlob(http.StatusOK, []byte(fmt.Sprintf(`{"amc_version": "%s", "amc_type": "%s"}`, common.AMCVersion, common.AMCEdition)))
+}
+
+func ShutdownServer() {
+	_server.Shutdown(_server.ShutdownTimeout)
 }
 
 func Server(config *common.Config) {
@@ -196,6 +202,7 @@ func Server(config *common.Config) {
 	}
 
 	log.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
+	_server = e
 	// Start server
 	if config.AMC.CertFile != "" {
 		log.Infof("In HTTPS (secure) Mode")
