@@ -1,15 +1,16 @@
 
 
-## Configure
-There are multiple sections that need to be configured. Each section begins on a new line with the section name in square brackets. All config values which are not integers need to be specified within double quotes
+## AMC Configuration
+The AMC configuration file follows the  [TOML](https://github.com/toml-lang/toml) syntax.
+The Configuration for the AMC can be broken down into the following sections.
 
-### AMC configs 
+### Runtime Configs (required)
 Configs related to the runtime behaviour of AMC
 ```
 [AMC]
 update_interval = 5
-certfile = "/home/amc/cert.pem"
-keyfile = "/home/amc/key.pem"
+certfile = "/home/amc/cert.pem" // optional
+keyfile = "/home/amc/key.pem"   // optional 
 database = "/home/amc/amc.db"
 bind = "localhost:8081"
 loglevel = "info"
@@ -32,7 +33,7 @@ certfile = "/home/amc/cert.pem"
 keyfile = "/home/amc/key.pem"
 ```
 
-* database  - the file which will be used as a database to store AMC book keeping information across restarts.
+* database  - the file which will be used to store AMC book keeping information across restarts
 ```
 database = "/home/amc/amc.db"
 ```
@@ -40,11 +41,10 @@ database = "/home/amc/amc.db"
 ```
 bind = "localhost:8081"
 ```
-* loglevel  - the level of detail at which AMC should log messages.
+* loglevel  - the level of detail at which AMC should log messages
 ```
-loglevel = "info"
+loglevel = "info" // one of debug, warn, error, info
 ```
-Valid values are debug, warn, error, info.
 
 * errorlog - the file to which the logs will be written to
 ```
@@ -59,31 +59,34 @@ static_dir = "/home/amc/static"
 ```
 timeout = 150
 ```
-* cluster_inactive_before_removal (seconds) - if the user has not requested any statistics for a cluster for more than  cluster_inactive_before_removal seconds  then AMC stops monitoring the cluster. A value <= 0 implies the clusters will  never be removed
+* cluster_inactive_before_removal - if the user has not requested any statistics for a cluster for more than  cluster_inactive_before_removal seconds  then AMC stops monitoring the cluster. A value <= 0 implies the clusters will  never be removed
 ```
 cluster_inactive_before_removal = 1800
 ```
 
-### Cluster Configs 
+### Cluster Configs (optional)
 List of clusters that will always be monitored by AMC.
 ```
 [amc.clusters]
-host = "192.168.121.121"
-port = 3000
-tls_name = "clusteronetls"
-user = "admin"
-password = "admin"
-alias = "clusterone"
 
+[clusterone] // unused
+host = "192.168.121.121"         
+port = 3000
+tls_name = "clusteronetls"  // optional
+user = "admin"              // optional
+password = "admin"          // optional 
+alias = "clusterone"        // optional
+
+[clustertwo] // unused
 host = "192.168.121.122"
 port = 3000
-tls_name = "clustertwotls"
-user = "admin"
-password = "admin"
-alias = "clustertwo"
+tls_name = "clustertwotls"  // optional
+user = "admin"              // optional
+password = "admin"          // optional 
+alias = "clustertwo"        // optional
 ```
 
-A newline separates the clusters. Each cluster has the following parameters
+Each cluster has the following parameters
 
 * host - the host of the cluster
 ```
@@ -108,7 +111,7 @@ alias = "clusterone"
 tls_name = "clusteronetls"
 ```
 
-### Mail Configs
+### Mail Configs (optional)
 Configuration used by AMC to send out alert emails.
 ```
 [mailer]
@@ -147,7 +150,7 @@ password = "password"
 send_to = ["monitorone@gmail.com", "monitortwo@yahoo.com"]
 ```
 
-### HTTP Basic Authentication 
+### HTTP Basic Authentication (optional)
 The basic authentication credentials that AMC should use
 ```
 [basic_auth]
@@ -163,13 +166,18 @@ password = "user123"
 ```
 
 
-### TLS Server Certificates [TLS]
+### TLS Server Certificates (optional)
 The set of root certificate authorities that AMC uses when verifying server certificates
 
 * server_cert_pool - the list of root certificate authorities that AMC uses when verifying server certificates
 ```
+[TLS]
 server_cert_pool = ["/home/amc/certone.pem", "home/amc/certtwo.pem"]
 ```
 
-### TLS Client Certificates [tls.client_certs]
+### TLS Client Certificates (optional)
+```
+[tls.client_certs]
+```
 ??? could not figure this out
+
