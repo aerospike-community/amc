@@ -36,8 +36,7 @@ case $platform in
 		rm -rf $BASE_DIR/opt/amc/mailer
 
 		mkdir -p $BASE_DIR/var/log
-		mkdir -p $BASE_DIR/opt
-		mkdir -p $BASE_DIR/etc
+		mkdir -p $BASE_DIR/opt/amc
 		mkdir -p $BASE_DIR/etc/amc
 
 		cp -R build/static $BASE_DIR/opt/amc/
