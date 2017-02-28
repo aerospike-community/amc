@@ -51,7 +51,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/opt/amc/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o deployment/release/amc/opt/amc/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
 
 		# rpm
 		rm -f $BASE_DIR/etc/init.d/*
