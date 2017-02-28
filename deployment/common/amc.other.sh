@@ -10,7 +10,7 @@ CMD="${PROJECT}/amc -daemon -config-file=${CONFIG}"
 port="8081"
 check_amc_status(){
     status=1
-    if [ -z "`ps aux | grep amc | grep -v grep`" ]; then
+    if [ -z "`ps aux | grep /opt/amc/amc | grep -v grep`" ]; then
         status=0
     fi
     echo $status
@@ -26,20 +26,25 @@ start_amc(){
 
 stop_amc(){
   status=$(check_amc_status)
-  if [ $status -nq 0 ] ; then
-      "${CMD} -signal stop"
+  if [ $status -ne 0 ] ; then
+      ${CMD} -signal stop
   fi
 }
 
-case $SIGNAL in
-  'start')
-    start_amc()
+case "$SIGNAL" in
+  start)
+    start_amc
     ;;
-  'stop')
-    stop_amc()
+  stop)
+    stop_amc
     ;;
-  'status')
-    check_amc_status()
+  status)
+    status=$(check_amc_status)
+    if [ $status -eq 0 ] ; then
+      echo "stopped"
+    else
+      echo "running"
+    fi
     ;;
   *)
     echo "Unrecognized signal"

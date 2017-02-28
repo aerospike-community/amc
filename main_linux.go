@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -37,6 +38,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	flag.Parse()
+
+	if *daemonSignal == "stop" {
+		log.SetOutput(ioutil.Discard)
+	}
 
 	// launch profiler if in profile mode
 	if *profileMode {
