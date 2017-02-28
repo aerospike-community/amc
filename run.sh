@@ -9,7 +9,7 @@ edition=${1:-enterprise}
 environ=${2:-dev}
 
 build=`date -u +%Y%m%d.%H%M%S`
-version=`git describe --tags`
+version=`git describe`
 # tag=`git rev-parse --short HEAD`
 version_build="$edition-$version"
 

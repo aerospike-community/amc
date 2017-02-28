@@ -8,7 +8,6 @@ cd $GOPATH/src/github.com/citrusleaf/amc
 edition=${1:-enterprise}
 environ=${2:-dev}
 platform=${3:-linux}
-release=${4:-internal}
 sysname=$(uname | tr '[:upper:]' '[:lower:]')
 
 maintainer="Khosrow Afroozeh (khosrow@aerospike.com)"
@@ -20,11 +19,6 @@ echo "sysname is ${sysname}"
 build=`date -u +%Y%m%d.%H%M%S`
 # version=`git describe --tags $(git rev-list --tags --max-count=1)`
 version=`git describe`
-
-amc_version=version
-# if [ $release != "release" ];	then
-#	amc_version=`git describe --tags`;
-# fi
 
 # build content
 rm -rf build/static
@@ -51,7 +45,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/opt/amc/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
 
 		# rpm
 		rm -f $BASE_DIR/etc/init.d/*
@@ -86,7 +80,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$amc_version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/amc .
 
 		# zip
 		fpm --verbose -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C deployment/release/darwin  -m "$maintainer" --description "$description" --vendor "Aerospike" .
