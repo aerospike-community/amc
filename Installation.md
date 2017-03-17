@@ -1,100 +1,88 @@
-# Debian Based Systems 
+---
+title: Upgrade to AMC 4.0
+description: Learn how to upgrade to AMC 4.0
+---
+
+Upgrade to AMC 4.0 and above from previous versions.
+
+### Debian Based Systems like Debian, Ubuntu
 
 1. uninstall the older amc version 
-* community
 ```
-sudo dpkg -P aerospike-amc-community
-```
-* enterprise
-```
-sudo dpkg -P aerospike-amc-enterprise
+sudo dpkg -P aerospike-amc-<edition>
 ```
 
-2. download AMC 4.0 from the repositories 
-_TODO_
-
-3. install AMC 4.0 on the machine
-* community
+2. install AMC 
 ```
-sudo dpkg -i aerospike-amc-community.deb
-```
-* enterprise
-```
-sudo dpkg -i aerospike-amc-enterprise.deb
+sudo dpkg -i aerospike-amc-<edition>-<version>.deb
 ```
 
-4. run amc
-* community
-```
-sudo service amc start
-```
-* enterprise
+3. start AMC
 ```
 sudo service amc start
 ```
 
+3. stop AMC
+```
+sudo service amc stop
+```
 
-# RPM Based Systems
+### RPM Based Systems like CentOS, Red Hat
 1. uninstall the older amc version
-* community
 ```
-sudo rpm -e aerospike-amc-community
-```
-* enterprise
-```
-sudo rpm -e aerospike-amc-enterprise
+sudo rpm -e aerospike-amc-<edition>
 ```
 
-2. download the AMC 4.0 from the repositories 
-_TODO_
-
- It is dependent on systemd and initscripts
-_TODO_ systemd
+2. install dependencies
 ```
 sudo yum install -y initscripts
 ```
 
-3. install AMC 4.0 on the machine
-* community
+3. install AMC 
 ```
-sudo rpm -i aerospike-amc-community.rpm
+sudo rpm -i aerospike-amc-<edition>-<version>.rpm
 ```
-* enterprise
-```
-sudo rpm -i aerospike-amc-enterprise.rpm
-```
-4. run AMC 4.0 on machine
-* community
-```
-sudo service amc start
-```
-* enterprise
+
+4. start AMC
 ```
 sudo service amc start
 ```
 
-# zip based (works on debian, centos, opensuse, arhclinux and fedora)
-1. download the AMC 4.0 zip version from the repository
-_TODO_
-
-2. install AMC 4.0 on the machine
-* community
+5. stop AMC
 ```
-tar -xvf aerospike-amc-community.tar.gz -C /
-```
-* enterprise
-```
-tar -xvf aerospike-amc-enterprise.tar.gz -C /
+sudo service amc stop
 ```
 
-3. run amc
-* community
+### zip installation
+1. install AMC
 ```
-sudo /etc/init.d/amc start
+tar -xvf aerospike-amc-<edition>-<version>.tar.gz -C /
 ```
-* enterprise
+
+2. start AMC
 ```
 sudo /etc/init.d/amc start
 ```
 
-# mac _TODO_ 
+3. stop AMC
+```
+sudo /etc/init.d/amc stop
+```
+
+### MacOS
+
+1. install AMC
+```
+sudo tar -xvf aerospike-amc-<edition>-<version>-darwin.tar.gz -C /Library
+```
+
+2. start AMC
+```
+sudo launchctl load  /Library/LaunchAgents/com.aerospike.amc.plist
+```
+
+3. stop AMC
+```
+sudo launchctl unload  /Library/LaunchAgents/com.aerospike.amc.plist
+```
+

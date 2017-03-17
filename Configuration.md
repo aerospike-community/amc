@@ -92,7 +92,9 @@ timeout = 150
 cluster_inactive_before_removal = 1800
 ```
 
-### Cluster Configuration (optional)
+### Cluster Configuration 
+This configuration is *optional*.
+
 List of Aerospike clusters that are always monitored by AMC.
 ```
 [amc.clusters]
@@ -141,7 +143,9 @@ to be specified as a configuration to AMC
 tls_name = "clusteronetls"
 ```
 
-### Mail Configuration (optional. For enterpise edition only)
+### Mail Configuration 
+This configuration is *optional* and available only in the enterprise edition.
+
 Configuration used by AMC to send out email alerts for the monitored clusters.
 
 ```
@@ -177,7 +181,9 @@ password = "user123"
 send_to = ["monitorone@gmail.com", "monitortwo@yahoo.com"]
 ```
 
-### HTTP Basic Authentication (optional)
+### HTTP Basic Authentication
+This configuration is *optional*.
+
 The basic authentication credentials that AMC should use
 ```
 [basic_auth]
@@ -192,7 +198,9 @@ user     = "user"
 password = "user123"
 ```
 
-### TLS Server Certificates (optional. For enterprise edition only)
+### TLS Server Certificates 
+This configuration is *optional* and available only in the enterprise edition.
+
 The set of root certificate authorities that AMC uses when verifying server certificates
 
 *server_cert_pool* - the list of root certificate authorities that AMC uses when verifying server certificates
@@ -201,7 +209,8 @@ The set of root certificate authorities that AMC uses when verifying server cert
 server_cert_pool = ["/home/amc/certone.pem", "home/amc/certtwo.pem"]
 ```
 
-### TLS Client Certificates (optional. For enterprise edition only)
+### TLS Client Certificates
+This configuration is *optional* and available only in the enterprise edition.
 ```
 [tls.client_certs]
 ```
