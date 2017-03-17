@@ -3,9 +3,7 @@ title: Configure AMC
 description: Learn how to configure the Aerospike Management Console.
 ---
 
-
-## AMC Configuration
-AMC uses a single configuration file located at /etc/amc/amc.conf .
+AMC uses a single configuration file located at /etc/amc/amc.conf.
 The configuration file follows the  [TOML](https://github.com/toml-lang/toml) syntax.
 
 The configuration is divided into six contexts. 
