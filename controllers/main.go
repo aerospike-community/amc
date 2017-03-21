@@ -100,7 +100,10 @@ func ShutdownServer() {
 func Server(config *common.Config) {
 	_observer = models.New(config)
 
-	_defaultClientPolicy.Timeout = 10 * time.Second
+	_defaultClientPolicy.Timeout = config.AMC.Timeout * time.Second
+	if _defaultClientPolicy.Timeout <= 0 {
+		_defaultClientPolicy.Timeout = 30 * time.Second
+	}
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
 	_defaultClientPolicy.ConnectionQueueSize = 1
 
