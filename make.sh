@@ -58,7 +58,7 @@ case $platform in
 		chmod +x $BASE_DIR/etc/init.d/amc
 		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		## deb download need to be renamed from _ to -
-		mv "aerospike-amc-$edition_$version_amd64" "aerospike-amc-$edition-$version_amd64"
+		mv aerospike-amc-${edition}_${version}_amd64 aerospike-amc-${edition}-${version}_amd64
 
 		# zip, for all others
 		rm -f $BASE_DIR/etc/init.d/*
