@@ -100,7 +100,7 @@ func ShutdownServer() {
 func Server(config *common.Config) {
 	_observer = models.New(config)
 
-	_defaultClientPolicy.Timeout = config.AMC.Timeout * time.Second
+	_defaultClientPolicy.Timeout = time.Duration(config.AMC.Timeout) * time.Second
 	if _defaultClientPolicy.Timeout <= 0 {
 		_defaultClientPolicy.Timeout = 30 * time.Second
 	}
