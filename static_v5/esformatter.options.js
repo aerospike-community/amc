@@ -24,7 +24,7 @@ module.exports = {
     // on the same line as the open tag
     "firstAttributeOnSameLine": false,
     // default to one space. Make it empty if you don't like spaces between JSXExpressionContainers
-    "spaceInJSXExpressionContainers": " ",
+    "spaceInJSXExpressionContainers": "",
     // align the attributes with the first attribute (if the first attribute was kept on the same line as on the open tag)
     "alignWithFirstAttribute": true,
     "htmlOptions": { // same as the ones passed to js-beautifier.html

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Clusters from '../components/Clusters';
-import { clusterEntitySelected } from '../actions';
+import { clusterEntitySelected, entityViewSelected } from '../actions';
 
 const mapStateToProps = (state) => {
   return {
@@ -12,8 +12,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onNodeClick: (id) => {
-      dispatch(clusterEntitySelected(id))
+    onEntityClick: (entity) => {
+      dispatch(clusterEntitySelected(entity))
+    },
+    onViewClick: (entity, view) => {
+      dispatch(entityViewSelected(entity, view));
     }
   };
 };

@@ -1,3 +1,16 @@
+.as-header {
+  background-color: #cc0000;
+}
+
+.as-leftpane {
+  background-color: #eee;
+  height: 100%;
+}
+
+.as-maincontent {
+  height: 100%;
+}
+
 .as-arrow-up {
 	width: 0; 
 	height: 0; 

@@ -1,5 +1,7 @@
 import { combineReducers } from 'redux';
-import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS, CLUSTER_ENTITY_SELECTED } from '../actions';
+import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS} from '../actions';
+import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER , SELECT_ENTITY_VIEW} from '../actions';
+import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 function clusters(state = {
     isFetching: false,
@@ -15,16 +17,46 @@ function clusters(state = {
         isFetching: false,
         items: action.clusters
       });
-    case CLUSTER_ENTITY_SELECTED:
-      console.log(CLUSTER_ENTITY_SELECTED);
-      return state;
     default:
       return state;
   }
 }
 
+function clusterEntity(state = {
+    type: CLUSTER_ENTITY_TYPE.UNDEFINED,
+    view: null, // the view of interest of the entity
+    value: null // the entity
+  }, action) {
+  switch (action.type) {
+    case SELECT_CLUSTER:
+      return Object.assign({}, state, {
+        type: CLUSTER_ENTITY_TYPE.CLUSTER,
+        value: action.cluster
+      });
+    case SELECT_NODE:
+      return Object.assign({}, state, {
+        type: CLUSTER_ENTITY_TYPE.NODE,
+        value: action.node
+      });
+    case SELECT_NAMESPACE:
+      return Object.assign({}, state, {
+        type: CLUSTER_ENTITY_TYPE.NAMESPACE,
+        value: action.namespace
+      });
+    case SELECT_ENTITY_VIEW:
+      return Object.assign({}, state, {
+        view: action.view,
+        value: action.entity,
+      });
+    default:
+      return state;
+  }
+}
+
+
 const app = combineReducers({
-  clusters
+  clusters, // the aerospike clusters
+  clusterEntity, // the selected cluster entity
 });
 
 export default app;
