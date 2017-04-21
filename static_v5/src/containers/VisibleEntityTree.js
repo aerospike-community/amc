@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Clusters from '../components/Clusters';
+import EntityTree from '../components/EntityTree';
 import { clusterEntitySelected, entityViewSelected } from '../actions';
 
 const mapStateToProps = (state) => {
@@ -12,18 +12,18 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEntityClick: (entity) => {
+    onEntitySelect: (entity) => {
       dispatch(clusterEntitySelected(entity))
     },
-    onViewClick: (entity, view) => {
+    onEntityViewSelect: (entity, view) => {
       dispatch(entityViewSelected(entity, view));
     }
   };
 };
 
-const VisibleClusters = connect(
+const VisibleEntityTree = connect(
   mapStateToProps,
   mapDispatchToProps
-)(Clusters);
+)(EntityTree);
 
-export default VisibleClusters;
+export default VisibleEntityTree;

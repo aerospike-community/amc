@@ -5,6 +5,7 @@ import { objectPropType, nextNumber } from '../classes/Util';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
 
+// Render a Tree view
 class Tree extends React.Component {
   constructor(props) {
     super(props);
@@ -24,7 +25,12 @@ class Tree extends React.Component {
   }
 
   onNodeClick() {
-    this.props.onNodeClick(this.props.node);
+    const fn = this.props.onNodeClick;
+    const type = typeof fn;
+    if (type === 'function')
+      this.props.onNodeClick(this.props.node);
+    else
+      console.warn(`Tree - onNodeClick not a function, is of type ${type}`);
   }
 
   render() {
@@ -56,15 +62,22 @@ class Tree extends React.Component {
 }
 
 Tree.propTypes = {
+  // depth of the node in the tree
   depth: PropTypes.number,
+  // callback when the node is clicked (optional)
+  // onNodeClick(node)
   onNodeClick: PropTypes.func,
+  // callback to render the node (optional)
+  // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 
+  // the node of the tree
+  // can have other properties, but these are required
   node: PropTypes.shape({
     label: PropTypes.string.isRequired,
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     children: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
-  }),
+  }).isRequired,
 };
 
 export default Tree;

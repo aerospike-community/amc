@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import VisibleClusters from '../containers/VisibleClusters';
+import VisibleEntityTree from '../containers/VisibleEntityTree';
 import Header from './Header';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 
@@ -10,7 +10,7 @@ import '../styles/common.css';
 
 class App extends React.Component {
   render() {
-    const leftPane = <VisibleClusters />;
+    const leftPane = <VisibleEntityTree />;
     const main = <h3> Main Content </h3>;
 
     return (

@@ -21,7 +21,8 @@ class NodeDashboard extends React.Component {
             <a className="nav-link disabled" href="#">Disabled</a>
           </li>
         </ul>
-        {view} {this.props.node.label}
+        {view}
+        {this.props.node.label}
       </div>
       );
   }

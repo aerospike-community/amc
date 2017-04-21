@@ -12,7 +12,7 @@ class MainDashboard extends React.Component {
     let dashboard = null;
     // TODO dashboard by state
     if (this.props.maindashboard === CLUSTER_ENTITY_TYPE.NODE) {
-      dashboard = <NodeDashboard node={this.props.node} view={this.props.view}/>
+      dashboard = <NodeDashboard node={this.props.node} view={this.props.view} />
     }
 
     return (

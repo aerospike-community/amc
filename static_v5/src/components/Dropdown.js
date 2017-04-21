@@ -60,11 +60,19 @@ class Dropdown extends React.Component {
 }
 
 Dropdown.PropTypes = {
+  // label of the dropdown
   label: PropTypes.string.isRequired,
+  // callback when an option is selected
+  // onOptionSelect(option)
   onOptionSelect: PropTypes.func,
+  // callback when the label is clicked
+  // onLabelClick(void)
   onLabelClick: PropTypes.func,
-  style: PropTypes.object, // style of the entire dropdown
+  // style applied to the entire dropdown
+  style: PropTypes.object,
 
+  // the options to display
+  // [string | object { label: 'option_label'}]
   options: PropTypes.arrayOf(function(propValue, key, componentName, location, propFullname) {
     const prop = propValue[key];
     const type = typeof prop;

@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
-import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS} from '../actions';
-import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER , SELECT_ENTITY_VIEW} from '../actions';
+import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
+import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 function clusters(state = {
