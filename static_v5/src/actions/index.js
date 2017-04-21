@@ -35,19 +35,15 @@ export const entityViewSelected = (entity, view) => {
 
 export function fetchClusters() {
   const dummyData = [{
-    id: 'Cluster ONE',
     label: 'Cluster ONE',
     children: [{
-      id: 'Cluster ONE',
-      label: 'Cluster ONE',
+      label: 'Cluster THREE',
       children: []
     }, {
-      id: 'Cluster TWO',
-      label: 'Cluster TWO',
+      label: 'Cluster FOUR',
       children: []
     }]
   }, {
-    id: 'Cluster TWO',
     label: 'Cluster TWO',
     children: []
   }];

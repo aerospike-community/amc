@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
+import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import { objectPropType, nextNumber } from '../classes/Util';
 import Tree from './Tree';
-import Dropdown from './Dropdown';
 
 // Display all the clusters and its entites 
 // in a tree.
@@ -11,14 +11,22 @@ class EntityTree extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      contextMenuEntity: null
+    };
+
+    // to maintain tree states across redraws
+    this.treeStates = []; // tree state of each cluster
+
     this.renderTreeNode = this.renderTreeNode.bind(this);
     this.onEntitySelect = this.onEntitySelect.bind(this);
+    this.onContextMenu = this.onContextMenu.bind(this);
+    this.hideContextMenu = this.hideContextMenu.bind(this);
   }
 
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
-    const onOptionSelect = (option) => this.onEntityViewSelect(entity, option);
-    const onLabelClick = () => this.onEntitySelect(entity);
+    const showContextMenu = this.state.contextMenuEntity === entity;
     const style = {
       display: 'inline-block',
       marginLeft: '5px'
@@ -31,12 +39,46 @@ class EntityTree extends React.Component {
     }];
 
     return (
-      <Dropdown options={options} label={entity.label} style={style} onOptionSelect={onOptionSelect} onLabelClick={onLabelClick}
-      />
+      <div style={style} 
+          onClick={(evt) => this.onEntitySelect(entity)}
+          onContextMenu={(evt) => this.onContextMenu(evt, entity)}> 
+        {entity.label} 
+        
+        {showContextMenu &&
+          <Dropdown isOpen={true} toggle={() => {}}>
+            <DropdownMenu>
+              {options.map((option) => {
+                 return <DropdownItem key={nextNumber()} onClick={(evt) => this.onEntityViewSelect(entity, option)}> 
+                           {option.label}
+                        </DropdownItem>
+               })}
+            </DropdownMenu>
+          </Dropdown>
+        }
+      </div>
       );
   }
 
+  onContextMenu(evt, entity) {
+    evt.preventDefault();
+
+    this.setState({
+      contextMenuEntity: entity
+    });
+  }
+
+  hideContextMenu() {
+    this.setState({
+      contextMenuEntity: null
+    });
+  }
+
   onEntitySelect(entity) {
+    if (this.state.contextMenuEntity !== null) {
+      this.hideContextMenu();
+      return;
+    }
+
     const fn = this.props.onEntitySelect;
     const type = typeof fn;
     if (type === 'function')
@@ -46,12 +88,24 @@ class EntityTree extends React.Component {
   }
 
   onEntityViewSelect(entity, view) {
+    this.hideContextMenu();
+
     const fn = this.props.onEntityViewSelect;
     const type = typeof fn;
     if (type === 'function')
       fn(entity, view.label);
     else
       console.warn(`EntityTree - onEntityViewSelect is not a function, is of type ${type}`);
+  }
+
+  getTreeState(cluster) {
+    let s = this.treeStates.find(s => s.cluster === cluster)
+    if (s)
+      return s.treeState;
+
+    s = {cluster: cluster, treeState: {}};
+    this.treeStates.push(s);
+    return s.treeState;
   }
 
   render() {
@@ -62,8 +116,9 @@ class EntityTree extends React.Component {
 
     return (
       <div>
-        {clusters.map(node => {
-           return <Tree node={node} depth={0} key={nextNumber()} renderNode={this.renderTreeNode} />
+        {clusters.map(cluster => {
+           let treeState = this.getTreeState(cluster);
+           return <Tree root={cluster} depth={0} treeState={treeState} key={nextNumber()} renderNode={this.renderTreeNode} />
          })}
       </div>
       );

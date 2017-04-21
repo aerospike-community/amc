@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 import { nextNumber } from '../classes/Util';
-import { Dropdown as ReactDropdown, DropdownMenu } from 'reactstrap';
+import { Dropdown as ReactDropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -49,9 +49,9 @@ class Dropdown extends React.Component {
         <button onClick={this.toggle} style={toggleStyle} className="btn btn-sm dropdown-toggle"> </button>
         <DropdownMenu>
           {this.props.options.map((option) => {
-             return <a key={nextNumber()} onClick={(evt) => this.onOptionClick(option)} className="dropdown-item">
-                      {typeof option === 'string' ? option : option.label}
-                    </a>
+             return <DropdownItem key={nextNumber()} onClick={(evt) => this.onOptionClick(option)}> 
+                       {typeof option === 'string' ? option : option.label}
+                    </DropdownItem>
            })}
         </DropdownMenu>
       </ReactDropdown>

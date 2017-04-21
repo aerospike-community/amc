@@ -10,74 +10,113 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
 
+    // if treeState is passed in use that
+    // else create new tree state
+    let expanded = [];
+    if (props.treeState) {
+      if (Array.isArray(props.treeState.expanded))
+        expanded = props.treeState.expanded;
+      else
+        props.treeState.expanded = expanded;
+    }
     this.state = {
-      collapsed: true,
+      expanded: expanded, // array of collpased nodes
     };
 
     this.onToggleCollapse = this.onToggleCollapse.bind(this);
     this.onNodeClick = this.onNodeClick.bind(this);
   }
 
-  onToggleCollapse() {
+  onToggleCollapse(node) {
+    const expanded = this.state.expanded
+    const i = expanded.findIndex(nd => node === nd);
+    if (i === -1) 
+      expanded.push(node);
+    else 
+      expanded.splice(i, 1);
+
     this.setState({
-      collapsed: !this.state.collapsed
+      expanded: expanded
     });
   }
 
-  onNodeClick() {
+  onNodeClick(node) {
     const fn = this.props.onNodeClick;
     const type = typeof fn;
     if (type === 'function')
-      this.props.onNodeClick(this.props.node);
+      this.props.onNodeClick(this.node);
     else
       console.warn(`Tree - onNodeClick not a function, is of type ${type}`);
   }
 
-  render() {
-    const depth = this.props.depth || 0;
-    const collapsed = this.state.collapsed;
-    const {label, children} = this.props.node;
+  renderTree(node, depth) {
+    const expanded = this.state.expanded.find(nd => node === nd);
     const renderNode = this.props.renderNode;
+    const {label, children} = node;
     const style = {
       marginLeft: depth * 10,
       cursor: 'pointer',
     };
+    let tree = (
+        <div key={label}>
+          <div>
+            <span className={expanded ? 'as-arrow-down' : 'as-arrow-right' } style={style} onClick={() => this.onToggleCollapse(node)} />
+            {typeof renderNode === 'function' ? renderNode(node) :
+             <span onClick={this.onNodeClick}> {label} </span>}
+          </div>
+          <div>
+            {expanded &&
+             children.map((node, i) => 
+               this.renderTree(node, depth + 1)
+             )}
+          </div>
+        </div>
+    );
+    return tree;
+  }
 
+  render() {
+    const depth = this.props.depth || 0;
     return (
-      <div>
-        <div>
-          <span className={collapsed ? 'as-arrow-right' : 'as-arrow-down'} style={style} onClick={this.onToggleCollapse} />
-          {typeof renderNode === 'function' ? renderNode(this.props.node) :
-           <span onClick={this.onNodeClick}> {label} </span>}
-        </div>
-        <div>
-          {!collapsed &&
-           children.map(node => {
-             return <Tree node={node} depth={depth + 1} key={nextNumber()} onNodeClick={this.props.onNodeClick} renderNode={this.props.renderNode} />
-           })}
-        </div>
-      </div>
-      );
+        this.renderTree(this.props.root, depth)
+    )
   }
 }
 
+function isNodeValid(node) {
+  if (!node.hasOwnProperty('label') || !node.hasOwnProperty('children'))
+    return false;
+  if (typeof node.label !== 'string')
+    return false;
+  if ( ! Array.isArray(node.children))
+    return false;
+  for (let i = 0; i < node.children.length; i++) {
+    if ( ! isNodeValid(node.children[i]))
+      return false;
+  }
+  return true;
+}
+
 Tree.propTypes = {
-  // depth of the node in the tree
-  depth: PropTypes.number,
-  // callback when the node is clicked (optional)
   // onNodeClick(node)
   onNodeClick: PropTypes.func,
   // callback to render the node (optional)
   // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 
-  // the node of the tree
-  // can have other properties, but these are required
-  node: PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    children: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
-  }).isRequired,
+  // An object to maintain the state of the tree across redraws.
+  // Pass this value only if the parent wants to maintain state across redraws
+  treeState: PropTypes.object,
+  // the root
+  root: function(props, propName, componentName) {
+    let node = props[propName];
+    if ( !isNodeValid(node)) {
+      return new Error(
+				 'Invalid prop `' + propName + '` supplied to' +
+        ' `' + componentName + '`. Validation failed.'
+      );
+		}	
+	}
 };
 
 export default Tree;
