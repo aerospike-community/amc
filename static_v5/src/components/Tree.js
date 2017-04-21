@@ -20,7 +20,7 @@ class Tree extends React.Component {
         props.treeState.expanded = expanded;
     }
     this.state = {
-      expanded: expanded, // array of collpased nodes
+      expanded: expanded, // array of expanded nodes
     };
 
     this.onToggleCollapse = this.onToggleCollapse.bind(this);
@@ -30,9 +30,9 @@ class Tree extends React.Component {
   onToggleCollapse(node) {
     const expanded = this.state.expanded
     const i = expanded.findIndex(nd => node === nd);
-    if (i === -1) 
+    if (i === -1)
       expanded.push(node);
-    else 
+    else
       expanded.splice(i, 1);
 
     this.setState({
@@ -58,19 +58,18 @@ class Tree extends React.Component {
       cursor: 'pointer',
     };
     let tree = (
-        <div key={label}>
-          <div>
-            <span className={expanded ? 'as-arrow-down' : 'as-arrow-right' } style={style} onClick={() => this.onToggleCollapse(node)} />
-            {typeof renderNode === 'function' ? renderNode(node) :
-             <span onClick={this.onNodeClick}> {label} </span>}
-          </div>
-          <div>
-            {expanded &&
-             children.map((node, i) => 
-               this.renderTree(node, depth + 1)
-             )}
-          </div>
-        </div>
+    <div key={label}>
+      <div>
+        <span className={expanded ? 'as-arrow-down' : 'as-arrow-right'} style={style} onClick={() => this.onToggleCollapse(node)} />
+        {typeof renderNode === 'function' ? renderNode(node) :
+         <span onClick={this.onNodeClick}> {label} </span>}
+      </div>
+      <div>
+        {expanded &&
+         children.map((node, i) => this.renderTree(node, depth + 1)
+         )}
+      </div>
+    </div>
     );
     return tree;
   }
@@ -78,7 +77,7 @@ class Tree extends React.Component {
   render() {
     const depth = this.props.depth || 0;
     return (
-        this.renderTree(this.props.root, depth)
+    this.renderTree(this.props.root, depth)
     )
   }
 }
@@ -88,10 +87,10 @@ function isNodeValid(node) {
     return false;
   if (typeof node.label !== 'string')
     return false;
-  if ( ! Array.isArray(node.children))
+  if (!Array.isArray(node.children))
     return false;
   for (let i = 0; i < node.children.length; i++) {
-    if ( ! isNodeValid(node.children[i]))
+    if (!isNodeValid(node.children[i]))
       return false;
   }
   return true;
@@ -110,13 +109,13 @@ Tree.propTypes = {
   // the root
   root: function(props, propName, componentName) {
     let node = props[propName];
-    if ( !isNodeValid(node)) {
+    if (!isNodeValid(node)) {
       return new Error(
-				 'Invalid prop `' + propName + '` supplied to' +
+        'Invalid prop `' + propName + '` supplied to' +
         ' `' + componentName + '`. Validation failed.'
       );
-		}	
-	}
+    }
+  }
 };
 
 export default Tree;

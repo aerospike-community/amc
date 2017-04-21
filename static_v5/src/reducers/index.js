@@ -1,11 +1,13 @@
 import { combineReducers } from 'redux';
 import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
 import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
+import { DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 function clusters(state = {
+    displayAddConnection: false,
     isFetching: false,
-    items: []
+    items: [],
   }, action) {
   switch (action.type) {
     case REQUEST_CLUSTERS:
@@ -16,6 +18,10 @@ function clusters(state = {
       return Object.assign({}, state, {
         isFetching: false,
         items: action.clusters
+      });
+    case DISPLAY_ADD_CLUSTER_CONNECTION:
+      return Object.assign({}, state, {
+        displayAddConnection: action.display,
       });
     default:
       return state;
@@ -45,6 +51,7 @@ function clusterEntity(state = {
       });
     case SELECT_ENTITY_VIEW:
       return Object.assign({}, state, {
+        type: CLUSTER_ENTITY_TYPE.NODE, // FIXME assign based on entity type
         view: action.view,
         value: action.entity,
       });

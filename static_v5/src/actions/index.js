@@ -33,6 +33,14 @@ export const entityViewSelected = (entity, view) => {
   };
 }
 
+export const DISPLAY_ADD_CLUSTER_CONNECTION = 'DISPLAY_ADD_CLUSTER_CONNECTION';
+export const displayAddClusterConnection = (display) => {
+  return {
+    type: DISPLAY_ADD_CLUSTER_CONNECTION,
+    display: display
+  };
+}
+
 export function fetchClusters() {
   const dummyData = [{
     label: 'Cluster ONE',

@@ -2,8 +2,9 @@ import React from 'react';
 import { render } from 'react-dom';
 
 import VisibleEntityTree from '../containers/VisibleEntityTree';
-import Header from './Header';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
+import VisibleClusterConnections from '../containers/VisibleClusterConnections';
+import Header from './Header';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
@@ -22,7 +23,7 @@ class App extends React.Component {
         </div>
         <div className="row no-gutters">
           <div className="col-2 as-leftpane">
-            {leftPane}
+            <VisibleClusterConnections />
           </div>
           <div className="col-10 as-maincontent">
             <VisibleMainDashboard />

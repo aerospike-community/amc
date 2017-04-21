@@ -39,22 +39,21 @@ class EntityTree extends React.Component {
     }];
 
     return (
-      <div style={style} 
-          onClick={(evt) => this.onEntitySelect(entity)}
-          onContextMenu={(evt) => this.onContextMenu(evt, entity)}> 
-        {entity.label} 
-        
+      <div style={style} onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
+        {entity.label}
         {showContextMenu &&
-          <Dropdown isOpen={true} toggle={() => {}}>
-            <DropdownMenu>
-              {options.map((option) => {
-                 return <DropdownItem key={nextNumber()} onClick={(evt) => this.onEntityViewSelect(entity, option)}> 
-                           {option.label}
-                        </DropdownItem>
-               })}
-            </DropdownMenu>
-          </Dropdown>
-        }
+         <Dropdown isOpen={true} toggle={() => {
+                                         }}>
+           <DropdownMenu>
+             <DropdownItem header>
+               {entity.label} </DropdownItem>
+             {options.map((option) => {
+                return <DropdownItem key={nextNumber()} onClick={(evt) => this.onEntityViewSelect(entity, option)}>
+                         {option.label}
+                       </DropdownItem>
+              })}
+           </DropdownMenu>
+         </Dropdown>}
       </div>
       );
   }
@@ -103,7 +102,10 @@ class EntityTree extends React.Component {
     if (s)
       return s.treeState;
 
-    s = {cluster: cluster, treeState: {}};
+    s = {
+      cluster: cluster,
+      treeState: {}
+    };
     this.treeStates.push(s);
     return s.treeState;
   }

@@ -49,8 +49,8 @@ class Dropdown extends React.Component {
         <button onClick={this.toggle} style={toggleStyle} className="btn btn-sm dropdown-toggle"> </button>
         <DropdownMenu>
           {this.props.options.map((option) => {
-             return <DropdownItem key={nextNumber()} onClick={(evt) => this.onOptionClick(option)}> 
-                       {typeof option === 'string' ? option : option.label}
+             return <DropdownItem key={nextNumber()} onClick={(evt) => this.onOptionClick(option)}>
+                      {typeof option === 'string' ? option : option.label}
                     </DropdownItem>
            })}
         </DropdownMenu>
