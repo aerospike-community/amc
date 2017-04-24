@@ -42,12 +42,23 @@ export const displayAddClusterConnection = (display) => {
 }
 
 export const ADD_CLUSTER_CONNECTION = 'ADD_CLUSTER_CONNECTION';
-export const addClusterConnection = (connection) => {
-  return {
-    type: ADD_CLUSTER_CONNECTION,
-    connection: connection,
-  };
+export const ADDING_CLUSTER_CONNECTION = 'ADDING_CLUSTER_CONNECTION';
+export function addClusterConnection(connection) {
+  return function(dispatch) {
+    dispatch({
+      type: ADDING_CLUSTER_CONNECTION
+    });
+
+    // TODO send request to server
+    setTimeout(() => {
+      dispatch({
+        type: ADD_CLUSTER_CONNECTION,
+        connection: connection,
+      });
+    }, 2000);
+  }
 }
+
 
 export const ENTITY_NODE_COLLAPSED = 'ENTITY_NODE_COLLAPSED';
 export const ENTITY_NODE_EXPANDED = 'ENTITY_NODE_EXPANDED';

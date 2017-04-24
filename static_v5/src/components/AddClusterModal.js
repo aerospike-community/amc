@@ -31,6 +31,7 @@ class AddClusterModal extends React.Component {
   }
 
   render() {
+    const inProgress = this.props.inProgress;
     return (
       <Modal isOpen={true} toggle={() => {
                              }}>
@@ -39,8 +40,11 @@ class AddClusterModal extends React.Component {
           Add a new cluster connection
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={this.onAddConnection}>Add</Button>
-          <Button color="secondary" onClick={this.onCancel}>Cancel</Button>
+          {inProgress &&
+           <span> Creating ... </span>
+          }
+          <Button disabled={inProgress} color="primary" onClick={this.onAddConnection}>Add</Button>
+          <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
         </ModalFooter>
       </Modal>
       );
@@ -48,6 +52,8 @@ class AddClusterModal extends React.Component {
 }
 
 AddClusterModal.PropTypes = {
+  // adding a connection is in progress
+  inProgress: PropTypes.bool,
   // callback to add a connection
   // callback(properties) TODO add properties
   onAddConnection: PropTypes.func,

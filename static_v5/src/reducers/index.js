@@ -2,13 +2,14 @@ import { combineReducers } from 'redux';
 import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
 import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
 import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions';
-import { ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
+import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 function clusters(state = {
     displayAddConnection: false,
     isFetching: false,
     items: [],
+    isUpdating: false,
   }, action) {
   switch (action.type) {
     case REQUEST_CLUSTERS:
@@ -27,7 +28,12 @@ function clusters(state = {
     case ADD_CLUSTER_CONNECTION:
       return Object.assign({}, state, {
         displayAddConnection: false,
-        items: [...state.items, action.connection]
+        items: [...state.items, action.connection],
+        isUpdating: false,
+      });
+    case ADDING_CLUSTER_CONNECTION:
+      return Object.assign({}, state, {
+        isUpdating: true
       });
     default:
       return state;

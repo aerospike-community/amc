@@ -3,6 +3,12 @@ import { connect } from 'react-redux';
 import AddClusterModal from '../components/AddClusterModal';
 import { addClusterConnection, displayAddClusterConnection } from '../actions';
 
+const mapStateToProps = (state) => {
+  return {
+    inProgress: state.clusters.isUpdating
+  };
+}
+
 const mapDispatchToProps = (dispatch) => {
   return {
     onAddConnection: (connection) => {
@@ -15,7 +21,7 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 const VisibleAddClusterModal = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(AddClusterModal);
 
