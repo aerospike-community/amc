@@ -59,6 +59,9 @@ class EntityTree extends React.Component {
   }
 
   onContextMenu(evt, entity) {
+    if (evt.ctrlKey)
+      return;
+
     evt.preventDefault();
 
     this.setState({
@@ -117,10 +120,14 @@ class EntityTree extends React.Component {
     }
 
     return (
+      // TODO unique key for each child
       <div>
         {clusters.map(cluster => {
            let treeState = this.getTreeState(cluster);
-           return <Tree root={cluster} depth={0} treeState={treeState} key={nextNumber()} renderNode={this.renderTreeNode} />
+           return (
+             <Tree root={cluster} renderNode={this.renderTreeNode} expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.props.onNodeExpand}
+             />
+             );
          })}
       </div>
       );
@@ -130,12 +137,20 @@ class EntityTree extends React.Component {
 EntityTree.PropTypes = {
   // an array of clusters to display
   clusters: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
-  // callback when an entity is clicked
+  // callback when an entity is selected
   // onEntitySelect(entity)
   onEntitySelect: PropTypes.func,
   // callback when a view is selected for an entity
   // onEntityViewSelect(entity, view)
-  onEntityViewSelect: PropTypes.func
+  onEntityViewSelect: PropTypes.func,
+
+  // state of the entity tree
+  // a set of expanded nodes of the tree
+  expanded: PropTypes.instanceOf(Set),
+  // onNodeExpand(node)
+  onNodeExpand: PropTypes.func,
+  // onNodeCollapse(node)
+  onNodeCollapse: PropTypes.func,
 };
 
 export default EntityTree;

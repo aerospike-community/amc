@@ -17,11 +17,11 @@ class App extends React.Component {
     return (
       <div className="container-fluid">
         <div className="row">
-          <div className="col-12">
+          <div className="col-12 pl-0 pr-0">
             <Header />
           </div>
         </div>
-        <div className="row no-gutters">
+        <div className="row pl-0 pr-0">
           <div className="col-2 as-leftpane">
             <VisibleClusterConnections />
           </div>

@@ -1,5 +1,10 @@
 .as-header {
   background-color: #cc0000;
+  height: 60px;
+}
+
+.as-logo {
+  padding: 10px;
 }
 
 .as-leftpane {

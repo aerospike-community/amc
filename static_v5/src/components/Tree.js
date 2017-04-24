@@ -10,47 +10,36 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
 
-    // if treeState is passed in use that
-    // else create new tree state
-    let expanded = [];
-    if (props.treeState) {
-      if (Array.isArray(props.treeState.expanded))
-        expanded = props.treeState.expanded;
-      else
-        props.treeState.expanded = expanded;
-    }
-    this.state = {
-      expanded: expanded, // array of expanded nodes
-    };
-
     this.onToggleCollapse = this.onToggleCollapse.bind(this);
     this.onNodeClick = this.onNodeClick.bind(this);
   }
 
   onToggleCollapse(node) {
-    const expanded = this.state.expanded
-    const i = expanded.findIndex(nd => node === nd);
-    if (i === -1)
-      expanded.push(node);
+    const expanded = this.props.expanded;
+    let fn;
+    if (expanded.has(node))
+      fn = this.props.onNodeCollapse;
     else
-      expanded.splice(i, 1);
+      fn = this.props.onNodeExpand;
 
-    this.setState({
-      expanded: expanded
-    });
+    const type = typeof fn;
+    if (type === 'function')
+      fn(node);
+    else
+      console.warn(`Tree - onNodeCollapse/onNodeExpand not a function, is of type ${type}`);
   }
 
   onNodeClick(node) {
     const fn = this.props.onNodeClick;
     const type = typeof fn;
     if (type === 'function')
-      this.props.onNodeClick(this.node);
+      fn(this.node);
     else
       console.warn(`Tree - onNodeClick not a function, is of type ${type}`);
   }
 
   renderTree(node, depth) {
-    const expanded = this.state.expanded.find(nd => node === nd);
+    const expanded = this.props.expanded.has(node);
     const renderNode = this.props.renderNode;
     const {label, children} = node;
     const style = {
@@ -75,7 +64,7 @@ class Tree extends React.Component {
   }
 
   render() {
-    const depth = this.props.depth || 0;
+    const depth = 0;
     return (
     this.renderTree(this.props.root, depth)
     )
@@ -97,15 +86,18 @@ function isNodeValid(node) {
 }
 
 Tree.propTypes = {
+  // onNodeExpand(node)
+  onNodeExpand: PropTypes.func,
+  // onNodeCollapse(node)
+  onNodeCollapse: PropTypes.func,
   // onNodeClick(node)
   onNodeClick: PropTypes.func,
   // callback to render the node (optional)
   // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 
-  // An object to maintain the state of the tree across redraws.
-  // Pass this value only if the parent wants to maintain state across redraws
-  treeState: PropTypes.object,
+  // a set of expanded nodes of the tree
+  expanded: PropTypes.instanceOf(Set),
   // the root
   root: function(props, propName, componentName) {
     let node = props[propName];

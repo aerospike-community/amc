@@ -2,11 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import EntityTree from '../components/EntityTree';
 import { clusterEntitySelected, entityViewSelected } from '../actions';
+import { expandEntityNode, collapseEntityNode } from '../actions';
 
 const mapStateToProps = (state) => {
   return {
     isFetching: state.clusters.isFetching,
     clusters: state.clusters.items,
+    expanded: state.entityTree.expanded,
   };
 };
 
@@ -17,6 +19,12 @@ const mapDispatchToProps = (dispatch) => {
     },
     onEntityViewSelect: (entity, view) => {
       dispatch(entityViewSelected(entity, view));
+    },
+    onNodeExpand: (node) => {
+      dispatch(expandEntityNode(node));
+    },
+    onNodeCollapse: (node) => {
+      dispatch(collapseEntityNode(node));
     }
   };
 };

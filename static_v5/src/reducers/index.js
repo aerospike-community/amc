@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
 import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
+import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions';
 import { DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
@@ -22,6 +23,26 @@ function clusters(state = {
     case DISPLAY_ADD_CLUSTER_CONNECTION:
       return Object.assign({}, state, {
         displayAddConnection: action.display,
+      });
+    default:
+      return state;
+  }
+}
+
+function entityTree(state = {
+    expanded: new Set()
+  }, action) {
+  const expanded = new Set(state.expanded);
+  switch (action.type) {
+    case ENTITY_NODE_EXPANDED:
+      expanded.add(action.node);
+      return Object.assign({}, state, {
+        expanded: expanded,
+      });
+    case ENTITY_NODE_COLLAPSED:
+      expanded.delete(action.node);
+      return Object.assign({}, state, {
+        expanded: expanded
       });
     default:
       return state;
@@ -64,6 +85,7 @@ function clusterEntity(state = {
 const app = combineReducers({
   clusters, // the aerospike clusters
   clusterEntity, // the selected cluster entity
+  entityTree, // state of the entity tree
 });
 
 export default app;
