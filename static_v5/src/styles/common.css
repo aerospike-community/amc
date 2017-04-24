@@ -9,6 +9,7 @@
 
 .as-leftpane {
   background-color: #eee;
+  border-right: 1px solid lightgray;
   height: 100%;
 }
 

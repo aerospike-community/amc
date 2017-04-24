@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
 import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
 import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions';
-import { DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
+import { ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 function clusters(state = {
@@ -23,6 +23,11 @@ function clusters(state = {
     case DISPLAY_ADD_CLUSTER_CONNECTION:
       return Object.assign({}, state, {
         displayAddConnection: action.display,
+      });
+    case ADD_CLUSTER_CONNECTION:
+      return Object.assign({}, state, {
+        displayAddConnection: false,
+        items: [...state.items, action.connection]
       });
     default:
       return state;

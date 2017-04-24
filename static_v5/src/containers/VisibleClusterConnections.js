@@ -3,8 +3,10 @@ import { connect } from 'react-redux';
 import ClusterConnections from '../components/ClusterConnections';
 
 const mapStateToProps = (state) => {
+  const clusters = state.clusters;
   return {
-    displayAddCluster: state.clusters.displayAddConnection,
+    displayAddCluster: clusters.displayAddConnection,
+    isFetching: clusters.isFetching,
   };
 };
 

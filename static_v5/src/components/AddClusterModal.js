@@ -12,10 +12,11 @@ class AddClusterModal extends React.Component {
   }
 
   onAddConnection() {
+    const connection = { label: 'Connection ', children: []};
     let fn = this.props.onAddConnection;
     let type = typeof fn;
     if (type === 'function')
-      fn(); // TODO properties for a new connection
+      fn(connection); // TODO properties for a new connection
     else
       console.warn(`AddClusterModal - onAddConnection is not a function, is of type ${type}`);
   }

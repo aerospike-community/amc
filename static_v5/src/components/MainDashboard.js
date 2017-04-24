@@ -9,7 +9,7 @@ import '../styles/common.css';
 
 class MainDashboard extends React.Component {
   render() {
-    let dashboard = null;
+    let dashboard;
     // TODO dashboard by state
     if (this.props.maindashboard === CLUSTER_ENTITY_TYPE.NODE) {
       dashboard = <NodeDashboard node={this.props.node} view={this.props.view} />

@@ -25,7 +25,7 @@ class App extends React.Component {
           <div className="col-2 as-leftpane">
             <VisibleClusterConnections />
           </div>
-          <div className="col-10 as-maincontent">
+          <div className="col-10 pl-0 pr-0 as-maincontent">
             <VisibleMainDashboard />
           </div>
         </div>

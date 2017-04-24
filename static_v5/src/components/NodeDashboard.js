@@ -2,27 +2,28 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import 'bootstrap/dist/css/bootstrap.css';
+
 class NodeDashboard extends React.Component {
   render() {
-    const view = this.props.view || 'Default';
     return (
       <div>
-        <ul className="nav nav-pills">
-          <li className="nav-item">
-            <a className="nav-link active" href="#">Active</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">Link</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">Link</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link disabled" href="#">Disabled</a>
-          </li>
-        </ul>
-        {view}
-        {this.props.node.label}
+        <nav className="navbar navbar-toggleable-md navbar-light" style={{background: 'lavender'}}>
+          <div className="navbar-collapse">
+            <ul className="navbar-nav">
+              <li className="nav-item"> <a className="nav-link active"> Configuration </a> </li>
+              <li className="nav-item"> <a className="nav-link"> Machine </a> </li>
+              <li className="nav-item"> <a className="nav-link"> Performance </a> </li>
+              <li className="nav-item"> <a className="nav-link"> Storage </a> </li>
+            </ul>
+          </div>
+        </nav>
+        <div>
+          {this.props.node.label}
+        </div>
+        <div>
+          {this.props.view}
+        </div>
       </div>
       );
   }

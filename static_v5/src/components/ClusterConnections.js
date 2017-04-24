@@ -13,23 +13,27 @@ class ClusterConnections extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <VisibleClusterToolbar />
-        <VisibleEntityTree />
-        {this.props.displayAddCluster &&
-         <VisibleAddClusterModal />}
-      </div>
+    let content;
+    if (this.props.isFetching) {
+      content = <h5> Loading ... </h5>;
+    } else {
+      content = (
+        <div>
+          <VisibleClusterToolbar />
+          <VisibleEntityTree />
+          {this.props.displayAddCluster &&
+           <VisibleAddClusterModal />}
+        </div>
       );
+    }
+    return content;
   }
 }
 
 ClusterConnections.PropTypes = {
-  // true whenin the process of adding a new connection
-  displayAddConnection: PropTypes.bool,
-  // callback when a toolbar item is clicked
-  // onToolItemClick('item')
-  onToolItemClick: PropTypes.func,
+  // true when in the process of adding a new connection
+  displayAddCluster: PropTypes.bool,
+  isFetching: PropTypes.bool,
 };
 
 export default ClusterConnections;

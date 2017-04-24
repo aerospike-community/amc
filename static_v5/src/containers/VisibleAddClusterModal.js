@@ -1,12 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import AddClusterModal from '../components/AddClusterModal';
-import { displayAddClusterConnection } from '../actions';
+import { addClusterConnection, displayAddClusterConnection } from '../actions';
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onAddConnection: () => {
-      dispatch(displayAddClusterConnection(false));
+    onAddConnection: (connection) => {
+      dispatch(addClusterConnection(connection));
     },
     onCancel: () => {
       dispatch(displayAddClusterConnection(false));

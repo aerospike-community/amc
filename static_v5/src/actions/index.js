@@ -37,7 +37,15 @@ export const DISPLAY_ADD_CLUSTER_CONNECTION = 'DISPLAY_ADD_CLUSTER_CONNECTION';
 export const displayAddClusterConnection = (display) => {
   return {
     type: DISPLAY_ADD_CLUSTER_CONNECTION,
-    display: display
+    display: display,
+  };
+}
+
+export const ADD_CLUSTER_CONNECTION = 'ADD_CLUSTER_CONNECTION';
+export const addClusterConnection = (connection) => {
+  return {
+    type: ADD_CLUSTER_CONNECTION,
+    connection: connection,
   };
 }
 

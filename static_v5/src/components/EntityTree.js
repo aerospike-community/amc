@@ -15,9 +15,6 @@ class EntityTree extends React.Component {
       contextMenuEntity: null
     };
 
-    // to maintain tree states across redraws
-    this.treeStates = []; // tree state of each cluster
-
     this.renderTreeNode = this.renderTreeNode.bind(this);
     this.onEntitySelect = this.onEntitySelect.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
@@ -100,19 +97,6 @@ class EntityTree extends React.Component {
       console.warn(`EntityTree - onEntityViewSelect is not a function, is of type ${type}`);
   }
 
-  getTreeState(cluster) {
-    let s = this.treeStates.find(s => s.cluster === cluster)
-    if (s)
-      return s.treeState;
-
-    s = {
-      cluster: cluster,
-      treeState: {}
-    };
-    this.treeStates.push(s);
-    return s.treeState;
-  }
-
   render() {
     const clusters = this.props.clusters;
     if (clusters.length === 0) {
@@ -123,7 +107,6 @@ class EntityTree extends React.Component {
       // TODO unique key for each child
       <div>
         {clusters.map(cluster => {
-           let treeState = this.getTreeState(cluster);
            return (
              <Tree root={cluster} renderNode={this.renderTreeNode} expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.props.onNodeExpand}
              />
