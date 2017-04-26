@@ -1,18 +1,30 @@
 package controllers
 
 import (
+	"compress/gzip"
+	"context"
+	"errors"
 	"fmt"
+	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	"github.com/tylerb/graceful"
+
+	"github.com/goadesign/goa"
+	gmiddleware "github.com/goadesign/goa/middleware"
+	gzm "github.com/goadesign/goa/middleware/gzip"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
+	mw "github.com/citrusleaf/amc/controllers/middleware"
 	"github.com/citrusleaf/amc/controllers/middleware/sessions"
 	"github.com/citrusleaf/amc/models"
 )
@@ -116,9 +128,9 @@ func Server(config *common.Config) {
 	e.Use(sessions.Sessions("amc_session", store))
 
 	if config.AMC.StaticPath == "" {
-		log.Fatalln("No static dir has been set in the config file. Quiting...")
+		logrus.Fatalln("No static dir has been set in the config file. Quiting...")
 	}
-	log.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
+	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
 	e.Static("/", config.AMC.StaticPath)
 	e.Static("/static", config.AMC.StaticPath)
 
@@ -204,16 +216,137 @@ func Server(config *common.Config) {
 		registerEnterpriseAPI(e)
 	}
 
-	log.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
+	logrus.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
 	_server = e
 	// Start server
 	if config.AMC.CertFile != "" {
-		log.Infof("In HTTPS (secure) Mode")
+		logrus.Infof("In HTTPS (secure) Mode")
 		// redirect all http requests to https
 		e.Pre(middleware.HTTPSRedirect())
 		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
 	} else {
-		log.Infof("In HTTP (insecure) Mode.")
+		logrus.Infof("In HTTP (insecure) Mode.")
 		e.Start(config.AMC.Bind)
+	}
+}
+
+func GoaServer(config *common.Config) {
+	_observer = models.New(config)
+
+	_defaultClientPolicy.Timeout = time.Duration(config.AMC.Timeout) * time.Second
+	if _defaultClientPolicy.Timeout <= 0 {
+		_defaultClientPolicy.Timeout = 30 * time.Second
+	}
+	_defaultClientPolicy.LimitConnectionsToQueueSize = true
+	_defaultClientPolicy.ConnectionQueueSize = 1
+
+	rand.Seed(time.Now().UnixNano())
+
+	// Create service and set the logger
+	f, err := os.OpenFile(config.AMC.ErrorLog, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger := goa.NewLogger(log.New(f, "", log.LstdFlags))
+	service := goa.New("amc")
+
+	// Mount middleware
+	service.Use(gmiddleware.RequestID())
+
+	service.Use(gmiddleware.ErrorHandler(service, true))
+	service.Use(gzm.Middleware(gzip.BestCompression))
+	service.Use(gmiddleware.LogRequest(true))
+
+	// Mount security middlewares
+	jwtMiddleware, err := mw.NewJWTMiddleware(logger)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	app.UseJWTMiddleware(service, jwtMiddleware)
+
+	authCtl := NewAuthController(service)
+	app.MountAuthController(service, authCtl)
+
+	// Mount "amc" controller
+	app.MountAmcController(service, NewAmcController(service))
+	// app.MountClusterController(service, NewClusterController(service))
+	app.MountConnectionController(service, NewConnectionController(service))
+	app.MountSwaggerController(service, NewSwaggerController(service))
+	app.MountPublicController(service, NewPublicController(service))
+
+	if config.AMC.StaticPath == "" {
+		log.Fatalln("No static dir has been set in the config file. Quiting...")
+	}
+	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
+
+	// Middleware
+	if !common.AMCIsProd() {
+		service.Use(gmiddleware.LogRequest(true))
+	} else {
+		service.Use(gmiddleware.Recover())
+	}
+
+	// Basic Authentication Middleware Setup
+	basicAuthUser := os.Getenv("AMC_AUTH_USER")
+	if basicAuthUser == "" {
+		basicAuthUser = config.BasicAuth.User
+	}
+
+	basicAuthPassword := os.Getenv("AMC_AUTH_PASSWORD")
+	if basicAuthPassword == "" {
+		basicAuthPassword = config.BasicAuth.Password
+	}
+
+	if basicAuthUser != "" {
+		service.Use(NewBasicAuthMiddleware(basicAuthUser, basicAuthPassword))
+	}
+
+	if registerEnterpriseAPI != nil {
+		goaRegisterEnterprise(service)
+	}
+
+	logrus.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
+
+	// Setup graceful server
+	server := &graceful.Server{
+		Timeout: time.Duration(15) * time.Second,
+		Server: &http.Server{
+			Addr:    ":8082", // TODO: config.AMC.Bind,
+			Handler: service.Mux,
+		},
+	}
+
+	// Start server
+	if config.AMC.CertFile != "" {
+		logrus.Infof("In HTTPS (secure) Mode")
+
+		// TODO: redirect all http requests to https
+		// e.Pre(gmiddleware.HTTPSRedirect())
+		if err := server.ListenAndServeTLS(config.AMC.CertFile, config.AMC.KeyFile); err != nil {
+			service.LogError("startup", "err", err)
+		}
+	} else {
+		logrus.Infof("In HTTP (insecure) Mode.")
+		if err := server.ListenAndServe(); err != nil {
+			service.LogError("startup", "err", err)
+		}
+	}
+}
+
+// NewBasicAuthMiddleware creates a middleware that checks for the presence of a basic auth header
+// and validates its content.
+func NewBasicAuthMiddleware(amcUser, amcPass string) goa.Middleware {
+	return func(h goa.Handler) goa.Handler {
+		return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+			// Retrieve and log basic auth info
+			user, pass, ok := req.BasicAuth()
+			// A real app would do something more interesting here
+			if !ok || user != amcUser || pass != amcPass {
+				goa.LogInfo(ctx, "failed basic auth")
+				return errors.New("missing auth header.")
+			}
+
+			return h(ctx, rw, req)
+		}
 	}
 }

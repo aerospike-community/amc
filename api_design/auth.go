@@ -9,7 +9,7 @@ import (
 // the token.  It also defines then scope "api".
 var JWT = JWTSecurity("jwt", func() {
 	Header("Authorization")
-	Scope("api:driver", "API access to driver resources")
+	Scope("api:cluster", "API access to cluster resources")
 })
 
 var _ = Resource("auth", func() { // Resources group related API endpoints

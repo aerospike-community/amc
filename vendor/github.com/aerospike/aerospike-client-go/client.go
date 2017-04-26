@@ -42,9 +42,9 @@ type Client struct {
 	DefaultPolicy *BasePolicy
 	// DefaultWritePolicy is used for all write commands without a specific policy.
 	DefaultWritePolicy *WritePolicy
-	// DefaultScanPolicy is used for all query commands without a specific policy.
+	// DefaultScanPolicy is used for all scan commands without a specific policy.
 	DefaultScanPolicy *ScanPolicy
-	// DefaultQueryPolicy is used for all scan commands without a specific policy.
+	// DefaultQueryPolicy is used for all query commands without a specific policy.
 	DefaultQueryPolicy *QueryPolicy
 	// DefaultAdminPolicy is used for all security commands without a specific policy.
 	DefaultAdminPolicy *AdminPolicy
@@ -78,7 +78,7 @@ func NewClientWithPolicyAndHost(policy *ClientPolicy, hosts ...*Host) (*Client, 
 	}
 
 	cluster, err := NewCluster(policy, hosts)
-	if err != nil {
+	if err != nil && policy.FailIfNotConnected {
 		if aerr, ok := err.(AerospikeError); ok {
 			Logger.Debug("Failed to connect to host(s): %v; error: %s", hosts, err)
 			return nil, aerr
@@ -96,7 +96,7 @@ func NewClientWithPolicyAndHost(policy *ClientPolicy, hosts ...*Host) (*Client, 
 	}
 
 	runtime.SetFinalizer(client, clientFinalizer)
-	return client, nil
+	return client, err
 
 }
 
@@ -414,19 +414,14 @@ func (clnt *Client) ScanAll(apolicy *ScanPolicy, namespace string, setName strin
 	if policy.ConcurrentNodes {
 		for _, node := range nodes {
 			go func(node *Node) {
-				if err := clnt.scanNode(&policy, node, res, namespace, setName, taskId, binNames...); err != nil {
-					res.sendError(err)
-				}
+				clnt.scanNode(&policy, node, res, namespace, setName, taskId, binNames...)
 			}(node)
 		}
 	} else {
 		// scan nodes one by one
 		go func() {
 			for _, node := range nodes {
-				if err := clnt.scanNode(&policy, node, res, namespace, setName, taskId, binNames...); err != nil {
-					res.sendError(err)
-					continue
-				}
+				clnt.scanNode(&policy, node, res, namespace, setName, taskId, binNames...)
 			}
 		}()
 	}
@@ -812,10 +807,7 @@ func (clnt *Client) QueryAggregate(policy *QueryPolicy, statement *Statement, pa
 
 		go func() {
 			defer wg.Done()
-			err := command.Execute()
-			if err != nil {
-				recSet.sendError(err)
-			}
+			command.Execute()
 		}()
 	}
 
@@ -909,10 +901,7 @@ func (clnt *Client) Query(policy *QueryPolicy, statement *Statement) (*Recordset
 		newPolicy := *policy
 		command := newQueryRecordCommand(node, &newPolicy, statement, recSet)
 		go func() {
-			err := command.Execute()
-			if err != nil {
-				recSet.sendError(err)
-			}
+			command.Execute()
 		}()
 	}
 
@@ -942,10 +931,7 @@ func (clnt *Client) QueryNode(policy *QueryPolicy, node *Node, statement *Statem
 	newPolicy := *policy
 	command := newQueryRecordCommand(node, &newPolicy, statement, recSet)
 	go func() {
-		err := command.Execute()
-		if err != nil {
-			recSet.sendError(err)
-		}
+		command.Execute()
 	}()
 
 	return recSet, nil
@@ -1017,11 +1003,7 @@ func (clnt *Client) CreateComplexIndex(
 		return nil, err
 	}
 
-	response := ""
-	for _, v := range responseMap {
-		response = v
-	}
-
+	response := responseMap[strCmd.String()]
 	if strings.ToUpper(response) == "OK" {
 		// Return task that could optionally be polled for completion.
 		return NewIndexTask(clnt.cluster, namespace, indexName), nil
@@ -1062,23 +1044,55 @@ func (clnt *Client) DropIndex(
 		return err
 	}
 
-	response := ""
-	for _, v := range responseMap {
-		response = v
+	response := responseMap[strCmd.String()]
 
-		if strings.ToUpper(response) == "OK" {
-			// Return task that could optionally be polled for completion.
-			task := NewDropIndexTask(clnt.cluster, namespace, indexName)
-			return <-task.OnComplete()
-		}
+	if strings.ToUpper(response) == "OK" {
+		// Return task that could optionally be polled for completion.
+		task := NewDropIndexTask(clnt.cluster, namespace, indexName)
+		return <-task.OnComplete()
+	}
 
-		if strings.HasPrefix(response, "FAIL:201") {
-			// Index did not previously exist. Return without error.
-			return nil
-		}
+	if strings.HasPrefix(response, "FAIL:201") {
+		// Index did not previously exist. Return without error.
+		return nil
 	}
 
 	return NewAerospikeError(INDEX_GENERIC, "Drop index failed: "+response)
+}
+
+// Remove records in specified namespace/set efficiently.  This method is many orders of magnitude
+// faster than deleting records one at a time.  Works with Aerospike Server versions >= 3.12.
+// This asynchronous server call may return before the truncation is complete.  The user can still
+// write new records after the server call returns because new records will have last update times
+// greater than the truncate cutoff (set at the time of truncate call).
+func (clnt *Client) Truncate(policy *WritePolicy, namespace, set string, beforeLastUpdate *time.Time) error {
+	policy = clnt.getUsableWritePolicy(policy)
+
+	var strCmd bytes.Buffer
+	_, err := strCmd.WriteString("truncate:namespace=")
+	_, err = strCmd.WriteString(namespace)
+
+	if len(set) > 0 {
+		_, err = strCmd.WriteString(";set=")
+		_, err = strCmd.WriteString(set)
+	}
+	if beforeLastUpdate != nil {
+		_, err = strCmd.WriteString(";lut=")
+		_, err = strCmd.WriteString(strconv.FormatInt(beforeLastUpdate.UnixNano(), 10))
+	}
+
+	// Send index command to one node. That node will distribute the command to other nodes.
+	responseMap, err := clnt.sendInfoCommand(policy.Timeout, strCmd.String())
+	if err != nil {
+		return err
+	}
+
+	response := responseMap[strCmd.String()]
+	if strings.ToUpper(response) == "OK" {
+		return nil
+	}
+
+	return NewAerospikeError(SERVER_ERROR, "Truncate failed: "+response)
 }
 
 //-------------------------------------------------------

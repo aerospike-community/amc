@@ -5,14 +5,6 @@ set -e
 
 cd $GOPATH/src/github.com/citrusleaf/amc
 
-# generate code
-goagen bootstrap -d github.com/citrusleaf/amc/api_design
-
-# delete generated controllers
-cd controllers
-find . -type f -exec rm -f ../{} \;
-cd ..
-
 edition=${1:-enterprise}
 environ=${2:-dev}
 

@@ -21,7 +21,16 @@ var AMCBuild string
 var AMCEdition string
 var AMCEnv string
 
-var db *sql.DB
+type _db struct {
+	*sql.DB
+	sync.RWMutex
+}
+
+var db _db
+
+func DB() *_db {
+	return &db
+}
 
 func AMCIsProd() bool {
 	return AMCEnv == "prod"
@@ -281,16 +290,32 @@ func SetupDatabase(filepath string) {
 		`CREATE TABLE IF NOT EXISTS migrations (
 			Version      int64
 		);`,
+		`CREATE TABLE IF NOT EXISTS users (
+			Username      string NOT NULL,
+			Password      blob NOT NULL,
+			Roles		  string NOT NULL,
+			FullName	  string,
+			Notes	      string,
+		);`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idxUsersUsername ON users (Username);`,
+		`CREATE TABLE IF NOT EXISTS connections (
+			Id		      string NOT NULL,
+			Username      string NOT NULL,
+			Label      	  string NOT NULL,
+			Seeds		  string NOT NULL,
+		);`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idxConnection ON connections (Username, Label);`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idxConnectionId ON connections (Id);`,
 	}
 
 	log.Infof("Database path is: %s", filepath)
 
-	var err error
-	db, err = sql.Open("ql", filepath)
+	qldb, err := sql.Open("ql", filepath)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %s", err.Error())
 	}
 
+	db = _db{qldb, _dbGlobalMutex}
 	// exec the schema or fail; multi-statement Exec behavior varies between
 	for _, ddl := range schema {
 		// ignore error
@@ -309,6 +334,26 @@ func SetupDatabase(filepath string) {
 			log.Fatal(err)
 		}
 	}
+
+	// set admin password
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if hash, err := HashPassword("admin"); err == nil {
+		_, err = tx.Exec(`INSERT INTO users (Username, Password, Roles, Notes) VALUES ("admin", ?1, "admin", "Admin User");`, hash)
+		if err != nil {
+			log.Warn(err)
+		}
+
+		if err = tx.Commit(); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		tx.Rollback()
+	}
+
 }
 
 func setLogFile(filepath string) {

@@ -1,0 +1,351 @@
+consumes:
+- application/json
+definitions:
+  AerospikeAmcSystemResponse:
+    description: AMC Server System information (default view)
+    example:
+      version: Enim modi placeat quia sint est praesentium.
+    properties:
+      version:
+        description: AMC Version
+        example: Enim modi placeat quia sint est praesentium.
+        type: string
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.system.response+json;
+      view=default'
+    type: object
+  AuthenticateAuthPayload:
+    example:
+      password: Et rerum nihil.
+      user: Quam consequatur ut laborum cupiditate modi.
+    properties:
+      password:
+        description: AMC User's Password
+        example: Et rerum nihil.
+        type: string
+      user:
+        description: AMC User Name (this is not the same as Database user name)
+        example: Quam consequatur ut laborum cupiditate modi.
+        type: string
+    required:
+    - user
+    - password
+    title: AuthenticateAuthPayload
+    type: object
+  NodeSeed:
+    example:
+      host: Similique ab amet enim et illo voluptatem.
+      port: 9.039253e+17
+      tlsName: Autem quaerat magni quo amet.
+    properties:
+      host:
+        description: Node Host. Valid DNS, IPv4 or IPv6 value
+        example: Similique ab amet enim et illo voluptatem.
+        type: string
+      port:
+        example: 9.039253e+17
+        format: int64
+        type: integer
+      tlsName:
+        description: Node's TLS name
+        example: Autem quaerat magni quo amet.
+        type: string
+    required:
+    - host
+    - port
+    title: NodeSeed
+    type: object
+  SaveConnectionPayload:
+    example:
+      id: Hic asperiores mollitia nihil minima maiores.
+      name: Quaerat ad et ut.
+      seeds:
+      - host: Similique ab amet enim et illo voluptatem.
+        port: 9.039253e+17
+        tlsName: Autem quaerat magni quo amet.
+      - host: Similique ab amet enim et illo voluptatem.
+        port: 9.039253e+17
+        tlsName: Autem quaerat magni quo amet.
+    properties:
+      id:
+        description: Connection Id
+        example: Hic asperiores mollitia nihil minima maiores.
+        type: string
+      name:
+        description: Connection Name
+        example: Quaerat ad et ut.
+        type: string
+      seeds:
+        description: Seeds
+        example:
+        - host: Similique ab amet enim et illo voluptatem.
+          port: 9.039253e+17
+          tlsName: Autem quaerat magni quo amet.
+        - host: Similique ab amet enim et illo voluptatem.
+          port: 9.039253e+17
+          tlsName: Autem quaerat magni quo amet.
+        items:
+          $ref: '#/definitions/NodeSeed'
+        type: array
+    required:
+    - name
+    - seeds
+    title: SaveConnectionPayload
+    type: object
+  error:
+    description: Error response media type (default view)
+    example:
+      code: invalid_value
+      detail: Value of ID must be an integer
+      id: 3F1FKVRR
+      meta:
+        timestamp: 1.458609e+09
+      status: "400"
+    properties:
+      code:
+        description: an application-specific error code, expressed as a string value.
+        example: invalid_value
+        type: string
+      detail:
+        description: a human-readable explanation specific to this occurrence of the
+          problem.
+        example: Value of ID must be an integer
+        type: string
+      id:
+        description: a unique identifier for this particular occurrence of the problem.
+        example: 3F1FKVRR
+        type: string
+      meta:
+        additionalProperties: true
+        description: a meta object containing non-standard meta-information about
+          the error.
+        example:
+          timestamp: 1.458609e+09
+        type: object
+      status:
+        description: the HTTP status code applicable to this problem, expressed as
+          a string value.
+        example: "400"
+        type: string
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+    type: object
+info:
+  description: The taxi manager API
+  title: Aerospike Management Console
+  version: ""
+paths:
+  /{filepath}:
+    get:
+      operationId: public#/*filepath
+      parameters:
+      - description: Relative file path
+        in: path
+        name: filepath
+        required: true
+        type: string
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      - https
+      summary: Download static/
+  /api/v1/amc/system:
+    get:
+      description: Get AMC Server Version and Information
+      operationId: amc#system
+      produces:
+      - application/vnd.aerospike.amc.system.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcSystemResponse'
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: system amc
+      tags:
+      - amc
+  /api/v1/auth/authenticate:
+    post:
+      description: Authenticate a device
+      operationId: auth#authenticate
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/AuthenticateAuthPayload'
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Authorization:
+              description: Generated JWT
+              type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: authenticate auth
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      description: Logout The User
+      operationId: auth#logout
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: logout auth
+      tags:
+      - auth
+  /api/v1/connections:
+    get:
+      description: Get the list of user connections
+      operationId: connection#query
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: query connection
+      tags:
+      - connection
+    post:
+      description: Register or Update a new connection for user
+      operationId: connection#save
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SaveConnectionPayload'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: save connection
+      tags:
+      - connection
+  /api/v1/connections/{id}:
+    delete:
+      description: Delete a connection
+      operationId: connection#delete
+      parameters:
+      - description: Connection Id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      summary: delete connection
+      tags:
+      - connection
+  /static/{filepath}:
+    get:
+      operationId: public#/static/*filepath
+      parameters:
+      - description: Relative file path
+        in: path
+        name: filepath
+        required: true
+        type: string
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      - https
+      summary: Download static/
+  /swagger.json:
+    get:
+      operationId: swagger#/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      - https
+      summary: Download swagger/swagger.json
+produces:
+- application/json
+responses:
+  BadRequest:
+    description: Bad Request
+  Forbidden:
+    description: Forbidden
+  InternalServerError:
+    description: Internal Server Error
+  NoContent:
+    description: No Content
+  NotFound:
+    description: Not Found
+  Unauthorized:
+    description: Unauthorized
+schemes:
+- http
+- https
+securityDefinitions:
+  jwt:
+    description: |2-
+
+
+      **Security Scopes**:
+        * `api:cluster`: API access to cluster resources
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

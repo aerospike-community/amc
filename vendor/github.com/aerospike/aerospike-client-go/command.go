@@ -85,6 +85,8 @@ type command interface {
 
 	writeBuffer(ifc command) error
 	getNode(ifc command) (*Node, error)
+	getConnection(timeout time.Duration) (*Connection, error)
+	putConnection(conn *Connection)
 	parseResult(ifc command, conn *Connection) error
 	parseRecordResults(ifc command, receiveSize int) (bool, error)
 
@@ -101,7 +103,9 @@ type baseCommand struct {
 	dataBuffer []byte
 	dataOffset int
 
-	keyWriter *keyWriter
+	// oneShot determines if streaming commands like query, scan or queryAggregate
+	// are not retried if they error out mid-parsing
+	oneShot bool
 }
 
 // Writes the command for write operations
@@ -293,7 +297,7 @@ func (cmd *baseCommand) setOperate(policy *WritePolicy, key *Key, operations []*
 	RespondPerEachOp := policy.RespondPerEachOp
 
 	for i := range operations {
-		switch operations[i].OpType {
+		switch operations[i].opType {
 		case MAP_READ:
 			// Map operations require RespondPerEachOp to be true.
 			RespondPerEachOp = true
@@ -304,7 +308,7 @@ func (cmd *baseCommand) setOperate(policy *WritePolicy, key *Key, operations []*
 				readAttr |= _INFO1_READ
 
 				// Read all bins if no bin is specified.
-				if operations[i].BinName == "" {
+				if operations[i].binName == "" {
 					readAttr |= _INFO1_GET_ALL
 				}
 				readBin = true
@@ -455,6 +459,7 @@ func (cmd *baseCommand) setBatchGet(policy *BasePolicy, keys []*Key, batch *batc
 func (cmd *baseCommand) setScan(policy *ScanPolicy, namespace *string, setName *string, binNames []string, taskId uint64) error {
 	cmd.begin()
 	fieldCount := 0
+	// predExpsSize := 0
 
 	if namespace != nil {
 		cmd.dataOffset += len(*namespace) + int(_FIELD_HEADER_SIZE)
@@ -470,6 +475,10 @@ func (cmd *baseCommand) setScan(policy *ScanPolicy, namespace *string, setName *
 	cmd.dataOffset += 2 + int(_FIELD_HEADER_SIZE)
 	fieldCount++
 
+	// Estimate scan timeout size.
+	cmd.dataOffset += 4 + int(_FIELD_HEADER_SIZE)
+	fieldCount++
+
 	// Allocate space for TaskId field.
 	cmd.dataOffset += 8 + int(_FIELD_HEADER_SIZE)
 	fieldCount++
@@ -479,6 +488,7 @@ func (cmd *baseCommand) setScan(policy *ScanPolicy, namespace *string, setName *
 			cmd.estimateOperationSizeForBinName(binNames[i])
 		}
 	}
+
 	if err := cmd.sizeBuffer(); err != nil {
 		return nil
 	}
@@ -517,6 +527,10 @@ func (cmd *baseCommand) setScan(policy *ScanPolicy, namespace *string, setName *
 	cmd.WriteByte(priority)
 	cmd.WriteByte(byte(policy.ScanPercent))
 
+	// Write scan timeout
+	cmd.writeFieldHeader(4, SCAN_TIMEOUT)
+	cmd.WriteInt32(int32(policy.ServerSocketTimeout / time.Millisecond)) // in milliseconds
+
 	cmd.writeFieldHeader(8, TRAN_ID)
 	cmd.WriteUint64(taskId)
 
@@ -525,6 +539,7 @@ func (cmd *baseCommand) setScan(policy *ScanPolicy, namespace *string, setName *
 			cmd.writeOperationForBinName(binNames[i], READ)
 		}
 	}
+
 	cmd.end()
 
 	return nil
@@ -534,6 +549,7 @@ func (cmd *baseCommand) setQuery(policy *QueryPolicy, statement *Statement, writ
 	fieldCount := 0
 	filterSize := 0
 	binNameSize := 0
+	predExpsSize := 0
 
 	cmd.begin()
 
@@ -596,6 +612,15 @@ func (cmd *baseCommand) setQuery(policy *QueryPolicy, statement *Statement, writ
 		// Calling query with no filters is more efficiently handled by a primary index scan.
 		// Estimate scan options size.
 		cmd.dataOffset += (2 + int(_FIELD_HEADER_SIZE))
+		fieldCount++
+	}
+
+	if len(statement.predExps) > 0 {
+		cmd.dataOffset += int(_FIELD_HEADER_SIZE)
+		for _, predexp := range statement.predExps {
+			predExpsSize += predexp.marshaledSize()
+		}
+		cmd.dataOffset += predExpsSize
 		fieldCount++
 	}
 
@@ -695,6 +720,15 @@ func (cmd *baseCommand) setQuery(policy *QueryPolicy, statement *Statement, writ
 		cmd.WriteByte(byte(100))
 	}
 
+	if len(statement.predExps) > 0 {
+		cmd.writeFieldHeader(predExpsSize, PREDEXP)
+		for _, predexp := range statement.predExps {
+			if err := predexp.marshal(cmd); err != nil {
+				return err
+			}
+		}
+	}
+
 	if statement.functionName != "" {
 		cmd.writeFieldHeader(1, UDF_OP)
 		if statement.returnData {
@@ -788,11 +822,19 @@ func (cmd *baseCommand) estimateOperationSizeForBinNameAndValue(name string, val
 }
 
 func (cmd *baseCommand) estimateOperationSizeForOperation(operation *Operation) error {
-	binLen := len(operation.BinName)
+	binLen := len(operation.binName)
 	cmd.dataOffset += binLen + int(_OPERATION_HEADER_SIZE)
 
-	if operation.BinValue != nil {
-		sz, err := operation.BinValue.estimateSize()
+	if operation.encoder == nil {
+		if operation.binValue != nil {
+			sz, err := operation.binValue.estimateSize()
+			if err != nil {
+				return err
+			}
+			cmd.dataOffset += sz
+		}
+	} else {
+		sz, err := operation.encoder(operation, nil)
 		if err != nil {
 			return err
 		}
@@ -956,24 +998,47 @@ func (cmd *baseCommand) writeOperationForBinNameAndValue(name string, val interf
 }
 
 func (cmd *baseCommand) writeOperationForOperation(operation *Operation) error {
-	nameLength := copy(cmd.dataBuffer[(cmd.dataOffset+int(_OPERATION_HEADER_SIZE)):], operation.BinName)
+	nameLength := copy(cmd.dataBuffer[(cmd.dataOffset+int(_OPERATION_HEADER_SIZE)):], operation.binName)
 
 	// check for float support
-	cmd.checkServerCompatibility(operation.BinValue)
+	cmd.checkServerCompatibility(operation.binValue)
 
-	valueLength, err := operation.BinValue.estimateSize()
-	if err != nil {
-		return err
+	if operation.used {
+		// cahce will set the used flag to false again
+		operation.cache()
 	}
 
-	cmd.WriteInt32(int32(nameLength + valueLength + 4))
-	cmd.WriteByte((operation.OpType.op))
-	cmd.WriteByte((byte(operation.BinValue.GetType())))
-	cmd.WriteByte((byte(0)))
-	cmd.WriteByte((byte(nameLength)))
-	cmd.dataOffset += nameLength
-	_, err = operation.BinValue.write(cmd)
-	return err
+	if operation.encoder == nil {
+		valueLength, err := operation.binValue.estimateSize()
+		if err != nil {
+			return err
+		}
+
+		cmd.WriteInt32(int32(nameLength + valueLength + 4))
+		cmd.WriteByte((operation.opType.op))
+		cmd.WriteByte((byte(operation.binValue.GetType())))
+		cmd.WriteByte((byte(0)))
+		cmd.WriteByte((byte(nameLength)))
+		cmd.dataOffset += nameLength
+		_, err = operation.binValue.write(cmd)
+		return err
+	} else {
+		valueLength, err := operation.encoder(operation, nil)
+		if err != nil {
+			return err
+		}
+
+		cmd.WriteInt32(int32(nameLength + valueLength + 4))
+		cmd.WriteByte((operation.opType.op))
+		cmd.WriteByte((byte(ParticleType.BLOB)))
+		cmd.WriteByte((byte(0)))
+		cmd.WriteByte((byte(nameLength)))
+		cmd.dataOffset += nameLength
+		_, err = operation.encoder(operation, cmd)
+		//mark the operation as used, so that it will be cached the next time it is used
+		operation.used = err == nil
+		return err
+	}
 }
 
 func (cmd *baseCommand) writeOperationForBinName(name string, operation OperationType) {
@@ -996,6 +1061,10 @@ func (cmd *baseCommand) writeOperationForOperationType(operation OperationType) 
 
 // TODO: Remove this method and move it to the appropriate VALUE method
 func (cmd *baseCommand) checkServerCompatibility(val Value) {
+	if val == nil {
+		return
+	}
+
 	// check for float support
 	switch val.GetType() {
 	case ParticleType.FLOAT:
@@ -1108,10 +1177,10 @@ func (cmd *baseCommand) WriteFloat64(float float64) (int, error) {
 	return 8, nil
 }
 
-func (cmd *baseCommand) WriteByte(b byte) (int, error) {
+func (cmd *baseCommand) WriteByte(b byte) error {
 	cmd.dataBuffer[cmd.dataOffset] = b
 	cmd.dataOffset++
-	return 1, nil
+	return nil
 }
 
 func (cmd *baseCommand) WriteString(s string) (int, error) {
@@ -1198,6 +1267,9 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 	policy := ifc.getPolicy(ifc).GetBasePolicy()
 	iterations := -1
 
+	// for exponential backoff
+	interval := policy.SleepBetweenRetries
+
 	// set timeout outside the loop
 	deadline := time.Now().Add(policy.Timeout)
 
@@ -1210,7 +1282,10 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 
 		// Sleep before trying again, after the first iteration
 		if iterations > 0 && policy.SleepBetweenRetries > 0 {
-			time.Sleep(policy.SleepBetweenRetries)
+			time.Sleep(interval)
+			if policy.SleepMultiplier > 1 {
+				interval = time.Duration(float64(interval) * policy.SleepMultiplier)
+			}
 		}
 
 		// check for command timeout
@@ -1225,7 +1300,8 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 			continue
 		}
 
-		cmd.conn, err = cmd.node.GetConnection(policy.Timeout)
+		// cmd.conn, err = cmd.node.GetConnection(policy.Timeout)
+		cmd.conn, err = ifc.getConnection(policy.Timeout)
 		if err != nil {
 			Logger.Warn("Node " + cmd.node.String() + ": " + err.Error())
 			continue
@@ -1233,9 +1309,6 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 
 		// Assign the connection buffer to the command buffer
 		cmd.dataBuffer = cmd.conn.dataBuffer
-
-		// Assign the connection buffer to the command buffer
-		cmd.keyWriter = &cmd.conn.keyWriter
 
 		// Set command buffer.
 		err = ifc.writeBuffer(ifc)
@@ -1270,7 +1343,11 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 				cmd.conn.Close()
 
 				Logger.Warn("Node " + cmd.node.String() + ": " + err.Error())
-				continue
+
+				// retry only for non-streaming commands
+				if !cmd.oneShot {
+					continue
+				}
 			}
 
 			// close the connection
@@ -1291,7 +1368,8 @@ func (cmd *baseCommand) execute(ifc command) (err error) {
 		cmd.conn.dataBuffer = cmd.dataBuffer
 
 		// Put connection back in pool.
-		cmd.node.PutConnection(cmd.conn)
+		// cmd.node.PutConnection(cmd.conn)
+		ifc.putConnection(cmd.conn)
 
 		// command has completed successfully.  Exit method.
 		return nil

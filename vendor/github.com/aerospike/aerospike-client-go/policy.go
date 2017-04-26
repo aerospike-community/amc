@@ -52,7 +52,11 @@ type BasePolicy struct {
 
 	// SleepBetweenReplies determines duration to sleep between retries if a transaction fails and the
 	// timeout was not exceeded.  Enter zero to skip sleep.
-	SleepBetweenRetries time.Duration //= 500ms;
+	SleepBetweenRetries time.Duration //= 1ms;
+
+	// SleepMultiplier specifies the multiplying factor to be used for exponential backoff during retries.
+	// Default to (1.0); Only values greater than 1 are valid.
+	SleepMultiplier float64 //= 1.0;
 
 	// ReplicaPolicy detemines the node to the send the read commands containing the key's partition replica type.
 	// Write commands are not affected by this setting, because all writes are directed
@@ -68,7 +72,8 @@ func NewPolicy() *BasePolicy {
 		ConsistencyLevel:    CONSISTENCY_ONE,
 		Timeout:             0 * time.Millisecond,
 		MaxRetries:          2,
-		SleepBetweenRetries: 500 * time.Millisecond,
+		SleepBetweenRetries: 1 * time.Millisecond,
+		SleepMultiplier:     1.0,
 		ReplicaPolicy:       MASTER,
 	}
 }

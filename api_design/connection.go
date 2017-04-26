@@ -5,13 +5,13 @@ import (
 	. "github.com/goadesign/goa/design/apidsl"
 )
 
-var _ = Resource("cluster", func() {
-	BasePath("clusters")
-	Description("Cluster Endpoints")
+var _ = Resource("connection", func() {
+	BasePath("connections")
+	Description("Connection Endpoints")
 
-	Security(JWT, func() {
-		Scope("api:general")
-	})
+	// Security(JWT, func() {
+	// 	Scope("api:general")
+	// })
 
 	Action("query", func() {
 		Description("Get the list of user connections")
@@ -31,6 +31,7 @@ var _ = Resource("cluster", func() {
 		})
 
 		Payload(func() {
+			Member("id", String, "Connection Id")
 			Member("name", String, "Connection Name")
 			Member("seeds", ArrayOf(NodeSeed), "Seeds")
 			Required("name", "seeds")
@@ -44,14 +45,15 @@ var _ = Resource("cluster", func() {
 
 	Action("delete", func() {
 		Description("Delete a connection")
-		Routing(DELETE(":name"))
+		Routing(DELETE(":id"))
 		Params(func() {
-			Param("name", String, "Connection name")
-			Required("name")
+			Param("id", String, "Connection Id")
+			Required("id")
 		})
 
-		Response(Gone)
+		Response(NoContent)
 		Response(Unauthorized)
+		Response(NotFound)
 		Response(InternalServerError)
 	})
 })

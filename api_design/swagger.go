@@ -15,7 +15,8 @@ var _ = Resource("public", func() {
 	Origin("*", func() {
 		Methods("GET", "OPTIONS")
 	})
-	Files("/*filepath", "static/swagger")
+	Files("/static/*filepath", "static/")
+	Files("/*filepath", "static/")
 })
 
 // var _ = Resource("js", func() {

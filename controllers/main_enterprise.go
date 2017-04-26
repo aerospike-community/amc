@@ -2,7 +2,13 @@
 
 package controllers
 
-import "github.com/labstack/echo"
+import (
+	"github.com/goadesign/goa"
+	"github.com/labstack/echo"
+)
+
+func goaRegisterEnterprise(e *goa.Service) {
+}
 
 func registerEnterprise(e *echo.Echo) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/get-current-user", sessionValidator(getClusterCurrentUser))
