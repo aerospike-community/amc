@@ -1,6 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { connect } from 'react-redux';
 
+import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
 import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
@@ -10,9 +12,15 @@ import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     const leftPane = <VisibleEntityTree />;
     const main = <h3> Main Content </h3>;
+    // FIXME this should not be here
+    const showLogin = !this.props.authentication.success;
 
     return (
       <div>
@@ -32,6 +40,10 @@ class App extends React.Component {
           </div>
         </div>
 
+        {showLogin && 
+          <VisibleAuthenticateModal />
+        }
+
         <footer className="as-footer">
           <div className="container-fluid">
             Footer
@@ -41,6 +53,12 @@ class App extends React.Component {
       );
   }
 }
+
+App = connect(function(state) {
+  return {
+    authentication: state.session.authentication
+  };
+})(App);
 
 export default App;
 
