@@ -60,13 +60,13 @@ func toConnectionMedias(conns []*models.Connection) ([]*app.AerospikeAmcConnecti
 
 func toConnection(ctx *app.SaveConnectionContext) *models.Connection {
 	var seeds []string
-	// for _, s := range ctx.Payload.Seeds {
-	// 	if s.TLSName == nil {
-	// 		seeds = append(seeds, strings.Join([]string{s.Host, strconv.Itoa(s.Port)}, "\t"))
-	// 	} else {
-	// 		seeds = append(seeds, strings.Join([]string{s.Host, *s.TLSName, strconv.Itoa(s.Port)}, "\t"))
-	// 	}
-	// }
+	for _, s := range ctx.Payload.Seeds {
+		if s.TLSName == nil {
+			seeds = append(seeds, strings.Join([]string{s.Host, strconv.Itoa(s.Port)}, "\t"))
+		} else {
+			seeds = append(seeds, strings.Join([]string{s.Host, *s.TLSName, strconv.Itoa(s.Port)}, "\t"))
+		}
+	}
 
 	conn := &models.Connection{
 		Label: ctx.Payload.Name,

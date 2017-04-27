@@ -25,8 +25,8 @@ var _ = Resource("auth", func() { // Resources group related API endpoints
 		})
 
 		Payload(func() { // Attributes define the media type shape.
-			Member("user", String, "AMC User Name (this is not the same as Database user name)")
-			Member("password", String, "AMC User's Password")
+			Member("user", String, "AMC User Name (this is not the same as Database user name)", func() { Example("username") })
+			Member("password", String, "AMC User's Password", func() { Example("password") })
 			Required("user", "password")
 		})
 

@@ -4,27 +4,27 @@ definitions:
   AerospikeAmcSystemResponse:
     description: AMC Server System information (default view)
     example:
-      version: Enim modi placeat quia sint est praesentium.
+      version: "5.0"
     properties:
       version:
         description: AMC Version
-        example: Enim modi placeat quia sint est praesentium.
+        example: "5.0"
         type: string
     title: 'Mediatype identifier: application/vnd.aerospike.amc.system.response+json;
       view=default'
     type: object
   AuthenticateAuthPayload:
     example:
-      password: Et rerum nihil.
-      user: Quam consequatur ut laborum cupiditate modi.
+      password: password
+      user: username
     properties:
       password:
         description: AMC User's Password
-        example: Et rerum nihil.
+        example: password
         type: string
       user:
         description: AMC User Name (this is not the same as Database user name)
-        example: Quam consequatur ut laborum cupiditate modi.
+        example: username
         type: string
     required:
     - user
@@ -33,21 +33,23 @@ definitions:
     type: object
   NodeSeed:
     example:
-      host: Similique ab amet enim et illo voluptatem.
-      port: 9.039253e+17
-      tlsName: Autem quaerat magni quo amet.
+      host: 127.0.0.1
+      port: 3000
+      tlsName: ""
     properties:
       host:
         description: Node Host. Valid DNS, IPv4 or IPv6 value
-        example: Similique ab amet enim et illo voluptatem.
+        example: 127.0.0.1
         type: string
       port:
-        example: 9.039253e+17
-        format: int64
+        description: Node's port
+        example: 3000
+        maximum: 32767
+        minimum: 0
         type: integer
       tlsName:
         description: Node's TLS name
-        example: Autem quaerat magni quo amet.
+        example: ""
         type: string
     required:
     - host
@@ -56,33 +58,28 @@ definitions:
     type: object
   SaveConnectionPayload:
     example:
-      id: Hic asperiores mollitia nihil minima maiores.
-      name: Quaerat ad et ut.
+      id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+      name: Payments Cluster
       seeds:
-      - host: Similique ab amet enim et illo voluptatem.
-        port: 9.039253e+17
-        tlsName: Autem quaerat magni quo amet.
-      - host: Similique ab amet enim et illo voluptatem.
-        port: 9.039253e+17
-        tlsName: Autem quaerat magni quo amet.
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
     properties:
       id:
         description: Connection Id
-        example: Hic asperiores mollitia nihil minima maiores.
+        example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         type: string
       name:
         description: Connection Name
-        example: Quaerat ad et ut.
+        example: Payments Cluster
         type: string
       seeds:
         description: Seeds
         example:
-        - host: Similique ab amet enim et illo voluptatem.
-          port: 9.039253e+17
-          tlsName: Autem quaerat magni quo amet.
-        - host: Similique ab amet enim et illo voluptatem.
-          port: 9.039253e+17
-          tlsName: Autem quaerat magni quo amet.
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -288,6 +285,7 @@ paths:
       - description: Connection Id
         in: path
         name: id
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         required: true
         type: string
       responses:

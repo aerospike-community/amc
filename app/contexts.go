@@ -193,6 +193,9 @@ func NewDeleteConnectionContext(ctx context.Context, r *http.Request, service *g
 	if len(paramID) > 0 {
 		rawID := paramID[0]
 		rctx.ID = rawID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`id`, rctx.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
 	}
 	return &rctx, err
 }
@@ -296,6 +299,11 @@ func (payload *saveConnectionPayload) Validate() (err error) {
 	if payload.Seeds == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "seeds"))
 	}
+	if payload.ID != nil {
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.id`, *payload.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
 	for _, e := range payload.Seeds {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
@@ -341,6 +349,11 @@ func (payload *SaveConnectionPayload) Validate() (err error) {
 	}
 	if payload.Seeds == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "seeds"))
+	}
+	if payload.ID != nil {
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.id`, *payload.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
 	}
 	for _, e := range payload.Seeds {
 		if e != nil {

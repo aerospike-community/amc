@@ -31,9 +31,12 @@ var _ = Resource("connection", func() {
 		})
 
 		Payload(func() {
-			Member("id", String, "Connection Id")
-			Member("name", String, "Connection Name")
-			Member("seeds", ArrayOf(NodeSeed), "Seeds")
+			Member("id", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Member("name", String, "Connection Name", func() { Example("Payments Cluster") })
+			Member("seeds", ArrayOf("NodeSeed"), "Seeds")
 			Required("name", "seeds")
 		})
 
@@ -47,7 +50,10 @@ var _ = Resource("connection", func() {
 		Description("Delete a connection")
 		Routing(DELETE(":id"))
 		Params(func() {
-			Param("id", String, "Connection Id")
+			Param("id", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
 			Required("id")
 		})
 

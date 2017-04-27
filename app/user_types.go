@@ -18,7 +18,8 @@ import (
 type nodeSeed struct {
 	// Node Host. Valid DNS, IPv4 or IPv6 value
 	Host *string `form:"host,omitempty" json:"host,omitempty" xml:"host,omitempty"`
-	Port *int    `form:"port,omitempty" json:"port,omitempty" xml:"port,omitempty"`
+	// Node's port
+	Port *int `form:"port,omitempty" json:"port,omitempty" xml:"port,omitempty"`
 	// Node's TLS name
 	TLSName *string `form:"tlsName,omitempty" json:"tlsName,omitempty" xml:"tlsName,omitempty"`
 }
@@ -30,6 +31,16 @@ func (ut *nodeSeed) Validate() (err error) {
 	}
 	if ut.Port == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "port"))
+	}
+	if ut.Port != nil {
+		if *ut.Port < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, *ut.Port, 0, true))
+		}
+	}
+	if ut.Port != nil {
+		if *ut.Port > 32767 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, *ut.Port, 32767, false))
+		}
 	}
 	return
 }
@@ -53,7 +64,8 @@ func (ut *nodeSeed) Publicize() *NodeSeed {
 type NodeSeed struct {
 	// Node Host. Valid DNS, IPv4 or IPv6 value
 	Host string `form:"host" json:"host" xml:"host"`
-	Port int    `form:"port" json:"port" xml:"port"`
+	// Node's port
+	Port int `form:"port" json:"port" xml:"port"`
 	// Node's TLS name
 	TLSName *string `form:"tlsName,omitempty" json:"tlsName,omitempty" xml:"tlsName,omitempty"`
 }
@@ -64,5 +76,11 @@ func (ut *NodeSeed) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "host"))
 	}
 
+	if ut.Port < 0 {
+		err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, ut.Port, 0, true))
+	}
+	if ut.Port > 32767 {
+		err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, ut.Port, 32767, false))
+	}
 	return
 }
