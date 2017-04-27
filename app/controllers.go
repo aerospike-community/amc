@@ -206,9 +206,10 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 		}
 		return ctrl.Delete(rctx)
 	}
+	h = handleSecurity("jwt", h, "api:general")
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("DELETE", "/api/v1/connections/:id", ctrl.MuxHandler("delete", h, nil))
-	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:id")
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:id", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -222,9 +223,10 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 		}
 		return ctrl.Query(rctx)
 	}
+	h = handleSecurity("jwt", h, "api:general")
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections", ctrl.MuxHandler("query", h, nil))
-	service.LogInfo("mount", "ctrl", "Connection", "action", "Query", "route", "GET /api/v1/connections")
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Query", "route", "GET /api/v1/connections", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -244,9 +246,10 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 		}
 		return ctrl.Save(rctx)
 	}
+	h = handleSecurity("jwt", h, "api:general")
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("POST", "/api/v1/connections", ctrl.MuxHandler("save", h, unmarshalSaveConnectionPayload))
-	service.LogInfo("mount", "ctrl", "Connection", "action", "Save", "route", "POST /api/v1/connections")
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Save", "route", "POST /api/v1/connections", "security", "jwt")
 }
 
 // handleConnectionOrigin applies the CORS response headers corresponding to the origin.

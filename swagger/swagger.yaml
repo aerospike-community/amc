@@ -129,7 +129,8 @@ definitions:
     title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
 info:
-  description: The taxi manager API
+  description: Aerospike Management Console is used to manage and monitor Aerospike
+    Database Clusters.
   title: Aerospike Management Console
   version: ""
 paths:
@@ -220,7 +221,11 @@ paths:
       - auth
   /api/v1/connections:
     get:
-      description: Get the list of user connections
+      description: |-
+        Get the list of user connections
+
+        Required security scopes:
+          * `api:general`
       operationId: connection#query
       produces:
       - text/plain
@@ -234,11 +239,18 @@ paths:
       schemes:
       - http
       - https
+      security:
+      - jwt:
+        - api:general
       summary: query connection
       tags:
       - connection
     post:
-      description: Register or Update a new connection for user
+      description: |-
+        Register or Update a new connection for user
+
+        Required security scopes:
+          * `api:general`
       operationId: connection#save
       parameters:
       - in: body
@@ -258,12 +270,19 @@ paths:
       schemes:
       - http
       - https
+      security:
+      - jwt:
+        - api:general
       summary: save connection
       tags:
       - connection
   /api/v1/connections/{id}:
     delete:
-      description: Delete a connection
+      description: |-
+        Delete a connection
+
+        Required security scopes:
+          * `api:general`
       operationId: connection#delete
       parameters:
       - description: Connection Id
@@ -283,6 +302,9 @@ paths:
       schemes:
       - http
       - https
+      security:
+      - jwt:
+        - api:general
       summary: delete connection
       tags:
       - connection

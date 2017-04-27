@@ -9,9 +9,9 @@ var _ = Resource("connection", func() {
 	BasePath("connections")
 	Description("Connection Endpoints")
 
-	// Security(JWT, func() {
-	// 	Scope("api:general")
-	// })
+	Security(JWT, func() {
+		Scope("api:general")
+	})
 
 	Action("query", func() {
 		Description("Get the list of user connections")

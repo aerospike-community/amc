@@ -84,9 +84,15 @@ func userInfoFromJWTToken(ctx context.Context) (string, []string, error) {
 	if !ok {
 		return "", nil, errors.New("token not found")
 	}
-	amcRoles, ok := claims["roles"].([]string)
+	amcRolesIfc, ok := claims["roles"].([]interface{})
 	if !ok {
 		return "", nil, errors.New("token not found")
 	}
+
+	var amcRoles = []string{}
+	for _, role := range amcRolesIfc {
+		amcRoles = append(amcRoles, role.(string))
+	}
+
 	return username, amcRoles, nil
 }

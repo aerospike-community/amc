@@ -34,8 +34,7 @@ func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 func (c *ConnectionController) Query(ctx *app.QueryConnectionContext) error {
 	// ConnectionController_Query: start_implement
 
-	// user := ctx.Value("username").(string)
-	user := "admin"
+	user := ctx.Value("username").(string)
 	conns, err := models.QueryUserConnections(user)
 	if err != nil {
 		return ctx.InternalServerError()
@@ -54,8 +53,7 @@ func (c *ConnectionController) Query(ctx *app.QueryConnectionContext) error {
 func (c *ConnectionController) Save(ctx *app.SaveConnectionContext) error {
 	// ConnectionController_Save: start_implement
 
-	// user := ctx.Value("username").(string)
-	user := "admin"
+	user := ctx.Value("username").(string)
 	conn := toConnection(ctx)
 	conn.Username = user
 	if err := conn.Save(); err != nil {
