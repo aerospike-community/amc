@@ -15,20 +15,28 @@ class App extends React.Component {
     const main = <h3> Main Content </h3>;
 
     return (
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-12 pl-0 pr-0">
-            <Header />
+      <div>
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-12 pl-0 pr-0">
+              <Header />
+            </div>
+          </div>
+          <div className="row pl-0 pr-0">
+            <div className="col-2 as-leftpane">
+              <VisibleClusterConnections />
+            </div>
+            <div className="col-10 pl-0 pr-0 as-maincontent">
+              <VisibleMainDashboard />
+            </div>
           </div>
         </div>
-        <div className="row pl-0 pr-0">
-          <div className="col-2 as-leftpane">
-            <VisibleClusterConnections />
+
+        <footer className="as-footer">
+          <div className="container-fluid">
+            Footer
           </div>
-          <div className="col-10 pl-0 pr-0 as-maincontent">
-            <VisibleMainDashboard />
-          </div>
-        </div>
+        </footer>
       </div>
       );
   }
