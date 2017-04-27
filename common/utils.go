@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/citrusleaf/amc/pkg/bcrypt"
 )
 
 func SplitHostPort(addr string) (host string, port int, err error) {
@@ -123,4 +125,21 @@ func SortStrings(s []string) []string {
 
 func ToNullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func MaxInt64(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func HashPassword(password string) ([]byte, error) {
+	// Hashing the password with the cost of 10, with a static salt
+	const salt = "$2a$10$1EqTTqA8hPqEF7fNZaFW3O"
+	hashedPassword, err := bcrypt.Hash(password, salt)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(hashedPassword), nil
 }

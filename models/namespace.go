@@ -271,7 +271,7 @@ func (ns *Namespace) setAliases() {
 	if exists := stats.Get("device_total_bytes"); exists != nil {
 		calcStats["used-bytes-disk"] = stats.TryInt("device_used_bytes", 0)
 		calcStats["total-bytes-disk"] = stats.TryInt("device_total_bytes", 0)
-		calcStats["free-bytes-disk"] = stats.TryInt("device_total_bytes", 0) - stats.TryInt("device_used_bytes", 0)
+		calcStats["free-bytes-disk"] = common.MaxInt64(0, stats.TryInt("device_total_bytes", 0)-stats.TryInt("device_used_bytes", 0))
 		calcStats["free-pct-disk"] = stats.TryFloat("device_free_pct", 0)
 		calcStats["available_pct"] = stats.TryFloat("device_available_pct", 0)
 		calcStats["free_pct"] = stats.TryFloat("device_free_pct", 0)
@@ -291,7 +291,7 @@ func (ns *Namespace) setAliases() {
 	calcStats["max-void-time"] = stats.TryInt("max_void_time", 0)
 	calcStats["free-pct-memory"] = stats.TryFloat("memory_free_pct", 0)
 	calcStats["used-bytes-memory"] = stats.TryInt("memory_used_bytes", 0)
-	calcStats["free-bytes-memory"] = stats.TryInt("memory-size", 0) - stats.TryInt("memory_used_bytes", 0)
+	calcStats["free-bytes-memory"] = common.MaxInt64(0, stats.TryInt("memory-size", 0)-stats.TryInt("memory_used_bytes", 0))
 	calcStats["data-used-bytes-memory"] = stats.TryInt("memory_used_data_bytes", 0)
 	calcStats["index-used-bytes-memory"] = stats.TryInt("memory_used_index_bytes", 0)
 	calcStats["sindex-used-bytes-memory"] = stats.TryInt("memory_used_sindex_bytes", 0)

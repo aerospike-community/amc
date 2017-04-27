@@ -48,5 +48,10 @@ func main() {
 	common.InitConfig(*configFile, *configDir, &config)
 
 	common.SetupDatabase(config.AMC.Database)
-	controllers.Server(&config)
+
+	// TOOD: Remove these two lines
+	// go controllers.Server(&config)
+	// time.Sleep(time.Second)
+
+	controllers.GoaServer(&config)
 }

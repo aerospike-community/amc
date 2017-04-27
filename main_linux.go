@@ -106,7 +106,10 @@ func main() {
 		log.Println("daemon terminated.")
 	} else {
 		common.SetupDatabase(config.AMC.Database)
-		controllers.Server(&config)
+		// TODO: Remove the next two lines
+		// go controllers.Server(&config)
+		// time.Sleep(time.Second)
+		controllers.ServerGoa(&config)
 	}
 }
 
