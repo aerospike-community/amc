@@ -307,25 +307,25 @@ func MountPublicController(service *goa.Service, ctrl PublicController) {
 	service.Mux.Handle("OPTIONS", "/static/*filepath", ctrl.MuxHandler("preflight", handlePublicOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/*filepath", ctrl.MuxHandler("preflight", handlePublicOrigin(cors.HandlePreflight()), nil))
 
-	h = ctrl.FileHandler("/static/*filepath", "static/")
+	h = ctrl.FileHandler("/static/*filepath", "static_v5/")
 	h = handlePublicOrigin(h)
 	service.Mux.Handle("GET", "/static/*filepath", ctrl.MuxHandler("serve", h, nil))
-	service.LogInfo("mount", "ctrl", "Public", "files", "static/", "route", "GET /static/*filepath")
+	service.LogInfo("mount", "ctrl", "Public", "files", "static_v5/", "route", "GET /static/*filepath")
 
-	h = ctrl.FileHandler("/*filepath", "static/")
+	h = ctrl.FileHandler("/*filepath", "static_v5/")
 	h = handlePublicOrigin(h)
 	service.Mux.Handle("GET", "/*filepath", ctrl.MuxHandler("serve", h, nil))
-	service.LogInfo("mount", "ctrl", "Public", "files", "static/", "route", "GET /*filepath")
+	service.LogInfo("mount", "ctrl", "Public", "files", "static_v5/", "route", "GET /*filepath")
 
-	h = ctrl.FileHandler("/static/", "static/index.html")
+	h = ctrl.FileHandler("/static/", "static_v5/index.html")
 	h = handlePublicOrigin(h)
 	service.Mux.Handle("GET", "/static/", ctrl.MuxHandler("serve", h, nil))
-	service.LogInfo("mount", "ctrl", "Public", "files", "static/index.html", "route", "GET /static/")
+	service.LogInfo("mount", "ctrl", "Public", "files", "static_v5/index.html", "route", "GET /static/")
 
-	h = ctrl.FileHandler("/", "static/index.html")
+	h = ctrl.FileHandler("/", "static_v5/index.html")
 	h = handlePublicOrigin(h)
 	service.Mux.Handle("GET", "/", ctrl.MuxHandler("serve", h, nil))
-	service.LogInfo("mount", "ctrl", "Public", "files", "static/index.html", "route", "GET /")
+	service.LogInfo("mount", "ctrl", "Public", "files", "static_v5/index.html", "route", "GET /")
 }
 
 // handlePublicOrigin applies the CORS response headers corresponding to the origin.

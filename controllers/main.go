@@ -311,7 +311,7 @@ func GoaServer(config *common.Config) {
 	server := &graceful.Server{
 		Timeout: time.Duration(15) * time.Second,
 		Server: &http.Server{
-			Addr:    ":8082", // TODO: config.AMC.Bind,
+			Addr:    config.AMC.Bind,
 			Handler: service.Mux,
 		},
 	}

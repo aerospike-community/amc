@@ -152,7 +152,7 @@ paths:
       schemes:
       - http
       - https
-      summary: Download static/
+      summary: Download static_v5/
   /api/v1/amc/system:
     get:
       description: Get AMC Server Version and Information
@@ -327,7 +327,7 @@ paths:
       schemes:
       - http
       - https
-      summary: Download static/
+      summary: Download static_v5/
   /swagger.json:
     get:
       operationId: swagger#/swagger.json
