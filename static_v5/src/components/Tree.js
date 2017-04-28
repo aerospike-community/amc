@@ -16,26 +16,14 @@ class Tree extends React.Component {
 
   onToggleCollapse(node) {
     const expanded = this.props.expanded;
-    let fn;
     if (expanded.has(node))
-      fn = this.props.onNodeCollapse;
+      this.props.onNodeCollapse(node);
     else
-      fn = this.props.onNodeExpand;
-
-    const type = typeof fn;
-    if (type === 'function')
-      fn(node);
-    else
-      console.warn(`Tree - onNodeCollapse/onNodeExpand not a function, is of type ${type}`);
+      this.props.onNodeExpand(node);
   }
 
   onNodeClick(node) {
-    const fn = this.props.onNodeClick;
-    const type = typeof fn;
-    if (type === 'function')
-      fn(this.node);
-    else
-      console.warn(`Tree - onNodeClick not a function, is of type ${type}`);
+    this.props.onNodeClick(this.node);
   }
 
   renderTree(node, depth) {
@@ -92,7 +80,7 @@ Tree.propTypes = {
   onNodeCollapse: PropTypes.func,
   // onNodeClick(node)
   onNodeClick: PropTypes.func,
-  // callback to render the node (optional)
+  // callback to render the node
   // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 

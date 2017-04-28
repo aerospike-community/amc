@@ -13,26 +13,6 @@ function receiveClusters(clusters) {
   };
 }
 
-export const SELECT_CLUSTER = 'SELECT_CLUSTER';
-export const SELECT_NODE = 'SELECT_NODE';
-export const SELECT_NAMESPACE = 'SELECT_NAMESPACE';
-export const clusterEntitySelected = (entity) => {
-  return {
-    // TODO type, cluster, node, namespace based on entity
-    type: SELECT_NODE,
-    node: entity,
-  };
-};
-
-export const SELECT_ENTITY_VIEW = 'SELECT_ENTITY_VIEW';
-export const entityViewSelected = (entity, view) => {
-  return {
-    type: SELECT_ENTITY_VIEW,
-    entity: entity,
-    view: view
-  };
-}
-
 export const DISPLAY_ADD_CLUSTER_CONNECTION = 'DISPLAY_ADD_CLUSTER_CONNECTION';
 export const displayAddClusterConnection = (display) => {
   return {
@@ -60,21 +40,6 @@ export function addClusterConnection(connection) {
 }
 
 
-export const ENTITY_NODE_COLLAPSED = 'ENTITY_NODE_COLLAPSED';
-export const ENTITY_NODE_EXPANDED = 'ENTITY_NODE_EXPANDED';
-export const expandEntityNode = (node) => {
-  return {
-    type: ENTITY_NODE_EXPANDED,
-    node: node
-  };
-}
-export const collapseEntityNode = (node) => {
-  return {
-    type: ENTITY_NODE_COLLAPSED,
-    node: node
-  };
-}
-
 export function fetchClusters() {
   const dummyData = [{
     label: 'Cluster ONE',
@@ -98,5 +63,6 @@ export function fetchClusters() {
     }, 200);
   }
 }
+
 
 

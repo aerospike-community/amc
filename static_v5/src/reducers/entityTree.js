@@ -1,4 +1,4 @@
-import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions';
+import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions/entityTree';
 
 // state of the entity tree
 export default function entityTree(state = {

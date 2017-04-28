@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ClusterToolbar from '../components/ClusterToolbar';
-import { displayAddClusterConnection } from '../actions';
+import { displayAddClusterConnection } from '../actions/clusters';
 
 const mapDispatchToProps = (dispatch) => {
   return {

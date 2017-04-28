@@ -10,12 +10,7 @@ class ClusterToolbar extends React.Component {
   }
 
   onItemClick(item) {
-    let fn = this.props.onItemClick;
-    let type = typeof fn;
-    if (type === 'function')
-      fn(item);
-    else
-      console.warn(`ClusterToolbar - onItemClick is not a function, is of type ${type}`);
+    this.props.onItemClick(item);
   }
 
   render() {

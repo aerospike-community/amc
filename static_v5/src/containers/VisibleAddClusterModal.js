@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import AddClusterModal from '../components/AddClusterModal';
-import { addClusterConnection, displayAddClusterConnection } from '../actions';
+import { addClusterConnection, displayAddClusterConnection } from '../actions/clusters';
 
 const mapStateToProps = (state) => {
   return {

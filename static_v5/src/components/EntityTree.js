@@ -78,23 +78,12 @@ class EntityTree extends React.Component {
       return;
     }
 
-    const fn = this.props.onEntitySelect;
-    const type = typeof fn;
-    if (type === 'function')
-      fn(entity);
-    else
-      console.warn(`EntityTree - onEntitySelect is not a function, is of type ${type}`);
+    this.props.onEntitySelect(entity);
   }
 
   onEntityViewSelect(entity, view) {
     this.hideContextMenu();
-
-    const fn = this.props.onEntityViewSelect;
-    const type = typeof fn;
-    if (type === 'function')
-      fn(entity, view.label);
-    else
-      console.warn(`EntityTree - onEntityViewSelect is not a function, is of type ${type}`);
+    this.props.onEntityViewSelect(entity, view.label);
   }
 
   render() {

@@ -33,10 +33,7 @@ class Dropdown extends React.Component {
   }
 
   onLabelClick() {
-    const fn = this.props.onLabelClick;
-    if (fn) {
-      fn();
-    }
+    this.props.onLabelClick();
   }
 
   render() {

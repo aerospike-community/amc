@@ -1,5 +1,5 @@
-import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions';
-import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions';
+import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions/clusters';
+import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
 
 // all the cluster connections of the user
 export default function clusters(state = {

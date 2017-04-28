@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import EntityTree from '../components/EntityTree';
-import { clusterEntitySelected, entityViewSelected } from '../actions';
-import { expandEntityNode, collapseEntityNode } from '../actions';
+import { clusterEntitySelected, entityViewSelected } from '../actions/clusterEntity';
+import { expandEntityNode, collapseEntityNode } from '../actions/entityTree';
 
 const mapStateToProps = (state) => {
   return {

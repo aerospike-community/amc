@@ -1,4 +1,4 @@
-import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions';
+import { SELECT_NODE, SELECT_NAMESPACE, SELECT_CLUSTER, SELECT_ENTITY_VIEW } from '../actions/clusterEntity';
 import { CLUSTER_ENTITY_TYPE } from '../classes/constants';
 
 // the currently selected entity and view
