@@ -6,7 +6,6 @@ export default function session(state = {
       inProgress: false,
       success: false,
       failureMessage: '',
-      jwt: null, // JSON web token
     },
     user: { // currently logged in user
       name: '',
@@ -27,7 +26,6 @@ export default function session(state = {
       auth = Object.assign({}, state.authentication, {
         inProgress: false,
         success: true,
-        jwt: action.jwt,
       });
       user = {
         name: action.name,
@@ -43,7 +41,6 @@ export default function session(state = {
         inProgress: false,
         success: false,
         failureMessage: action.failureMessage,
-        jwt: null,
       });
       user = {
         name: '',
