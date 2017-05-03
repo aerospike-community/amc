@@ -9,12 +9,11 @@ function authenticateUser(credentials) {
   };
 }
 
-function successfulAuthentication(credentials, headers) {
+export function successfulAuthentication(user, roles = []) {
   return {
     type: USER_AUTHENTICATION_SUCCESS,
-    user: credentials.user,
-    password: credentials.password,
-    roles: [], // TODO fetch the user roles,
+    user: user,
+    roles: roles, // TODO fetch the user roles,
   };
 }
 
@@ -32,7 +31,7 @@ export function authenticate(credentials) {
     authenticateAPI(credentials)
     .then(function(response) {
       if (response.ok) 
-        dispatch(successfulAuthentication(credentials, response.headers));
+        dispatch(successfulAuthentication(credentials.user));
       else
         dispatch(failedAuthentication());
     });

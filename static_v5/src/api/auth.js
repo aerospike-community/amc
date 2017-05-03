@@ -1,10 +1,8 @@
-import * as url from './url';
+import ls from 'local-storage';
+import { toURLConverter } from './url';
+import { AuthHeader, setAuthentication } from '../classes/authentication';
 
-const fetch = window.fetch;
-
-let jwt;
-const AuthHeader = 'Authorization';
-const toURLPath = url.toURLConverter('auth');
+const toURLPath = toURLConverter('auth');
 
 export function authenticate(credentials) {
   const url = toURLPath('authenticate');
@@ -20,35 +18,9 @@ export function authenticate(credentials) {
   })
   .then(function(response) {
     if (response.ok) {
-      jwt = response.headers.get(AuthHeader);
-      window.fetch = authorizedFetch;
+      const jwt = response.headers.get(AuthHeader);
+      setAuthentication(jwt, credentials.user);
     }
     return response;
   });
 }
-
-export function logout() {
-  jwt = null;
-  window.fetch = fetch;
-}
-
-// fetch with the Authorization header inserted
-function authorizedFetch(url, options) {
-  let headers;
-  options = options || {};
-  if (options && options.headers) 
-    headers = options.headers;
-  else
-    headers = new Headers();
-
-  if (headers instanceof Headers) 
-    headers.set(AuthHeader, jwt);
-  else 
-    headers[AuthHeader] = jwt;
-
-  if (!options.headers) 
-    options.headers = headers;
-
-  return fetch(url, options);
-}
-

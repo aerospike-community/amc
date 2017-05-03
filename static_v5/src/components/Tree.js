@@ -60,9 +60,7 @@ class Tree extends React.Component {
 }
 
 function isNodeValid(node) {
-  if (!node.hasOwnProperty('label') || !node.hasOwnProperty('children'))
-    return false;
-  if (typeof node.label !== 'string')
+  if (typeof node.name !== 'string')
     return false;
   if (!Array.isArray(node.children))
     return false;

@@ -97,7 +97,7 @@ class EntityTree extends React.Component {
       <div>
         {clusters.map(cluster => {
            return (
-             <Tree root={cluster} renderNode={this.renderTreeNode} expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.props.onNodeExpand}
+             <Tree key={cluster.id} root={cluster} renderNode={this.renderTreeNode} expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.props.onNodeExpand}
              />
              );
          })}

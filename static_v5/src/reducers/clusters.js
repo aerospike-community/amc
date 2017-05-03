@@ -23,7 +23,7 @@ export default function clusters(state = {
       });
     case DISPLAY_ADD_CLUSTER_CONNECTION:
       newConnection = Object.assign({}, state.newConnection, {
-        isAdding: true
+        isAdding: action.display
       });
       return Object.assign({}, state, {
         newConnection: newConnection

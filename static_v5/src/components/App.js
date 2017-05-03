@@ -7,6 +7,8 @@ import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
 import Header from './Header';
+import { successfulAuthentication }  from '../actions/authenticate';
+import { getUser } from '../classes/authentication';
 
 import { fetchClusters } from '../actions/clusters';
 
@@ -18,8 +20,14 @@ class App extends React.Component {
     super(props);
   }
 
+  componentWillMount() {
+    const user = getUser();
+    if (user !== null)
+      this.props.dispatch(successfulAuthentication(user));
+  }
+
   componentWillReceiveProps(nextProps) {
-    if (!this.props.authentication.success && nextProps.authentication.success)
+    if (!this.props.authentication.success && nextProps.authentication.success) 
       this.props.dispatch(fetchClusters());
   }
 

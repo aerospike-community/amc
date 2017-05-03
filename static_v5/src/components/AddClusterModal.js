@@ -155,6 +155,7 @@ class AddClusterModal extends React.Component {
     const inProgress = this.props.inProgress;
     const showWarnings = this.state.showWarnings;
     const nameWarning = showWarnings && !this.state.clusterName;
+    const seedsWarning = showWarnings && this.state.seeds.length === 0;
     return (
       <Modal size="lg" isOpen={true} toggle={() => {
                              }}>
@@ -166,7 +167,9 @@ class AddClusterModal extends React.Component {
               <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} disabled={inProgress}
                 onChange={this.onNameChange} name="clusterName" value={this.state.clusterName} />
             </div>
-            <legend> Seeds </legend>
+            <legend> 
+              Seeds {seedsWarning && <span style={{fontSize: 12, color: 'orange'}}> * seed node required for a cluster </span>}
+            </legend>
             <div className="row">
               <div className="col-3">
                 <label> Host </label>
