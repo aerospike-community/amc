@@ -8,12 +8,19 @@ import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
 import Header from './Header';
 
+import { fetchClusters } from '../actions/clusters';
+
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.authentication.success && nextProps.authentication.success)
+      this.props.dispatch(fetchClusters());
   }
 
   render() {

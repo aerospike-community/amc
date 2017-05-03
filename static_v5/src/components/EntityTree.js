@@ -37,13 +37,13 @@ class EntityTree extends React.Component {
 
     return (
       <div style={style} onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
-        {entity.label}
+        {entity.name}
         {showContextMenu &&
          <Dropdown isOpen={true} toggle={() => {
                                          }}>
            <DropdownMenu>
              <DropdownItem header>
-               {entity.label} </DropdownItem>
+               {entity.name} </DropdownItem>
              {options.map((option) => {
                 return <DropdownItem key={nextNumber()} onClick={(evt) => this.onEntityViewSelect(entity, option)}>
                          {option.label}

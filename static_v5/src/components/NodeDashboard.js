@@ -19,7 +19,7 @@ class NodeDashboard extends React.Component {
           </div>
         </nav>
         <div>
-          {this.props.node.label}
+          {this.props.node.name}
         </div>
         <div>
           {this.props.view}

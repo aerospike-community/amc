@@ -5,7 +5,7 @@ import ClusterConnections from '../components/ClusterConnections';
 const mapStateToProps = (state) => {
   const clusters = state.clusters;
   return {
-    displayAddCluster: clusters.displayAddConnection,
+    displayAddCluster: clusters.newConnection.isAdding,
     isFetching: clusters.isFetching,
   };
 };

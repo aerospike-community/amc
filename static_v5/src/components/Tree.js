@@ -42,7 +42,7 @@ class Tree extends React.Component {
          <span onClick={this.onNodeClick}> {label} </span>}
       </div>
       <div>
-        {expanded &&
+        {expanded && Array.isArray(children) && 
          children.map((node, i) => this.renderTree(node, depth + 1)
          )}
       </div>

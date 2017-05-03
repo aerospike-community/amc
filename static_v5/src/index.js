@@ -14,8 +14,6 @@ const store = createStore(
   )
 );
 
-store.dispatch(fetchClusters());
-
 render(
   <Provider store={store}>
     <App />

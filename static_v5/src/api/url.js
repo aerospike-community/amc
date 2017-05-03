@@ -25,7 +25,8 @@ export function toURLConverter(api) {
 
   return function(path) {
     path = removeLeadingSlash(path);
-    return basePath + api + '/' + path;
+    const url = basePath + api + '/' + path;
+    return removeTrailingSlash(url);
   }
 }
 

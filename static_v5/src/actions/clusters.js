@@ -1,3 +1,5 @@
+import { addConnection, listConnections } from '../api/clusterConnections';
+
 export const REQUEST_CLUSTERS = 'REQUEST_CLUSTERS';
 function requestClusters() {
   return {
@@ -24,45 +26,41 @@ export const displayAddClusterConnection = (display) => {
 export const ADD_CLUSTER_CONNECTION = 'ADD_CLUSTER_CONNECTION';
 export const ADDING_CLUSTER_CONNECTION = 'ADDING_CLUSTER_CONNECTION';
 export function addClusterConnection(connection) {
+  const seeds = connection.seeds.map((seed) => {
+    seed.port = parseInt(seed.port, 10);
+    return seed;
+  });
+  connection.seeds = seeds;
   return function(dispatch) {
     dispatch({
       type: ADDING_CLUSTER_CONNECTION
     });
 
-    // TODO send request to server
-    setTimeout(() => {
-      dispatch({
-        type: ADD_CLUSTER_CONNECTION,
-        connection: connection,
-      });
-    }, 2000);
+    addConnection(connection)
+    .then(function(response) {
+      if (true || response.OK) { // FIXME
+        dispatch({
+          type: ADD_CLUSTER_CONNECTION,
+          connection: connection,
+        });
+      } else {} // TODO
+    });
   }
 }
 
-
 export function fetchClusters() {
-  const dummyData = [{
-    label: 'Cluster ONE',
-    children: [{
-      label: 'Cluster THREE',
-      children: []
-    }, {
-      label: 'Cluster FOUR',
-      children: []
-    }]
-  }, {
-    label: 'Cluster TWO',
-    children: []
-  }];
-
   return function(dispatch) {
     dispatch(requestClusters());
 
-    setTimeout(() => {
-      dispatch(receiveClusters(dummyData));
-    }, 200);
+    listConnections()
+    .then(function(response) {
+      if (response.ok)
+        return response.json();
+      throw new Error('TODO: abstract out to handle response errors');
+    })
+    .then(function(connections) {
+      dispatch(receiveClusters(connections));
+    });
   }
 }
-
-
 
