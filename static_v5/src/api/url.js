@@ -6,14 +6,14 @@ export function toURLPath(path) {
 }
 
 function removeLeadingSlash(path) {
-  if (path.startsWith('/')) 
+  if (path.startsWith('/'))
     path = path.slice('/'.length)
 
   return path;
 }
 
 function removeTrailingSlash(path) {
-  if (path.endsWith('/')) 
+  if (path.endsWith('/'))
     path = path.slice(0, -1 * '/'.length);
 
   return path;

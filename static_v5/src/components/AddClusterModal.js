@@ -40,7 +40,10 @@ class AddClusterModal extends React.Component {
     }
 
     const {clusterName, seeds} = this.state;
-    const connection = {name: clusterName, seeds: seeds};
+    const connection = {
+      name: clusterName,
+      seeds: seeds
+    };
     this.props.onAddConnection(connection);
   }
 
@@ -106,7 +109,7 @@ class AddClusterModal extends React.Component {
       return false;
     if (seeds.length === 0)
       return false;
-    
+
     let valid = true;
     seeds.map((seed) => {
       if (!seed.host || !seed.port)
@@ -124,9 +127,9 @@ class AddClusterModal extends React.Component {
     };
     const onInputChange = (evt) => this.onSeedChange(evt, i);
     return (
-      <Seed key={i} seed={seed} showWarnings={showWarnings} disabled={inProgress}
-        button={button} onInputChange={onInputChange} />
-    );
+      <Seed key={i} seed={seed} showWarnings={showWarnings} disabled={inProgress} button={button} onInputChange={onInputChange}
+      />
+      );
   }
 
   renderInput() {
@@ -144,11 +147,10 @@ class AddClusterModal extends React.Component {
       borderTop: '1px solid #e5e5e5'
     };
     return (
-        <div style={style}>
-          <Seed seed={seed} showWarnings={false} disabled={inProgress}
-            button={button} onInputChange={onInputChange} />
-        </div>
-    );
+      <div style={style}>
+        <Seed seed={seed} showWarnings={false} disabled={inProgress} button={button} onInputChange={onInputChange} />
+      </div>
+      );
   }
 
   render() {
@@ -158,17 +160,21 @@ class AddClusterModal extends React.Component {
     const seedsWarning = showWarnings && this.state.seeds.length === 0;
     return (
       <Modal size="lg" isOpen={true} toggle={() => {
-                             }}>
+                                       }}>
         <ModalHeader>Add Cluster Connection</ModalHeader>
         <ModalBody>
           <form>
-            <div className={classNames('form-group', {'has-warning': nameWarning})}>
+            <div className={classNames('form-group', {
+                              'has-warning': nameWarning
+                            })}>
               <label> Cluster Name </label>
-              <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} disabled={inProgress}
-                onChange={this.onNameChange} name="clusterName" value={this.state.clusterName} />
+              <input type="text" className={classNames('form-control', {
+                                              'form-control-warning': nameWarning
+                                            })} disabled={inProgress} onChange={this.onNameChange} name="clusterName" value={this.state.clusterName} />
             </div>
-            <legend> 
-              Seeds {seedsWarning && <span style={{fontSize: 12, color: 'orange'}}> * seed node required for a cluster </span>}
+            <legend>
+              Seeds
+              {seedsWarning && <span style={{ fontSize: 12, color: 'orange' }}> * seed node required for a cluster </span>}
             </legend>
             <div className="row">
               <div className="col-3">
@@ -187,8 +193,7 @@ class AddClusterModal extends React.Component {
         </ModalBody>
         <ModalFooter>
           {inProgress &&
-           <span> Creating ... </span>
-          }
+           <span> Creating ... </span>}
           <Button disabled={inProgress} color="primary" onClick={this.onAddConnection}>Add</Button>
           <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
         </ModalFooter>

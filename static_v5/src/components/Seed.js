@@ -17,26 +17,29 @@ class Seed extends React.Component {
     const portWarning = showWarnings && !port;
     return (
       <div className="row">
-        <div disabled={disabled} className={classNames('col-3', {'has-warning': hostWarning})}>
-          <input className={classNames('form-control', {'form-control-warning': hostWarning})} type="text" name="host" placeholder="Host"
-            onChange={this.props.onInputChange} value={host} />
+        <div disabled={disabled} className={classNames('col-3', {
+                                              'has-warning': hostWarning
+                                            })}>
+          <input className={classNames('form-control', {
+                              'form-control-warning': hostWarning
+                            })} type="text" name="host" placeholder="Host" onChange={this.props.onInputChange} value={host} />
         </div>
-
-        <div  disabled={disabled} className={classNames('col-3', {'has-warning': portWarning})}>
-          <input className={classNames('form-control', {'form-control-warning': portWarning})} type="number" name="port" placeholder="Port"
-            onChange={this.props.onInputChange} value={port} />
+        <div disabled={disabled} className={classNames('col-3', {
+                                              'has-warning': portWarning
+                                            })}>
+          <input className={classNames('form-control', {
+                              'form-control-warning': portWarning
+                            })} type="number" name="port" placeholder="Port" onChange={this.props.onInputChange} value={port} />
         </div>
-
         <div className="col-3">
-          <input className="form-control" type="text" name="tlsName" placeholder="TLS Name"
-            onChange={this.props.onInputChange} value={tlsName} />
+          <input className="form-control" type="text" name="tlsName" placeholder="TLS Name" onChange={this.props.onInputChange} value={tlsName} />
         </div>
-
         <div className="col-3">
-          <Button className="btn btn-sm"  style={{marginTop: 5}} onClick={onClick}> {name} </Button>
+          <Button className="btn btn-sm" style={{ marginTop: 5 }} onClick={onClick}>
+            {name} </Button>
         </div>
-     </div>
-    );
+      </div>
+      );
   }
 }
 

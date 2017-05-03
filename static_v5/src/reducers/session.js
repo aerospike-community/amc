@@ -13,7 +13,8 @@ export default function session(state = {
       roles: [],
     },
   }, action) {
-  let auth, user;
+  let auth,
+    user;
   switch (action.type) {
     case AUTHENTICATE_USER:
       auth = Object.assign({}, state.authentication, {

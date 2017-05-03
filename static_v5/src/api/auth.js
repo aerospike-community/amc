@@ -16,11 +16,11 @@ export function authenticate(credentials) {
       password: credentials.password
     })
   })
-  .then(function(response) {
-    if (response.ok) {
-      const jwt = response.headers.get(AuthHeader);
-      setAuthentication(jwt, credentials.user);
-    }
-    return response;
-  });
+    .then(function(response) {
+      if (response.ok) {
+        const jwt = response.headers.get(AuthHeader);
+        setAuthentication(jwt, credentials.user);
+      }
+      return response;
+    });
 }

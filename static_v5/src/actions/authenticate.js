@@ -29,12 +29,12 @@ export function authenticate(credentials) {
     dispatch(authenticateUser(credentials));
 
     authenticateAPI(credentials)
-    .then(function(response) {
-      if (response.ok) 
-        dispatch(successfulAuthentication(credentials.user));
-      else
-        dispatch(failedAuthentication());
-    });
+      .then(function(response) {
+        if (response.ok)
+          dispatch(successfulAuthentication(credentials.user));
+        else
+          dispatch(failedAuthentication());
+      });
   }
 }
 

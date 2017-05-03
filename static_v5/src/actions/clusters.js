@@ -37,14 +37,15 @@ export function addClusterConnection(connection) {
     });
 
     addConnection(connection)
-    .then(function(response) {
-      if (true || response.OK) { // FIXME
-        dispatch({
-          type: ADD_CLUSTER_CONNECTION,
-          connection: connection,
-        });
-      } else {} // TODO
-    });
+      .then(function(response) {
+        if (true || response.OK) { // FIXME
+          dispatch({
+            type: ADD_CLUSTER_CONNECTION,
+            connection: connection,
+          });
+        } else {
+        } // TODO
+      });
   }
 }
 
@@ -53,14 +54,14 @@ export function fetchClusters() {
     dispatch(requestClusters());
 
     listConnections()
-    .then(function(response) {
-      if (response.ok)
-        return response.json();
-      throw new Error('TODO: abstract out to handle response errors');
-    })
-    .then(function(connections) {
-      dispatch(receiveClusters(connections));
-    });
+      .then(function(response) {
+        if (response.ok)
+          return response.json();
+        throw new Error('TODO: abstract out to handle response errors');
+      })
+      .then(function(connections) {
+        dispatch(receiveClusters(connections));
+      });
   }
 }
 

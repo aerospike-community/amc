@@ -32,17 +32,17 @@ export function getUser() {
 function authorizedFetch(url, options) {
   let headers;
   options = options || {};
-  if (options && options.headers) 
+  if (options && options.headers)
     headers = options.headers;
   else
     headers = new Headers();
 
-  if (headers instanceof Headers) 
+  if (headers instanceof Headers)
     headers.set(AuthHeader, jwt);
-  else 
+  else
     headers[AuthHeader] = jwt;
 
-  if (!options.headers) 
+  if (!options.headers)
     options.headers = headers;
 
   return fetch(url, options);

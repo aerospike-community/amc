@@ -7,7 +7,7 @@ import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
 import Header from './Header';
-import { successfulAuthentication }  from '../actions/authenticate';
+import { successfulAuthentication } from '../actions/authenticate';
 import { getUser } from '../classes/authentication';
 
 import { fetchClusters } from '../actions/clusters';
@@ -27,7 +27,7 @@ class App extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.authentication.success && nextProps.authentication.success) 
+    if (!this.props.authentication.success && nextProps.authentication.success)
       this.props.dispatch(fetchClusters());
   }
 
@@ -54,11 +54,8 @@ class App extends React.Component {
             </div>
           </div>
         </div>
-
-        {showLogin && 
-          <VisibleAuthenticateModal />
-        }
-
+        {showLogin &&
+         <VisibleAuthenticateModal />}
         <footer className="as-footer">
           <div className="container-fluid">
             Footer
