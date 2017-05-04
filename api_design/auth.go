@@ -41,14 +41,4 @@ var _ = Resource("auth", func() { // Resources group related API endpoints
 		Response(InternalServerError) // other errors
 	})
 
-	Action("logout", func() { // Actions define a single API endpoint together
-		Description("Logout The User") // with its path, parameters (both path
-		Routing(POST("logout"))        // parameters and querystring values) and payload
-		Params(func() {                // (shape of the request body).
-		})
-
-		Response(NoContent)
-		Response(InternalServerError) // other errors
-	})
-
 })

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
+	as "github.com/aerospike/aerospike-client-go"
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
@@ -25,7 +26,7 @@ func QueryUserConnections(username string) ([]*Connection, error) {
 	db.Lock()
 	defer db.Unlock()
 
-	rows, err := db.Query(fmt.Sprintf("SELECT %s FROM connections where Username = ?1", _connectionFields), username)
+	rows, err := db.Query(fmt.Sprintf("SELECT %s FROM connections WHERE Username = ?1", _connectionFields), username)
 	if err != nil {
 		log.Errorf("Error retrieving connections from the database: %s", err.Error())
 		return nil, err
@@ -59,6 +60,24 @@ func GetConnection(username, label string) (*Connection, error) {
 	return res, nil
 }
 
+func GetConnectionByID(id string) (*Connection, error) {
+	db := common.DB()
+
+	db.Lock()
+	defer db.Unlock()
+
+	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM connections WHERE Id = ?1 ", _connectionFields), id)
+
+	res := new(Connection)
+	err := res.fromSQLRow(row)
+	if err != nil {
+		log.Errorf("Error retrieving Connection from the database: %s", err.Error())
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (c *Connection) Delete() error {
 	db := common.DB()
 	db.Lock()
@@ -80,6 +99,10 @@ func (c *Connection) Delete() error {
 	}
 
 	return nil
+}
+
+func (c *Connection) SeedHosts() []*as.Host {
+	return toHosts(c.Seeds)
 }
 
 func (c *Connection) Save() error {

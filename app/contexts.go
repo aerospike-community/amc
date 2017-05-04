@@ -141,33 +141,111 @@ func (ctx *AuthenticateAuthContext) InternalServerError() error {
 	return nil
 }
 
-// LogoutAuthContext provides the auth logout action context.
-type LogoutAuthContext struct {
+// ConnectConnectionContext provides the connection connect action context.
+type ConnectConnectionContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
+	ID      string
+	Payload *ConnectConnectionPayload
 }
 
-// NewLogoutAuthContext parses the incoming request URL and body, performs validations and creates the
-// context used by the auth controller logout action.
-func NewLogoutAuthContext(ctx context.Context, r *http.Request, service *goa.Service) (*LogoutAuthContext, error) {
+// NewConnectConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller connect action.
+func NewConnectConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*ConnectConnectionContext, error) {
 	var err error
 	resp := goa.ContextResponse(ctx)
 	resp.Service = service
 	req := goa.ContextRequest(ctx)
 	req.Request = r
-	rctx := LogoutAuthContext{Context: ctx, ResponseData: resp, RequestData: req}
+	rctx := ConnectConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramID := req.Params["id"]
+	if len(paramID) > 0 {
+		rawID := paramID[0]
+		rctx.ID = rawID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`id`, rctx.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
 	return &rctx, err
 }
 
-// NoContent sends a HTTP response with status code 204.
-func (ctx *LogoutAuthContext) NoContent() error {
-	ctx.ResponseData.WriteHeader(204)
+// connectConnectionPayload is the connection connect action payload.
+type connectConnectionPayload struct {
+	// Database User's Password
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database Username
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *connectConnectionPayload) Validate() (err error) {
+	if payload.Username == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Password == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "password"))
+	}
+	return
+}
+
+// Publicize creates ConnectConnectionPayload from connectConnectionPayload
+func (payload *connectConnectionPayload) Publicize() *ConnectConnectionPayload {
+	var pub ConnectConnectionPayload
+	if payload.Password != nil {
+		pub.Password = *payload.Password
+	}
+	if payload.Username != nil {
+		pub.Username = *payload.Username
+	}
+	return &pub
+}
+
+// ConnectConnectionPayload is the connection connect action payload.
+type ConnectConnectionPayload struct {
+	// Database User's Password
+	Password string `form:"password" json:"password" xml:"password"`
+	// Database Username
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *ConnectConnectionPayload) Validate() (err error) {
+	if payload.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Password == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "password"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ConnectConnectionContext) OK(r *AerospikeAmcConnectionTreeResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.tree.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ConnectConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ConnectConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *ConnectConnectionContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
 	return nil
 }
 
 // InternalServerError sends a HTTP response with status code 500.
-func (ctx *LogoutAuthContext) InternalServerError() error {
+func (ctx *ConnectConnectionContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -385,6 +463,263 @@ func (ctx *SaveConnectionContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *SaveConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// DeleteUserContext provides the user delete action context.
+type DeleteUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Username string
+}
+
+// NewDeleteUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the user controller delete action.
+func NewDeleteUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*DeleteUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DeleteUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramUsername := req.Params["username"]
+	if len(paramUsername) > 0 {
+		rawUsername := paramUsername[0]
+		rctx.Username = rawUsername
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DeleteUserContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DeleteUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DeleteUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *DeleteUserContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DeleteUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// GetUserContext provides the user get action context.
+type GetUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Username string
+}
+
+// NewGetUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the user controller get action.
+func NewGetUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*GetUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := GetUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramUsername := req.Params["username"]
+	if len(paramUsername) > 0 {
+		rawUsername := paramUsername[0]
+		rctx.Username = rawUsername
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *GetUserContext) OK(r *AerospikeAmcUserQueryResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.user.query.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *GetUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *GetUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryUserContext provides the user query action context.
+type QueryUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+}
+
+// NewQueryUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the user controller query action.
+func NewQueryUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryUserContext) OK(r []*AerospikeAmcUserQueryResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SaveUserContext provides the user save action context.
+type SaveUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Payload *SaveUserPayload
+}
+
+// NewSaveUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the user controller save action.
+func NewSaveUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SaveUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// saveUserPayload is the user save action payload.
+type saveUserPayload struct {
+	// User account is active
+	Active *bool `form:"active,omitempty" json:"active,omitempty" xml:"active,omitempty"`
+	// User's fullname
+	FullName *string `form:"fullName,omitempty" json:"fullName,omitempty" xml:"fullName,omitempty"`
+	// Additional Notes
+	Notes *string `form:"notes,omitempty" json:"notes,omitempty" xml:"notes,omitempty"`
+	// Password
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Valid roles are: admin, ops, dev
+	Roles []string `form:"roles,omitempty" json:"roles,omitempty" xml:"roles,omitempty"`
+	// AMC User Id
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *saveUserPayload) Validate() (err error) {
+	if payload.Username == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "roles"))
+	}
+	return
+}
+
+// Publicize creates SaveUserPayload from saveUserPayload
+func (payload *saveUserPayload) Publicize() *SaveUserPayload {
+	var pub SaveUserPayload
+	if payload.Active != nil {
+		pub.Active = payload.Active
+	}
+	if payload.FullName != nil {
+		pub.FullName = payload.FullName
+	}
+	if payload.Notes != nil {
+		pub.Notes = payload.Notes
+	}
+	if payload.Password != nil {
+		pub.Password = payload.Password
+	}
+	if payload.Roles != nil {
+		pub.Roles = payload.Roles
+	}
+	if payload.Username != nil {
+		pub.Username = *payload.Username
+	}
+	return &pub
+}
+
+// SaveUserPayload is the user save action payload.
+type SaveUserPayload struct {
+	// User account is active
+	Active *bool `form:"active,omitempty" json:"active,omitempty" xml:"active,omitempty"`
+	// User's fullname
+	FullName *string `form:"fullName,omitempty" json:"fullName,omitempty" xml:"fullName,omitempty"`
+	// Additional Notes
+	Notes *string `form:"notes,omitempty" json:"notes,omitempty" xml:"notes,omitempty"`
+	// Password
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Valid roles are: admin, ops, dev
+	Roles []string `form:"roles" json:"roles" xml:"roles"`
+	// AMC User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SaveUserPayload) Validate() (err error) {
+	if payload.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "roles"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SaveUserContext) OK(r *AerospikeAmcUserQueryResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.user.query.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SaveUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SaveUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SaveUserContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

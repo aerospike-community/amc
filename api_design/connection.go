@@ -13,6 +13,30 @@ var _ = Resource("connection", func() {
 		Scope("api:general")
 	})
 
+	Action("connect", func() {
+		Description("Connect to the cluster and return the entity tree")
+		Routing(POST(":id"))
+		Params(func() {
+			Param("id", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("id")
+		})
+
+		Payload(func() {
+			Member("username", String, "Database Username", func() { Example("admin") })
+			Member("password", String, "Database User's Password", func() { Example("123456") })
+			Required("username", "password")
+		})
+
+		Response(OK, UserConnectionTreeResponseMedia)
+		Response(BadRequest, String)
+		Response(Forbidden)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("query", func() {
 		Description("Get the list of user connections")
 		Routing(GET(""))

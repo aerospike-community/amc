@@ -17,6 +17,7 @@ import (
 	// "github.com/sasha-s/go-deadlock"
 	"github.com/satori/go.uuid"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/mailer"
 )
@@ -1369,4 +1370,65 @@ func (c *Cluster) Restore(
 func (c *Cluster) CurrentRestore() *Restore {
 	return c.activeRestore.Get().(*Restore)
 
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResponse, error) {
+	resp := &app.AerospikeAmcConnectionTreeResponse{
+		ID: connId,
+	}
+
+	modules := map[string]*app.AerospikeAmcEntityModuleResponse{}
+	for _, node := range c.Nodes() {
+		nodeResp := &app.AerospikeAmcEntityNodeResponse{
+			Host: node.Address(),
+			ID:   node.Id(),
+		}
+
+		for nsName, ns := range node.Namespaces() {
+			namespaceResp := &app.AerospikeAmcEntityNamespaceResponse{
+				Name: nsName,
+			}
+
+			nsIndexes := node.Indexes(nsName)
+			for setName, _ := range ns.SetsInfo() {
+				setResp := &app.AerospikeAmcEntitySetResponse{
+					Name: setName,
+				}
+
+				for idxName, idx := range nsIndexes {
+					if idx.TryString("set", "") == setName {
+						indexResp := &app.AerospikeAmcEntityIndexResponse{
+							Name:    idxName,
+							BinName: idx.TryString("bin", ""),
+							Type:    idx.TryString("type", ""),
+						}
+						setResp.Indexes = append(setResp.Indexes, indexResp)
+					}
+				}
+				namespaceResp.Sets = append(namespaceResp.Sets, setResp)
+			}
+
+			nodeResp.Namespaces = append(nodeResp.Namespaces, namespaceResp)
+		}
+
+		resp.Nodes = append(resp.Nodes, nodeResp)
+
+		for name, nodeModule := range node.UDFs() {
+			module := &app.AerospikeAmcEntityModuleResponse{
+				Name: name,
+				Hash: nodeModule.TryString("hash", ""),
+				Type: nodeModule.TryString("type", ""),
+			}
+			modules[module.Hash] = module
+		}
+	}
+
+	resp.Modules = make([]*app.AerospikeAmcEntityModuleResponse, 0, len(modules))
+	for _, module := range modules {
+		resp.Modules = append(resp.Modules, module)
+	}
+
+	return resp, nil
 }

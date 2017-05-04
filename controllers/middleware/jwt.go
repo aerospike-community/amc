@@ -62,11 +62,12 @@ func SpecializeContext(logger goa.LogAdapter) goa.Middleware {
 	errValidationFailed := goa.NewErrorClass("validation_failed", 401)
 	specializeContext := func(h goa.Handler) goa.Handler {
 		return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-			username, amcRoles, err := userInfoFromJWTToken(ctx)
+			username, jti, amcRoles, err := userInfoFromJWTToken(ctx)
 			if err != nil {
 				return errValidationFailed("JWT middleware: username not found")
 			}
 
+			ctx = context.WithValue(ctx, "sessionId", jti)
 			ctx = context.WithValue(ctx, "username", username)
 			ctx = context.WithValue(ctx, "roles", amcRoles)
 			return h(ctx, rw, req)
@@ -77,16 +78,20 @@ func SpecializeContext(logger goa.LogAdapter) goa.Middleware {
 }
 
 // Show runs the show action.
-func userInfoFromJWTToken(ctx context.Context) (string, []string, error) {
+func userInfoFromJWTToken(ctx context.Context) (string, string, []string, error) {
 	token := jwt.ContextJWT(ctx)
 	claims := token.Claims.(jwtgo.MapClaims)
 	username, ok := claims["username"].(string)
 	if !ok {
-		return "", nil, errors.New("token not found")
+		return "", "", nil, errors.New("token not found")
+	}
+	jti, ok := claims["jti"].(string)
+	if !ok {
+		return "", "", nil, errors.New("token not found")
 	}
 	amcRolesIfc, ok := claims["roles"].([]interface{})
 	if !ok {
-		return "", nil, errors.New("token not found")
+		return "", "", nil, errors.New("token not found")
 	}
 
 	var amcRoles = []string{}
@@ -94,5 +99,5 @@ func userInfoFromJWTToken(ctx context.Context) (string, []string, error) {
 		amcRoles = append(amcRoles, role.(string))
 	}
 
-	return username, amcRoles, nil
+	return username, jti, amcRoles, nil
 }

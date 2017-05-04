@@ -269,6 +269,7 @@ func GoaServer(config *common.Config) {
 
 	// Mount "amc" controller
 	app.MountAmcController(service, NewAmcController(service))
+	app.MountUserController(service, NewUserController(service))
 	// app.MountClusterController(service, NewClusterController(service))
 	app.MountConnectionController(service, NewConnectionController(service))
 	app.MountSwaggerController(service, NewSwaggerController(service))

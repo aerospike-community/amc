@@ -296,6 +296,7 @@ func SetupDatabase(filepath string) {
 			Roles		  string NOT NULL,
 			FullName	  string,
 			Notes	      string,
+			Active	      bool NOT NULL DEFAULT TRUE,
 		);`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idxUsersUsername ON users (Username);`,
 		`CREATE TABLE IF NOT EXISTS connections (

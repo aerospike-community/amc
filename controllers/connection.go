@@ -3,7 +3,10 @@ package controllers
 import (
 	"github.com/goadesign/goa"
 
+	ast "github.com/aerospike/aerospike-client-go/types"
+
 	"github.com/citrusleaf/amc/app"
+	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/models"
 )
 
@@ -15,6 +18,31 @@ type ConnectionController struct {
 // NewConnectionController creates a connection controller.
 func NewConnectionController(service *goa.Service) *ConnectionController {
 	return &ConnectionController{Controller: service.NewController("ConnectionController")}
+}
+
+// Connect runs the connect action.
+func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error {
+	// ConnectionController_Connect: start_implement
+
+	sessionId := ctx.Value("sessionId").(string)
+	cluster, err := GetConnectionCluster(sessionId, ctx.ID, ctx.Payload.Username, ctx.Payload.Password)
+	if err != nil {
+		if common.AMCIsEnterprise() {
+			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
+				return ctx.Forbidden()
+			}
+		}
+
+		return ctx.BadRequest(err.Error())
+	}
+
+	et, err := cluster.EntityTree(ctx.ID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// ConnectionController_Connect: end_implement
+	return ctx.OK(et)
 }
 
 // Delete runs the delete action.

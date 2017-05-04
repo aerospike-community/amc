@@ -1,6 +1,232 @@
 consumes:
 - application/json
 definitions:
+  AerospikeAmcConnectionTreeResponse:
+    description: User Connection Entity Tree (default view)
+    example:
+      id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+      modules:
+      - hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+        name: map_reduce.lua
+        type: lua
+      nodes:
+      - host: 127.0.0.1:3000
+        id: BB9EB6C71290C00
+        namespaces:
+        - name: Test
+          sets:
+          - indexes:
+            - binName: id
+              name: idx_test_customers_id
+              type: NUMERIC
+            name: Customers
+      - host: 127.0.0.1:3000
+        id: BB9EB6C71290C00
+        namespaces:
+        - name: Test
+          sets:
+          - indexes:
+            - binName: id
+              name: idx_test_customers_id
+              type: NUMERIC
+            name: Customers
+    properties:
+      id:
+        description: Connection Id
+        example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        type: string
+      modules:
+        description: modules
+        example:
+        - hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+          name: map_reduce.lua
+          type: lua
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityModuleResponse'
+        type: array
+      nodes:
+        description: Nodes
+        example:
+        - host: 127.0.0.1:3000
+          id: BB9EB6C71290C00
+          namespaces:
+          - name: Test
+            sets:
+            - indexes:
+              - binName: id
+                name: idx_test_customers_id
+                type: NUMERIC
+              name: Customers
+        - host: 127.0.0.1:3000
+          id: BB9EB6C71290C00
+          namespaces:
+          - name: Test
+            sets:
+            - indexes:
+              - binName: id
+                name: idx_test_customers_id
+                type: NUMERIC
+              name: Customers
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
+        type: array
+    required:
+    - id
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.connection.tree.response+json;
+      view=default'
+    type: object
+  AerospikeAmcEntityIndexResponse:
+    description: Index Entity (default view)
+    example:
+      binName: id
+      name: idx_test_customers_id
+      type: NUMERIC
+    properties:
+      binName:
+        description: Bin Name
+        example: id
+        type: string
+      name:
+        description: Set Name
+        example: idx_test_customers_id
+        type: string
+      type:
+        description: Index Type
+        example: NUMERIC
+        type: string
+    required:
+    - name
+    - binName
+    - type
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.index.response+json;
+      view=default'
+    type: object
+  AerospikeAmcEntityModuleResponse:
+    description: Module Entity (default view)
+    example:
+      hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+      name: map_reduce.lua
+      type: lua
+    properties:
+      hash:
+        description: Module Hash
+        example: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+        type: string
+      name:
+        description: Module Name
+        example: map_reduce.lua
+        type: string
+      type:
+        description: Module Type
+        example: lua
+        type: string
+    required:
+    - name
+    - hash
+    - type
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.module.response+json;
+      view=default'
+    type: object
+  AerospikeAmcEntityNamespaceResponse:
+    description: Namespace Entity (default view)
+    example:
+      name: Test
+      sets:
+      - indexes:
+        - binName: id
+          name: idx_test_customers_id
+          type: NUMERIC
+        name: Customers
+    properties:
+      name:
+        description: Namespace Name
+        example: Test
+        type: string
+      sets:
+        description: Namespaces
+        example:
+        - indexes:
+          - binName: id
+            name: idx_test_customers_id
+            type: NUMERIC
+          name: Customers
+        items:
+          $ref: '#/definitions/AerospikeAmcEntitySetResponse'
+        type: array
+    required:
+    - name
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.namespace.response+json;
+      view=default'
+    type: object
+  AerospikeAmcEntityNodeResponse:
+    description: Node Entity (default view)
+    example:
+      host: 127.0.0.1:3000
+      id: BB9EB6C71290C00
+      namespaces:
+      - name: Test
+        sets:
+        - indexes:
+          - binName: id
+            name: idx_test_customers_id
+            type: NUMERIC
+          name: Customers
+    properties:
+      host:
+        description: Network Host Address
+        example: 127.0.0.1:3000
+        type: string
+      id:
+        description: Node Id
+        example: BB9EB6C71290C00
+        type: string
+      namespaces:
+        description: Namespaces
+        example:
+        - name: Test
+          sets:
+          - indexes:
+            - binName: id
+              name: idx_test_customers_id
+              type: NUMERIC
+            name: Customers
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
+        type: array
+    required:
+    - host
+    - id
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.node.response+json;
+      view=default'
+    type: object
+  AerospikeAmcEntitySetResponse:
+    description: Set Entity (default view)
+    example:
+      indexes:
+      - binName: id
+        name: idx_test_customers_id
+        type: NUMERIC
+      name: Customers
+    properties:
+      indexes:
+        description: Indexes
+        example:
+        - binName: id
+          name: idx_test_customers_id
+          type: NUMERIC
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
+        type: array
+      name:
+        description: Set Name
+        example: Customers
+        type: string
+    required:
+    - name
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.set.response+json;
+      view=default'
+    type: object
   AerospikeAmcSystemResponse:
     description: AMC Server System information (default view)
     example:
@@ -11,6 +237,47 @@ definitions:
         example: "5.0"
         type: string
     title: 'Mediatype identifier: application/vnd.aerospike.amc.system.response+json;
+      view=default'
+    type: object
+  AerospikeAmcUserQueryResponse:
+    description: User (default view)
+    example:
+      active: true
+      fullName: Ada Lovelace
+      notes: A Genius
+      roles:
+      - ops
+      - dev
+      username: ada
+    properties:
+      active:
+        description: User account is active
+        example: true
+        type: boolean
+      fullName:
+        description: User's fullname
+        example: Ada Lovelace
+        type: string
+      notes:
+        description: Additional Notes
+        example: A Genius
+        type: string
+      roles:
+        description: AMC User Roles
+        example:
+        - ops
+        - dev
+        items:
+          example: Aut voluptas.
+          type: string
+        type: array
+      username:
+        description: User Id
+        example: ada
+        type: string
+    required:
+    - username
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.user.query.response+json;
       view=default'
     type: object
   AuthenticateAuthPayload:
@@ -30,6 +297,24 @@ definitions:
     - user
     - password
     title: AuthenticateAuthPayload
+    type: object
+  ConnectConnectionPayload:
+    example:
+      password: "123456"
+      username: admin
+    properties:
+      password:
+        description: Database User's Password
+        example: "123456"
+        type: string
+      username:
+        description: Database Username
+        example: admin
+        type: string
+    required:
+    - username
+    - password
+    title: ConnectConnectionPayload
     type: object
   NodeSeed:
     example:
@@ -87,6 +372,51 @@ definitions:
     - name
     - seeds
     title: SaveConnectionPayload
+    type: object
+  SaveUserPayload:
+    example:
+      active: true
+      fullName: Ada Lovelace
+      notes: A Genius
+      password: password
+      roles:
+      - ops
+      - dev
+      username: ada
+    properties:
+      active:
+        description: User account is active
+        example: true
+        type: boolean
+      fullName:
+        description: User's fullname
+        example: Ada Lovelace
+        type: string
+      notes:
+        description: Additional Notes
+        example: A Genius
+        type: string
+      password:
+        description: Password
+        example: password
+        type: string
+      roles:
+        description: 'Valid roles are: admin, ops, dev'
+        example:
+        - ops
+        - dev
+        items:
+          example: Tempora similique.
+          type: string
+        type: array
+      username:
+        description: AMC User Id
+        example: ada
+        type: string
+    required:
+    - username
+    - roles
+    title: SaveUserPayload
     type: object
   error:
     description: Error response media type (default view)
@@ -201,21 +531,6 @@ paths:
       summary: authenticate auth
       tags:
       - auth
-  /api/v1/auth/logout:
-    post:
-      description: Logout The User
-      operationId: auth#logout
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-      schemes:
-      - http
-      - https
-      summary: logout auth
-      tags:
-      - auth
   /api/v1/connections:
     get:
       description: |-
@@ -306,6 +621,175 @@ paths:
       summary: delete connection
       tags:
       - connection
+    post:
+      description: |-
+        Connect to the cluster and return the entity tree
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#connect
+      parameters:
+      - description: Connection Id
+        in: path
+        name: id
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/ConnectConnectionPayload'
+      produces:
+      - application/vnd.aerospike.amc.connection.tree.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcConnectionTreeResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: connect connection
+      tags:
+      - connection
+  /api/v1/users:
+    get:
+      description: |-
+        Get the list of users
+
+        Required security scopes:
+          * `api:admin`
+      operationId: user#query
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:admin
+      summary: query user
+      tags:
+      - user
+    post:
+      description: |-
+        Register or Update a new user
+
+        Required security scopes:
+          * `api:admin`
+      operationId: user#save
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SaveUserPayload'
+      produces:
+      - application/vnd.aerospike.amc.user.query.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcUserQueryResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:admin
+      summary: save user
+      tags:
+      - user
+  /api/v1/users/{username}:
+    delete:
+      description: |-
+        Delete a user
+
+        Required security scopes:
+          * `api:admin`
+      operationId: user#delete
+      parameters:
+      - in: path
+        name: username
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:admin
+      summary: delete user
+      tags:
+      - user
+    get:
+      description: |-
+        Get the list of users
+
+        Required security scopes:
+          * `api:admin`
+      operationId: user#get
+      parameters:
+      - in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.user.query.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcUserQueryResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:admin
+      summary: get user
+      tags:
+      - user
   /static/{filepath}:
     get:
       operationId: public#/static/*filepath

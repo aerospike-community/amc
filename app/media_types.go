@@ -47,10 +47,203 @@ func (mt *AerospikeAmcConnectionQueryResponse) Validate() (err error) {
 	return
 }
 
+// User Connection Entity Tree (default view)
+//
+// Identifier: application/vnd.aerospike.amc.connection.tree.response+json; view=default
+type AerospikeAmcConnectionTreeResponse struct {
+	// Connection Id
+	ID string `form:"id" json:"id" xml:"id"`
+	// modules
+	Modules []*AerospikeAmcEntityModuleResponse `form:"modules,omitempty" json:"modules,omitempty" xml:"modules,omitempty"`
+	// Nodes
+	Nodes []*AerospikeAmcEntityNodeResponse `form:"nodes,omitempty" json:"nodes,omitempty" xml:"nodes,omitempty"`
+}
+
+// Validate validates the AerospikeAmcConnectionTreeResponse media type instance.
+func (mt *AerospikeAmcConnectionTreeResponse) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
+		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	}
+	for _, e := range mt.Modules {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range mt.Nodes {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Index Entity (default view)
+//
+// Identifier: application/vnd.aerospike.amc.entity.index.response+json; view=default
+type AerospikeAmcEntityIndexResponse struct {
+	// Bin Name
+	BinName string `form:"binName" json:"binName" xml:"binName"`
+	// Set Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Index Type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate validates the AerospikeAmcEntityIndexResponse media type instance.
+func (mt *AerospikeAmcEntityIndexResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.BinName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "binName"))
+	}
+	if mt.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+	return
+}
+
+// Module Entity (default view)
+//
+// Identifier: application/vnd.aerospike.amc.entity.module.response+json; view=default
+type AerospikeAmcEntityModuleResponse struct {
+	// Module Hash
+	Hash string `form:"hash" json:"hash" xml:"hash"`
+	// Module Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Module Type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate validates the AerospikeAmcEntityModuleResponse media type instance.
+func (mt *AerospikeAmcEntityModuleResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Hash == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "hash"))
+	}
+	if mt.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+	return
+}
+
+// Namespace Entity (default view)
+//
+// Identifier: application/vnd.aerospike.amc.entity.namespace.response+json; view=default
+type AerospikeAmcEntityNamespaceResponse struct {
+	// Namespace Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Namespaces
+	Sets []*AerospikeAmcEntitySetResponse `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+}
+
+// Validate validates the AerospikeAmcEntityNamespaceResponse media type instance.
+func (mt *AerospikeAmcEntityNamespaceResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	for _, e := range mt.Sets {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Node Entity (default view)
+//
+// Identifier: application/vnd.aerospike.amc.entity.node.response+json; view=default
+type AerospikeAmcEntityNodeResponse struct {
+	// Network Host Address
+	Host string `form:"host" json:"host" xml:"host"`
+	// Node Id
+	ID string `form:"id" json:"id" xml:"id"`
+	// Namespaces
+	Namespaces []*AerospikeAmcEntityNamespaceResponse `form:"namespaces,omitempty" json:"namespaces,omitempty" xml:"namespaces,omitempty"`
+}
+
+// Validate validates the AerospikeAmcEntityNodeResponse media type instance.
+func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
+	if mt.Host == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "host"))
+	}
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	for _, e := range mt.Namespaces {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Set Entity (default view)
+//
+// Identifier: application/vnd.aerospike.amc.entity.set.response+json; view=default
+type AerospikeAmcEntitySetResponse struct {
+	// Indexes
+	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
+	// Set Name
+	Name string `form:"name" json:"name" xml:"name"`
+}
+
+// Validate validates the AerospikeAmcEntitySetResponse media type instance.
+func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	for _, e := range mt.Indexes {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
 // AMC Server System information (default view)
 //
 // Identifier: application/vnd.aerospike.amc.system.response+json; view=default
 type AerospikeAmcSystemResponse struct {
 	// AMC Version
 	Version *string `form:"version,omitempty" json:"version,omitempty" xml:"version,omitempty"`
+}
+
+// User (default view)
+//
+// Identifier: application/vnd.aerospike.amc.user.query.response+json; view=default
+type AerospikeAmcUserQueryResponse struct {
+	// User account is active
+	Active *bool `form:"active,omitempty" json:"active,omitempty" xml:"active,omitempty"`
+	// User's fullname
+	FullName *string `form:"fullName,omitempty" json:"fullName,omitempty" xml:"fullName,omitempty"`
+	// Additional Notes
+	Notes *string `form:"notes,omitempty" json:"notes,omitempty" xml:"notes,omitempty"`
+	// AMC User Roles
+	Roles []string `form:"roles,omitempty" json:"roles,omitempty" xml:"roles,omitempty"`
+	// User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate validates the AerospikeAmcUserQueryResponse media type instance.
+func (mt *AerospikeAmcUserQueryResponse) Validate() (err error) {
+	if mt.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "username"))
+	}
+	return
 }
