@@ -5,7 +5,7 @@ import { addClusterConnection, displayAddClusterConnection } from '../actions/cl
 
 const mapStateToProps = (state) => {
   return {
-    inProgress: state.clusters.isUpdating
+    inProgress: state.clusters.newConnection.isUpdating
   };
 }
 

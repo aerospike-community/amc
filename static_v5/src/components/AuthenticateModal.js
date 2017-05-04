@@ -43,20 +43,17 @@ class AuthenticateModal extends React.Component {
           <form>
             <div className="form-group">
               <label> User </label>
-              <input type="text" className="form-control" disabled={inProgress}
-                onChange={this.onInputChange} name="user" value={this.state.user} />
+              <input type="text" className="form-control" disabled={inProgress} onChange={this.onInputChange} name="user" value={this.state.user} />
             </div>
             <div className="form-group">
               <label> Password </label>
-              <input type="password" className="form-control" disabled={inProgress}
-                onChange={this.onInputChange} name="password" value={this.state.password} />
+              <input type="password" className="form-control" disabled={inProgress} onChange={this.onInputChange} name="password" value={this.state.password} />
             </div>
           </form>
         </ModalBody>
         <ModalFooter>
           {inProgress &&
-           <span> Creating ... </span>
-          }
+           <span> Creating ... </span>}
           <Button disabled={inProgress} color="primary" onClick={this.onAuthenticate}>Submit</Button>
         </ModalFooter>
       </Modal>

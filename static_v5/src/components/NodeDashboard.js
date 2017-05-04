@@ -8,7 +8,7 @@ class NodeDashboard extends React.Component {
   render() {
     return (
       <div>
-        <nav className="navbar navbar-toggleable-md navbar-light" style={{background: 'lavender'}}>
+        <nav className="navbar navbar-toggleable-md navbar-light" style={{ background: 'lavender' }}>
           <div className="navbar-collapse">
             <ul className="navbar-nav">
               <li className="nav-item"> <a className="nav-link active"> Configuration </a> </li>
@@ -19,7 +19,7 @@ class NodeDashboard extends React.Component {
           </div>
         </nav>
         <div>
-          {this.props.node.label}
+          {this.props.node.name}
         </div>
         <div>
           {this.props.view}

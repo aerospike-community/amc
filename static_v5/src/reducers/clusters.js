@@ -3,11 +3,14 @@ import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_
 
 // all the cluster connections of the user
 export default function clusters(state = {
-    displayAddConnection: false,
+    newConnection: {
+      isAdding: false, // adding a new connection
+      isUpdating: false,
+    },
     isFetching: false,
     items: [],
-    isUpdating: false,
   }, action) {
+  let newConnection;
   switch (action.type) {
     case REQUEST_CLUSTERS:
       return Object.assign({}, state, {
@@ -16,21 +19,30 @@ export default function clusters(state = {
     case RECEIVE_CLUSTERS:
       return Object.assign({}, state, {
         isFetching: false,
-        items: action.clusters
+        items: action.clusters || [],
       });
     case DISPLAY_ADD_CLUSTER_CONNECTION:
+      newConnection = Object.assign({}, state.newConnection, {
+        isAdding: action.display
+      });
       return Object.assign({}, state, {
-        displayAddConnection: action.display,
+        newConnection: newConnection
       });
     case ADD_CLUSTER_CONNECTION:
-      return Object.assign({}, state, {
-        displayAddConnection: false,
-        items: [...state.items, action.connection],
+      newConnection = Object.assign({}, state.newConnection, {
+        isAdding: false,
         isUpdating: false,
       });
-    case ADDING_CLUSTER_CONNECTION:
       return Object.assign({}, state, {
-        isUpdating: true
+        newConnection: newConnection,
+        items: [...state.items, action.connection],
+      });
+    case ADDING_CLUSTER_CONNECTION:
+      newConnection = Object.assign({}, state.newConnection, {
+        isUpdating: true,
+      });
+      return Object.assign({}, state, {
+        newConnection: newConnection
       });
     default:
       return state;

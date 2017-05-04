@@ -42,7 +42,7 @@ class Tree extends React.Component {
          <span onClick={this.onNodeClick}> {label} </span>}
       </div>
       <div>
-        {expanded &&
+        {expanded && Array.isArray(children) &&
          children.map((node, i) => this.renderTree(node, depth + 1)
          )}
       </div>
@@ -60,9 +60,7 @@ class Tree extends React.Component {
 }
 
 function isNodeValid(node) {
-  if (!node.hasOwnProperty('label') || !node.hasOwnProperty('children'))
-    return false;
-  if (typeof node.label !== 'string')
+  if (typeof node.name !== 'string')
     return false;
   if (!Array.isArray(node.children))
     return false;
