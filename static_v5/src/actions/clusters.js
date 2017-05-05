@@ -8,7 +8,7 @@ function requestClusters() {
 }
 
 export const RECEIVE_CLUSTERS = 'RECEIVE_CLUSTERS';
-function receiveClusters(clusters) {
+function receiveClusters(clusters = []) {
   return {
     type: RECEIVE_CLUSTERS,
     clusters
@@ -57,10 +57,13 @@ export function fetchClusters() {
       .then(function(response) {
         if (response.ok)
           return response.json();
-        throw new Error('TODO: abstract out to handle response errors');
+        throw new Error('Error in fetching cluster connections');
       })
       .then(function(connections) {
         dispatch(receiveClusters(connections));
+      })
+      .catch(function() {
+        dispatch(receiveClusters([]))
       });
   }
 }

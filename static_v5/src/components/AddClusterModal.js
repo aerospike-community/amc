@@ -5,6 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
 import Seed from './Seed';
+import '../styles/common.css';
 
 class AddClusterModal extends React.Component {
   constructor(props) {
@@ -105,16 +106,12 @@ class AddClusterModal extends React.Component {
 
   isFormValid() {
     const {clusterName, seeds} = this.state;
-    if (!clusterName)
-      return false;
-    if (seeds.length === 0)
+    if (!clusterName || seeds.length === 0)
       return false;
 
-    let valid = true;
-    seeds.map((seed) => {
-      if (!seed.host || !seed.port)
-        valid = false;
-    })
+    let valid = seeds.every((seed) => 
+      seed.host !== '' && seed.port !== ''
+    );
     return valid;
   }
 
@@ -174,7 +171,7 @@ class AddClusterModal extends React.Component {
             </div>
             <legend>
               Seeds
-              {seedsWarning && <span style={{ fontSize: 12, color: 'orange' }}> * seed node required for a cluster </span>}
+              {seedsWarning && <span className="as-warning-text"> * seed node required for a cluster </span>}
             </legend>
             <div className="row">
               <div className="col-3">
