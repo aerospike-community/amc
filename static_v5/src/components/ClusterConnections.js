@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleClusterToolbar from '../containers/VisibleClusterToolbar';
 import VisibleAddClusterModal from '../containers/VisibleAddClusterModal';
+import VisibleClusterConnectionModal from '../containers/VisibleClusterConnectionModal';
 
 class ClusterConnections extends React.Component {
   constructor(props) {
@@ -23,6 +24,9 @@ class ClusterConnections extends React.Component {
           <VisibleEntityTree />
           {this.props.displayAddCluster &&
            <VisibleAddClusterModal />}
+          {this.props.displayAuthCluster &&
+           <VisibleClusterConnectionModal />
+          }
         </div>
       );
     }
@@ -33,6 +37,8 @@ class ClusterConnections extends React.Component {
 ClusterConnections.PropTypes = {
   // true when in the process of adding a new connection
   displayAddCluster: PropTypes.bool,
+  // true when in the process of authenticating a connection
+  displayAuthCluster: PropTypes.bool,
   isFetching: PropTypes.bool,
 };
 

@@ -27,3 +27,18 @@ export function deleteConnection(id) {
   });
 }
 
+export function authConnection(id, name, password) {
+  const url = toURLPath(id);
+  const credentials = {
+    username: name,
+    password: password
+  };
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials)
+  });
+}
+

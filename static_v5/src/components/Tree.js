@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { objectPropType, nextNumber } from '../classes/Util';
+import { objectPropType, nextNumber } from '../classes/util';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';

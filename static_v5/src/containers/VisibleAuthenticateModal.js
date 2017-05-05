@@ -13,7 +13,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onAuthenticate: (credentials) => {
+    authenticate: (credentials) => {
       dispatch(authenticate(credentials));
     },
   };

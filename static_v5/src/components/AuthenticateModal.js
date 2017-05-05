@@ -21,7 +21,7 @@ class AuthenticateModal extends React.Component {
       user: this.state.user,
       password: this.state.password
     };
-    this.props.onAuthenticate(credentials);
+    this.props.authenticate(credentials);
   }
 
   onInputChange(evt) {
@@ -67,8 +67,8 @@ AuthenticateModal.PropTypes = {
   // message on failure
   failureMessage: PropTypes.string,
   // callback to authenticate
-  // onAuthenticate(credentials) 
-  onAuthenticate: PropTypes.func,
+  // authenticate(credentials) 
+  authenticate: PropTypes.func,
 };
 
 export default AuthenticateModal;

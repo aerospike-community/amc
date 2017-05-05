@@ -11,10 +11,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onAddConnection: (connection) => {
+    addConnection: (connection) => {
       dispatch(addClusterConnection(connection));
     },
-    onCancel: () => {
+    cancel: () => {
       dispatch(displayAddClusterConnection(false));
     }
   };

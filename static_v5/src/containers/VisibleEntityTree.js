@@ -3,11 +3,24 @@ import { connect } from 'react-redux';
 import EntityTree from '../components/EntityTree';
 import { clusterEntitySelected, entityViewSelected } from '../actions/clusterEntity';
 import { expandEntityNode, collapseEntityNode } from '../actions/entityTree';
+import { displayAuthClusterConnection, disconnectCluster } from '../actions/clusters';
 
 const mapStateToProps = (state) => {
+  // FIXME is there a better way to do this
+  let clusters = state.clusters.items;
+  clusters.map((c) => {
+    let children = [];
+    if (c.entities) {
+      c.entities.map((n) => {
+        n.name = n.host;
+        children.push(n);
+      });
+    }
+    c.children = children;
+  });
   return {
     isFetching: state.clusters.isFetching,
-    clusters: state.clusters.items,
+    clusters: clusters,
     expanded: state.entityTree.expanded,
   };
 };
@@ -17,8 +30,12 @@ const mapDispatchToProps = (dispatch) => {
     onEntitySelect: (entity) => {
       dispatch(clusterEntitySelected(entity))
     },
-    onEntityViewSelect: (entity, view) => {
-      dispatch(entityViewSelected(entity, view));
+    onEntityAction: (entity, action) => {
+      if (action === 'Connect') 
+        dispatch(displayAuthClusterConnection(true, entity.id));
+      else if (action === 'Disconnect')
+        dispatch(disconnectCluster(entity.id));
+      // else TODO
     },
     onNodeExpand: (node) => {
       dispatch(expandEntityNode(node));

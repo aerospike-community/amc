@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
-import { nextNumber } from '../classes/Util';
+import { nextNumber } from '../classes/util';
 import { Dropdown as ReactDropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.css';

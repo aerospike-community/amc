@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
-import { objectPropType, nextNumber } from '../classes/Util';
+import { objectPropType, nextNumber } from '../classes/util';
 import Tree from './Tree';
 
 // Display all the clusters and its entites 
@@ -45,7 +45,7 @@ class EntityTree extends React.Component {
              <DropdownItem header>
                {entity.name} </DropdownItem>
              {options.map((option) => {
-                return <DropdownItem key={nextNumber()} onClick={(evt) => this.onEntityViewSelect(entity, option)}>
+                return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
                          {option.label}
                        </DropdownItem>
               })}
@@ -81,9 +81,9 @@ class EntityTree extends React.Component {
     this.props.onEntitySelect(entity);
   }
 
-  onEntityViewSelect(entity, view) {
+  onContextMenuClick(entity, action) {
     this.hideContextMenu();
-    this.props.onEntityViewSelect(entity, view.label);
+    this.props.onEntityAction(entity, action);
   }
 
   render() {
@@ -112,9 +112,9 @@ EntityTree.PropTypes = {
   // callback when an entity is selected
   // onEntitySelect(entity)
   onEntitySelect: PropTypes.func,
-  // callback when a view is selected for an entity
-  // onEntityViewSelect(entity, view)
-  onEntityViewSelect: PropTypes.func,
+  // callback when an action is performed on an entity
+  // onEntityAction(entity, action)
+  onEntityAction: PropTypes.func,
 
   // state of the entity tree
   // a set of expanded nodes of the tree

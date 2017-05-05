@@ -45,11 +45,11 @@ class AddClusterModal extends React.Component {
       name: clusterName,
       seeds: seeds
     };
-    this.props.onAddConnection(connection);
+    this.props.addConnection(connection);
   }
 
   onCancel() {
-    this.props.onCancel();
+    this.props.cancel();
   }
 
   onNameChange(evt) {
@@ -204,9 +204,9 @@ AddClusterModal.PropTypes = {
   inProgress: PropTypes.bool,
   // callback to add a connection
   // callback(properties) TODO add properties
-  onAddConnection: PropTypes.func,
+  addConnection: PropTypes.func,
   // callback to cancel the modal
-  onCancel: PropTypes.func,
+  cancel: PropTypes.func,
 };
 
 export default AddClusterModal;
