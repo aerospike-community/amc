@@ -8,7 +8,7 @@ var config = {
   entry: ['whatwg-fetch', APP_DIR + '/index.js'],
   output: {
     path: BUILD_DIR,
-    filename: 'bundle.js'
+    filename: 'bundle.js',
       
     // The publicPath specifies the public URL address of the output files when
     // referenced in a browser. Needs to be set for file-loader.
