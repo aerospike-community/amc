@@ -3,27 +3,33 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 
 import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.css';
 
 class ClusterToolbar extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  onItemClick(item) {
-    this.props.onItemClick(item);
+  onToolClick(item) {
+    this.props.onToolClick(item);
   }
 
   render() {
     return (
-      <div onClick={() => this.onItemClick('addCluster')}> + </div>
+      <div>
+        <div className="float-right" onClick={() => this.onToolClick('addCluster')}> 
+          <i className="fa fa-plus"></i>
+        </div>
+        <div className="clearfix"></div>
+      </div>
       );
   }
 }
 
 ClusterToolbar.PropTypes = {
-  // callback on clicking an item
-  // onItemClick('itemName')
-  onItemClick: PropTypes.func.required
+  // callback on clicking a tool on the toolbar
+  // onToolClick('toolName')
+  onToolClick: PropTypes.func.required
 };
 
 export default ClusterToolbar;

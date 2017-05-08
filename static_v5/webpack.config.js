@@ -9,6 +9,21 @@ var config = {
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js'
+      
+    // The publicPath specifies the public URL address of the output files when
+    // referenced in a browser. Needs to be set for file-loader.
+    // Example:
+    //  <i className="fa fa-address-book"></i>
+    //  - file-loader will create a file named 'af7ae505a9eed503f8b8e6982036873e.woff2'
+    //    in 'config.output.path', 
+    //  - url referenced by bundle.js will be
+    //    'config.output.path/af7ae505a9eed503f8b8e6982036873e.woff2'
+    //    which is wrong
+    //  - adding publicPath the file will be fetched from 
+    //    'config.output.publicPath/af7ae505a9eed503f8b8e6982036873e.woff2'.
+    //
+    // see https://webpack.github.io/docs/configuration.html#output-publicpath
+    publicPath: 'build/',
   },
 	module : {
     loaders : [
@@ -23,7 +38,19 @@ var config = {
         test: /\.css$/,
         loader: 'style-loader!css-loader'
       }, {
-        test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
+        test: /\.(png|jpg|gif)$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000
+        }
+      }, {
+        test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000
+        }
+      }, {
+        test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'url-loader',
         options: {
           limit: 10000

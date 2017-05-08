@@ -5,7 +5,7 @@ import { displayAddClusterConnection } from '../actions/clusters';
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onItemClick: (item) => {
+    onToolClick: (item) => {
       // TODO add more based on toolbar
       if (true && item === 'addCluster') {
         dispatch(displayAddClusterConnection(true));
