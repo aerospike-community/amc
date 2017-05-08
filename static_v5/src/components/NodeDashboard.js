@@ -1,10 +1,23 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
+import brace from 'brace';
+import AceEditor from 'react-ace';
+
+import 'brace/mode/lua';
+import 'brace/theme/github';
 
 import 'bootstrap/dist/css/bootstrap.css';
 
+import { nextNumber } from '../classes/util';
+
 class NodeDashboard extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.id = 'lua_editor' + nextNumber();
+  }
+
   render() {
     return (
       <div>
@@ -20,6 +33,7 @@ class NodeDashboard extends React.Component {
         </nav>
         <div>
           {this.props.node.name}
+          <AceEditor mode="lua" theme="github" name={this.id} />
         </div>
         <div>
           {this.props.view}

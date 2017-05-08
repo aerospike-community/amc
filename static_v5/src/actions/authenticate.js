@@ -71,6 +71,7 @@ export function authenticate(credentials) {
 }
 
 // fetch with the Authorization header inserted
+// TODO explain our scope of jwt authentication
 function authorizedFetch(jwt, dispatch) {
   return function(url, options = {}) {
     let headers = options.headers || new Headers();

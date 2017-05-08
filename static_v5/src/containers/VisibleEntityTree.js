@@ -10,7 +10,8 @@ const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
   clusters.map((c) => {
     let children = [];
-    if (c.entities) {
+    if (c.isAuthenticated) {
+      // FIXME entities types will change
       c.entities.map((n) => {
         n.name = n.host;
         children.push(n);
