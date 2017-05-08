@@ -8,15 +8,14 @@ export default function entityTree(state = {
   switch (action.type) {
     case ENTITY_NODE_EXPANDED:
       expanded.add(action.node);
-      return Object.assign({}, state, {
-        expanded: expanded,
-      });
+      break;
     case ENTITY_NODE_COLLAPSED:
       expanded.delete(action.node);
-      return Object.assign({}, state, {
-        expanded: expanded
-      });
+      break;
     default:
       return state;
   }
+  return Object.assign({}, state, {
+    expanded: expanded,
+  });
 }

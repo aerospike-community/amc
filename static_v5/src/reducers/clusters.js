@@ -16,6 +16,8 @@ export default function(state = {
       clusterID: '',
       inProgress: false, // in the process of authenticating a connection
       isUpdating: false,
+      hasFailed: false,
+      failureMessage: '',
     },
 
     // all the clusters of the user.
@@ -76,28 +78,24 @@ function newConnection(state, action) {
       newConnection = Object.assign({}, state.newConnection, {
         inProgress: action.display
       });
-      return Object.assign({}, state, {
-        newConnection: newConnection
-      });
+      break;
     case ADD_CLUSTER_CONNECTION:
       newConnection = Object.assign({}, state.newConnection, {
         inProgress: false,
         isUpdating: false,
       });
-      return Object.assign({}, state, {
-        newConnection: newConnection,
-        items: [...state.items, action.connection],
-      });
+      break;
     case ADDING_CLUSTER_CONNECTION:
       newConnection = Object.assign({}, state.newConnection, {
         isUpdating: true,
       });
-      return Object.assign({}, state, {
-        newConnection: newConnection
-      });
+      break;
     default:
       return state;
   }
+  return Object.assign({}, state, {
+    newConnection: newConnection
+  });
 }
 
 function authCluster(state, action) {
@@ -108,24 +106,29 @@ function authCluster(state, action) {
         inProgress: action.display,
         clusterID: action.clusterID
       });
-      return Object.assign({}, state, {
-        authConnection: auth
-      });
+      if (!action.display)
+        auth.hasFailed = false;
+      break;
     case AUTHENTICATED_CLUSTER_CONNECTION:
       auth = Object.assign({}, state.authConnection, {
         inProgress: false,
       });
-      return Object.assign({}, state, {
-        authConnection: auth
-      });
+      break;
     case AUTHENTICATING_CLUSTER_CONNECTION:
       auth = Object.assign({}, state.authConnection, {
         isUpdating: true
       });
-      return Object.assign({}, state, {
-        authConnection: auth
+      break;
+    case CLUSTER_CONNECTION_AUTH_FAILED:
+      auth = Object.assign({}, state.authConnection, {
+        hasFailed: true,
+        failureMessage: action.errorMsg
       });
+      break;
     default:
       return state;
   }
+  return Object.assign({}, state, {
+    authConnection: auth
+  });
 }

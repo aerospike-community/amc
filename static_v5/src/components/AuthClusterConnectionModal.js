@@ -38,7 +38,7 @@ class AuthClusterConnectionModal extends React.Component {
 
   render() {
     const clusterName = this.props.clusterName;
-    const inProgress = this.props.inProgress;
+    const {inProgress, hasFailed, failureMessage} = this.props;
     return (
       <Modal isOpen={true} toggle={() => {
                                        }}>
@@ -58,6 +58,8 @@ class AuthClusterConnectionModal extends React.Component {
         <ModalFooter>
           {inProgress &&
            <span> Creating ... </span>}
+          {!inProgress && hasFailed &&
+           <span className="as-error-text"> {failureMessage} </span>}
           <Button disabled={inProgress} color="primary" onClick={this.onConnect}>Authenticate</Button>
           <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
         </ModalFooter>
@@ -71,6 +73,10 @@ AuthClusterConnectionModal.PropTypes = {
   clusterID: PropTypes.string.required,
   // adding a connection is in progress
   inProgress: PropTypes.bool,
+  // authentication failed
+  hasFailed: PropTypes.bool,
+  // message on failed authentication
+  failureMessage: PropTypes.string,
   // callback to authenticate a connection
   // callback(name, password)
   authenticate: PropTypes.func,

@@ -3,7 +3,7 @@ import { toURLConverter } from './url';
 
 const toURLPath = toURLConverter('auth');
 
-export function authenticate(credentials) {
+export const authenticate = (credentials) => {
   const url = toURLPath('authenticate');
   return fetch(url, {
     method: 'POST',

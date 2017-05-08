@@ -12,16 +12,13 @@ export default function session(state = {
       roles: [],
     },
   }, action) {
-  let auth,
-    user;
+  let {auth, user} = state;
   switch (action.type) {
     case AUTHENTICATE_USER:
       auth = Object.assign({}, state.authentication, {
         inProgress: true
       });
-      return Object.assign({}, state, {
-        authentication: auth
-      });
+      break;
     case USER_AUTHENTICATION_SUCCESS:
       auth = Object.assign({}, state.authentication, {
         inProgress: false,
@@ -31,10 +28,7 @@ export default function session(state = {
         name: action.user,
         roles: action.roles
       };
-      return Object.assign({}, state, {
-        authentication: auth,
-        user: user
-      });
+      break;
     case USER_AUTHENTICATION_FAILURE:
       auth = Object.assign({}, state.authentication, {
         inProgress: false,
@@ -45,10 +39,7 @@ export default function session(state = {
         name: '',
         roles: []
       };
-      return Object.assign({}, state, {
-        authentication: auth,
-        user: user
-      });
+      break;
     case LOGOUT_USER:
       auth = Object.assign({}, state.authentication, {
          inProgress: false,
@@ -58,12 +49,13 @@ export default function session(state = {
         name: '',
         roles: []
       };
-      return Object.assign({}, state, {
-        authentication: auth,
-        user: user
-      });
+      break;
     default:
       return state;
   }
+  return Object.assign({}, state, {
+    authentication: auth,
+    user: user
+  });
 }
 

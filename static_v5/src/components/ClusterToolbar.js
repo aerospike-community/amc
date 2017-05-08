@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.css';
+import '../styles/common.css';
 
 class ClusterToolbar extends React.Component {
   constructor(props) {
@@ -16,9 +17,10 @@ class ClusterToolbar extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="as-toolbar">
+        <div className="float-left"> Clusters </div>
         <div className="float-right" onClick={() => this.onToolClick('addCluster')}> 
-          <i className="fa fa-plus"></i>
+          <button className="btn btn-sm btn-link"> Add </button>
         </div>
         <div className="clearfix"></div>
       </div>

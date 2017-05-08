@@ -7,6 +7,7 @@ import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
 import Header from './Header';
+import Footer from './Footer';
 
 import { fetchClusters } from '../actions/clusters';
 import { init as initAuth } from '../actions/authenticate';
@@ -43,7 +44,7 @@ class App extends React.Component {
             </div>
           </div>
           <div className="row pl-0 pr-0">
-            <div className="col-2 as-leftpane">
+            <div className="col-2 pl-1 pr-1 as-leftpane">
               <VisibleClusterConnections />
             </div>
             <div className="col-10 pl-0 pr-0 as-maincontent">
@@ -53,11 +54,8 @@ class App extends React.Component {
         </div>
         {showLogin &&
          <VisibleAuthenticateModal />}
-        <footer className="as-footer">
-          <div className="container-fluid">
-            Footer
-          </div>
-        </footer>
+
+        <Footer />
       </div>
       );
   }

@@ -10,7 +10,7 @@ export const USER_AUTHENTICATION_FAILURE = 'USER_AUTHENTICATION_FAILURE';
 let fetch = window.fetch;
 const AuthHeader = 'Authorization';
 
-export function init(dispatch) {
+export const init = (dispatch) => {
   const jwt = ls.get('jwt');
   const user = ls.get('user');
   if (jwt) {
@@ -48,12 +48,12 @@ function authSuccess(user, roles = []) {
   };
 }
 
-export function authenticate(credentials) {
-  return function(dispatch) {
+export const authenticate = (credentials) => {
+  return (dispatch) => {
     dispatch(authenticateUser(credentials));
 
     authenticateAPI(credentials)
-      .then(function(response) {
+      .then((response) => {
         if (response.ok) {
           const jwt = response.headers.get(AuthHeader);
           window.fetch = authorizedFetch(jwt, dispatch);
@@ -73,7 +73,7 @@ export function authenticate(credentials) {
 // fetch with the Authorization header inserted
 // TODO explain our scope of jwt authentication
 function authorizedFetch(jwt, dispatch) {
-  return function(url, options = {}) {
+  return (url, options = {}) => {
     let headers = options.headers || new Headers();
 
     if (headers instanceof Headers)
@@ -84,7 +84,7 @@ function authorizedFetch(jwt, dispatch) {
     options.headers = headers;
 
     return fetch(url, options)
-      .then(function(response) {
+      .then((response) => {
         if (response.status === 401) // unauthorized
           dispatch(logout());
 

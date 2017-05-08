@@ -2,6 +2,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
+import classNames from 'classnames';
+
 import { objectPropType, nextNumber } from '../classes/util';
 import Tree from './Tree';
 
@@ -19,6 +21,7 @@ class EntityTree extends React.Component {
     this.onEntitySelect = this.onEntitySelect.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
     this.hideContextMenu = this.hideContextMenu.bind(this);
+    this.onNodeExpand = this.onNodeExpand.bind(this);
   }
 
   // called from the Tree component to render a entity
@@ -34,16 +37,15 @@ class EntityTree extends React.Component {
     }, {
       label: 'Disconnect'
     }];
+    const isDisconnected = this.isDisconnected(entity);
 
     return (
-      <div style={style} onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
+      <div style={style} className={classNames({'as-disconnected': isDisconnected})}
+          onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
         {entity.name}
         {showContextMenu &&
-         <Dropdown isOpen={true} toggle={() => {
-                                         }}>
+         <Dropdown isOpen={true} toggle={() => {}}>
            <DropdownMenu>
-             <DropdownItem header>
-               {entity.name} </DropdownItem>
              {options.map((option) => {
                 return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
                          {option.label}
@@ -72,9 +74,35 @@ class EntityTree extends React.Component {
     });
   }
 
+  isDisconnected(entity) {
+    const clusters = this.props.clusters;
+    const i = clusters.findIndex((c) => c.id === entity.id);
+
+    if (i === -1) // not a cluster entity
+      return false;
+    return !entity.isAuthenticated;
+  }
+
+  showConnect(entity) {
+    this.props.onEntityAction(entity, 'Connect');
+  }
+
+  onNodeExpand(entity) {
+    if (this.isDisconnected(entity)) {
+      this.showConnect(entity);
+      return;
+    }
+
+    this.props.onNodeExpand(entity);
+  }
+
   onEntitySelect(entity) {
     if (this.state.contextMenuEntity !== null) {
       this.hideContextMenu();
+      return;
+    }
+    if (this.isDisconnected(entity)) {
+      this.showConnect(entity);
       return;
     }
 
@@ -93,11 +121,11 @@ class EntityTree extends React.Component {
     }
 
     return (
-      // TODO unique key for each child
       <div>
         {clusters.map(cluster => {
            return (
-             <Tree key={cluster.id} root={cluster} renderNode={this.renderTreeNode} expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.props.onNodeExpand}
+             <Tree key={cluster.id} root={cluster} renderNode={this.renderTreeNode} selectedNode={this.props.selectedEntity}
+                expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.onNodeExpand}
              />
              );
          })}
@@ -109,6 +137,8 @@ class EntityTree extends React.Component {
 EntityTree.PropTypes = {
   // an array of clusters to display
   clusters: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
+  // the selected entity in the tree
+  selectedEntity: PropTypes.object,
   // callback when an entity is selected
   // onEntitySelect(entity)
   onEntitySelect: PropTypes.func,

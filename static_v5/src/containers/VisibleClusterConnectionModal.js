@@ -16,6 +16,8 @@ const mapStateToProps = (state) => {
     clusterName: clusterName,
     clusterID: authConnection.clusterID,
     inProgress: authConnection.isUpdating,
+    hasFailed: authConnection.hasFailed,
+    failureMessage: authConnection.failureMessage,
   };
 }
 

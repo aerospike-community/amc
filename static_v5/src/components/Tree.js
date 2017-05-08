@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { objectPropType, nextNumber } from '../classes/util';
+import classNames from 'classnames';
 
+import { objectPropType, nextNumber } from '../classes/util';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
 
@@ -30,19 +31,25 @@ class Tree extends React.Component {
     const expanded = this.props.expanded.has(node);
     const renderNode = this.props.renderNode;
     const {label, children} = node;
+    const hasChildren = Array.isArray(children) && children.length > 0;
+    const isSelected = this.props.selectedNode === node;
     const style = {
       marginLeft: depth * 10,
       cursor: 'pointer',
     };
     let tree = (
     <div key={label}>
-      <div>
-        <span className={expanded ? 'as-arrow-down' : 'as-arrow-right'} style={style} onClick={() => this.onToggleCollapse(node)} />
+      <div className={classNames({'as-selected': isSelected})}>
+        <span className={classNames({
+                          'as-arrow-down': hasChildren && expanded, 
+                          'as-arrow-right': hasChildren && !expanded,
+                        })}
+              style={style} onClick={() => this.onToggleCollapse(node)} />
         {typeof renderNode === 'function' ? renderNode(node) :
          <span onClick={this.onNodeClick}> {label} </span>}
       </div>
       <div>
-        {expanded && Array.isArray(children) &&
+        {hasChildren && expanded &&
          children.map((node, i) => this.renderTree(node, depth + 1)
          )}
       </div>
@@ -82,6 +89,8 @@ Tree.propTypes = {
   // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 
+  // the selected node
+  selectedNode: PropTypes.object,
   // a set of expanded nodes of the tree
   expanded: PropTypes.instanceOf(Set),
   // the root

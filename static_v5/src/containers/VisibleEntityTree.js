@@ -22,6 +22,7 @@ const mapStateToProps = (state) => {
   return {
     isFetching: state.clusters.isFetching,
     clusters: clusters,
+    selectedEntity: state.clusterEntity.value,
     expanded: state.entityTree.expanded,
   };
 };

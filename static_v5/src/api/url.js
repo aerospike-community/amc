@@ -1,6 +1,6 @@
 const basePath = '/api/v1/';
 
-export function toURLPath(path) {
+export const toURLPath = (path) => {
   path = removeLeadingSlash(path);
   return basePath + path;
 }
@@ -19,11 +19,11 @@ function removeTrailingSlash(path) {
   return path;
 }
 
-export function toURLConverter(api) {
+export const toURLConverter = (api) => {
   api = removeLeadingSlash(api);
   api = removeTrailingSlash(api);
 
-  return function(path) {
+  return (path) => {
     path = removeLeadingSlash(path);
     const url = basePath + api + '/' + path;
     return removeTrailingSlash(url);

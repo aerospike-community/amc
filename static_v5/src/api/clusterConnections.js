@@ -2,14 +2,14 @@ import { toURLConverter } from './url';
 
 const toURLPath = toURLConverter('connections');
 
-export function listConnections() {
+export const listConnections = () => {
   const url = toURLPath('');
   return fetch(url, {
     method: 'GET',
   });
 }
 
-export function addConnection(connection) {
+export const addConnection = (connection) => {
   const url = toURLPath('');
   return fetch(url, {
     method: 'POST',
@@ -20,14 +20,14 @@ export function addConnection(connection) {
   });
 }
 
-export function deleteConnection(id) {
+export const deleteConnection = (id) => {
   const url = toURLPath(id);
   return fetch(url, {
     method: 'DELETE'
   });
 }
 
-export function authConnection(id, name, password) {
+export const authConnection = (id, name, password) => {
   const url = toURLPath(id);
   const credentials = {
     username: name,
