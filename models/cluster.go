@@ -22,6 +22,17 @@ import (
 	"github.com/citrusleaf/amc/mailer"
 )
 
+type EntityType string
+
+const (
+	ETConnection EntityType = "connection"
+	ETNode       EntityType = "node"
+	ETNamespace  EntityType = "namespace"
+	ETSet        EntityType = "set"
+	ETIndex      EntityType = "index"
+	ETModule     EntityType = "module"
+)
+
 type Cluster struct {
 	observer *ObserverT
 	client   common.SyncValue //*as.Client
@@ -1376,33 +1387,43 @@ func (c *Cluster) CurrentRestore() *Restore {
 
 func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResponse, error) {
 	resp := &app.AerospikeAmcConnectionTreeResponse{
-		ID: connId,
+		LastUpdate: int(time.Now().Unix()),
+		EntityType: string(ETConnection),
+		ID:         connId,
 	}
 
 	modules := map[string]*app.AerospikeAmcEntityModuleResponse{}
 	for _, node := range c.Nodes() {
 		nodeResp := &app.AerospikeAmcEntityNodeResponse{
-			Host: node.Address(),
-			ID:   node.Id(),
+			LastUpdate: int(time.Now().Unix()),
+			EntityType: string(ETNode),
+			Host:       node.Address(),
+			ID:         node.Id(),
 		}
 
 		for nsName, ns := range node.Namespaces() {
 			namespaceResp := &app.AerospikeAmcEntityNamespaceResponse{
-				Name: nsName,
+				LastUpdate: int(time.Now().Unix()),
+				EntityType: string(ETNamespace),
+				Name:       nsName,
 			}
 
 			nsIndexes := node.Indexes(nsName)
 			for setName, _ := range ns.SetsInfo() {
 				setResp := &app.AerospikeAmcEntitySetResponse{
-					Name: setName,
+					LastUpdate: int(time.Now().Unix()),
+					EntityType: string(ETSet),
+					Name:       setName,
 				}
 
 				for idxName, idx := range nsIndexes {
 					if idx.TryString("set", "") == setName {
 						indexResp := &app.AerospikeAmcEntityIndexResponse{
-							Name:    idxName,
-							BinName: idx.TryString("bin", ""),
-							Type:    idx.TryString("type", ""),
+							LastUpdate: int(time.Now().Unix()),
+							EntityType: string(ETIndex),
+							Name:       idxName,
+							BinName:    idx.TryString("bin", ""),
+							Type:       idx.TryString("type", ""),
 						}
 						setResp.Indexes = append(setResp.Indexes, indexResp)
 					}
@@ -1417,9 +1438,11 @@ func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResp
 
 		for name, nodeModule := range node.UDFs() {
 			module := &app.AerospikeAmcEntityModuleResponse{
-				Name: name,
-				Hash: nodeModule.TryString("hash", ""),
-				Type: nodeModule.TryString("type", ""),
+				LastUpdate: int(time.Now().Unix()),
+				EntityType: string(ETModule),
+				Name:       name,
+				Hash:       nodeModule.TryString("hash", ""),
+				Type:       nodeModule.TryString("type", ""),
 			}
 			modules[module.Hash] = module
 		}

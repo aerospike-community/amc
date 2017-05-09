@@ -4,42 +4,233 @@ definitions:
   AerospikeAmcConnectionTreeResponse:
     description: User Connection Entity Tree (default view)
     example:
+      entityType: Quo perferendis.
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+      lastUpdate: 2.6068516e+18
       modules:
-      - hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+      - entityType: Ex tenetur magnam delectus aut voluptas.
+        hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+        lastUpdate: 7.6612887e+18
         name: map_reduce.lua
         type: lua
       nodes:
-      - host: 127.0.0.1:3000
+      - entityType: Ab amet.
+        host: 127.0.0.1:3000
         id: BB9EB6C71290C00
+        lastUpdate: 6.6358644e+18
         namespaces:
-        - name: Test
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
           sets:
-          - indexes:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
             - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
               name: idx_test_customers_id
               type: NUMERIC
+            lastUpdate: 4.0808995e+18
             name: Customers
-      - host: 127.0.0.1:3000
-        id: BB9EB6C71290C00
-        namespaces:
-        - name: Test
-          sets:
-          - indexes:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
             - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
               name: idx_test_customers_id
               type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+      - entityType: Ab amet.
+        host: 127.0.0.1:3000
+        id: BB9EB6C71290C00
+        lastUpdate: 6.6358644e+18
+        namespaces:
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
             name: Customers
     properties:
+      entityType:
+        description: Entity Type
+        example: Quo perferendis.
+        type: string
       id:
         description: Connection Id
         example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
         pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         type: string
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 2.6068516e+18
+        format: int64
+        type: integer
       modules:
         description: modules
         example:
-        - hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+        - entityType: Ex tenetur magnam delectus aut voluptas.
+          hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+          lastUpdate: 7.6612887e+18
           name: map_reduce.lua
           type: lua
         items:
@@ -48,31 +239,209 @@ definitions:
       nodes:
         description: Nodes
         example:
-        - host: 127.0.0.1:3000
+        - entityType: Ab amet.
+          host: 127.0.0.1:3000
           id: BB9EB6C71290C00
+          lastUpdate: 6.6358644e+18
           namespaces:
-          - name: Test
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
             sets:
-            - indexes:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
               - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
                 name: idx_test_customers_id
                 type: NUMERIC
+              lastUpdate: 4.0808995e+18
               name: Customers
-        - host: 127.0.0.1:3000
-          id: BB9EB6C71290C00
-          namespaces:
-          - name: Test
-            sets:
-            - indexes:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
               - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
                 name: idx_test_customers_id
                 type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
+            sets:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
+            sets:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+        - entityType: Ab amet.
+          host: 127.0.0.1:3000
+          id: BB9EB6C71290C00
+          lastUpdate: 6.6358644e+18
+          namespaces:
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
+            sets:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
+            sets:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+          - entityType: Voluptatem rerum in autem quaerat magni.
+            lastUpdate: 4.5896422e+18
+            name: Test
+            sets:
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
+              name: Customers
+            - entityType: Enim modi placeat quia sint est praesentium.
+              indexes:
+              - binName: id
+                entityType: Rerum nihil vel quam consequatur ut.
+                lastUpdate: 6.3274783e+18
+                name: idx_test_customers_id
+                type: NUMERIC
+              lastUpdate: 4.0808995e+18
               name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
         type: array
     required:
     - id
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.connection.tree.response+json;
       view=default'
     type: object
@@ -80,6 +449,8 @@ definitions:
     description: Index Entity (default view)
     example:
       binName: id
+      entityType: Rerum nihil vel quam consequatur ut.
+      lastUpdate: 6.3274783e+18
       name: idx_test_customers_id
       type: NUMERIC
     properties:
@@ -87,6 +458,15 @@ definitions:
         description: Bin Name
         example: id
         type: string
+      entityType:
+        description: Type
+        example: Rerum nihil vel quam consequatur ut.
+        type: string
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 6.3274783e+18
+        format: int64
+        type: integer
       name:
         description: Set Name
         example: idx_test_customers_id
@@ -99,20 +479,33 @@ definitions:
     - name
     - binName
     - type
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.index.response+json;
       view=default'
     type: object
   AerospikeAmcEntityModuleResponse:
     description: Module Entity (default view)
     example:
+      entityType: Ex tenetur magnam delectus aut voluptas.
       hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+      lastUpdate: 7.6612887e+18
       name: map_reduce.lua
       type: lua
     properties:
+      entityType:
+        description: Type
+        example: Ex tenetur magnam delectus aut voluptas.
+        type: string
       hash:
         description: Module Hash
         example: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
         type: string
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 7.6612887e+18
+        format: int64
+        type: integer
       name:
         description: Module Name
         example: map_reduce.lua
@@ -125,20 +518,55 @@ definitions:
     - name
     - hash
     - type
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.module.response+json;
       view=default'
     type: object
   AerospikeAmcEntityNamespaceResponse:
     description: Namespace Entity (default view)
     example:
+      entityType: Voluptatem rerum in autem quaerat magni.
+      lastUpdate: 4.5896422e+18
       name: Test
       sets:
-      - indexes:
+      - entityType: Enim modi placeat quia sint est praesentium.
+        indexes:
         - binName: id
+          entityType: Rerum nihil vel quam consequatur ut.
+          lastUpdate: 6.3274783e+18
           name: idx_test_customers_id
           type: NUMERIC
+        lastUpdate: 4.0808995e+18
+        name: Customers
+      - entityType: Enim modi placeat quia sint est praesentium.
+        indexes:
+        - binName: id
+          entityType: Rerum nihil vel quam consequatur ut.
+          lastUpdate: 6.3274783e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        lastUpdate: 4.0808995e+18
+        name: Customers
+      - entityType: Enim modi placeat quia sint est praesentium.
+        indexes:
+        - binName: id
+          entityType: Rerum nihil vel quam consequatur ut.
+          lastUpdate: 6.3274783e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        lastUpdate: 4.0808995e+18
         name: Customers
     properties:
+      entityType:
+        description: Type
+        example: Voluptatem rerum in autem quaerat magni.
+        type: string
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 4.5896422e+18
+        format: int64
+        type: integer
       name:
         description: Namespace Name
         example: Test
@@ -146,33 +574,149 @@ definitions:
       sets:
         description: Namespaces
         example:
-        - indexes:
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
           - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
             name: idx_test_customers_id
             type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
           name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntitySetResponse'
         type: array
     required:
     - name
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.namespace.response+json;
       view=default'
     type: object
   AerospikeAmcEntityNodeResponse:
     description: Node Entity (default view)
     example:
+      entityType: Ab amet.
       host: 127.0.0.1:3000
       id: BB9EB6C71290C00
+      lastUpdate: 6.6358644e+18
       namespaces:
-      - name: Test
+      - entityType: Voluptatem rerum in autem quaerat magni.
+        lastUpdate: 4.5896422e+18
+        name: Test
         sets:
-        - indexes:
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
           - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
             name: idx_test_customers_id
             type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+      - entityType: Voluptatem rerum in autem quaerat magni.
+        lastUpdate: 4.5896422e+18
+        name: Test
+        sets:
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+      - entityType: Voluptatem rerum in autem quaerat magni.
+        lastUpdate: 4.5896422e+18
+        name: Test
+        sets:
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
+          name: Customers
+        - entityType: Enim modi placeat quia sint est praesentium.
+          indexes:
+          - binName: id
+            entityType: Rerum nihil vel quam consequatur ut.
+            lastUpdate: 6.3274783e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.0808995e+18
           name: Customers
     properties:
+      entityType:
+        description: Type
+        example: Ab amet.
+        type: string
       host:
         description: Network Host Address
         example: 127.0.0.1:3000
@@ -181,15 +725,106 @@ definitions:
         description: Node Id
         example: BB9EB6C71290C00
         type: string
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 6.6358644e+18
+        format: int64
+        type: integer
       namespaces:
         description: Namespaces
         example:
-        - name: Test
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
           sets:
-          - indexes:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
             - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
               name: idx_test_customers_id
               type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+        - entityType: Voluptatem rerum in autem quaerat magni.
+          lastUpdate: 4.5896422e+18
+          name: Test
+          sets:
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
+            name: Customers
+          - entityType: Enim modi placeat quia sint est praesentium.
+            indexes:
+            - binName: id
+              entityType: Rerum nihil vel quam consequatur ut.
+              lastUpdate: 6.3274783e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.0808995e+18
             name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
@@ -197,33 +832,52 @@ definitions:
     required:
     - host
     - id
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.node.response+json;
       view=default'
     type: object
   AerospikeAmcEntitySetResponse:
     description: Set Entity (default view)
     example:
+      entityType: Enim modi placeat quia sint est praesentium.
       indexes:
       - binName: id
+        entityType: Rerum nihil vel quam consequatur ut.
+        lastUpdate: 6.3274783e+18
         name: idx_test_customers_id
         type: NUMERIC
+      lastUpdate: 4.0808995e+18
       name: Customers
     properties:
+      entityType:
+        description: Type
+        example: Enim modi placeat quia sint est praesentium.
+        type: string
       indexes:
         description: Indexes
         example:
         - binName: id
+          entityType: Rerum nihil vel quam consequatur ut.
+          lastUpdate: 6.3274783e+18
           name: idx_test_customers_id
           type: NUMERIC
         items:
           $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
         type: array
+      lastUpdate:
+        description: Last Update Of This Entity in Unix Nanoseconds
+        example: 4.0808995e+18
+        format: int64
+        type: integer
       name:
         description: Set Name
         example: Customers
         type: string
     required:
     - name
+    - entityType
+    - lastUpdate
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.set.response+json;
       view=default'
     type: object
@@ -268,7 +922,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Aut voluptas.
+          example: Sunt eum.
           type: string
         type: array
       username:
@@ -406,7 +1060,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Tempora similique.
+          example: Dolore magni ducimus quam eaque ullam.
           type: string
         type: array
       username:

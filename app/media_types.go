@@ -51,8 +51,12 @@ func (mt *AerospikeAmcConnectionQueryResponse) Validate() (err error) {
 //
 // Identifier: application/vnd.aerospike.amc.connection.tree.response+json; view=default
 type AerospikeAmcConnectionTreeResponse struct {
+	// Entity Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Connection Id
 	ID string `form:"id" json:"id" xml:"id"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// modules
 	Modules []*AerospikeAmcEntityModuleResponse `form:"modules,omitempty" json:"modules,omitempty" xml:"modules,omitempty"`
 	// Nodes
@@ -64,6 +68,10 @@ func (mt *AerospikeAmcConnectionTreeResponse) Validate() (err error) {
 	if mt.ID == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
 		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 	}
@@ -90,6 +98,10 @@ func (mt *AerospikeAmcConnectionTreeResponse) Validate() (err error) {
 type AerospikeAmcEntityIndexResponse struct {
 	// Bin Name
 	BinName string `form:"binName" json:"binName" xml:"binName"`
+	// Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Set Name
 	Name string `form:"name" json:"name" xml:"name"`
 	// Index Type
@@ -107,6 +119,10 @@ func (mt *AerospikeAmcEntityIndexResponse) Validate() (err error) {
 	if mt.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	return
 }
 
@@ -114,8 +130,12 @@ func (mt *AerospikeAmcEntityIndexResponse) Validate() (err error) {
 //
 // Identifier: application/vnd.aerospike.amc.entity.module.response+json; view=default
 type AerospikeAmcEntityModuleResponse struct {
+	// Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Module Hash
 	Hash string `form:"hash" json:"hash" xml:"hash"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Module Name
 	Name string `form:"name" json:"name" xml:"name"`
 	// Module Type
@@ -133,6 +153,10 @@ func (mt *AerospikeAmcEntityModuleResponse) Validate() (err error) {
 	if mt.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	return
 }
 
@@ -140,6 +164,10 @@ func (mt *AerospikeAmcEntityModuleResponse) Validate() (err error) {
 //
 // Identifier: application/vnd.aerospike.amc.entity.namespace.response+json; view=default
 type AerospikeAmcEntityNamespaceResponse struct {
+	// Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespace Name
 	Name string `form:"name" json:"name" xml:"name"`
 	// Namespaces
@@ -151,6 +179,10 @@ func (mt *AerospikeAmcEntityNamespaceResponse) Validate() (err error) {
 	if mt.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	for _, e := range mt.Sets {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
@@ -165,10 +197,14 @@ func (mt *AerospikeAmcEntityNamespaceResponse) Validate() (err error) {
 //
 // Identifier: application/vnd.aerospike.amc.entity.node.response+json; view=default
 type AerospikeAmcEntityNodeResponse struct {
+	// Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Network Host Address
 	Host string `form:"host" json:"host" xml:"host"`
 	// Node Id
 	ID string `form:"id" json:"id" xml:"id"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespaces
 	Namespaces []*AerospikeAmcEntityNamespaceResponse `form:"namespaces,omitempty" json:"namespaces,omitempty" xml:"namespaces,omitempty"`
 }
@@ -181,6 +217,10 @@ func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
 	if mt.ID == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	for _, e := range mt.Namespaces {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
@@ -195,8 +235,12 @@ func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
 //
 // Identifier: application/vnd.aerospike.amc.entity.set.response+json; view=default
 type AerospikeAmcEntitySetResponse struct {
+	// Type
+	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Indexes
 	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
+	// Last Update Of This Entity in Unix Nanoseconds
+	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Set Name
 	Name string `form:"name" json:"name" xml:"name"`
 }
@@ -206,6 +250,10 @@ func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
 	if mt.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
 	}
+	if mt.EntityType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
+	}
+
 	for _, e := range mt.Indexes {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
