@@ -1,9 +1,6 @@
-const basePath = '/api/v1/';
+import queryString from 'query-string';
 
-export function toURLPath(path) {
-  path = removeLeadingSlash(path);
-  return basePath + path;
-}
+const basePath = '/api/v1/';
 
 function removeLeadingSlash(path) {
   if (path.startsWith('/'))
@@ -19,14 +16,24 @@ function removeTrailingSlash(path) {
   return path;
 }
 
+// returns a function which converts the api and path to 
+// a complete url
 export function toURLConverter(api) {
   api = removeLeadingSlash(api);
   api = removeTrailingSlash(api);
 
-  return (path) => {
+  // return url for path, queryParams
+  return (path, queryParams = {}) => {
     path = removeLeadingSlash(path);
-    const url = basePath + api + '/' + path;
-    return removeTrailingSlash(url);
+
+    let url = basePath + api + '/' + path;
+    url = removeTrailingSlash(url);
+
+    let qparams = queryString.stringify(queryParams);
+    if (qparams.length > 0)
+      url += '?' + qparams;
+
+    return url;
   }
 }
 

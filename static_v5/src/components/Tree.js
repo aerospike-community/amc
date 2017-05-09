@@ -39,7 +39,7 @@ class Tree extends React.Component {
     };
     let tree = (
     <div key={label}>
-      <div className={classNames({'as-selected': isSelected})}>
+      <div className={classNames('as-tree-list-item', {'as-selected': isSelected})}>
         <span className={classNames({
                           'as-arrow-down': hasChildren && expanded, 
                           'as-arrow-right': hasChildren && !expanded,

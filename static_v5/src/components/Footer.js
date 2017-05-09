@@ -17,10 +17,9 @@ class Footer extends React.Component {
 
   componentDidMount() {
     system()
-      .then((response) => response.json())
-      .then((json) => {
+      .then((response) => {
         this.setState({
-          version: json.version
+          version: response.version
         });
       });
   }

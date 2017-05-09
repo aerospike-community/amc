@@ -37,11 +37,11 @@ export function addClusterConnection(connection) {
 
     addConnectionAPI(connection)
       .then((response) => {
-        if (true || response.OK) { // FIXME
-          dispatch(addConnection(connection));
-          dispatch(fetchClusters());
-        } else {
-        } // TODO
+        dispatch(addConnection(connection));
+        dispatch(fetchClusters());
+      })
+      .catch((response) => {
+        // TODO
       });
   }
 }
@@ -69,11 +69,6 @@ export function fetchClusters() {
     dispatch(requestClusters());
 
     listConnections()
-      .then((response) => {
-        if (response.ok)
-          return response.json();
-        throw new Error('Error in fetching cluster connections');
-      })
       .then((connections) => {
         dispatch(receiveClusters(connections));
       })
@@ -129,22 +124,12 @@ export function disconnectCluster(clusterID) {
 export function authenticateClusterConnection(id, name, password) {
   return (dispatch) => {
     authConnectionAPI(id, name, password)
-      .then((response) => {
-        if (response.ok)
-          return response.json();
-        
-        return new Promise((resolve, reject) => {
-          response.text().then((message) => {
-            reject(message)
-          });
-        });
-      })
       .then((entities) => {
         dispatch(authSuccess(entities));
       })
       .catch((message) => {
-        const msg = message || 'Failed to authenticated';
-        dispatch(authFailed(msg));
+        message = message || 'Failed to authenticated';
+        dispatch(authFailed(message));
       })
   }
 }

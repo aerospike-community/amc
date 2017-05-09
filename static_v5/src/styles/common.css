@@ -8,13 +8,14 @@
 }
 
 .as-leftpane {
-  background-color: #eee;
   border-right: 1px solid lightgray;
-  height: 100%;
 }
 
 .as-toolbar {
   border-bottom: 1px solid darkgray;
+  line-height: 40px;
+  height: 40px;
+  font-size: 18px;
 }
 
 .as-maincontent {
@@ -22,11 +23,16 @@
 }
 
 .as-disconnected {
-  color: #bbb;
+  color: #666;
 }
 
 .as-selected {
   background-color: lightgray;
+}
+
+.as-tree-list-item {
+  height: 30px;
+  line-height: 30px;
 }
 
 .as-arrow-up {
@@ -70,13 +76,14 @@
 }
 
 .as-footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   width: 100%;
   height: 25px;
   font-size: 12px;
   line-height: 30px; 
-  background-color: lavender;
+  background-color: #c20000;
+  color: white;
 }
 
 .as-error-text {

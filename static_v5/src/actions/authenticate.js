@@ -54,18 +54,16 @@ export function authenticate(credentials) {
 
     authenticateAPI(credentials)
       .then((response) => {
-        if (response.ok) {
-          const jwt = response.headers.get(AuthHeader);
-          window.fetch = authorizedFetch(jwt, dispatch);
-          ls.set('jwt', jwt);
+        const jwt = response.headers.get(AuthHeader);
+        window.fetch = authorizedFetch(jwt, dispatch);
+        ls.set('jwt', jwt);
 
-          const user = credentials.user;
-          ls.set('user', user);
-          dispatch(authSuccess(user));
-
-        } else {
+        const user = credentials.user;
+        ls.set('user', user);
+        dispatch(authSuccess(user));
+      })
+      .catch((response) => {
           dispatch(authFailed()); // TODO error message
-        }
       });
   }
 }

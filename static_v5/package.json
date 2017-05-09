@@ -38,6 +38,7 @@
     "karma-webpack": "^2.0.2",
     "local-storage": "^1.4.2",
     "prop-types": "^15.5.8",
+    "query-string": "^4.3.4",
     "react": "^15.5.0",
     "react-ace": "^4.2.1",
     "react-addons-test-utils": "^15.5.0",

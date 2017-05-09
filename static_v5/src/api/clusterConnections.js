@@ -1,30 +1,21 @@
+import { deleteAPI, get, postJSON } from './http';
 import { toURLConverter } from './url';
 
 const toURLPath = toURLConverter('connections');
 
 export function listConnections() {
   const url = toURLPath('');
-  return fetch(url, {
-    method: 'GET',
-  });
+  return get(url);
 }
 
 export function addConnection(connection) {
   const url = toURLPath('');
-  return fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(connection)
-  });
+  return postJSON(url, connection);
 }
 
 export function deleteConnection(id) {
   const url = toURLPath(id);
-  return fetch(url, {
-    method: 'DELETE'
-  });
+  return deleteAPI(url);
 }
 
 export function authConnection(id, name, password) {
@@ -33,12 +24,6 @@ export function authConnection(id, name, password) {
     username: name,
     password: password
   };
-  return fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials)
-  });
+  return postJSON(url, credentials);
 }
 

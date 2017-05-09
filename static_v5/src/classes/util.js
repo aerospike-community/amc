@@ -23,3 +23,12 @@ export const nextNumber = (() => {
   };
 })();
 
+/**
+ * Calculate the distance to bottom of viewport
+ * for the given HTML element
+ */
+export function distanceToBottom(elm) {
+  const rect = elm.getBoundingClientRect();
+  return window.innerHeight - rect.top;
+}
+
