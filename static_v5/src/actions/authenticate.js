@@ -10,7 +10,7 @@ export const USER_AUTHENTICATION_FAILURE = 'USER_AUTHENTICATION_FAILURE';
 let fetch = window.fetch;
 const AuthHeader = 'Authorization';
 
-export const init = (dispatch) => {
+export function init(dispatch) {
   const jwt = ls.get('jwt');
   const user = ls.get('user');
   if (jwt) {
@@ -48,7 +48,7 @@ function authSuccess(user, roles = []) {
   };
 }
 
-export const authenticate = (credentials) => {
+export function authenticate(credentials) {
   return (dispatch) => {
     dispatch(authenticateUser(credentials));
 
@@ -64,14 +64,14 @@ export const authenticate = (credentials) => {
           dispatch(authSuccess(user));
 
         } else {
-          dispatch(authFailed());
+          dispatch(authFailed()); // TODO error message
         }
       });
   }
 }
 
 // fetch with the Authorization header inserted
-// TODO explain our scope of jwt authentication
+// JSON Web Token authentication is used. see https://tools.ietf.org/html/rfc7519
 function authorizedFetch(jwt, dispatch) {
   return (url, options = {}) => {
     let headers = options.headers || new Headers();

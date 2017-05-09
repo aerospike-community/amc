@@ -4,7 +4,7 @@ import { addConnection as addConnectionAPI, authConnection as authConnectionAPI,
 // Adding a Cluster Connection
 
 export const DISPLAY_ADD_CLUSTER_CONNECTION = 'DISPLAY_ADD_CLUSTER_CONNECTION';
-export const displayAddClusterConnection = (display) => {
+export function displayAddClusterConnection(display) {
   return {
     type: DISPLAY_ADD_CLUSTER_CONNECTION,
     display: display,
@@ -26,7 +26,7 @@ function addConnection(connection) {
   };
 }
 
-export const addClusterConnection = (connection) => {
+export function addClusterConnection(connection) {
   const seeds = connection.seeds.map((seed) => {
     seed.port = parseInt(seed.port, 10);
     return seed;
@@ -64,7 +64,7 @@ function receiveClusters(clusters = []) {
   };
 }
 
-export const fetchClusters = () => {
+export function fetchClusters() {
   return (dispatch) => {
     dispatch(requestClusters());
 
@@ -87,7 +87,7 @@ export const fetchClusters = () => {
 // Cluster Connection Authentication
 
 export const DISPLAY_AUTH_CLUSTER_CONNECTION = 'DISPLAY_AUTH_CLUSTER_CONNECTION';
-export const displayAuthClusterConnection = (display, clusterID) => {
+export function displayAuthClusterConnection(display, clusterID) {
   return {
     type: DISPLAY_AUTH_CLUSTER_CONNECTION,
     display: display,
@@ -119,14 +119,14 @@ function authFailed(errorMsg) {
 }
 
 export const DISCONNECT_CLUSTER_CONNECTION = 'DISCONNECT_CLUSTER_CONNECTION';
-export const disconnectCluster = (clusterID) => {
+export function disconnectCluster(clusterID) {
   return {
     type: DISCONNECT_CLUSTER_CONNECTION,
     clusterID: clusterID
   };
 }
 
-export const authenticateClusterConnection = (id, name, password) => {
+export function authenticateClusterConnection(id, name, password) {
   return (dispatch) => {
     authConnectionAPI(id, name, password)
       .then((response) => {
