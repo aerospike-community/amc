@@ -31,4 +31,3 @@ export function distanceToBottom(elm) {
   const rect = elm.getBoundingClientRect();
   return window.innerHeight - rect.top;
 }
-

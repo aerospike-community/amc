@@ -16,8 +16,8 @@ class Tree extends React.Component {
   }
 
   onToggleCollapse(node) {
-    const expanded = this.props.expanded;
-    if (expanded.has(node))
+    const isExpanded = this.props.isExpanded(node);
+    if (isExpanded)
       this.props.onNodeCollapse(node);
     else
       this.props.onNodeExpand(node);
@@ -28,7 +28,7 @@ class Tree extends React.Component {
   }
 
   renderTree(node, depth) {
-    const expanded = this.props.expanded.has(node);
+    const expanded = this.props.isExpanded(node);
     const renderNode = this.props.renderNode;
     const {label, children} = node;
     const hasChildren = Array.isArray(children) && children.length > 0;
@@ -91,8 +91,9 @@ Tree.propTypes = {
 
   // the selected node
   selectedNode: PropTypes.object,
-  // a set of expanded nodes of the tree
-  expanded: PropTypes.instanceOf(Set),
+  // returns true if the node is expaned
+  // isExpanded(treeNode)
+  isExpanded: PropTypes.func,
   // the root
   root: function(props, propName, componentName) {
     let node = props[propName];

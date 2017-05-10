@@ -125,7 +125,7 @@ class EntityTree extends React.Component {
         {clusters.map(cluster => {
            return (
              <Tree key={cluster.id} root={cluster} renderNode={this.renderTreeNode} selectedNode={this.props.selectedEntity}
-                expanded={this.props.expanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.onNodeExpand}
+                isExpanded={this.props.isExpanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.onNodeExpand}
              />
              );
          })}
@@ -146,9 +146,9 @@ EntityTree.PropTypes = {
   // onEntityAction(entity, action)
   onEntityAction: PropTypes.func,
 
-  // state of the entity tree
-  // a set of expanded nodes of the tree
-  expanded: PropTypes.instanceOf(Set),
+  // returns true if the node is expaned
+  // isExpanded(treeNode)
+  isExpanded: PropTypes.func,
   // onNodeExpand(node)
   onNodeExpand: PropTypes.func,
   // onNodeCollapse(node)

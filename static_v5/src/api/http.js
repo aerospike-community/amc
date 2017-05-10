@@ -1,4 +1,4 @@
-export function postJSON(url, data, processResponseAsJSON = true) {
+export function postJSON(url, data, processResponse = true) {
   const f = fetch(url, {
     method: 'POST',
     headers: {
@@ -6,25 +6,25 @@ export function postJSON(url, data, processResponseAsJSON = true) {
     },
     body: JSON.stringify(data)
   })
-  return promise(f, processResponseAsJSON);
+  return promise(f, processResponse);
 }
 
-export function get(url, processResponseAsJSON = true) {
+export function get(url, processResponse = true) {
   const f = fetch(url, {
     method: 'GET',
   })
-  return promise(f, processResponseAsJSON);
+  return promise(f, processResponse);
 }
 
-export function deleteAPI(url, processResponseAsJSON = true) {
+export function deleteAPI(url, processResponse = true) {
   const f = fetch(url, {
     method: 'DELETE'
   });
-  return promise(f, processResponseAsJSON);
+  return promise(f, processResponse);
 }
 
-function promise(p, processResponseAsJSON) {
-  if (processResponseAsJSON)
+function promise(p, processResponse) {
+  if (processResponse)
     return p.then((response) => resolveResponse(response));
   else
     return p;

@@ -56,10 +56,10 @@ function clusters(state, action) {
       });
     case AUTHENTICATED_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
-      return updateItem(state, id, {
-        entities: action.entities.nodes, // TODO all the entities
-        isAuthenticated: true,
+      let update = Object.assign({}, action.cluster, {
+        isAuthenticated: true
       });
+      return updateItem(state, id, update);
     case DISCONNECT_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
       return updateItem(state, id, {

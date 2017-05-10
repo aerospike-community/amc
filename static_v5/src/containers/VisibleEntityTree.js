@@ -4,26 +4,20 @@ import EntityTree from '../components/EntityTree';
 import { clusterEntitySelected, entityViewSelected } from '../actions/clusterEntity';
 import { expandEntityNode, collapseEntityNode } from '../actions/entityTree';
 import { displayAuthClusterConnection, disconnectCluster } from '../actions/clusters';
+import { toPhysicalEntityTree } from '../classes/entityTree';
 
 const mapStateToProps = (state) => {
-  // FIXME is there a better way to do this
   let clusters = state.clusters.items;
-  clusters.map((c) => {
-    let children = [];
-    if (c.isAuthenticated) {
-      // FIXME entities types will change
-      c.entities.map((n) => {
-        n.name = n.host;
-        children.push(n);
-      });
-    }
-    c.children = children;
+  let items = [];
+  clusters.forEach((c) => {
+    const item = toPhysicalEntityTree(c);
+    items.push(item);
   });
   return {
     isFetching: state.clusters.isFetching,
-    clusters: clusters,
+    clusters: items,
     selectedEntity: state.clusterEntity.value,
-    expanded: state.entityTree.expanded,
+    isExpanded: (treeNode) => state.entityTree.expanded.has(treeNode.id)
   };
 };
 

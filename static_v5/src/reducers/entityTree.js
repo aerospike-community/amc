@@ -7,10 +7,10 @@ export default function entityTree(state = {
   const expanded = new Set(state.expanded);
   switch (action.type) {
     case ENTITY_NODE_EXPANDED:
-      expanded.add(action.node);
+      expanded.add(action.node.id);
       break;
     case ENTITY_NODE_COLLAPSED:
-      expanded.delete(action.node);
+      expanded.delete(action.node.id);
       break;
     default:
       return state;

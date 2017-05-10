@@ -98,10 +98,10 @@ function authenticatingConnection() {
 }
 
 export const AUTHENTICATED_CLUSTER_CONNECTION = 'AUTHENTICATED_CLUSTER_CONNECTION';
-function authSuccess(entities) {
+function authSuccess(cluster) {
   return {
     type: AUTHENTICATED_CLUSTER_CONNECTION,
-    entities: entities
+    cluster: cluster
   };
 }
 
@@ -124,8 +124,8 @@ export function disconnectCluster(clusterID) {
 export function authenticateClusterConnection(id, name, password) {
   return (dispatch) => {
     authConnectionAPI(id, name, password)
-      .then((entities) => {
-        dispatch(authSuccess(entities));
+      .then((cluster) => {
+        dispatch(authSuccess(cluster));
       })
       .catch((message) => {
         message = message || 'Failed to authenticated';
