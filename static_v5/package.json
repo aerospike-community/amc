@@ -28,6 +28,7 @@
     "file-loader": "^0.10.1",
     "font-awesome": "^4.7.0",
     "font-awesome-webpack": "0.0.5-beta.2",
+    "history": "^4.6.1",
     "jasmine-core": "^2.5.2",
     "jasmine-enzyme": "^3.0.1",
     "jsdoc": "^3.4.3",
