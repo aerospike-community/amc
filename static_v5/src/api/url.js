@@ -1,20 +1,7 @@
 import queryString from 'query-string';
+import { removeTrailingSlash, removeLeadingSlash } from '../classes/util';
 
 const basePath = '/api/v1/';
-
-function removeLeadingSlash(path) {
-  if (path.startsWith('/'))
-    path = path.slice('/'.length)
-
-  return path;
-}
-
-function removeTrailingSlash(path) {
-  if (path.endsWith('/'))
-    path = path.slice(0, -1 * '/'.length);
-
-  return path;
-}
 
 // returns a function which converts the api and path to 
 // a complete url

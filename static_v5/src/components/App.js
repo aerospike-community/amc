@@ -3,14 +3,14 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 
 import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
-import VisibleEntityTree from '../containers/VisibleEntityTree';
-import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
+import MainDashboard from './MainDashboard';
 import Header from './Header';
 import Footer from './Footer';
 
 import { fetchClusters } from '../actions/clusters';
 import { init as initAuth } from '../actions/authenticate';
+import { init as initURLAndViewSync } from '../classes/urlAndViewSynchronizer';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
@@ -20,17 +20,20 @@ class App extends React.Component {
     super(props);
   }
 
-  componentWillMount() {
-    initAuth(this.props.dispatch);
+  componentDidMount() {
+    const { dispatch } = this.props;
+    initAuth(dispatch);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.authentication.success && nextProps.authentication.success)
+    const { dispatch, currentView, authentication } = this.props;
+    if (!authentication.success && nextProps.authentication.success) {
       this.props.dispatch(fetchClusters());
+      initURLAndViewSync(currentView, dispatch);
+    }
   }
 
   render() {
-    const leftPane = <VisibleEntityTree />;
     const main = <h3> Main Content </h3>;
     // FIXME this should not be here
     const showLogin = !this.props.authentication.success;
@@ -43,14 +46,15 @@ class App extends React.Component {
               <Header />
             </div>
           </div>
+          {!showLogin && 
           <div className="row pl-0 pr-0">
             <div className="col-2 pl-1 pr-1 as-leftpane">
               <VisibleClusterConnections />
             </div>
             <div className="col-10 pl-0 pr-0 as-maincontent">
-              <VisibleMainDashboard />
+              <MainDashboard />
             </div>
-          </div>
+          </div>}
         </div>
         {showLogin &&
          <VisibleAuthenticateModal />}
@@ -61,9 +65,10 @@ class App extends React.Component {
   }
 }
 
-App = connect(function(state) {
+App = connect((state) => {
   return {
-    authentication: state.session.authentication
+    authentication: state.session.authentication,
+    currentView: state.currentView,
   };
 })(App);
 

@@ -32,7 +32,7 @@ class Tree extends React.Component {
     const renderNode = this.props.renderNode;
     const {label, children} = node;
     const hasChildren = Array.isArray(children) && children.length > 0;
-    const isSelected = this.props.selectedNode === node;
+    const isSelected = this.props.isNodeSelected(node);
     const style = {
       marginLeft: depth * 10,
       cursor: 'pointer',
@@ -89,8 +89,8 @@ Tree.propTypes = {
   // can customise how the node looks in the tree
   renderNode: PropTypes.func,
 
-  // the selected node
-  selectedNode: PropTypes.object,
+  // return true if the node is selected
+  isNodeSelected: PropTypes.func,
   // returns true if the node is expaned
   // isExpanded(treeNode)
   isExpanded: PropTypes.func,

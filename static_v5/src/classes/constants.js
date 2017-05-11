@@ -1,7 +1,25 @@
 // type of cluster entities
-export const CLUSTER_ENTITY_TYPE = {
+export const ENTITY_TYPE = {
   CLUSTER: 'CLUSTER',
   NODE: 'NODE',
   NAMESPACE: 'NAMESPACE',
-  UNDEFINED: 'UNDEFINED'
+  UDF: 'UDF',
 };
+
+// type of the entity view types
+export const VIEW_TYPE = {
+  CLUSTER: 'CLUSTER',
+  NODE: 'NODE',
+  NAMESPACE: 'NAMESPACE',
+  SET: 'SET',
+  UDF: 'UDF',
+  NODE_OVERVIEW: 'NODE_OVERVIEW',
+  NAMESPACE_OVERVIEW: 'NAMESPACE_OVERVIEW',
+  SET_OVERVIEW: 'SET_OVERVIEW',
+  UDF_OVERVIEW: 'UDF_OVERVIEW',
+
+  START_VIEW: 'START_VIEW',
+};
+
+
+

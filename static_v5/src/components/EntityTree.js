@@ -76,7 +76,7 @@ class EntityTree extends React.Component {
 
   isDisconnected(entity) {
     const clusters = this.props.clusters;
-    const i = clusters.findIndex((c) => c.id === entity.id);
+    const i = clusters.findIndex((c) => c.path === entity.path);
 
     if (i === -1) // not a cluster entity
       return false;
@@ -124,7 +124,8 @@ class EntityTree extends React.Component {
       <div>
         {clusters.map(cluster => {
            return (
-             <Tree key={cluster.id} root={cluster} renderNode={this.renderTreeNode} selectedNode={this.props.selectedEntity}
+             <Tree key={cluster.path} root={cluster} renderNode={this.renderTreeNode} 
+                isNodeSelected={(entity) => this.props.selectedEntityPath === entity.path}
                 isExpanded={this.props.isExpanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.onNodeExpand}
              />
              );
@@ -138,7 +139,7 @@ EntityTree.PropTypes = {
   // an array of clusters to display
   clusters: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
   // the selected entity in the tree
-  selectedEntity: PropTypes.object,
+  selectedEntityPath: PropTypes.string,
   // callback when an entity is selected
   // onEntitySelect(entity)
   onEntitySelect: PropTypes.func,
