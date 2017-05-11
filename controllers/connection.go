@@ -25,7 +25,7 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 	// ConnectionController_Connect: start_implement
 
 	sessionId := ctx.Value("sessionId").(string)
-	cluster, err := GetConnectionCluster(sessionId, ctx.ID, ctx.Payload.Username, ctx.Payload.Password)
+	cluster, err := GetConnectionCluster(sessionId, ctx.ConnID, ctx.Payload.Username, ctx.Payload.Password)
 	if err != nil {
 		if common.AMCIsEnterprise() {
 			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
@@ -36,7 +36,7 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 		return ctx.BadRequest(err.Error())
 	}
 
-	et, err := cluster.EntityTree(ctx.ID)
+	et, err := cluster.EntityTree(ctx.ConnID)
 	if err != nil {
 		return ctx.BadRequest(err.Error())
 	}
@@ -49,7 +49,7 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 	// ConnectionController_Delete: start_implement
 
-	conn := models.Connection{Id: ctx.ID}
+	conn := models.Connection{Id: ctx.ConnID}
 	if err := conn.Delete(); err != nil {
 		return ctx.InternalServerError()
 	}
@@ -90,4 +90,15 @@ func (c *ConnectionController) Save(ctx *app.SaveConnectionContext) error {
 
 	// ConnectionController_Save: end_implement
 	return ctx.NoContent()
+}
+
+// Show runs the show action.
+func (c *ConnectionController) Show(ctx *app.ShowConnectionContext) error {
+	// ConnectionController_Show: start_implement
+
+	// Put your logic here
+
+	// ConnectionController_Show: end_implement
+	res := &app.AerospikeAmcConnectionQueryResponse{}
+	return ctx.OK(res)
 }

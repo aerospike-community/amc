@@ -76,8 +76,8 @@ func toConnection(ctx *app.SaveConnectionContext) *models.Connection {
 		conn.Seeds = strings.Join(seeds, "\n")
 	}
 
-	if ctx.Payload.ID != nil {
-		conn.Id = *ctx.Payload.ID
+	if ctx.Payload.ConnID != nil {
+		conn.Id = *ctx.Payload.ConnID
 	}
 
 	return conn

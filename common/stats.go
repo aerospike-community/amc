@@ -154,6 +154,17 @@ func (s Info) TryString(name string, defValue string, aliases ...string) string 
 	return defValue
 }
 
+// Value should be a string; otherwise defValue is returned
+// this function never panics
+func (s Info) TryStringP(name string, defValue string, aliases ...string) *string {
+	field := s.Get(name, aliases...)
+	if field != nil {
+		s := field.(string)
+		return &s
+	}
+	return &defValue
+}
+
 // Value should be an float64, int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Info) TryNumericValue(name string, defVal interface{}, aliases ...string) interface{} {
@@ -455,6 +466,17 @@ func (s Stats) TryString(name string, defValue string, aliases ...string) string
 	return defValue
 }
 
+// Value should be an int64 or a convertible string; otherwise defValue is returned
+// this function never panics
+func (s Stats) TryStringP(name string, defValue string, aliases ...string) *string {
+	field := s.Get(name, aliases...)
+	if field != nil {
+		s := field.(string)
+		return &s
+	}
+	return &defValue
+}
+
 /**********************************************************************
 
 					Type SyncInfo
@@ -543,6 +565,15 @@ func (s *SyncInfo) TryString(name string, defValue string, aliases ...string) st
 	defer s.mutex.RUnlock()
 
 	return s._Info.TryString(name, defValue, aliases...)
+}
+
+// Value should be a string; otherwise defValue is returned
+// this function never panics
+func (s *SyncInfo) TryStringP(name string, defValue string, aliases ...string) *string {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Info.TryStringP(name, defValue, aliases...)
 }
 
 // Value should be an float64, int64 or a convertible string; otherwise defValue is returned
@@ -693,6 +724,15 @@ func (s *SyncStats) TryString(name string, defValue string, aliases ...string) s
 	defer s.mutex.RUnlock()
 
 	return s._Stats.TryString(name, defValue, aliases...)
+}
+
+// Value should be a string; otherwise defValue is returned
+// this function never panics
+func (s *SyncStats) TryStringP(name string, defValue string, aliases ...string) *string {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s._Stats.TryStringP(name, defValue, aliases...)
 }
 
 // Value should be an float64 or a convertible string

@@ -3,8 +3,10 @@ package models
 import (
 	"fmt"
 	// "strconv"
+	"encoding/base64"
 	"errors"
 	"html/template"
+	"math/rand"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -367,12 +369,29 @@ func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error
 	return client.RevokePrivileges(nil, role, privileges)
 }
 
-func (c *Cluster) CreateUDF(name, body string) error {
+func (c *Cluster) GetUDF(name string) (common.Info, error) {
+	cmd := "udf-get:filename=" + name
+	cmdRes, err := c.RequestInfo(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	res := cmdRes.ToInfo(cmd)
+	content, err := base64.StdEncoding.DecodeString(res.TryString("content", ""))
+	if err != nil {
+		return nil, err
+	}
+
+	res["content"] = string(content)
+	return res, nil
+}
+
+func (c *Cluster) CreateUDF(name, body string, lang as.Language) error {
 	client := c.origClient()
 	if client == nil {
 		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
 	}
-	_, err := client.RegisterUDF(nil, []byte(body), name, as.LUA)
+	_, err := client.RegisterUDF(nil, []byte(body), name, lang)
 	return err
 }
 
@@ -710,6 +729,16 @@ func (c *Cluster) updateUsers() error {
 	c.roles.Set(roles)
 
 	return nil
+}
+
+func (c *Cluster) RequestInfo(cmd string) (common.Info, error) {
+	nodes := c.Nodes()
+	if len(nodes) == 0 {
+		return nil, errors.New("No nodes found.")
+	}
+
+	node := nodes[rand.Intn(len(nodes))]
+	return node.RequestInfo(1, cmd)
 }
 
 func (c *Cluster) RequestInfoAll(cmd string) (map[*Node]string, error) {

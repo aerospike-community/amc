@@ -13,15 +13,31 @@ var _ = Resource("connection", func() {
 		Scope("api:general")
 	})
 
-	Action("connect", func() {
-		Description("Connect to the cluster and return the entity tree")
-		Routing(POST(":id"))
+	Action("show", func() {
+		Description("Get the user connection")
+		Routing(GET(":connId"))
 		Params(func() {
-			Param("id", String, "Connection Id", func() {
+			Param("connId", String, "Connection Id", func() {
 				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
 				Pattern(uuidv4Regex)
 			})
-			Required("id")
+			Required("connId")
+		})
+
+		Response(OK, UserConnectionsResponseMedia)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("connect", func() {
+		Description("Connect to the cluster and return the entity tree")
+		Routing(POST(":connId"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("connId")
 		})
 
 		Payload(func() {
@@ -55,7 +71,7 @@ var _ = Resource("connection", func() {
 		})
 
 		Payload(func() {
-			Member("id", String, "Connection Id", func() {
+			Member("connId", String, "Connection Id", func() {
 				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
 				Pattern(uuidv4Regex)
 			})
@@ -72,13 +88,13 @@ var _ = Resource("connection", func() {
 
 	Action("delete", func() {
 		Description("Delete a connection")
-		Routing(DELETE(":id"))
+		Routing(DELETE(":connId"))
 		Params(func() {
-			Param("id", String, "Connection Id", func() {
+			Param("connId", String, "Connection Id", func() {
 				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
 				Pattern(uuidv4Regex)
 			})
-			Required("id")
+			Required("connId")
 		})
 
 		Response(NoContent)

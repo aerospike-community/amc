@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"net"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	asl "github.com/aerospike/aerospike-client-go/logger"
+	"github.com/dustin/go-humanize"
 	// "github.com/sasha-s/go-deadlock"
 
 	"github.com/citrusleaf/amc/common"
@@ -125,16 +127,22 @@ func (o *ObserverT) observe(config *common.Config) {
 	// update as soon as initiated once
 	o.updateClusters()
 
+	updateTicker := time.NewTicker(time.Second)
+	systemTicker := time.NewTicker(time.Second * 5)
+
 	for {
 		select {
 
-		case <-time.After(time.Second):
+		case <-updateTicker.C:
 			if o.debugExpired() {
 				o.StopDebug()
 			}
 
 			o.removeIdleClusters()
 			o.updateClusters()
+
+		case <-systemTicker.C:
+			o.logSystemParams()
 
 		case <-o.notifyCloseChan:
 			clusters := o.Clusters()
@@ -146,6 +154,19 @@ func (o *ObserverT) observe(config *common.Config) {
 			return
 		}
 	}
+}
+
+var lastPauseNs uint64
+
+func (o *ObserverT) logSystemParams() {
+	// GC stats
+	var memStats = new(runtime.MemStats)
+	runtime.ReadMemStats(memStats)
+	log.Infof("Total allocated memory: %s", humanize.Bytes(memStats.HeapAlloc))
+	log.Infof("Total GC Time: %s", time.Duration(memStats.PauseTotalNs-lastPauseNs))
+
+	// GC
+	lastPauseNs = memStats.PauseTotalNs
 }
 
 func (o *ObserverT) sessionClusters(sessionId string) []*Cluster {

@@ -146,7 +146,7 @@ type ConnectConnectionContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ID      string
+	ConnID  string
 	Payload *ConnectConnectionPayload
 }
 
@@ -159,12 +159,12 @@ func NewConnectConnectionContext(ctx context.Context, r *http.Request, service *
 	req := goa.ContextRequest(ctx)
 	req.Request = r
 	rctx := ConnectConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
-	paramID := req.Params["id"]
-	if len(paramID) > 0 {
-		rawID := paramID[0]
-		rctx.ID = rawID
-		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ID); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`id`, rctx.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
 	return &rctx, err
@@ -255,7 +255,7 @@ type DeleteConnectionContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ID string
+	ConnID string
 }
 
 // NewDeleteConnectionContext parses the incoming request URL and body, performs validations and creates the
@@ -267,12 +267,12 @@ func NewDeleteConnectionContext(ctx context.Context, r *http.Request, service *g
 	req := goa.ContextRequest(ctx)
 	req.Request = r
 	rctx := DeleteConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
-	paramID := req.Params["id"]
-	if len(paramID) > 0 {
-		rawID := paramID[0]
-		rctx.ID = rawID
-		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ID); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`id`, rctx.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
 	return &rctx, err
@@ -362,7 +362,7 @@ func NewSaveConnectionContext(ctx context.Context, r *http.Request, service *goa
 // saveConnectionPayload is the connection save action payload.
 type saveConnectionPayload struct {
 	// Connection Id
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	ConnID *string `form:"connId,omitempty" json:"connId,omitempty" xml:"connId,omitempty"`
 	// Connection Name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Seeds
@@ -377,9 +377,9 @@ func (payload *saveConnectionPayload) Validate() (err error) {
 	if payload.Seeds == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "seeds"))
 	}
-	if payload.ID != nil {
-		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ID); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.id`, *payload.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	if payload.ConnID != nil {
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.connId`, *payload.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
 	for _, e := range payload.Seeds {
@@ -395,8 +395,8 @@ func (payload *saveConnectionPayload) Validate() (err error) {
 // Publicize creates SaveConnectionPayload from saveConnectionPayload
 func (payload *saveConnectionPayload) Publicize() *SaveConnectionPayload {
 	var pub SaveConnectionPayload
-	if payload.ID != nil {
-		pub.ID = payload.ID
+	if payload.ConnID != nil {
+		pub.ConnID = payload.ConnID
 	}
 	if payload.Name != nil {
 		pub.Name = *payload.Name
@@ -413,7 +413,7 @@ func (payload *saveConnectionPayload) Publicize() *SaveConnectionPayload {
 // SaveConnectionPayload is the connection save action payload.
 type SaveConnectionPayload struct {
 	// Connection Id
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	ConnID *string `form:"connId,omitempty" json:"connId,omitempty" xml:"connId,omitempty"`
 	// Connection Name
 	Name string `form:"name" json:"name" xml:"name"`
 	// Seeds
@@ -428,9 +428,9 @@ func (payload *SaveConnectionPayload) Validate() (err error) {
 	if payload.Seeds == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "seeds"))
 	}
-	if payload.ID != nil {
-		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ID); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.id`, *payload.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	if payload.ConnID != nil {
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *payload.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.connId`, *payload.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
 	for _, e := range payload.Seeds {
@@ -463,6 +463,356 @@ func (ctx *SaveConnectionContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *SaveConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowConnectionContext provides the connection show action context.
+type ShowConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewShowConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller show action.
+func NewShowConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowConnectionContext) OK(r *AerospikeAmcConnectionQueryResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.query.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// DropModuleContext provides the module drop action context.
+type DropModuleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Name   string
+}
+
+// NewDropModuleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the module controller drop action.
+func NewDropModuleContext(ctx context.Context, r *http.Request, service *goa.Service) (*DropModuleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DropModuleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramName := req.Params["name"]
+	if len(paramName) > 0 {
+		rawName := paramName[0]
+		rctx.Name = rawName
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DropModuleContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DropModuleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DropModuleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DropModuleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryModuleContext provides the module query action context.
+type QueryModuleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewQueryModuleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the module controller query action.
+func NewQueryModuleContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryModuleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryModuleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryModuleContext) OK(r []*AerospikeAmcConnectionModulesResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryModuleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryModuleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *QueryModuleContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryModuleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SaveModuleContext provides the module save action context.
+type SaveModuleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *SaveModulePayload
+}
+
+// NewSaveModuleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the module controller save action.
+func NewSaveModuleContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveModuleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SaveModuleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// saveModulePayload is the module save action payload.
+type saveModulePayload struct {
+	// Module's Source Code
+	Content *string `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
+	// Module's Name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Module's type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *saveModulePayload) Validate() (err error) {
+	if payload.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Content == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "content"))
+	}
+	if payload.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+	if payload.Type != nil {
+		if ok := goa.ValidatePattern(`lua`, *payload.Type); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, *payload.Type, `lua`))
+		}
+	}
+	return
+}
+
+// Publicize creates SaveModulePayload from saveModulePayload
+func (payload *saveModulePayload) Publicize() *SaveModulePayload {
+	var pub SaveModulePayload
+	if payload.Content != nil {
+		pub.Content = *payload.Content
+	}
+	if payload.Name != nil {
+		pub.Name = *payload.Name
+	}
+	if payload.Type != nil {
+		pub.Type = *payload.Type
+	}
+	return &pub
+}
+
+// SaveModulePayload is the module save action payload.
+type SaveModulePayload struct {
+	// Module's Source Code
+	Content string `form:"content" json:"content" xml:"content"`
+	// Module's Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Module's type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SaveModulePayload) Validate() (err error) {
+	if payload.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Content == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "content"))
+	}
+	if payload.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+	if ok := goa.ValidatePattern(`lua`, payload.Type); !ok {
+		err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, payload.Type, `lua`))
+	}
+	return
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *SaveModuleContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SaveModuleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SaveModuleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *SaveModuleContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SaveModuleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowModuleContext provides the module show action context.
+type ShowModuleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Name   string
+}
+
+// NewShowModuleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the module controller show action.
+func NewShowModuleContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowModuleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowModuleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramName := req.Params["name"]
+	if len(paramName) > 0 {
+		rawName := paramName[0]
+		rctx.Name = rawName
+	}
+	return &rctx, err
+}
+
+// OKFull sends a HTTP response with status code 200.
+func (ctx *ShowModuleContext) OKFull(r *AerospikeAmcConnectionModulesResponseFull) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.modules.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowModuleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowModuleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowModuleContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

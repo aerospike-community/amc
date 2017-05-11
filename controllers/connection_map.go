@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"crypto/tls"
+	"errors"
 	"sync"
 
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/models"
 )
+
+var ErrClusterNotFound = errors.New("Cluster Not Found.")
 
 type connectionMap struct {
 	conns map[string]*models.Cluster
@@ -70,4 +73,19 @@ func GetConnectionCluster(sessionId, connId string, dbUsername, dbPassword strin
 	}
 	connections.conns[connId] = cluster
 	return cluster, nil
+}
+
+func GetConnectionClusterById(connId string) (*models.Cluster, error) {
+	connections.m.Lock()
+	defer connections.m.Unlock()
+
+	if c := connections.conns[connId]; c != nil {
+		if c.IsSet() {
+			return c, nil
+		}
+		// the cluster existed, but is not active anymore
+		delete(connections.conns, connId)
+	}
+
+	return nil, ErrClusterNotFound
 }

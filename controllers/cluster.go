@@ -440,7 +440,7 @@ func postClusterAddUDF(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 
-	if err := cluster.CreateUDF(form.FileName, form.FileContents); err != nil {
+	if err := cluster.CreateUDF(form.FileName, form.FileContents, as.LUA); err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 

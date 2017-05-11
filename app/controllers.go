@@ -168,13 +168,14 @@ type ConnectionController interface {
 	Delete(*DeleteConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
+	Show(*ShowConnectionContext) error
 }
 
 // MountConnectionController "mounts" a Connection resource controller on the given service.
 func MountConnectionController(service *goa.Service, ctrl ConnectionController) {
 	initService(service)
 	var h goa.Handler
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:id", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
@@ -197,8 +198,8 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleConnectionOrigin(h)
-	service.Mux.Handle("POST", "/api/v1/connections/:id", ctrl.MuxHandler("connect", h, unmarshalConnectConnectionPayload))
-	service.LogInfo("mount", "ctrl", "Connection", "action", "Connect", "route", "POST /api/v1/connections/:id", "security", "jwt")
+	service.Mux.Handle("POST", "/api/v1/connections/:connId", ctrl.MuxHandler("connect", h, unmarshalConnectConnectionPayload))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Connect", "route", "POST /api/v1/connections/:connId", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -214,8 +215,8 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleConnectionOrigin(h)
-	service.Mux.Handle("DELETE", "/api/v1/connections/:id", ctrl.MuxHandler("delete", h, nil))
-	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:id", "security", "jwt")
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId", ctrl.MuxHandler("delete", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:connId", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -256,6 +257,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("POST", "/api/v1/connections", ctrl.MuxHandler("save", h, unmarshalSaveConnectionPayload))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Save", "route", "POST /api/v1/connections", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Show", "route", "GET /api/v1/connections/:connId", "security", "jwt")
 }
 
 // handleConnectionOrigin applies the CORS response headers corresponding to the origin.
@@ -303,6 +321,139 @@ func unmarshalConnectConnectionPayload(ctx context.Context, service *goa.Service
 // unmarshalSaveConnectionPayload unmarshals the request body into the context request data Payload field.
 func unmarshalSaveConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &saveConnectionPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// ModuleController is the controller interface for the Module actions.
+type ModuleController interface {
+	goa.Muxer
+	Drop(*DropModuleContext) error
+	Query(*QueryModuleContext) error
+	Save(*SaveModuleContext) error
+	Show(*ShowModuleContext) error
+}
+
+// MountModuleController "mounts" a Module resource controller on the given service.
+func MountModuleController(service *goa.Service, ctrl ModuleController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/modules/:name", ctrl.MuxHandler("preflight", handleModuleOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/modules", ctrl.MuxHandler("preflight", handleModuleOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewDropModuleContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Drop(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleModuleOrigin(h)
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/modules/:name", ctrl.MuxHandler("drop", h, nil))
+	service.LogInfo("mount", "ctrl", "Module", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/modules/:name", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQueryModuleContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleModuleOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/modules", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Module", "action", "Query", "route", "GET /api/v1/connections/:connId/modules", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSaveModuleContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*SaveModulePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Save(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleModuleOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/modules", ctrl.MuxHandler("save", h, unmarshalSaveModulePayload))
+	service.LogInfo("mount", "ctrl", "Module", "action", "Save", "route", "POST /api/v1/connections/:connId/modules", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowModuleContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleModuleOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/modules/:name", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Module", "action", "Show", "route", "GET /api/v1/connections/:connId/modules/:name", "security", "jwt")
+}
+
+// handleModuleOrigin applies the CORS response headers corresponding to the origin.
+func handleModuleOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// unmarshalSaveModulePayload unmarshals the request body into the context request data Payload field.
+func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &saveModulePayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}

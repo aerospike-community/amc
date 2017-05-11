@@ -14,6 +14,36 @@ import (
 	"github.com/goadesign/goa"
 )
 
+// Cluster Modules (default view)
+//
+// Identifier: application/vnd.aerospike.amc.connection.modules.response+json; view=default
+type AerospikeAmcConnectionModulesResponse struct {
+	// Module's Hash
+	Hash *string `form:"hash,omitempty" json:"hash,omitempty" xml:"hash,omitempty"`
+	// Module's Name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Nodes from which the module is absent
+	NodesAbsent []string `form:"nodesAbsent,omitempty" json:"nodesAbsent,omitempty" xml:"nodesAbsent,omitempty"`
+	// Nodes in which the module is present
+	NodesPresent []string `form:"nodesPresent,omitempty" json:"nodesPresent,omitempty" xml:"nodesPresent,omitempty"`
+	// Is Module present in all nodes?
+	Synced *bool `form:"synced,omitempty" json:"synced,omitempty" xml:"synced,omitempty"`
+	// Module's Source Type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
+// Cluster Modules (full view)
+//
+// Identifier: application/vnd.aerospike.amc.connection.modules.response+json; view=full
+type AerospikeAmcConnectionModulesResponseFull struct {
+	// Module's Name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Module's Source Code
+	Source *string `form:"source,omitempty" json:"source,omitempty" xml:"source,omitempty"`
+	// Module's Source Type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
 // User Connection (default view)
 //
 // Identifier: application/vnd.aerospike.amc.connection.query.response+json; view=default
@@ -55,7 +85,7 @@ type AerospikeAmcConnectionTreeResponse struct {
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Connection Id
 	ID string `form:"id" json:"id" xml:"id"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// modules
 	Modules []*AerospikeAmcEntityModuleResponse `form:"modules,omitempty" json:"modules,omitempty" xml:"modules,omitempty"`
@@ -100,7 +130,7 @@ type AerospikeAmcEntityIndexResponse struct {
 	BinName string `form:"binName" json:"binName" xml:"binName"`
 	// Type
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Set Name
 	Name string `form:"name" json:"name" xml:"name"`
@@ -134,7 +164,7 @@ type AerospikeAmcEntityModuleResponse struct {
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Module Hash
 	Hash string `form:"hash" json:"hash" xml:"hash"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Module Name
 	Name string `form:"name" json:"name" xml:"name"`
@@ -166,7 +196,7 @@ func (mt *AerospikeAmcEntityModuleResponse) Validate() (err error) {
 type AerospikeAmcEntityNamespaceResponse struct {
 	// Type
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespace Name
 	Name string `form:"name" json:"name" xml:"name"`
@@ -203,7 +233,7 @@ type AerospikeAmcEntityNodeResponse struct {
 	Host string `form:"host" json:"host" xml:"host"`
 	// Node Id
 	ID string `form:"id" json:"id" xml:"id"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespaces
 	Namespaces []*AerospikeAmcEntityNamespaceResponse `form:"namespaces,omitempty" json:"namespaces,omitempty" xml:"namespaces,omitempty"`
@@ -239,7 +269,7 @@ type AerospikeAmcEntitySetResponse struct {
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Indexes
 	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
-	// Last Update Of This Entity in Unix Nanoseconds
+	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Set Name
 	Name string `form:"name" json:"name" xml:"name"`

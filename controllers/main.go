@@ -269,11 +269,13 @@ func GoaServer(config *common.Config) {
 
 	// Mount "amc" controller
 	app.MountAmcController(service, NewAmcController(service))
-	app.MountUserController(service, NewUserController(service))
-	// app.MountClusterController(service, NewClusterController(service))
-	app.MountConnectionController(service, NewConnectionController(service))
 	app.MountSwaggerController(service, NewSwaggerController(service))
 	app.MountPublicController(service, NewPublicController(service))
+
+	app.MountUserController(service, NewUserController(service))
+	app.MountConnectionController(service, NewConnectionController(service))
+	app.MountModuleController(service, NewModuleController(service))
+	// app.MountClusterController(service, NewClusterController(service))
 
 	if config.AMC.StaticPath == "" {
 		log.Fatalln("No static dir has been set in the config file. Quiting...")
