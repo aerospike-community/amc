@@ -25,8 +25,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEntitySelect: (entity) => {
-      dispatch(selectPath(entity.path));
+    onEntitySelect: (entity, view = 'default') => {
+      dispatch(selectPath(entity.path, view));
     },
 
     onEntityAction: (entity, action) => {

@@ -46,19 +46,17 @@ export function removeTrailingSlash(path) {
   return path;
 }
 
-// // extract text till next separator
-// function extractToken(text, sep = '/') {
-//   let i = text.indexOf(sep);
-//   if (i === -1)
-//     return text;
-//   return text.slice(0, i);
-// }
+// returns s + '/' + t with no duplicated forward slashes
+function joinURL(s, t) {
+  if (s.length === 0 && t.length === 0)
+    return '';
+  else if (s.length === 0)
+    return t;
+  else if (t.length === 0)
+    return s;
 
-// // return next token to be processed from the string
-// function nextToken(text, sep = '/') {
-//   let i = text.indexOf(sep);
-//   if (i === -1)
-//     return '';
-//   return text.slice(i + 1); // remove separator
-// }
-
+  // also takes care of the case when s === '/'
+  s = removeTrailingSlash(s);
+  t = removeLeadingSlash(t);
+  return s + '/' + t;
+}

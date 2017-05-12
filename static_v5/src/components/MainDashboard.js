@@ -19,8 +19,7 @@ class MainDashboard extends React.Component {
 
     return (
       <div>
-        {currentView.viewType} {currentView.clusterID} {currentView.nodeHost}
-        {currentView.namespaceName} {currentView.setName} {currentView.udfName}
+        {currentView.viewType} {currentView.selectedEntityPath} {currentView.view}
       </div>
       );
   }

@@ -1,4 +1,4 @@
-import { extractEntityInfo } from '../classes/entityTree';
+import { matchAndExtractVariables } from '../classes/urlAndViewSynchronizer';
 
 export const INITIALIZE_VIEW = 'INITIALIZE_VIEW';
 export function initView() {
@@ -59,9 +59,8 @@ export function selectStartView() {
   };
 }
 
-export function selectPath(entityPath) {
-  const entity = extractEntityInfo(entityPath);
-  const view = entity.view;
+export function selectPath(entityPath, view) {
+  const entity = matchAndExtractVariables(entityPath, 'entityPath');
 
   if (entity.udfName)
     return selectUDF(entityPath, view);

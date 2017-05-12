@@ -1,96 +1,16 @@
 import { VIEW_TYPE } from './constants';
 
-// Each entity is uniquely identified by the path from its
-// cluster.
+// Each entity is uniquely identified by the path from its cluster.
 // 'path' is defined by the entities it encounters on its traversal 
 // from the cluster root.
 //
-// Example: clusterID/NODES/nodeHost/namespaces/namespaceName
+// Example: clusterID/NODES/nodeHost/NAMESPACES/namespaceName
 
-
-const UDF = 'UDF';
-const NODES = 'NODES';
-const NAMESPACES = 'NAMESPACES';
-const SETS = 'SETS';
-
-// extracts the entity information from the entityPath
-export function extractEntityInfo(entityPath) {
-  let clusterID, nodeHost, namespaceName,
-      setName, udfName;
-
-  let tokens = entityPath.split('/');
-  let i = 0;
-  while (i < tokens.length) {
-    let token = tokens[i];
-    let nextToken = tokens[i+1];
-
-    if (i === 0) {
-      clusterID = token;
-      i++;
-    } else if (token === NODES) {
-      nodeHost = nextToken;
-      i += 2;
-    } else if (token === NAMESPACES) {
-      namespaceName = nextToken;
-      i += 2;
-    } else if (token === SETS) {
-      setName = nextToken;
-      i += 2;
-    } else if (token === UDF) {
-      udfName = nextToken;
-      i += 2;
-    } else { // unrecognized skip
-      console.warn(`Unrecognized entity path param ${token}`);
-      i++;
-    }
-  }
-
-  return {
-    clusterID: clusterID,
-    nodeHost: nodeHost,
-    namespaceName: namespaceName,
-    setName: setName,
-    udfName: udfName,
-  };
-}
-
-function processPath(entity, orderedPath) {
-  let path = '';
-  orderedPath.forEach((k) => {
-    let v = entity[k];
-    if (v) {
-      if (k === 'nodeHost')
-        v = NODES + '/' + v;
-      else if (k === 'namespaceName')
-        v = NAMESPACES + '/' + v;
-      else if (k === 'setName')
-        v = SETS + '/' + v;
-      else if (k === 'udfName')
-        v = UDF + '/' + v;
-
-      if (path.length > 0 && !path.endsWith('/'))
-        path += '/';
-      path += v;
-    }
-  });
-  return path;
-}
-
-export function toEntityPath(entity) {
-  const { clusterID, nodeHost, namespaceName } = entity;
-  const { setName, udfName } = entity;
-  
-  let path = '';
-  path = processPath(entity, ['clusterID', 'nodeHost', 'namespaceName', 'setName']);
-  if (path !== '')
-    return path;
-
-  path = processPath(entity, ['clusterID', 'udfName']);
-  if (path != '')
-    return path
-
-  throw new Error('In processing path');
-}
+export const CLUSTER = 'CLUSTER';
+export const UDF = 'UDF';
+export const NODES = 'NODES';
+export const NAMESPACES = 'NAMESPACES';
+export const SETS = 'SETS';
 
 function toUDF(parentPath, cluster) {
   const path = parentPath + '/' + UDF;
