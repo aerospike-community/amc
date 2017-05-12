@@ -3,7 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	// "crypto/x509"
-	"math"
+	// "math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -337,48 +337,48 @@ var statKeys = []string{
 	"same_cluster",
 }
 
-func getClusterNodes(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
-	if cluster == nil {
-		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
-	}
-	nodeList := strings.Split(c.Param("nodes"), ",")
+// func getClusterNodes(c echo.Context) error {
+// 	clusterUuid := c.Param("clusterUuid")
+// 	cluster := _observer.FindClusterById(clusterUuid)
+// 	if cluster == nil {
+// 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
+// 	}
+// 	nodeList := strings.Split(c.Param("nodes"), ",")
 
-	res := make(map[string]interface{}, len(nodeList))
-	for _, node := range cluster.Nodes() {
-		for _, nodeName := range nodeList {
-			if node.Address() == nodeName {
-				nodeMem := node.Memory()
-				nodeDisk := node.Disk()
+// 	res := make(map[string]interface{}, len(nodeList))
+// 	for _, node := range cluster.Nodes() {
+// 		for _, nodeName := range nodeList {
+// 			if node.Address() == nodeName {
+// 				nodeMem := node.Memory()
+// 				nodeDisk := node.Disk()
 
-				stats := node.AnyAttrs(statKeys...)
-				stats["cluster_visibility"] = (node.VisibilityStatus())
-				stats["same_cluster"] = true
-				stats["memory"] = nodeMem
-				stats["disk"] = nodeDisk
-				stats["node_status"] = node.Status()
+// 				stats := node.AnyAttrs(statKeys...)
+// 				stats["cluster_visibility"] = (node.VisibilityStatus())
+// 				stats["same_cluster"] = true
+// 				stats["memory"] = nodeMem
+// 				stats["disk"] = nodeDisk
+// 				stats["node_status"] = node.Status()
 
-				// customized calculations
-				if nodeDisk.TryFloat("total-bytes-disk", 0) > 0 {
-					stats["free-pct-disk"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-disk", 0) / nodeDisk.TryFloat("total-bytes-disk", 1))
-				}
-				if nodeMem.TryFloat("total-bytes-memory", 0) > 0 {
-					stats["free-pct-memory"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-memory", 0) / nodeDisk.TryFloat("total-bytes-memory", 1))
-				}
+// 				// customized calculations
+// 				if nodeDisk.TryFloat("total-bytes-disk", 0) > 0 {
+// 					stats["free-pct-disk"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-disk", 0) / nodeDisk.TryFloat("total-bytes-disk", 1))
+// 				}
+// 				if nodeMem.TryFloat("total-bytes-memory", 0) > 0 {
+// 					stats["free-pct-memory"] = math.Ceil(100 * nodeDisk.TryFloat("free-bytes-memory", 0) / nodeDisk.TryFloat("total-bytes-memory", 1))
+// 				}
 
-				for _, key := range statKeys {
-					if _, exists := stats[key]; !exists {
-						stats[key] = common.NOT_AVAILABLE
-					}
-				}
-				res[nodeName] = stats
-			}
-		}
-	}
+// 				for _, key := range statKeys {
+// 					if _, exists := stats[key]; !exists {
+// 						stats[key] = common.NOT_AVAILABLE
+// 					}
+// 				}
+// 				res[nodeName] = stats
+// 			}
+// 		}
+// 	}
 
-	return c.JSON(http.StatusOK, res)
-}
+// 	return c.JSON(http.StatusOK, res)
+// }
 
 func getClusterUDFs(c echo.Context) error {
 	clusterUuid := c.Param("clusterUuid")

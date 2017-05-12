@@ -96,9 +96,46 @@ func (c *ConnectionController) Save(ctx *app.SaveConnectionContext) error {
 func (c *ConnectionController) Show(ctx *app.ShowConnectionContext) error {
 	// ConnectionController_Show: start_implement
 
-	// Put your logic here
+	conn, err := models.GetConnectionByID(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	userRoles := cluster.Users()
+	users := make([]string, 0, len(userRoles))
+	for _, u := range userRoles {
+		users = append(users, u.User)
+	}
+
+	seeds, err := toSeedsMedia(conn)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	res := &app.AerospikeAmcConnectionResponse{
+		ActiveRedAlertCount: cluster.RedAlertCount(),
+		ClusterBuilds:       cluster.BuildDetails(),
+		ConnectOnLogin:      conn.ConnectOnLogin,
+		Connected:           connectionIsConnected(ctx.ConnID),
+		Disk:                cluster.Disk(),
+		ID:                  &ctx.ConnID,
+		Memory:              cluster.Memory(),
+		Name:                conn.Label,
+		Namespaces:          cluster.NamespaceList(),
+		Nodes:               cluster.NodeList(),
+		NodesCompatibility:  cluster.NodeCompatibility(),
+		OffNodes:            cluster.OffNodes(),
+		Seeds:               seeds,
+		Status:              string(cluster.Status()),
+		UpdateInterval:      cluster.UpdateInterval(),
+		Users:               users,
+	}
 
 	// ConnectionController_Show: end_implement
-	res := &app.AerospikeAmcConnectionQueryResponse{}
 	return ctx.OK(res)
 }

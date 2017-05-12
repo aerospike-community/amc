@@ -12,6 +12,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/rrd"
 )
@@ -662,24 +663,24 @@ func (n *Node) Build() string {
 	return n.InfoAttr("build")
 }
 
-func (n *Node) Disk() common.Stats {
-	return common.Stats{
-		"used":             n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
-		"free":             n.nsAggCalcStats.TryInt("free-bytes-disk", 0),
-		"used-bytes-disk":  n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
-		"free-bytes-disk":  n.nsAggCalcStats.TryInt("free-bytes-disk", 0),
-		"total-bytes-disk": n.nsAggCalcStats.TryInt("total-bytes-disk", 0),
+func (n *Node) Disk() *app.AerospikeAmcResourceUsageResponse {
+	result := &app.AerospikeAmcResourceUsageResponse{
+		UsedBytes: int(n.nsAggCalcStats.TryInt("used-bytes-disk", 0)),
+		FreeBytes: int(n.nsAggCalcStats.TryInt("free-bytes-disk", 0)),
 	}
+
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+	return result
 }
 
-func (n *Node) Memory() common.Stats {
-	return common.Stats{
-		"used":               n.nsAggCalcStats.TryInt("used-bytes-memory", 0),
-		"free":               n.nsAggCalcStats.TryInt("free-bytes-memory", 0),
-		"used-bytes-memory":  n.nsAggCalcStats.TryInt("used-bytes-memory", 0),
-		"free-bytes-memory":  n.nsAggCalcStats.TryInt("free-bytes-memory", 0),
-		"total-bytes-memory": n.nsAggCalcStats.TryInt("total-bytes-memory", 0),
+func (n *Node) Memory() *app.AerospikeAmcResourceUsageResponse {
+	result := &app.AerospikeAmcResourceUsageResponse{
+		UsedBytes: int(n.nsAggCalcStats.TryInt("used-bytes-memory", 0)),
+		FreeBytes: int(n.nsAggCalcStats.TryInt("free-bytes-memory", 0)),
 	}
+
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+	return result
 }
 
 func (n *Node) DataCenters() map[string]common.Stats {

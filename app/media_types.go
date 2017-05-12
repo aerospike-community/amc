@@ -14,6 +14,26 @@ import (
 	"github.com/goadesign/goa"
 )
 
+// Cluster Resource Usage (default view)
+//
+// Identifier: application/vnd.aerospike.amc.cluster.resource.usage.response+json; view=default
+type AerospikeAmcClusterResourceUsageResponse struct {
+	// Free Bytes
+	FreeBytes int `form:"free-bytes" json:"free-bytes" xml:"free-bytes"`
+	// Resource usage details.
+	NodeDetails map[string]*AerospikeAmcResourceUsageResponse `form:"nodeDetails,omitempty" json:"nodeDetails,omitempty" xml:"nodeDetails,omitempty"`
+	// Total Bytes
+	TotalBytes int `form:"total-bytes" json:"total-bytes" xml:"total-bytes"`
+	// Used Bytes
+	UsedBytes int `form:"used-bytes" json:"used-bytes" xml:"used-bytes"`
+}
+
+// Validate validates the AerospikeAmcClusterResourceUsageResponse media type instance.
+func (mt *AerospikeAmcClusterResourceUsageResponse) Validate() (err error) {
+
+	return
+}
+
 // Cluster Modules (default view)
 //
 // Identifier: application/vnd.aerospike.amc.connection.modules.response+json; view=default
@@ -71,6 +91,93 @@ func (mt *AerospikeAmcConnectionQueryResponse) Validate() (err error) {
 
 	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
 		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	}
+	for _, e := range mt.Seeds {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// User Connection (default view)
+//
+// Identifier: application/vnd.aerospike.amc.connection.response+json; view=default
+type AerospikeAmcConnectionResponse struct {
+	// Ative red alert count.
+	ActiveRedAlertCount int `form:"activeRedAlertCount" json:"activeRedAlertCount" xml:"activeRedAlertCount"`
+	// Cluster build details.
+	ClusterBuilds *AerospikeAmcVersionInfoResponse `form:"clusterBuilds" json:"clusterBuilds" xml:"clusterBuilds"`
+	// UI should connect to this connection automatically after AMC login
+	ConnectOnLogin bool `form:"connectOnLogin" json:"connectOnLogin" xml:"connectOnLogin"`
+	// If AMC is already connected to this cluster for the current user.
+	Connected bool `form:"connected" json:"connected" xml:"connected"`
+	// Disk usage.
+	Disk *AerospikeAmcClusterResourceUsageResponse `form:"disk,omitempty" json:"disk,omitempty" xml:"disk,omitempty"`
+	// Connection Id
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Memory usage.
+	Memory *AerospikeAmcClusterResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
+	// Connection Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// List of namespaces.
+	Namespaces []string `form:"namespaces" json:"namespaces" xml:"namespaces"`
+	// List of cluster nodes which have been discovered.
+	Nodes []string `form:"nodes" json:"nodes" xml:"nodes"`
+	// If nodes are all from the same version: Values: homogenious/compatible
+	NodesCompatibility string `form:"nodesCompatibility" json:"nodesCompatibility" xml:"nodesCompatibility"`
+	// Inactive/Lost/Inaccessible nodes.
+	OffNodes []string `form:"offNodes" json:"offNodes" xml:"offNodes"`
+	// Seeds
+	Seeds []*NodeSeed `form:"seeds,omitempty" json:"seeds,omitempty" xml:"seeds,omitempty"`
+	// If cluster is connected: Values: on/off
+	Status string `form:"status" json:"status" xml:"status"`
+	// Interval with which AMC fetches data from the database.
+	UpdateInterval int `form:"updateInterval" json:"updateInterval" xml:"updateInterval"`
+	// Cluster users list.
+	Users []string `form:"users,omitempty" json:"users,omitempty" xml:"users,omitempty"`
+}
+
+// Validate validates the AerospikeAmcConnectionResponse media type instance.
+func (mt *AerospikeAmcConnectionResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+
+	if mt.ClusterBuilds == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "clusterBuilds"))
+	}
+
+	if mt.OffNodes == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "offNodes"))
+	}
+	if mt.NodesCompatibility == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "nodesCompatibility"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Namespaces == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "namespaces"))
+	}
+	if mt.Nodes == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "nodes"))
+	}
+	if mt.Memory == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "memory"))
+	}
+
+	if mt.ClusterBuilds != nil {
+		if err2 := mt.ClusterBuilds.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if mt.ID != nil {
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, *mt.ID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, *mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
 	}
 	for _, e := range mt.Seeds {
 		if e != nil {
@@ -304,6 +411,24 @@ func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
 	return
 }
 
+// Resource Usage (default view)
+//
+// Identifier: application/vnd.aerospike.amc.resource.usage.response+json; view=default
+type AerospikeAmcResourceUsageResponse struct {
+	// Free Bytes
+	FreeBytes int `form:"free-bytes" json:"free-bytes" xml:"free-bytes"`
+	// Total Bytes
+	TotalBytes int `form:"total-bytes" json:"total-bytes" xml:"total-bytes"`
+	// Used Bytes
+	UsedBytes int `form:"used-bytes" json:"used-bytes" xml:"used-bytes"`
+}
+
+// Validate validates the AerospikeAmcResourceUsageResponse media type instance.
+func (mt *AerospikeAmcResourceUsageResponse) Validate() (err error) {
+
+	return
+}
+
 // AMC Server System information (default view)
 //
 // Identifier: application/vnd.aerospike.amc.system.response+json; view=default
@@ -332,6 +457,27 @@ type AerospikeAmcUserQueryResponse struct {
 func (mt *AerospikeAmcUserQueryResponse) Validate() (err error) {
 	if mt.Username == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "username"))
+	}
+	return
+}
+
+// Resource Usage (default view)
+//
+// Identifier: application/vnd.aerospike.amc.version.info.response+json; view=default
+type AerospikeAmcVersionInfoResponse struct {
+	// Latest server version used in the cluster
+	LatestVersion string `form:"latestVersion" json:"latestVersion" xml:"latestVersion"`
+	// Map of server versions to nodes
+	VersionList map[string][]string `form:"versionList" json:"versionList" xml:"versionList"`
+}
+
+// Validate validates the AerospikeAmcVersionInfoResponse media type instance.
+func (mt *AerospikeAmcVersionInfoResponse) Validate() (err error) {
+	if mt.VersionList == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "versionList"))
+	}
+	if mt.LatestVersion == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "latestVersion"))
 	}
 	return
 }

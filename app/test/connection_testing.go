@@ -1049,6 +1049,63 @@ func SaveConnectionUnauthorized(t goatest.TInterface, ctx context.Context, servi
 	return rw
 }
 
+// ShowConnectionBadRequest runs the method Show of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func ShowConnectionBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v", connID),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	showCtx, _err := app.NewShowConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Show(showCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
 // ShowConnectionInternalServerError runs the method Show of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
@@ -1110,7 +1167,7 @@ func ShowConnectionInternalServerError(t goatest.TInterface, ctx context.Context
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowConnectionOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string) (http.ResponseWriter, *app.AerospikeAmcConnectionQueryResponse) {
+func ShowConnectionOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string) (http.ResponseWriter, *app.AerospikeAmcConnectionResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -1158,12 +1215,12 @@ func ShowConnectionOK(t goatest.TInterface, ctx context.Context, service *goa.Se
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.AerospikeAmcConnectionQueryResponse
+	var mt *app.AerospikeAmcConnectionResponse
 	if resp != nil {
 		var ok bool
-		mt, ok = resp.(*app.AerospikeAmcConnectionQueryResponse)
+		mt, ok = resp.(*app.AerospikeAmcConnectionResponse)
 		if !ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcConnectionQueryResponse", resp)
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcConnectionResponse", resp)
 		}
 		_err = mt.Validate()
 		if _err != nil {

@@ -19,6 +19,121 @@ var NodeSeed = Type("NodeSeed", func() {
 	Required("host", "port")
 })
 
+var ResourceUsageResponseMedia = MediaType("application/vnd.aerospike.amc.resource.usage.response+json", func() {
+	Description("Resource Usage")
+
+	Attributes(func() {
+		Attribute("used-bytes", Integer, "Used Bytes")
+		Attribute("free-bytes", Integer, "Free Bytes")
+		Attribute("total-bytes", Integer, "Total Bytes")
+
+		Required("used-bytes", "free-bytes", "total-bytes")
+	})
+
+	View("default", func() {
+		Attribute("used-bytes")
+		Attribute("free-bytes")
+		Attribute("total-bytes")
+
+		Required("used-bytes", "free-bytes", "total-bytes")
+	})
+})
+
+var ClusterResourceUsageResponseMedia = MediaType("application/vnd.aerospike.amc.cluster.resource.usage.response+json", func() {
+	Description("Cluster Resource Usage")
+
+	Attributes(func() {
+		Attribute("used-bytes", Integer, "Used Bytes")
+		Attribute("free-bytes", Integer, "Free Bytes")
+		Attribute("total-bytes", Integer, "Total Bytes")
+
+		Attribute("nodeDetails", HashOf(String, ResourceUsageResponseMedia), "Resource usage details.")
+
+		Required("used-bytes", "free-bytes", "total-bytes")
+	})
+
+	View("default", func() {
+		Attribute("used-bytes")
+		Attribute("free-bytes")
+		Attribute("total-bytes")
+
+		Attribute("nodeDetails")
+
+		Required("used-bytes", "free-bytes", "total-bytes")
+	})
+})
+
+var VersionInfoResponseMedia = MediaType("application/vnd.aerospike.amc.version.info.response+json", func() {
+	Description("Resource Usage")
+
+	Attributes(func() {
+		Attribute("versionList", HashOf(String, ArrayOf(String)), "Map of server versions to nodes")
+		Attribute("latestVersion", String, "Latest server version used in the cluster")
+
+		Required("versionList", "latestVersion")
+	})
+
+	View("default", func() {
+		Attribute("versionList")
+		Attribute("latestVersion")
+
+		Required("versionList", "latestVersion")
+	})
+})
+
+var UserConnectionResponseMedia = MediaType("application/vnd.aerospike.amc.connection.response+json", func() {
+	Description("User Connection")
+	Attributes(func() {
+		Attribute("id", String, "Connection Id", func() {
+			Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+			Pattern(uuidv4Regex)
+		})
+
+		Attribute("name", String, "Connection Name", func() { Example("Payments Cluster") })
+		Attribute("seeds", ArrayOf(NodeSeed), "Seeds")
+
+		Attribute("connectOnLogin", Boolean, "UI should connect to this connection automatically after AMC login")
+		Attribute("connected", Boolean, "If AMC is already connected to this cluster for the current user.")
+
+		Attribute("clusterBuilds", VersionInfoResponseMedia, "Cluster build details.")
+		Attribute("activeRedAlertCount", Integer, "Ative red alert count.")
+		Attribute("users", ArrayOf(String), "Cluster users list.")
+		Attribute("offNodes", ArrayOf(String), "Inactive/Lost/Inaccessible nodes.")
+		Attribute("nodesCompatibility", String, "If nodes are all from the same version: Values: homogenious/compatible")
+		Attribute("status", String, "If cluster is connected: Values: on/off")
+		Attribute("namespaces", ArrayOf(String), "List of namespaces.")
+		Attribute("nodes", ArrayOf(String), "List of cluster nodes which have been discovered.")
+		Attribute("memory", ClusterResourceUsageResponseMedia, "Memory usage.")
+		Attribute("disk", ClusterResourceUsageResponseMedia, "Disk usage.")
+		Attribute("updateInterval", Integer, "Interval with which AMC fetches data from the database.")
+
+		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval")
+	})
+
+	View("default", func() {
+		Attribute("id")
+		Attribute("name")
+		Attribute("seeds")
+
+		Attribute("connectOnLogin")
+		Attribute("connected")
+
+		Attribute("clusterBuilds")
+		Attribute("activeRedAlertCount")
+		Attribute("users")
+		Attribute("offNodes")
+		Attribute("nodesCompatibility")
+		Attribute("status")
+		Attribute("namespaces")
+		Attribute("nodes")
+		Attribute("memory")
+		Attribute("disk")
+		Attribute("updateInterval")
+
+		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval")
+	})
+})
+
 var UserConnectionsResponseMedia = MediaType("application/vnd.aerospike.amc.connection.query.response+json", func() {
 	Description("User Connection")
 	Attributes(func() {

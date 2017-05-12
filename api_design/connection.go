@@ -24,7 +24,8 @@ var _ = Resource("connection", func() {
 			Required("connId")
 		})
 
-		Response(OK, UserConnectionsResponseMedia)
+		Response(OK, UserConnectionResponseMedia)
+		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})

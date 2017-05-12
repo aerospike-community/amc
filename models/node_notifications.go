@@ -212,8 +212,8 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 	}
 
 	disk := n.Disk()
-	diskSpaceLimit := disk.TryFloat("total-bytes-disk", 0)
-	diskSpace := disk.TryFloat("used-bytes-disk", 0)
+	diskSpaceLimit := float64(disk.TotalBytes)
+	diskSpace := float64(disk.UsedBytes)
 
 	diskSpaceAlert := "on"
 	if diskSpace <= diskSpaceLimit*0.9 {
@@ -266,8 +266,8 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 	}
 
 	memory := n.Memory()
-	memSpaceLimit := memory.TryFloat("total-bytes-memory", 0)
-	memSpace := memory.TryFloat("used-bytes-memory", 0)
+	memSpaceLimit := float64(memory.TotalBytes)
+	memSpace := float64(memory.UsedBytes)
 
 	memSpaceAlert := "on"
 	if memSpace <= memSpaceLimit*0.9 {

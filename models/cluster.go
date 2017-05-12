@@ -239,33 +239,37 @@ func (c *Cluster) Status() ClusterStatus {
 	return ClusterStatusOff
 }
 
-func (c *Cluster) Disk() common.Stats {
-	result := common.Stats{
-		"used": c.aggNodeCalcStats.TryInt("used-bytes-disk", 0),
-		"free": c.aggNodeCalcStats.TryInt("free-bytes-disk", 0),
+func (c *Cluster) Disk() *app.AerospikeAmcClusterResourceUsageResponse {
+	result := &app.AerospikeAmcClusterResourceUsageResponse{
+		UsedBytes: int(c.aggNodeCalcStats.TryInt("used-bytes-disk", 0)),
+		FreeBytes: int(c.aggNodeCalcStats.TryInt("free-bytes-disk", 0)),
 	}
 
-	details := common.Stats{}
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+
+	details := make(map[string]*app.AerospikeAmcResourceUsageResponse, len(c.Nodes()))
 	for _, n := range c.Nodes() {
 		details[n.Address()] = n.Disk()
 	}
 
-	result["details"] = details
+	result.NodeDetails = details
 	return result
 }
 
-func (c *Cluster) Memory() common.Stats {
-	result := common.Stats{
-		"used": c.aggNodeCalcStats.TryInt("used-bytes-memory", 0),
-		"free": c.aggNodeCalcStats.TryInt("free-bytes-memory", 0),
+func (c *Cluster) Memory() *app.AerospikeAmcClusterResourceUsageResponse {
+	result := &app.AerospikeAmcClusterResourceUsageResponse{
+		UsedBytes: int(c.aggNodeCalcStats.TryInt("used-bytes-memory", 0)),
+		FreeBytes: int(c.aggNodeCalcStats.TryInt("free-bytes-memory", 0)),
 	}
 
-	details := common.Stats{}
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+
+	details := make(map[string]*app.AerospikeAmcResourceUsageResponse, len(c.Nodes()))
 	for _, n := range c.Nodes() {
-		details[n.Address()] = n.Memory()
+		details[n.Address()] = n.Disk()
 	}
 
-	result["details"] = details
+	result.NodeDetails = details
 	return result
 }
 
@@ -874,9 +878,7 @@ func (c *Cluster) updateStats() error {
 
 func (c *Cluster) versionSupported(oldest string) error {
 	buildDetails := c.BuildDetails()
-	verList := buildDetails["version_list"].(map[string][]string)
-
-	for ver, nodeList := range verList {
+	for ver, nodeList := range buildDetails.VersionList {
 		if version.Compare(ver, oldest, "<") {
 			return errors.New(fmt.Sprintf("Database cluster is not supported. Latest supported version is: `v%s`. Nodes [%s] are at `v%s`", oldest, strings.Join(nodeList, ", "), ver))
 		}
@@ -885,8 +887,8 @@ func (c *Cluster) versionSupported(oldest string) error {
 	return nil
 }
 
-func (c *Cluster) BuildDetails() map[string]interface{} {
-	result := map[string]interface{}{}
+func (c *Cluster) BuildDetails() *app.AerospikeAmcVersionInfoResponse {
+	result := &app.AerospikeAmcVersionInfoResponse{}
 
 	versionList := map[string][]string{}
 	latestBuild := ""
@@ -898,8 +900,8 @@ func (c *Cluster) BuildDetails() map[string]interface{} {
 		}
 	}
 
-	result["version_list"] = versionList
-	result["latest_build_no"] = latestBuild
+	result.VersionList = versionList
+	result.LatestVersion = latestBuild
 
 	c.updateLastestPing()
 	return result

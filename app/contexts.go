@@ -503,9 +503,15 @@ func NewShowConnectionContext(ctx context.Context, r *http.Request, service *goa
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ShowConnectionContext) OK(r *AerospikeAmcConnectionQueryResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.query.response+json")
+func (ctx *ShowConnectionContext) OK(r *AerospikeAmcConnectionResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
 }
 
 // Unauthorized sends a HTTP response with status code 401.
