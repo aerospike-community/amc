@@ -128,7 +128,7 @@ func (o *ObserverT) observe(config *common.Config) {
 	o.updateClusters()
 
 	updateTicker := time.NewTicker(time.Second)
-	systemTicker := time.NewTicker(time.Second * 5)
+	systemTicker := time.NewTicker(time.Second * 60)
 
 	for {
 		select {

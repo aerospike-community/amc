@@ -38,9 +38,10 @@ func toConnectionMedia(conn *models.Connection) (*app.AerospikeAmcConnectionQuer
 	}
 
 	return &app.AerospikeAmcConnectionQueryResponse{
-		ID:    conn.Id,
-		Name:  conn.Label,
-		Seeds: seeds,
+		ID:        conn.Id,
+		Name:      conn.Label,
+		Seeds:     seeds,
+		Connected: connectionIsConnected(conn.Id),
 	}, nil
 }
 
@@ -78,6 +79,10 @@ func toConnection(ctx *app.SaveConnectionContext) *models.Connection {
 
 	if ctx.Payload.ConnID != nil {
 		conn.Id = *ctx.Payload.ConnID
+	}
+
+	if ctx.Payload.ConnectOnLogin != nil {
+		conn.ConnectOnLogin = *ctx.Payload.ConnectOnLogin
 	}
 
 	return conn

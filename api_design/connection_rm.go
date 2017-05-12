@@ -28,14 +28,22 @@ var UserConnectionsResponseMedia = MediaType("application/vnd.aerospike.amc.conn
 		})
 		Attribute("name", String, "Connection Name", func() { Example("Payments Cluster") })
 		Attribute("seeds", ArrayOf(NodeSeed), "Seeds")
-		Required("id", "name")
+
+		Attribute("connectOnLogin", Boolean, "UI should connect to this connection automatically after AMC login")
+		Attribute("connected", Boolean, "If AMC is already connected to this cluster for the current user.")
+
+		Required("id", "name", "connectOnLogin", "connected")
 	})
 
 	View("default", func() {
 		Attribute("id")
 		Attribute("name")
 		Attribute("seeds")
-		Required("name")
+
+		Attribute("connectOnLogin")
+		Attribute("connected")
+
+		Required("name", "connectOnLogin", "connected")
 	})
 })
 
@@ -52,7 +60,9 @@ var UserConnectionTreeResponseMedia = MediaType("application/vnd.aerospike.amc.c
 		Attribute("nodes", ArrayOf(EntityNode), "Nodes")
 		Attribute("modules", ArrayOf(EntityModule), "modules")
 
-		Required("id", "entityType", "lastUpdate")
+		Attribute("status", String, "Cureent connection status.")
+
+		Required("id", "entityType", "lastUpdate", "status")
 	})
 
 	View("default", func() {
@@ -61,7 +71,8 @@ var UserConnectionTreeResponseMedia = MediaType("application/vnd.aerospike.amc.c
 		Attribute("id")
 		Attribute("nodes")
 		Attribute("modules")
-		Required("id", "entityType", "lastUpdate")
+		Attribute("status")
+		Required("id", "entityType", "lastUpdate", "status")
 	})
 })
 

@@ -26,6 +26,13 @@ import (
 
 type EntityType string
 
+type ClusterStatus string
+
+const (
+	ClusterStatusOn  ClusterStatus = "on"
+	ClusterStatusOff ClusterStatus = "off"
+)
+
 const (
 	ETConnection EntityType = "connection"
 	ETNode       EntityType = "node"
@@ -225,11 +232,11 @@ func (c *Cluster) RandomActiveNode() *Node {
 	return nil
 }
 
-func (c *Cluster) Status() string {
+func (c *Cluster) Status() ClusterStatus {
 	if client := c.origClient(); client != nil && client.IsConnected() {
-		return "on"
+		return ClusterStatusOn
 	}
-	return "off"
+	return ClusterStatusOff
 }
 
 func (c *Cluster) Disk() common.Stats {
@@ -1419,6 +1426,7 @@ func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResp
 		LastUpdate: int(time.Now().Unix()),
 		EntityType: string(ETConnection),
 		ID:         connId,
+		Status:     string(c.Status()),
 	}
 
 	modules := map[string]*app.AerospikeAmcEntityModuleResponse{}

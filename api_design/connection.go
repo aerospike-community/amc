@@ -77,6 +77,7 @@ var _ = Resource("connection", func() {
 			})
 			Member("name", String, "Connection Name", func() { Example("Payments Cluster") })
 			Member("seeds", ArrayOf("NodeSeed"), "Seeds")
+			Member("connectOnLogin", Boolean, "Should AMC connect to this cluster automatically after user login?")
 			Required("name", "seeds")
 		})
 

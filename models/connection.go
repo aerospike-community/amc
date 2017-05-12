@@ -11,13 +11,14 @@ import (
 	"github.com/citrusleaf/amc/common"
 )
 
-const _connectionFields = "Id, Username, Label, Seeds"
+const _connectionFields = "Id, Username, Label, Seeds, ConnectOnLogin"
 
 type Connection struct {
-	Id       string
-	Username string
-	Label    string
-	Seeds    string
+	Id             string
+	Username       string
+	Label          string
+	Seeds          string
+	ConnectOnLogin bool
 }
 
 func QueryUserConnections(username string) ([]*Connection, error) {
@@ -117,11 +118,11 @@ func (c *Connection) Save() error {
 	}
 
 	if len(c.Id) == 0 {
-		if _, err := tx.Exec(fmt.Sprintf("INSERT INTO connections (%s) VALUES (?1, ?2, ?3, ?4)", _connectionFields), uuid.NewV4().String(), c.Username, c.Label, c.Seeds); err != nil {
+		if _, err := tx.Exec(fmt.Sprintf("INSERT INTO connections (%s) VALUES (?1, ?2, ?3, ?4, ?5)", _connectionFields), uuid.NewV4().String(), c.Username, c.Label, c.Seeds, c.ConnectOnLogin); err != nil {
 			log.Error(err.Error())
 		}
 	} else {
-		if _, err := tx.Exec("UPDATE connections SET Username = ?1, Label=?2, Seeds=?3 WHERE Id = ?4", c.Username, c.Label, c.Seeds, c.Id); err != nil {
+		if _, err := tx.Exec("UPDATE connections SET Username = ?1, Label=?2, Seeds=?3, ConnectOnLogin = ?4 WHERE Id = ?4", c.Username, c.Label, c.Seeds, c.ConnectOnLogin, c.Id); err != nil {
 			log.Error(err.Error())
 		}
 	}
@@ -135,14 +136,14 @@ func (c *Connection) Save() error {
 }
 
 func (c *Connection) fromSQLRow(row *sql.Row) error {
-	return row.Scan(&c.Id, &c.Username, &c.Label, &c.Seeds)
+	return row.Scan(&c.Id, &c.Username, &c.Label, &c.Seeds, &c.ConnectOnLogin)
 }
 
 func connectionsFromSQLRows(rows *sql.Rows) ([]*Connection, error) {
 	res := []*Connection{}
 	for rows.Next() {
 		c := new(Connection)
-		if err := rows.Scan(&c.Id, &c.Username, &c.Label, &c.Seeds); err != nil {
+		if err := rows.Scan(&c.Id, &c.Username, &c.Label, &c.Seeds, &c.ConnectOnLogin); err != nil {
 			return nil, err
 		}
 		res = append(res, c)

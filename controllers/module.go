@@ -26,7 +26,7 @@ func NewModuleController(service *goa.Service) *ModuleController {
 func (c *ModuleController) Drop(ctx *app.DropModuleContext) error {
 	// ModuleController_Drop: start_implement
 
-	cluster, err := GetConnectionClusterById(ctx.ConnID)
+	cluster, err := getConnectionClusterById(ctx.ConnID)
 	if err != nil {
 		return ctx.BadRequest(err.Error())
 	}
@@ -45,7 +45,7 @@ func (c *ModuleController) Drop(ctx *app.DropModuleContext) error {
 func (c *ModuleController) Query(ctx *app.QueryModuleContext) error {
 	// ModuleController_Query: start_implement
 
-	cluster, err := GetConnectionClusterById(ctx.ConnID)
+	cluster, err := getConnectionClusterById(ctx.ConnID)
 	if err != nil {
 		return ctx.BadRequest(err.Error())
 	}
@@ -100,7 +100,7 @@ func (c *ModuleController) Query(ctx *app.QueryModuleContext) error {
 func (c *ModuleController) Save(ctx *app.SaveModuleContext) error {
 	// ModuleController_Save: start_implement
 
-	cluster, err := GetConnectionClusterById(ctx.ConnID)
+	cluster, err := getConnectionClusterById(ctx.ConnID)
 	if err != nil {
 		return ctx.BadRequest(err.Error())
 	}
@@ -121,7 +121,7 @@ func (c *ModuleController) Save(ctx *app.SaveModuleContext) error {
 func (c *ModuleController) Show(ctx *app.ShowModuleContext) error {
 	// ModuleController_Show: start_implement
 
-	cluster, err := GetConnectionClusterById(ctx.ConnID)
+	cluster, err := getConnectionClusterById(ctx.ConnID)
 	if err != nil {
 		return ctx.BadRequest(err.Error())
 	}

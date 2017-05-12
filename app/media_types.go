@@ -48,6 +48,10 @@ type AerospikeAmcConnectionModulesResponseFull struct {
 //
 // Identifier: application/vnd.aerospike.amc.connection.query.response+json; view=default
 type AerospikeAmcConnectionQueryResponse struct {
+	// UI should connect to this connection automatically after AMC login
+	ConnectOnLogin bool `form:"connectOnLogin" json:"connectOnLogin" xml:"connectOnLogin"`
+	// If AMC is already connected to this cluster for the current user.
+	Connected bool `form:"connected" json:"connected" xml:"connected"`
 	// Connection Id
 	ID string `form:"id" json:"id" xml:"id"`
 	// Connection Name
@@ -64,6 +68,7 @@ func (mt *AerospikeAmcConnectionQueryResponse) Validate() (err error) {
 	if mt.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
 	}
+
 	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
 		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 	}
@@ -91,6 +96,8 @@ type AerospikeAmcConnectionTreeResponse struct {
 	Modules []*AerospikeAmcEntityModuleResponse `form:"modules,omitempty" json:"modules,omitempty" xml:"modules,omitempty"`
 	// Nodes
 	Nodes []*AerospikeAmcEntityNodeResponse `form:"nodes,omitempty" json:"nodes,omitempty" xml:"nodes,omitempty"`
+	// Cureent connection status.
+	Status string `form:"status" json:"status" xml:"status"`
 }
 
 // Validate validates the AerospikeAmcConnectionTreeResponse media type instance.
@@ -102,6 +109,9 @@ func (mt *AerospikeAmcConnectionTreeResponse) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
 	}
 
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
 	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
 		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 	}

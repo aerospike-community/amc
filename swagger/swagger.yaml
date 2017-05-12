@@ -26,6 +26,8 @@ definitions:
   AerospikeAmcConnectionQueryResponse:
     description: User Connection (default view)
     example:
+      connectOnLogin: true
+      connected: true
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
       name: Payments Cluster
       seeds:
@@ -35,7 +37,19 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
     properties:
+      connectOnLogin:
+        description: UI should connect to this connection automatically after AMC
+          login
+        example: true
+        type: boolean
+      connected:
+        description: If AMC is already connected to this cluster for the current user.
+        example: true
+        type: boolean
       id:
         description: Connection Id
         example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
@@ -54,183 +68,137 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
     required:
     - id
     - name
+    - connectOnLogin
+    - connected
     title: 'Mediatype identifier: application/vnd.aerospike.amc.connection.query.response+json;
       view=default'
     type: object
   AerospikeAmcConnectionTreeResponse:
     description: User Connection Entity Tree (default view)
     example:
-      entityType: Modi dolorum hic.
+      entityType: Hic asperiores mollitia nihil minima maiores.
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      lastUpdate: 2.8971743e+17
+      lastUpdate: 2.7047948e+18
       modules:
-      - entityType: Minima maiores.
+      - entityType: Et ut sed hic assumenda quis voluptatem.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 2.7047948e+18
+        lastUpdate: 2.1030623e+18
         name: map_reduce.lua
         type: lua
-      - entityType: Minima maiores.
+      - entityType: Et ut sed hic assumenda quis voluptatem.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 2.7047948e+18
+        lastUpdate: 2.1030623e+18
         name: map_reduce.lua
         type: lua
-      - entityType: Minima maiores.
+      - entityType: Et ut sed hic assumenda quis voluptatem.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 2.7047948e+18
+        lastUpdate: 2.1030623e+18
         name: map_reduce.lua
         type: lua
       nodes:
-      - entityType: Et ut sed hic assumenda quis voluptatem.
+      - entityType: Aut amet qui.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        lastUpdate: 2.1030623e+18
+        lastUpdate: 5.8044137e+18
         namespaces:
-        - entityType: Aut amet qui.
-          lastUpdate: 5.8044137e+18
+        - entityType: Laudantium ut cum.
+          lastUpdate: 6.146135e+17
           name: Test
           sets:
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
             name: Customers
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
             name: Customers
-      - entityType: Et ut sed hic assumenda quis voluptatem.
-        host: 127.0.0.1:3000
-        id: BB9EB6C71290C00
-        lastUpdate: 2.1030623e+18
-        namespaces:
-        - entityType: Aut amet qui.
-          lastUpdate: 5.8044137e+18
+        - entityType: Laudantium ut cum.
+          lastUpdate: 6.146135e+17
           name: Test
           sets:
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
             name: Customers
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
             name: Customers
-      - entityType: Et ut sed hic assumenda quis voluptatem.
-        host: 127.0.0.1:3000
-        id: BB9EB6C71290C00
-        lastUpdate: 2.1030623e+18
-        namespaces:
-        - entityType: Aut amet qui.
-          lastUpdate: 5.8044137e+18
-          name: Test
-          sets:
-          - entityType: Laudantium ut cum.
-            indexes:
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 4.3827383e+18
-            name: Customers
-          - entityType: Laudantium ut cum.
-            indexes:
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 4.3827383e+18
-            name: Customers
+      status: Error rerum ut dolor voluptatibus.
     properties:
       entityType:
         description: Entity Type
-        example: Modi dolorum hic.
+        example: Hic asperiores mollitia nihil minima maiores.
         type: string
       id:
         description: Connection Id
@@ -239,25 +207,25 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 2.8971743e+17
+        example: 2.7047948e+18
         format: int64
         type: integer
       modules:
         description: modules
         example:
-        - entityType: Minima maiores.
+        - entityType: Et ut sed hic assumenda quis voluptatem.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 2.7047948e+18
+          lastUpdate: 2.1030623e+18
           name: map_reduce.lua
           type: lua
-        - entityType: Minima maiores.
+        - entityType: Et ut sed hic assumenda quis voluptatem.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 2.7047948e+18
+          lastUpdate: 2.1030623e+18
           name: map_reduce.lua
           type: lua
-        - entityType: Minima maiores.
+        - entityType: Et ut sed hic assumenda quis voluptatem.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 2.7047948e+18
+          lastUpdate: 2.1030623e+18
           name: map_reduce.lua
           type: lua
         items:
@@ -266,154 +234,107 @@ definitions:
       nodes:
         description: Nodes
         example:
-        - entityType: Et ut sed hic assumenda quis voluptatem.
+        - entityType: Aut amet qui.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          lastUpdate: 2.1030623e+18
+          lastUpdate: 5.8044137e+18
           namespaces:
-          - entityType: Aut amet qui.
-            lastUpdate: 5.8044137e+18
+          - entityType: Laudantium ut cum.
+            lastUpdate: 6.146135e+17
             name: Test
             sets:
-            - entityType: Laudantium ut cum.
+            - entityType: Rerum autem perspiciatis ut eaque sunt eum.
               indexes:
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 4.3827383e+18
+              lastUpdate: 4.885164e+18
               name: Customers
-            - entityType: Laudantium ut cum.
+            - entityType: Rerum autem perspiciatis ut eaque sunt eum.
               indexes:
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 4.3827383e+18
+              lastUpdate: 4.885164e+18
               name: Customers
-        - entityType: Et ut sed hic assumenda quis voluptatem.
-          host: 127.0.0.1:3000
-          id: BB9EB6C71290C00
-          lastUpdate: 2.1030623e+18
-          namespaces:
-          - entityType: Aut amet qui.
-            lastUpdate: 5.8044137e+18
+          - entityType: Laudantium ut cum.
+            lastUpdate: 6.146135e+17
             name: Test
             sets:
-            - entityType: Laudantium ut cum.
+            - entityType: Rerum autem perspiciatis ut eaque sunt eum.
               indexes:
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 4.3827383e+18
+              lastUpdate: 4.885164e+18
               name: Customers
-            - entityType: Laudantium ut cum.
+            - entityType: Rerum autem perspiciatis ut eaque sunt eum.
               indexes:
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
+                entityType: Magni ducimus quam eaque ullam maiores.
+                lastUpdate: 2.34265e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 4.3827383e+18
-              name: Customers
-        - entityType: Et ut sed hic assumenda quis voluptatem.
-          host: 127.0.0.1:3000
-          id: BB9EB6C71290C00
-          lastUpdate: 2.1030623e+18
-          namespaces:
-          - entityType: Aut amet qui.
-            lastUpdate: 5.8044137e+18
-            name: Test
-            sets:
-            - entityType: Laudantium ut cum.
-              indexes:
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 4.3827383e+18
-              name: Customers
-            - entityType: Laudantium ut cum.
-              indexes:
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Et rerum.
-                lastUpdate: 4.0837937e+17
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 4.3827383e+18
+              lastUpdate: 4.885164e+18
               name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
         type: array
+      status:
+        description: Cureent connection status.
+        example: Error rerum ut dolor voluptatibus.
+        type: string
     required:
     - id
     - entityType
     - lastUpdate
+    - status
     title: 'Mediatype identifier: application/vnd.aerospike.amc.connection.tree.response+json;
       view=default'
     type: object
@@ -421,8 +342,8 @@ definitions:
     description: Index Entity (default view)
     example:
       binName: id
-      entityType: Et rerum.
-      lastUpdate: 4.0837937e+17
+      entityType: Magni ducimus quam eaque ullam maiores.
+      lastUpdate: 2.34265e+18
       name: idx_test_customers_id
       type: NUMERIC
     properties:
@@ -432,11 +353,11 @@ definitions:
         type: string
       entityType:
         description: Type
-        example: Et rerum.
+        example: Magni ducimus quam eaque ullam maiores.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 4.0837937e+17
+        example: 2.34265e+18
         format: int64
         type: integer
       name:
@@ -459,15 +380,15 @@ definitions:
   AerospikeAmcEntityModuleResponse:
     description: Module Entity (default view)
     example:
-      entityType: Minima maiores.
+      entityType: Et ut sed hic assumenda quis voluptatem.
       hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-      lastUpdate: 2.7047948e+18
+      lastUpdate: 2.1030623e+18
       name: map_reduce.lua
       type: lua
     properties:
       entityType:
         description: Type
-        example: Minima maiores.
+        example: Et ut sed hic assumenda quis voluptatem.
         type: string
       hash:
         description: Module Hash
@@ -475,7 +396,7 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 2.7047948e+18
+        example: 2.1030623e+18
         format: int64
         type: integer
       name:
@@ -498,56 +419,56 @@ definitions:
   AerospikeAmcEntityNamespaceResponse:
     description: Namespace Entity (default view)
     example:
-      entityType: Aut amet qui.
-      lastUpdate: 5.8044137e+18
+      entityType: Laudantium ut cum.
+      lastUpdate: 6.146135e+17
       name: Test
       sets:
-      - entityType: Laudantium ut cum.
+      - entityType: Rerum autem perspiciatis ut eaque sunt eum.
         indexes:
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
-        lastUpdate: 4.3827383e+18
+        lastUpdate: 4.885164e+18
         name: Customers
-      - entityType: Laudantium ut cum.
+      - entityType: Rerum autem perspiciatis ut eaque sunt eum.
         indexes:
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
-        lastUpdate: 4.3827383e+18
+        lastUpdate: 4.885164e+18
         name: Customers
     properties:
       entityType:
         description: Type
-        example: Aut amet qui.
+        example: Laudantium ut cum.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 5.8044137e+18
+        example: 6.146135e+17
         format: int64
         type: integer
       name:
@@ -557,43 +478,43 @@ definitions:
       sets:
         description: Namespaces
         example:
-        - entityType: Laudantium ut cum.
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
           indexes:
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 4.3827383e+18
+          lastUpdate: 4.885164e+18
           name: Customers
-        - entityType: Laudantium ut cum.
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
           indexes:
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 4.3827383e+18
+          lastUpdate: 4.885164e+18
           name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntitySetResponse'
@@ -608,57 +529,99 @@ definitions:
   AerospikeAmcEntityNodeResponse:
     description: Node Entity (default view)
     example:
-      entityType: Et ut sed hic assumenda quis voluptatem.
+      entityType: Aut amet qui.
       host: 127.0.0.1:3000
       id: BB9EB6C71290C00
-      lastUpdate: 2.1030623e+18
+      lastUpdate: 5.8044137e+18
       namespaces:
-      - entityType: Aut amet qui.
-        lastUpdate: 5.8044137e+18
+      - entityType: Laudantium ut cum.
+        lastUpdate: 6.146135e+17
         name: Test
         sets:
-        - entityType: Laudantium ut cum.
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
           indexes:
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 4.3827383e+18
+          lastUpdate: 4.885164e+18
           name: Customers
-        - entityType: Laudantium ut cum.
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
           indexes:
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Et rerum.
-            lastUpdate: 4.0837937e+17
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 4.3827383e+18
+          lastUpdate: 4.885164e+18
+          name: Customers
+      - entityType: Laudantium ut cum.
+        lastUpdate: 6.146135e+17
+        name: Test
+        sets:
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
+          indexes:
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.885164e+18
+          name: Customers
+        - entityType: Rerum autem perspiciatis ut eaque sunt eum.
+          indexes:
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Magni ducimus quam eaque ullam maiores.
+            lastUpdate: 2.34265e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 4.885164e+18
           name: Customers
     properties:
       entityType:
         description: Type
-        example: Et ut sed hic assumenda quis voluptatem.
+        example: Aut amet qui.
         type: string
       host:
         description: Network Host Address
@@ -670,53 +633,95 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 2.1030623e+18
+        example: 5.8044137e+18
         format: int64
         type: integer
       namespaces:
         description: Namespaces
         example:
-        - entityType: Aut amet qui.
-          lastUpdate: 5.8044137e+18
+        - entityType: Laudantium ut cum.
+          lastUpdate: 6.146135e+17
           name: Test
           sets:
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
             name: Customers
-          - entityType: Laudantium ut cum.
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
             indexes:
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Et rerum.
-              lastUpdate: 4.0837937e+17
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 4.3827383e+18
+            lastUpdate: 4.885164e+18
+            name: Customers
+        - entityType: Laudantium ut cum.
+          lastUpdate: 6.146135e+17
+          name: Test
+          sets:
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
+            indexes:
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.885164e+18
+            name: Customers
+          - entityType: Rerum autem perspiciatis ut eaque sunt eum.
+            indexes:
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            - binName: id
+              entityType: Magni ducimus quam eaque ullam maiores.
+              lastUpdate: 2.34265e+18
+              name: idx_test_customers_id
+              type: NUMERIC
+            lastUpdate: 4.885164e+18
             name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
@@ -732,46 +737,46 @@ definitions:
   AerospikeAmcEntitySetResponse:
     description: Set Entity (default view)
     example:
-      entityType: Laudantium ut cum.
+      entityType: Rerum autem perspiciatis ut eaque sunt eum.
       indexes:
       - binName: id
-        entityType: Et rerum.
-        lastUpdate: 4.0837937e+17
+        entityType: Magni ducimus quam eaque ullam maiores.
+        lastUpdate: 2.34265e+18
         name: idx_test_customers_id
         type: NUMERIC
       - binName: id
-        entityType: Et rerum.
-        lastUpdate: 4.0837937e+17
+        entityType: Magni ducimus quam eaque ullam maiores.
+        lastUpdate: 2.34265e+18
         name: idx_test_customers_id
         type: NUMERIC
       - binName: id
-        entityType: Et rerum.
-        lastUpdate: 4.0837937e+17
+        entityType: Magni ducimus quam eaque ullam maiores.
+        lastUpdate: 2.34265e+18
         name: idx_test_customers_id
         type: NUMERIC
-      lastUpdate: 4.3827383e+18
+      lastUpdate: 4.885164e+18
       name: Customers
     properties:
       entityType:
         description: Type
-        example: Laudantium ut cum.
+        example: Rerum autem perspiciatis ut eaque sunt eum.
         type: string
       indexes:
         description: Indexes
         example:
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Et rerum.
-          lastUpdate: 4.0837937e+17
+          entityType: Magni ducimus quam eaque ullam maiores.
+          lastUpdate: 2.34265e+18
           name: idx_test_customers_id
           type: NUMERIC
         items:
@@ -779,7 +784,7 @@ definitions:
         type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 4.3827383e+18
+        example: 4.885164e+18
         format: int64
         type: integer
       name:
@@ -834,7 +839,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Nostrum natus voluptatem ea rem quia ducimus.
+          example: Ipsa eum.
           type: string
         type: array
       username:
@@ -910,14 +915,9 @@ definitions:
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
+      connectOnLogin: false
       name: Payments Cluster
       seeds:
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
@@ -927,6 +927,10 @@ definitions:
         example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
         pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         type: string
+      connectOnLogin:
+        description: Should AMC connect to this cluster automatically after user login?
+        example: false
+        type: boolean
       name:
         description: Connection Name
         example: Payments Cluster
@@ -934,12 +938,6 @@ definitions:
       seeds:
         description: Seeds
         example:
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
@@ -953,13 +951,13 @@ definitions:
     type: object
   SaveModulePayload:
     example:
-      content: Ut quod.
+      content: Est quis ratione.
       name: reports
-      type: lua
+      type: LUA
     properties:
       content:
         description: Module's Source Code
-        example: Ut quod.
+        example: Est quis ratione.
         type: string
       name:
         description: Module's Name
@@ -967,8 +965,8 @@ definitions:
         type: string
       type:
         description: Module's type
-        example: lua
-        pattern: lua
+        example: LUA
+        pattern: (?i)LUA
         type: string
     required:
     - name
@@ -1009,7 +1007,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Saepe laboriosam.
+          example: Quia magnam.
           type: string
         type: array
       username:

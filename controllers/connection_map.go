@@ -18,7 +18,7 @@ type connectionMap struct {
 
 var connections = connectionMap{conns: map[string]*models.Cluster{}}
 
-func GetConnectionCluster(sessionId, connId string, dbUsername, dbPassword string) (*models.Cluster, error) {
+func getConnectionCluster(sessionId, connId string, dbUsername, dbPassword string) (*models.Cluster, error) {
 	connections.m.Lock()
 	defer connections.m.Unlock()
 
@@ -75,7 +75,7 @@ func GetConnectionCluster(sessionId, connId string, dbUsername, dbPassword strin
 	return cluster, nil
 }
 
-func GetConnectionClusterById(connId string) (*models.Cluster, error) {
+func getConnectionClusterById(connId string) (*models.Cluster, error) {
 	connections.m.Lock()
 	defer connections.m.Unlock()
 
@@ -88,4 +88,13 @@ func GetConnectionClusterById(connId string) (*models.Cluster, error) {
 	}
 
 	return nil, ErrClusterNotFound
+}
+
+func connectionIsConnected(connId string) bool {
+	connections.m.Lock()
+	defer connections.m.Unlock()
+
+	cluster, exists := connections.conns[connId]
+
+	return exists && (cluster.Status() == models.ClusterStatusOn)
 }

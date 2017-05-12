@@ -363,6 +363,8 @@ func NewSaveConnectionContext(ctx context.Context, r *http.Request, service *goa
 type saveConnectionPayload struct {
 	// Connection Id
 	ConnID *string `form:"connId,omitempty" json:"connId,omitempty" xml:"connId,omitempty"`
+	// Should AMC connect to this cluster automatically after user login?
+	ConnectOnLogin *bool `form:"connectOnLogin,omitempty" json:"connectOnLogin,omitempty" xml:"connectOnLogin,omitempty"`
 	// Connection Name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Seeds
@@ -398,6 +400,9 @@ func (payload *saveConnectionPayload) Publicize() *SaveConnectionPayload {
 	if payload.ConnID != nil {
 		pub.ConnID = payload.ConnID
 	}
+	if payload.ConnectOnLogin != nil {
+		pub.ConnectOnLogin = payload.ConnectOnLogin
+	}
 	if payload.Name != nil {
 		pub.Name = *payload.Name
 	}
@@ -414,6 +419,8 @@ func (payload *saveConnectionPayload) Publicize() *SaveConnectionPayload {
 type SaveConnectionPayload struct {
 	// Connection Id
 	ConnID *string `form:"connId,omitempty" json:"connId,omitempty" xml:"connId,omitempty"`
+	// Should AMC connect to this cluster automatically after user login?
+	ConnectOnLogin *bool `form:"connectOnLogin,omitempty" json:"connectOnLogin,omitempty" xml:"connectOnLogin,omitempty"`
 	// Connection Name
 	Name string `form:"name" json:"name" xml:"name"`
 	// Seeds
@@ -680,8 +687,8 @@ func (payload *saveModulePayload) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
 	}
 	if payload.Type != nil {
-		if ok := goa.ValidatePattern(`lua`, *payload.Type); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, *payload.Type, `lua`))
+		if ok := goa.ValidatePattern(`(?i)LUA`, *payload.Type); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, *payload.Type, `(?i)LUA`))
 		}
 	}
 	return
@@ -723,8 +730,8 @@ func (payload *SaveModulePayload) Validate() (err error) {
 	if payload.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
 	}
-	if ok := goa.ValidatePattern(`lua`, payload.Type); !ok {
-		err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, payload.Type, `lua`))
+	if ok := goa.ValidatePattern(`(?i)LUA`, payload.Type); !ok {
+		err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, payload.Type, `(?i)LUA`))
 	}
 	return
 }

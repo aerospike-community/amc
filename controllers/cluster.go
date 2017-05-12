@@ -149,7 +149,7 @@ func getCluster(c echo.Context) error {
 		"namespaces":              cluster.NamespaceList(),
 		"update_interval":         cluster.UpdateInterval(),
 		"nodes":                   cluster.NodeList(),
-		"cluster_status":          cluster.Status(),
+		"cluster_status":          string(cluster.Status()),
 	})
 }
 
@@ -180,7 +180,7 @@ func getClusterBasic(c echo.Context) error {
 		"users":                  users,
 		"off_nodes":              cluster.OffNodes(),
 		"nodes_compatibility":    cluster.NodeCompatibility(),
-		"cluster_status":         cluster.Status(),
+		"cluster_status":         string(cluster.Status()),
 		"namespaces":             cluster.NamespaceList(),
 		"memory":                 cluster.Memory(),
 		"nodes":                  cluster.NodeList(),
@@ -237,7 +237,7 @@ func getClusterThroughputHistory(c echo.Context) error {
 	throughput := cluster.ThroughputSince(tm)
 
 	res := map[string]interface{}{
-		"cluster_status": cluster.Status(),
+		"cluster_status": string(cluster.Status()),
 	}
 
 	zeroValue := float64(0)
@@ -282,7 +282,7 @@ func getClusterThroughput(c echo.Context) error {
 	throughput := cluster.LatestThroughput()
 
 	res := map[string]interface{}{
-		"cluster_status": cluster.Status(),
+		"cluster_status": string(cluster.Status()),
 	}
 
 	zeroVal := float64(0)

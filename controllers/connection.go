@@ -25,7 +25,7 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 	// ConnectionController_Connect: start_implement
 
 	sessionId := ctx.Value("sessionId").(string)
-	cluster, err := GetConnectionCluster(sessionId, ctx.ConnID, ctx.Payload.Username, ctx.Payload.Password)
+	cluster, err := getConnectionCluster(sessionId, ctx.ConnID, ctx.Payload.Username, ctx.Payload.Password)
 	if err != nil {
 		if common.AMCIsEnterprise() {
 			if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
