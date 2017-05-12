@@ -34,7 +34,7 @@ function updateView(dispatch) {
   }
 
   const path = toEntityPath(pathname);
-  const entity = matchAndExtractVariables(pathname, 'url');
+  const entity = matchAndExtracURLVariabes(pathname);
   dispatch(selectPath(path, entity.view));
 }
 
@@ -73,7 +73,10 @@ const pathDefinitions = [{
   entityPath: ':clusterID'
 }, {
   url: 'cluster/:clusterID/node/:nodeHost/view/:view',
-  entityPath: ':clusterID/' + NODES + '/:nodeHost',
+  entityPath: ':clusterID/' + NODES + '/:nodeHost'
+}, {
+  url: 'cluster/:clusterID/udf/:udfName',
+  entityPath: ':clusterID/' + UDF + '/:udfName'
 }];
 
 // generate a url from the entity path for the view
@@ -92,10 +95,16 @@ function toEntityPath(url) {
   return removeSlashes(path);
 }
 
-// match the entityPath and extract the variables fpr key url or entityPath
-export function matchAndExtractVariables(path, key = 'entityPath') {
-  const match = findMatch(path, key);
-  return extractVariables(path, match[key]);
+// match the entityPath and extract the entity path variables
+export function matchAndExtractEntityPathVariabes(entityPath) {
+  const match = findMatch(entityPath, 'entityPath');
+  return extractVariables(entityPath, match.entityPath);
+}
+
+// match the url and extract the path variables
+export function matchAndExtracURLVariabes(url) {
+  const match = findMatch(url, 'url');
+  return extractVariables(url, match.url);
 }
 
 // extract variables from the path for the path definition

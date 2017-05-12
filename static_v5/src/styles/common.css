@@ -33,6 +33,9 @@
 .as-tree-list-item {
   height: 30px;
   line-height: 30px;
+}
+
+.as-tree-node-name {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

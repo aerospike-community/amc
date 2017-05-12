@@ -14,7 +14,7 @@ class EntityTree extends React.Component {
     super(props);
 
     this.state = {
-      contextMenuEntity: null
+      contextMenuEntityPath: null
     };
 
     this.renderTreeNode = this.renderTreeNode.bind(this);
@@ -26,7 +26,7 @@ class EntityTree extends React.Component {
 
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
-    const showContextMenu = this.state.contextMenuEntity === entity;
+    const showContextMenu = this.state.contextMenuEntityPath === entity.path;
     const style = {
       display: 'inline-block',
       marginLeft: '5px'
@@ -40,9 +40,10 @@ class EntityTree extends React.Component {
     const isDisconnected = this.isDisconnected(entity);
 
     return (
-      <div style={style} className={classNames({'as-disconnected': isDisconnected})}
+      <span style={style} className={classNames({'as-disconnected': isDisconnected})}
           onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
-        {entity.name}
+        <span className="as-tree-node-name"> {entity.name} </span>
+
         {showContextMenu &&
          <Dropdown isOpen={true} toggle={() => {}}>
            <DropdownMenu>
@@ -53,7 +54,7 @@ class EntityTree extends React.Component {
               })}
            </DropdownMenu>
          </Dropdown>}
-      </div>
+      </span>
       );
   }
 
@@ -64,13 +65,13 @@ class EntityTree extends React.Component {
     evt.preventDefault();
 
     this.setState({
-      contextMenuEntity: entity
+      contextMenuEntityPath: entity.path
     });
   }
 
   hideContextMenu() {
     this.setState({
-      contextMenuEntity: null
+      contextMenuEntityPath: null,
     });
   }
 
@@ -97,7 +98,7 @@ class EntityTree extends React.Component {
   }
 
   onEntitySelect(entity) {
-    if (this.state.contextMenuEntity !== null) {
+    if (this.state.contextMenuEntityPath !== null) {
       this.hideContextMenu();
       return;
     }
