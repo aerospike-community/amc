@@ -49,9 +49,11 @@ class App extends React.Component {
           {!showLogin && 
           <div className="row pl-0 pr-0">
             <div className="col-2 pl-1 pr-1 as-leftpane">
-              <VisibleClusterConnections />
+              <div>
+                <VisibleClusterConnections />
+              </div>
             </div>
-            <div className="col-10 pl-0 pr-0 as-maincontent">
+            <div className="col-10 offset-2 pl-0 pr-0 as-maincontent">
               <MainDashboard />
             </div>
           </div>}

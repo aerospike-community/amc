@@ -24,7 +24,6 @@ class MainDashboard extends React.Component {
 
     return (
       <div>
-        {currentView.viewType} {currentView.selectedEntityPath} {currentView.view}
         {dashboard}
       </div>
       );

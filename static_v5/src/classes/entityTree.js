@@ -7,8 +7,6 @@ import { toEntityPath } from './urlAndViewSynchronizer';
 //
 // Example: clusterID/NODES/nodeHost/NAMESPACES/namespaceName
 //
-// NOTE: the paths generated should match the entity paths
-// defined in urlAndViewSynchronizer
 
 function toUDF(cluster) {
   const path = toEntityPath(VIEW_TYPE.UDF_OVERVIEW, {

@@ -9,6 +9,11 @@
 
 .as-leftpane {
   border-right: 1px solid lightgray;
+  position: fixed;
+  bottom: 0;
+  top: 60px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .as-toolbar {
@@ -117,4 +122,8 @@
 .as-warning-text {
   color: orange;
   font-size: 12px;
+}
+
+.as-ace-editor {
+  border: 1px solid #e5e5e5;
 }

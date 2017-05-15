@@ -129,10 +129,10 @@ export function authenticateClusterConnection(id, name, password) {
       .then((cluster) => {
         dispatch(authSuccess(cluster));
 
-        // expand first level nodes of the tree
         // TODO find a better way to do this
-        // const path = toClusterPath(cluster);
-        // dispatch(expandEntityNode(path));
+        // expand first level nodes of the tree
+        const path = toClusterPath(cluster);
+        dispatch(expandEntityNode(path));
       })
       .catch((message) => {
         message = message || 'Failed to authenticate';

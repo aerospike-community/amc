@@ -3,6 +3,8 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import 'bootstrap/dist/css/bootstrap.css';
+
 class Tabs extends React.Component {
   constructor(props) {
     super(props);
@@ -15,13 +17,13 @@ class Tabs extends React.Component {
         <nav className="navbar navbar-toggleable-md navbar-light" style={{ background: 'lavender' }}>
           <div className="navbar-collapse">
             <ul className="navbar-nav">
-              names.map((name) => {
+              {names.map((name) => {
                 <li className="nav-item"> 
                   <a className={classNames('nav-link', {active: name === selected})}>  
                     {name}
                   </a> 
                 </li>
-              })
+              })}
             </ul>
           </div>
         </nav>

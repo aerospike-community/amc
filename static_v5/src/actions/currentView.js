@@ -78,7 +78,7 @@ export function selectPath(entityPath, view) {
   if (e.udfName)
     return selectUDF(clusterID, udfName, entityPath, view);
   if (e.setName)
-    return selectSet(clusterID, namespaceName, setName, entityPath, view);
+    return selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view);
   if (e.namespaceName)
     return selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view);
   if (e.nodeHost)

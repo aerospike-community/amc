@@ -1,5 +1,5 @@
 // State of the view is also stored in redux.
-// This provides functionality to keep the data and the url 
+// This module provides functionality to keep the data and the url 
 // in sync.
 //
 // On each view change update the url and vice versa.
@@ -77,8 +77,6 @@ export function updateURL(selectedEntityPath, view) {
 // Here we define path definitions for url and entity path. This helps 
 // to convert a url to an entity path and vice versa.
 //
-// NOTE: the entity paths defined here should match the paths generated
-// for each of the entities in entityTree
 
 const { CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW } = VIEW_TYPE;
 const pathDefinitions = [{
@@ -90,7 +88,7 @@ const pathDefinitions = [{
   entityPath: ':clusterID/' + UDF,
   viewType: UDF_OVERVIEW,
 }, {
-  url: 'cluster/:clusterID/udf/:udfName',
+  url: 'cluster/:clusterID/udf/:udfName/view/:view',
   entityPath: ':clusterID/' + UDF + '/:udfName',
   viewType: UDF,
 }, {

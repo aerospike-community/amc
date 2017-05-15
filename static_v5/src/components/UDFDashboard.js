@@ -60,14 +60,14 @@ class UDFDashboard extends React.Component {
     let contents = <div>  Loading ... </div>;
     if (!this.state.isFetching) {
       contents = (
-        <div>
-          <AceEditor mode="lua" theme="github" readOnly={true} name={this.id} value={this.state.sourceCode}/>
+        <div className="as-ace-editor">
+          <AceEditor width={'100%'} mode="lua" theme="github" readOnly={true} name={this.id} value={this.state.sourceCode}/>
         </div>
       );
     }
     return (
       <div>
-        {this.props.udfName}
+        <h4> {this.props.udfName} </h4>
         {contents}
       </div>
     );
