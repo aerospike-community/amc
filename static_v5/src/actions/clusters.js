@@ -1,4 +1,6 @@
 import { addConnection as addConnectionAPI, authConnection as authConnectionAPI, listConnections } from '../api/clusterConnections';
+import { expandEntityNode } from './entityTree';
+import { toClusterPath } from '../classes/entityTree';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -126,9 +128,14 @@ export function authenticateClusterConnection(id, name, password) {
     authConnectionAPI(id, name, password)
       .then((cluster) => {
         dispatch(authSuccess(cluster));
+
+        // expand first level nodes of the tree
+        // TODO find a better way to do this
+        // const path = toClusterPath(cluster);
+        // dispatch(expandEntityNode(path));
       })
       .catch((message) => {
-        message = message || 'Failed to authenticated';
+        message = message || 'Failed to authenticate';
         dispatch(authFailed(message));
       })
   }

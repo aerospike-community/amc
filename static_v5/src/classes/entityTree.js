@@ -1,28 +1,33 @@
 import { VIEW_TYPE } from './constants';
+import { toEntityPath } from './urlAndViewSynchronizer';
 
 // Each entity is uniquely identified by the path from its cluster.
 // 'path' is defined by the entities it encounters on its traversal 
 // from the cluster root.
 //
 // Example: clusterID/NODES/nodeHost/NAMESPACES/namespaceName
+//
+// NOTE: the paths generated should match the entity paths
+// defined in urlAndViewSynchronizer
 
-export const CLUSTER = 'CLUSTER';
-export const UDF = 'UDF';
-export const NODES = 'NODES';
-export const NAMESPACES = 'NAMESPACES';
-export const SETS = 'SETS';
-
-function toUDF(parentPath, cluster) {
-  const path = parentPath + '/' + UDF;
+function toUDF(cluster) {
+  const path = toEntityPath(VIEW_TYPE.UDF_OVERVIEW, {
+    clusterID: cluster.id,
+  });
   let udfs = {
     path: path,
     name: 'UDF',
-    children: []
+    children: [],
+    isCategory: true, // aggregator of entites
   };
 
   cluster.modules.forEach((udf) => {
+    const path = toEntityPath(VIEW_TYPE.UDF, {
+      clusterID: cluster.id,
+      udfName: udf.name
+    });
     let c = Object.assign({}, udf, {
-      path: path + '/' + udf.name,
+      path: path,
       children: []
     });
     udfs.children.push(c);
@@ -31,23 +36,29 @@ function toUDF(parentPath, cluster) {
   return udfs;
 }
 
-function toNodes(parentPath, cluster) {
-  const path = parentPath + '/' + NODES;
+function toNodes(cluster) {
+  const path = toEntityPath(VIEW_TYPE.NODE_OVERVIEW, {
+    clusterID: cluster.id,
+  });
   let nodes = {
     path: path,
     name: 'Nodes',
-    children: []
+    children: [],
+    isCategory: true, // aggregator of entities
   };
 
   cluster.nodes.forEach((node) => {
-    let npath = path + '/' + node.host;
+    const path = toEntityPath(VIEW_TYPE.NODE, {
+      clusterID: cluster.id,
+      nodeHost: node.host
+    });
     let n = Object.assign({}, node, {
-      path: npath,
+      path: path,
       children: [],
       name: node.host,
     });
     if (Array.isArray(n.namespaces))
-      n.children.push(toNamespaces(npath, n));
+      n.children.push(toNamespaces(cluster, node));
 
     nodes.children.push(n);
   });
@@ -55,38 +66,57 @@ function toNodes(parentPath, cluster) {
   return nodes;
 }
 
-function toNamespaces(parentPath, node) {
-  const path = parentPath + '/' + NAMESPACES;
+function toNamespaces(cluster, node) {
+  const path = toEntityPath(VIEW_TYPE.NAMESPACE_OVERVIEW, {
+    clusterID: cluster.id,
+    nodeHost: node.host
+  });
   let namespaces = {
     path: path,
     name: 'Namespaces',
-    children: []
+    children: [],
+    isCategory: true, // aggregator of entities
   };
 
   node.namespaces.forEach((namespace) => {
-    let npath = path + '/' + namespace.name;
+    const path = toEntityPath(VIEW_TYPE.NAMESPACE, {
+      clusterID: cluster.id,
+      nodeHost: node.host,
+      namespaceName: namespace.name,
+    });
     let ns = Object.assign({}, namespace, {
-      path: npath,
+      path: path,
       children: [],
     });
     if (Array.isArray(ns.sets))
-      ns.children.push(toSets(npath, ns));
+      ns.children.push(toSets(cluster, node, namespace));
     namespaces.children.push(ns);
   });
   return namespaces;
 }
 
-function toSets(parentPath, namespace) {
-  const path = parentPath + '/' + SETS;
+function toSets(cluster, node, namespace) {
+  const path = toEntityPath(VIEW_TYPE.SET_OVERVIEW, {
+    clusterID: cluster.id,
+    nodeHost: node.host,
+    namespaceName: namespace.name,
+  });
   let sets = {
     path: path,
     name: 'Sets',
-    children: []
+    children: [],
+    isCategory: true, // aggregator of entities
   };
 
   namespace.sets.forEach((set) => {
+    const path = toEntityPath(VIEW_TYPE.SET, {
+      clusterID: cluster.id,
+      nodeHost: node.host,
+      namespaceName: namespace.name,
+      setName: set.name
+    });
     let s = Object.assign({}, set, {
-      path: path + '/' + set.name,
+      path: path,
       children: [],
     });
     sets.children.push(s);
@@ -94,13 +124,15 @@ function toSets(parentPath, namespace) {
   return sets;
 }
   
+// convert the cluster into a physical entity tree representation
 export function toPhysicalEntityTree(cluster) {
-  const path = cluster.id;
+  const path = toClusterPath(cluster);
   let root = {
     path: path,
     name: cluster.name,
     isAuthenticated: cluster.isAuthenticated,
     children: [],
+    isCategory: true, // aggregator of entities
   };
 
   if (!cluster.isAuthenticated)
@@ -108,12 +140,18 @@ export function toPhysicalEntityTree(cluster) {
 
   let children = [];
   if (Array.isArray(cluster.modules)) 
-    children.push(toUDF(path, cluster));
+    children.push(toUDF(cluster));
   if (Array.isArray(cluster.nodes)) 
-    children.push(toNodes(path, cluster));
+    children.push(toNodes(cluster));
   
 
   root.children = children;
   return root;
 }
 
+// get cluster path
+export function toClusterPath(cluster) {
+  return toEntityPath(VIEW_TYPE.CLUSTER, {
+    clusterID: cluster.id,
+  });
+}

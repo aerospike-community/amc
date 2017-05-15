@@ -38,9 +38,10 @@ class EntityTree extends React.Component {
       label: 'Disconnect'
     }];
     const isDisconnected = this.isDisconnected(entity);
+    const { isCategory } = entity;
 
     return (
-      <span style={style} className={classNames({'as-disconnected': isDisconnected})}
+      <span style={style} className={classNames({'as-disconnected': isDisconnected, 'as-bold': !isDisconnected && isCategory})}
           onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
         <span className="as-tree-node-name"> {entity.name} </span>
 

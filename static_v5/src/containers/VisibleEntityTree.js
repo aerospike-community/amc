@@ -10,6 +10,7 @@ import { VIEW_TYPE } from '../classes/constants';
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
   let items = [];
+  // trasform each cluster to entity tree representation
   clusters.forEach((c) => {
     const item = toPhysicalEntityTree(c);
     items.push(item);

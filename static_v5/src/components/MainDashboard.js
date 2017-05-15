@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import NodeDashboard from './NodeDashboard';
 import UDFDashboard from './UDFDashboard';
 import { VIEW_TYPE } from '../classes/constants';
-import { matchAndExtractEntityPathVariabes }  from '../classes/urlAndViewSynchronizer';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/common.css';
@@ -14,7 +13,7 @@ class MainDashboard extends React.Component {
   render() {
     const { currentView } = this.props;
     const { entities, viewType } = currentView;
-    const { clusterID, nodeHost, namespaceName, setName, udfName } = entities;
+    const { clusterID, nodeHost, namespaceName, setName, udfName } = currentView;
 
     let dashboard;
 

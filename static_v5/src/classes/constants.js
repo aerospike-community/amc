@@ -3,6 +3,7 @@ export const ENTITY_TYPE = {
   CLUSTER: 'CLUSTER',
   NODE: 'NODE',
   NAMESPACE: 'NAMESPACE',
+  SET: 'SET',
   UDF: 'UDF',
 };
 

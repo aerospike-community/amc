@@ -19,29 +19,35 @@ export default function currentView(state = {
     // the whole path to the selected entity
     // Ex: clusterID/nodeHost/namespaceName
     selectedEntityPath: null,
-    entities: {}, // the entities in the selected path
+
+    // the entities in the selected view
+    // ex: namespace is identified by clusterID, nodeHost, namespaceName
+    clusterID: null,
+    nodeHost: null,
+    namespaceName: null,
+    setName:null,
+    udfName: null,
   }, action) {
+
   let updated;
   const wasInitialized = state.isInitialized;
   switch (action.type) {
     case SELECT_CLUSTER_VIEW:
       updated = Object.assign({}, state, {
-        viewType: VIEW_TYPE.CLUSTER,
         view: action.view,
         selectedEntityPath: action.entityPath,
-      });
-      updated.entities = Object.assign({}, state, {
+
+        viewType: VIEW_TYPE.CLUSTER,
         clusterID: action.clusterID
       });
       break;
 
     case SELECT_NODE_VIEW:
       updated =  Object.assign({}, state, {
-        viewType: VIEW_TYPE.NODE,
         view: action.view,
         selectedEntityPath: action.entityPath,
-      });
-      updated.entities = Object.assign({}, state, {
+
+        viewType: VIEW_TYPE.NODE,
         clusterID: action.clusterID,
         nodeHost: action.nodeHost,
       });
@@ -49,11 +55,10 @@ export default function currentView(state = {
 
     case SELECT_NAMESPACE_VIEW:
       updated = Object.assign({}, state, {
-        viewType: VIEW_TYPE.NAMESPACE,
         view: action.view,
         selectedEntityPath: action.entityPath,
-      });
-      updated.entities = Object.assign({}, state, {
+
+        viewType: VIEW_TYPE.NAMESPACE,
         clusterID: action.clusterID,
         nodeHost: action.nodeHost,
         namespaceName: action.namespaceName,
@@ -62,11 +67,10 @@ export default function currentView(state = {
 
     case SELECT_SET_VIEW:
       updated =  Object.assign({}, state, {
-        viewType: VIEW_TYPE.SET,
         view: action.view,
         selectedEntityPath: action.entityPath,
-      });
-      updated.entities = Object.assign({}, state, {
+
+        viewType: VIEW_TYPE.SET,
         clusterID: action.clusterID,
         nodeHost: action.nodeHost,
         namespaceName: action.namespaceName,
@@ -76,11 +80,10 @@ export default function currentView(state = {
 
     case SELECT_UDF_VIEW:
       updated =  Object.assign({}, state, {
-        viewType: VIEW_TYPE.UDF,
         view: action.view,
         selectedEntityPath: action.entityPath,
-      });
-      updated.entities = Object.assign({}, state, {
+
+        viewType: VIEW_TYPE.UDF,
         clusterID: action.clusterID,
         udfName: action.udfName,
       });

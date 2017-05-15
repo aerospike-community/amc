@@ -20,7 +20,7 @@ class ClusterToolbar extends React.Component {
       <div className="as-toolbar">
         <div className="float-left"> Clusters </div>
         <div className="float-right" onClick={() => this.onToolClick('addCluster')}> 
-          <button className="btn btn-sm btn-link"> Add </button>
+          <button className="btn btn-sm btn-link as-cursor-pointer"> Add </button>
         </div>
         <div className="clearfix"></div>
       </div>
