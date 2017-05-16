@@ -65,7 +65,7 @@ function selectUDF(clusterID, udfName, entityPath, view) {
 }
 
 export const SELECT_START_VIEW = 'SELECT_START_VIEW';
-export function selectStartView() {
+function selectStartView() {
   return {
     type: SELECT_START_VIEW
   };
@@ -86,5 +86,5 @@ export function selectPath(entityPath, view) {
   if (e.clusterID)
     return selectCluster(clusterID, entityPath, view);
 
-  throw new Error(`Unrecognized entity path ${entityPath}`);
+  return selectStartView();
 }

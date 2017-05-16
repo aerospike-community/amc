@@ -97,7 +97,7 @@ export default function currentView(state = {
 
     case SELECT_START_VIEW:
       updated = Object.assign({}, state, {
-        view: VIEW_TYPE.START_VIEW
+        viewType: VIEW_TYPE.START_VIEW
       });
       break;
 

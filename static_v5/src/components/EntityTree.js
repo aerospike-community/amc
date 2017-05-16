@@ -27,10 +27,6 @@ class EntityTree extends React.Component {
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
     const showContextMenu = this.state.contextMenuEntityPath === entity.path;
-    const style = {
-      display: 'inline-block',
-      marginLeft: '5px'
-    };
     // TODO options based on entity type
     const options = [{
       label: 'Connect'
@@ -41,7 +37,7 @@ class EntityTree extends React.Component {
     const { isCategory } = entity;
 
     return (
-      <span style={style} className={classNames({'as-disconnected': isDisconnected, 'as-bold': !isDisconnected && isCategory})}
+      <span className={classNames({'as-disconnected': isDisconnected, 'as-bold': !isDisconnected && isCategory})}
           onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
         <span className="as-tree-node-name"> {entity.name} </span>
 

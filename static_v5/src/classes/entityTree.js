@@ -111,7 +111,7 @@ function toSets(cluster, node, namespace) {
       clusterID: cluster.id,
       nodeHost: node.host,
       namespaceName: namespace.name,
-      setName: set.name
+      setName: set.name,
     });
     let s = Object.assign({}, set, {
       path: path,

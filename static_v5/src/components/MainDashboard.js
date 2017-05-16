@@ -21,6 +21,8 @@ class MainDashboard extends React.Component {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
     else if (viewType === VIEW_TYPE.UDF)
       dashboard = <UDFDashboard clusterID={clusterID} udfName={udfName} />
+    else
+      dashboard = viewType;
 
     return (
       <div>

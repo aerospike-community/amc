@@ -23,6 +23,7 @@ export default function(state = {
     // all the clusters of the user.
     // not all of them are authenticated
     isFetching: false,
+    isInitialized: false,
     items: [],
 
   }, action) {
@@ -52,6 +53,7 @@ function clusters(state, action) {
     case RECEIVE_CLUSTERS:
       return Object.assign({}, state, {
         isFetching: false,
+        isInitialized: true,
         items: action.clusters || [],
       });
     case AUTHENTICATED_CLUSTER_CONNECTION:

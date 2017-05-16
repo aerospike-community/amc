@@ -127,3 +127,8 @@
 .as-ace-editor {
   border: 1px solid #e5e5e5;
 }
+
+.as-cluster-connection {
+  border-bottom: 1px solid darkgray;
+  background: #eee;
+}

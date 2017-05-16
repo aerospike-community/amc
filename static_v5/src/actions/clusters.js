@@ -43,7 +43,7 @@ export function addClusterConnection(connection) {
         dispatch(fetchClusters());
       })
       .catch((response) => {
-        // TODO
+        console.log('Error');
       });
   }
 }
@@ -64,6 +64,24 @@ function receiveClusters(clusters = []) {
     type: RECEIVE_CLUSTERS,
     clusters
   };
+}
+
+export function initClusters() {
+  return (dispatch) => {
+    dispatch(requestClusters());
+
+    listConnections()
+      .then((connections) => {
+        dispatch(receiveClusters(connections));
+        connections.forEach((conn) => {
+          if (conn.connectOnLogin) // automatically connect to 'clusters without authentication'
+            authenticateClusterConnection(conn.id, '', '');
+        });
+      })
+      .catch(() => {
+        dispatch(receiveClusters([]))
+      });
+  }
 }
 
 export function fetchClusters() {

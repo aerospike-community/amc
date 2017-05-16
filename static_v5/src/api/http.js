@@ -31,8 +31,12 @@ function promise(p, processResponse) {
 }
 
 function resolveResponse(response) {
-  if (response.ok)
+  if (response.ok) {
+    if (response.status === 204) // no content
+      return JSON.stringify('');
+
     return response.json();
+  }
 
   return new Promise((resolve, reject) => {
     response.text().then((message) => {

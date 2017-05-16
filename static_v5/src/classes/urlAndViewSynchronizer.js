@@ -36,11 +36,6 @@ function updateView(dispatch) {
     return;
   currentPathname = pathname;
 
-  if (pathname === '/') {
-    dispatch(selectStartView());
-    return;
-  }
-
   const path = urlToEntityPath(pathname);
   const entity = matchAndExtracURLVariabes(pathname);
   dispatch(selectPath(path, entity.view));
@@ -78,41 +73,45 @@ export function updateURL(selectedEntityPath, view) {
 // to convert a url to an entity path and vice versa.
 //
 
-const { CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW } = VIEW_TYPE;
+const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW } = VIEW_TYPE;
 const pathDefinitions = [{
-  url: 'cluster/:clusterID/view/:view',
+  url: '',
+  entityPath: '',
+  viewType: START_VIEW
+}, {
+  url: 'cluster/:clusterID/:view',
   entityPath: ':clusterID',
   viewType: CLUSTER,
 }, {
-  url: 'cluster/:clusterID/udfOverview/:view',
+  url: 'udf-overview/:clusterID/:view',
   entityPath: ':clusterID/' + UDF,
   viewType: UDF_OVERVIEW,
 }, {
-  url: 'cluster/:clusterID/udf/:udfName/view/:view',
+  url: 'udf/:clusterID/:udfName/:view',
   entityPath: ':clusterID/' + UDF + '/:udfName',
   viewType: UDF,
 }, {
-  url: 'cluster/:clusterID/node/:nodeHost/view/:view',
+  url: 'node/:clusterID/:nodeHost/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost',
   viewType: NODE,
 }, {
-  url: 'cluster/:clusterID/node/:nodeHost/namespace/:namespaceName/view/:view',
+  url: 'namespace/:clusterID/:nodeHost/:namespaceName/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName',
   viewType: NAMESPACE, 
 }, {
-  url: 'cluster/:clusterID/node/:nodeHost/namespace/:namespaceName/set/:setName/view/:view',
+  url: 'set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET + '/:setName',
   viewType: SET, 
 }, {
-  url: 'cluster/:clusterID/nodeOverview/:view',
+  url: 'node-overview/:clusterID/:view',
   entityPath: ':clusterID/' + NODE,
   viewType: NODE_OVERVIEW, 
 }, {
-  url: 'cluster/:clusterID/namespaceOverview/:nodeHost/:view',
+  url: 'namespace-overview/:clusterID/:nodeHost/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE,
   viewType: NAMESPACE_OVERVIEW, 
 }, {
-  url: 'cluster/:clusterID/setOverview/:nodeHost/:namespaceName/:view',
+  url: 'set-overview/:clusterID/:nodeHost/:namespaceName/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET,
   viewType: SET_OVERVIEW, 
 }];
@@ -147,12 +146,18 @@ export function toEntityPath(viewType, entities) {
 
 // match the entityPath and extract the entity path variables
 export function matchAndExtractEntityPathVariabes(entityPath) {
+  if (entityPath.length === 0)
+    return {};
+
   const match = findMatch(entityPath, 'entityPath');
   return extractVariables(entityPath, match.entityPath);
 }
 
 // match the url and extract the path variables
 export function matchAndExtracURLVariabes(url) {
+  if (url.length === 0)
+    return {};
+
   const match = findMatch(url, 'url');
   return extractVariables(url, match.url);
 }

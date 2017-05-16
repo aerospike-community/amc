@@ -1,6 +1,6 @@
-// type of cluster entities
+// type of cluster entities as returned by the server
 export const ENTITY_TYPE = {
-  CLUSTER: 'CLUSTER',
+  CLUSTER: 'CONNECTION',
   NODE: 'NODE',
   NAMESPACE: 'NAMESPACE',
   SET: 'SET',

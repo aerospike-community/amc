@@ -26,7 +26,7 @@ class AddClusterModal extends React.Component {
     this.onAddConnection = this.onAddConnection.bind(this);
     this.onCancel = this.onCancel.bind(this);
 
-    this.onNameChange = this.onNameChange.bind(this);
+    this.onInputChange = this.onInputChange.bind(this);
     this.onSeedChange = this.onSeedChange.bind(this);
     this.removeSeed = this.removeSeed.bind(this);
     this.addSeed = this.addSeed.bind(this);
@@ -43,7 +43,7 @@ class AddClusterModal extends React.Component {
     const {clusterName, seeds} = this.state;
     const connection = {
       name: clusterName,
-      seeds: seeds
+      seeds: seeds,
     };
     this.props.addConnection(connection);
   }
@@ -52,11 +52,13 @@ class AddClusterModal extends React.Component {
     this.props.cancel();
   }
 
-  onNameChange(evt) {
-    const value = evt.target.value;
+  onInputChange(evt) {
+    const target = evt.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
     this.setState({
-      clusterName: value
+      [name]: value
     });
   }
 
@@ -165,9 +167,8 @@ class AddClusterModal extends React.Component {
                               'has-warning': nameWarning
                             })}>
               <label> Cluster Name </label>
-              <input type="text" className={classNames('form-control', {
-                                              'form-control-warning': nameWarning
-                                            })} disabled={inProgress} onChange={this.onNameChange} name="clusterName" value={this.state.clusterName} />
+              <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} 
+                    disabled={inProgress} onChange={this.onInputChange} name="clusterName" value={this.state.clusterName} />
             </div>
             <legend>
               Seeds
