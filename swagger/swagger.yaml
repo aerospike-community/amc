@@ -1940,17 +1940,17 @@ definitions:
     type: object
   SaveModulePayload:
     example:
-      content: In hic doloremque facere perspiciatis ab et.
       name: reports
+      source: In hic doloremque facere perspiciatis ab et.
       type: LUA
     properties:
-      content:
-        description: Module's Source Code
-        example: In hic doloremque facere perspiciatis ab et.
-        type: string
       name:
         description: Module's Name
         example: reports
+        type: string
+      source:
+        description: Module's Source Code
+        example: In hic doloremque facere perspiciatis ab et.
         type: string
       type:
         description: Module's type
@@ -1959,7 +1959,7 @@ definitions:
         type: string
     required:
     - name
-    - content
+    - source
     - type
     title: SaveModulePayload
     type: object
@@ -2346,9 +2346,13 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/SaveModulePayload'
+      produces:
+      - application/vnd.aerospike.amc.connection.modules.response+json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcConnectionModulesResponseFull'
         "400":
           description: Bad Request
         "401":

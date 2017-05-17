@@ -102,19 +102,33 @@ func (c *ModuleController) Save(ctx *app.SaveModuleContext) error {
 
 	cluster, err := getConnectionClusterById(ctx.ConnID)
 	if err != nil {
+		panic(err)
 		return ctx.BadRequest(err.Error())
 	}
 
 	// No need to verify the lang; it is checked with a pattern on API
-	if err := cluster.CreateUDF(ctx.Payload.Name, ctx.Payload.Content, as.Language(strings.ToUpper(ctx.Payload.Type))); err != nil {
+	if err := cluster.CreateUDF(ctx.Payload.Name, ctx.Payload.Source, as.Language(strings.ToUpper(ctx.Payload.Type))); err != nil {
+		panic(err)
 		return ctx.BadRequest(err.Error())
 	}
 
 	// wait for different nodes to sync up
 	time.Sleep(1 * time.Second)
 
+	udf, err := cluster.GetUDF(ctx.Payload.Name)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// ModuleController_Show: end_implement
+	res := &app.AerospikeAmcConnectionModulesResponseFull{
+		Name:   &ctx.Payload.Name,
+		Source: udf.TryStringP("content", ""),
+		Type:   udf.TryStringP("type", ""),
+	}
+
 	// ModuleController_Save: end_implement
-	return ctx.NoContent()
+	return ctx.OKFull(res)
 }
 
 // Show runs the show action.

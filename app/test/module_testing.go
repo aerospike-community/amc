@@ -748,11 +748,11 @@ func SaveModuleInternalServerError(t goatest.TInterface, ctx context.Context, se
 	return rw
 }
 
-// SaveModuleNoContent runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
+// SaveModuleOK runs the method Save of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveModuleNoContent(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ModuleController, connID string, payload *app.SaveModulePayload) http.ResponseWriter {
+func SaveModuleOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ModuleController, connID string, payload *app.SaveModulePayload) (http.ResponseWriter, *app.AerospikeAmcConnectionModulesResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -778,7 +778,7 @@ func SaveModuleNoContent(t goatest.TInterface, ctx context.Context, service *goa
 			panic(err) // bug
 		}
 		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil
+		return nil, nil
 	}
 
 	// Setup request context
@@ -809,12 +809,97 @@ func SaveModuleNoContent(t goatest.TInterface, ctx context.Context, service *goa
 	if __err != nil {
 		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
 	}
-	if rw.Code != 204 {
-		t.Errorf("invalid response status code: got %+v, expected 204", rw.Code)
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcConnectionModulesResponse
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcConnectionModulesResponse)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcConnectionModulesResponse", resp)
+		}
 	}
 
 	// Return results
-	return rw
+	return rw, mt
+}
+
+// SaveModuleOKFull runs the method Save of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func SaveModuleOKFull(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ModuleController, connID string, payload *app.SaveModulePayload) (http.ResponseWriter, *app.AerospikeAmcConnectionModulesResponseFull) {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil, nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/modules", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ModuleTest"), rw, req, prms)
+	saveCtx, __err := app.NewSaveModuleContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	saveCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Save(saveCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcConnectionModulesResponseFull
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcConnectionModulesResponseFull)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcConnectionModulesResponseFull", resp)
+		}
+	}
+
+	// Return results
+	return rw, mt
 }
 
 // SaveModuleUnauthorized runs the method Save of the given controller with the given parameters and payload.

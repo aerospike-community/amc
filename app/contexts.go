@@ -673,10 +673,10 @@ func NewSaveModuleContext(ctx context.Context, r *http.Request, service *goa.Ser
 
 // saveModulePayload is the module save action payload.
 type saveModulePayload struct {
-	// Module's Source Code
-	Content *string `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Module's Name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Module's Source Code
+	Source *string `form:"source,omitempty" json:"source,omitempty" xml:"source,omitempty"`
 	// Module's type
 	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
 }
@@ -686,8 +686,8 @@ func (payload *saveModulePayload) Validate() (err error) {
 	if payload.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
 	}
-	if payload.Content == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "content"))
+	if payload.Source == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "source"))
 	}
 	if payload.Type == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
@@ -703,11 +703,11 @@ func (payload *saveModulePayload) Validate() (err error) {
 // Publicize creates SaveModulePayload from saveModulePayload
 func (payload *saveModulePayload) Publicize() *SaveModulePayload {
 	var pub SaveModulePayload
-	if payload.Content != nil {
-		pub.Content = *payload.Content
-	}
 	if payload.Name != nil {
 		pub.Name = *payload.Name
+	}
+	if payload.Source != nil {
+		pub.Source = *payload.Source
 	}
 	if payload.Type != nil {
 		pub.Type = *payload.Type
@@ -717,10 +717,10 @@ func (payload *saveModulePayload) Publicize() *SaveModulePayload {
 
 // SaveModulePayload is the module save action payload.
 type SaveModulePayload struct {
-	// Module's Source Code
-	Content string `form:"content" json:"content" xml:"content"`
 	// Module's Name
 	Name string `form:"name" json:"name" xml:"name"`
+	// Module's Source Code
+	Source string `form:"source" json:"source" xml:"source"`
 	// Module's type
 	Type string `form:"type" json:"type" xml:"type"`
 }
@@ -730,8 +730,8 @@ func (payload *SaveModulePayload) Validate() (err error) {
 	if payload.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
 	}
-	if payload.Content == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "content"))
+	if payload.Source == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "source"))
 	}
 	if payload.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
@@ -742,10 +742,10 @@ func (payload *SaveModulePayload) Validate() (err error) {
 	return
 }
 
-// NoContent sends a HTTP response with status code 204.
-func (ctx *SaveModuleContext) NoContent() error {
-	ctx.ResponseData.WriteHeader(204)
-	return nil
+// OKFull sends a HTTP response with status code 200.
+func (ctx *SaveModuleContext) OKFull(r *AerospikeAmcConnectionModulesResponseFull) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.modules.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
 // BadRequest sends a HTTP response with status code 400.

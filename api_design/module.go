@@ -45,16 +45,18 @@ var _ = Resource("module", func() {
 			Member("name", String, "Module's Name", func() {
 				Example("reports")
 			})
-			Member("content", String, "Module's Source Code")
+			Member("source", String, "Module's Source Code")
 			Member("type", String, "Module's type", func() {
 				Example("LUA")
 				Pattern("(?i)LUA")
 			})
 
-			Required("name", "content", "type")
+			Required("name", "source", "type")
 		})
 
-		Response(NoContent)
+		Response(OK, func() {
+			Media(ConnectionModuleResponseMedia, "full")
+		})
 		Response(BadRequest, String)
 		Response(Forbidden)
 		Response(Unauthorized)
