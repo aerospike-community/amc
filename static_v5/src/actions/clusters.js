@@ -147,9 +147,7 @@ export function authenticateClusterConnection(id, name, password) {
       .then((cluster) => {
         dispatch(authSuccess(cluster));
 
-        // TODO find a better way to do this
-        // expand first level nodes of the tree
-        const path = toClusterPath(cluster);
+        const path = toClusterPath(cluster.id);
         dispatch(expandEntityNode(path));
       })
       .catch((message) => {

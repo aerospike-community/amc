@@ -146,11 +146,14 @@ export function toEntityPath(viewType, entities) {
 
 // match the entityPath and extract the entity path variables
 export function matchAndExtractEntityPathVariabes(entityPath) {
-  if (entityPath.length === 0)
-    return {};
-
   const match = findMatch(entityPath, 'entityPath');
   return extractVariables(entityPath, match.entityPath);
+}
+
+// get the view type for the entity path
+export function getEntityPathViewType(entityPath) {
+  const match = findMatch(entityPath, 'entityPath');
+  return match.viewType;
 }
 
 // match the url and extract the path variables
@@ -239,8 +242,8 @@ function isDefinitionMatch(path, pathDefinition) {
   path = removeSlashes(path);
   pathDefinition = removeSlashes(pathDefinition);
 
-  let defItems = pathDefinition.split('/');
-  let pathItems = path.split('/');
+  let defItems = pathDefinition.length === 0 ? [] : pathDefinition.split('/');
+  let pathItems = path.length === 0 ? [] : path.split('/');
   
   if (defItems.length !== pathItems.length)
     return false;

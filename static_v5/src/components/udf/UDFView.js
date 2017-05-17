@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -10,20 +9,23 @@ import 'brace/theme/github';
 
 import 'bootstrap/dist/css/bootstrap.css';
 
-import { getUDF } from '../api/udf';
-import { nextNumber } from '../classes/util';
+import { getUDF } from '../../api/udf';
+import { nextNumber } from '../../classes/util';
 
-class UDFDashboard extends React.Component {
+import { Button } from 'reactstrap';
+
+class UDFView extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isFetching: true,
+      isFetching: false,
       sourceCode: '',
       udfType: '',
     };
 
-    this.id = 'lua_editor' + nextNumber();
+    this.id = 'udf_editor' + nextNumber();
+    this.onEdit = this.onEdit.bind(this);
   }
 
 	componentDidMount() {
@@ -56,27 +58,35 @@ class UDFDashboard extends React.Component {
       });
   }
 
+  onEdit() {
+    this.props.onEditUDF();
+  }
+
   render() {
-    let contents = <div>  Loading ... </div>;
-    if (!this.state.isFetching) {
-      contents = (
-        <div className="as-ace-editor">
-          <AceEditor width={'100%'} mode="lua" theme="github" readOnly={true} name={this.id} value={this.state.sourceCode}/>
-        </div>
-      );
-    }
+    if (this.state.isFetching) 
+      return <div> Loading ... </div>;
+
     return (
       <div>
         <h4> {this.props.udfName} </h4>
-        {contents}
+        <div className="as-ace-editor">
+          <AceEditor width={'100%'} mode="lua" readOnly={true} theme="github" name={this.id} value={this.state.sourceCode} />
+        </div>
+        <div>
+          <Button color="primary" size="sm" onClick={this.onEdit}> Edit </Button>
+        </div>
       </div>
     );
   }
 }
 
-UDFDashboard.PropTypes = {
+UDFView.PropTypes = {
   clusterID: PropTypes.string,
-  udfName: PropTypes.string
+  udfName: PropTypes.string,
+  // callback to edit the currently viewing udf
+  // onEditUDF()
+  onEditUDF: PropTypes.func,
 };
 
-export default UDFDashboard;
+export default UDFView;
+

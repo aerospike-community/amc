@@ -35,8 +35,7 @@ class Seed extends React.Component {
           <input className="form-control" type="text" name="tlsName" placeholder="TLS Name" onChange={this.props.onInputChange} value={tlsName} />
         </div>
         <div className="col-3">
-          <Button className="btn btn-sm" style={{ marginTop: 5 }} onClick={onClick}>
-            {name} </Button>
+          <Button size="sm" style={{ marginTop: 5 }} onClick={onClick}> {name} </Button>
         </div>
       </div>
       );

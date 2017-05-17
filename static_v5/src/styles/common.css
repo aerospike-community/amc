@@ -128,7 +128,7 @@
   border: 1px solid #e5e5e5;
 }
 
-.as-cluster-connection {
+.as-tree-root {
   border-bottom: 1px solid darkgray;
-  background: #eee;
+  margin-top: 20px;
 }

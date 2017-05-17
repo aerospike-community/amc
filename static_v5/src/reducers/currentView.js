@@ -1,6 +1,6 @@
 import { SELECT_NODE_VIEW, SELECT_CLUSTER_VIEW, INITIALIZE_VIEW } from '../actions/currentView';
 import { SELECT_START_VIEW, SELECT_NAMESPACE_VIEW, SELECT_SET_VIEW } from '../actions/currentView';
-import { SELECT_UDF_VIEW } from '../actions/currentView';
+import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW } from '../actions/currentView';
 import { VIEW_TYPE } from '../classes/constants';
 import { updateURL } from '../classes/urlAndViewSynchronizer';
 
@@ -86,6 +86,16 @@ export default function currentView(state = {
         viewType: VIEW_TYPE.UDF,
         clusterID: action.clusterID,
         udfName: action.udfName,
+      });
+      break;
+
+    case SELECT_UDF_OVERVIEW:
+      updated =  Object.assign({}, state, {
+        view: action.view, 
+        selectedEntityPath: action.entityPath,
+
+        viewType: VIEW_TYPE.UDF_OVERVIEW,
+        clusterID: action.clusterID,
       });
       break;
 

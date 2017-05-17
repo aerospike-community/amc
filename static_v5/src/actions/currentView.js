@@ -1,4 +1,6 @@
-import { matchAndExtractEntityPathVariabes } from '../classes/urlAndViewSynchronizer';
+import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from '../classes/urlAndViewSynchronizer';
+import { VIEW_TYPE } from '../classes/constants';
+import { toUDFOverviewPath } from '../classes/entityTree';
 
 export const INITIALIZE_VIEW = 'INITIALIZE_VIEW';
 export function initView() {
@@ -71,20 +73,42 @@ function selectStartView() {
   };
 }
 
+export const SELECT_UDF_OVERVIEW = 'SELECT_UDF_OVERVIEW';
+export function selectUDFOverview(clusterID, view) {
+  const path = toUDFOverviewPath(clusterID);
+  return {
+    type: SELECT_UDF_OVERVIEW,
+    clusterID: clusterID,
+    entityPath: path,
+    view: view
+  };
+}
+
 export function selectPath(entityPath, view) {
   const e = matchAndExtractEntityPathVariabes(entityPath);
   const { clusterID, udfName, namespaceName, setName, nodeHost } = e;
+  const viewType = getEntityPathViewType(entityPath);
 
-  if (e.udfName)
+  switch (viewType) {
+  case VIEW_TYPE.UDF:
     return selectUDF(clusterID, udfName, entityPath, view);
-  if (e.setName)
-    return selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view);
-  if (e.namespaceName)
-    return selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view);
-  if (e.nodeHost)
-    return selectNode(clusterID, nodeHost, entityPath, view);
-  if (e.clusterID)
+
+  case VIEW_TYPE.UDF_OVERVIEW:
+    return selectUDFOverview(clusterID, view);
+
+  case VIEW_TYPE.CLUSTER:
     return selectCluster(clusterID, entityPath, view);
 
-  return selectStartView();
+  case VIEW_TYPE.NODE:
+    return selectNode(clusterID, nodeHost, entityPath, view);
+
+  case VIEW_TYPE.NAMESPACE:
+    return selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view);
+
+  case VIEW_TYPE.SET:
+    return selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view);
+
+  default:
+    return selectStartView();
+  }
 }
