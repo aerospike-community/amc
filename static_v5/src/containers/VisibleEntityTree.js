@@ -10,6 +10,7 @@ import { VIEW_TYPE } from '../classes/constants';
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
   let items = [];
+  // trasform each cluster to entity tree representation
   clusters.forEach((c) => {
     const item = toPhysicalEntityTree(c);
     items.push(item);
@@ -25,7 +26,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEntitySelect: (entity, view = 'default') => {
+    onEntitySelect: (entity, view = '') => {
       dispatch(selectPath(entity.path, view));
     },
 
@@ -34,7 +35,8 @@ const mapDispatchToProps = (dispatch) => {
         dispatch(displayAuthClusterConnection(true, entity.path));
       else if (action === 'Disconnect')
         dispatch(disconnectCluster(entity.path));
-      // else TODO
+      else // TODO
+        dispatch(selectPath(entity.path, action));
     },
 
     onNodeExpand: (node) => {

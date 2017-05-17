@@ -6,6 +6,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.css';
 import '../styles/common.css';
 
+import { Button } from 'reactstrap';
+
 class ClusterToolbar extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +22,7 @@ class ClusterToolbar extends React.Component {
       <div className="as-toolbar">
         <div className="float-left"> Clusters </div>
         <div className="float-right" onClick={() => this.onToolClick('addCluster')}> 
-          <button className="btn btn-sm btn-link"> Add </button>
+          <Button color="link" className="as-cursor-pointer"> Add </Button>
         </div>
         <div className="clearfix"></div>
       </div>

@@ -5,6 +5,7 @@ import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
 import { objectPropType, nextNumber } from '../classes/util';
+import { VIEW_TYPE_ACTIONS } from '../classes/constants';
 import Tree from './Tree';
 
 // Display all the clusters and its entites 
@@ -24,23 +25,24 @@ class EntityTree extends React.Component {
     this.onNodeExpand = this.onNodeExpand.bind(this);
   }
 
+  getOptions(viewType) {
+    let options = VIEW_TYPE_ACTIONS[viewType];
+    return options.map((o) => {
+      return {
+        label: o
+      };
+    });
+  }
+
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
     const showContextMenu = this.state.contextMenuEntityPath === entity.path;
-    const style = {
-      display: 'inline-block',
-      marginLeft: '5px'
-    };
-    // TODO options based on entity type
-    const options = [{
-      label: 'Connect'
-    }, {
-      label: 'Disconnect'
-    }];
+    const options = this.getOptions(entity.viewType);
     const isDisconnected = this.isDisconnected(entity);
+    const { isCategory } = entity;
 
     return (
-      <span style={style} className={classNames({'as-disconnected': isDisconnected})}
+      <span className={classNames({'as-disconnected': isDisconnected, 'as-bold': !isDisconnected && isCategory})}
           onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
         <span className="as-tree-node-name"> {entity.name} </span>
 
@@ -107,7 +109,12 @@ class EntityTree extends React.Component {
       return;
     }
 
-    this.props.onEntitySelect(entity);
+    // select the default view on click
+    // const options = VIEW_TYPE_ACTIONS[entity.viewType];
+    // const view = options.default;
+    // FIXME
+    const view = 'View';
+    this.props.onEntitySelect(entity, view);
   }
 
   onContextMenuClick(entity, action) {

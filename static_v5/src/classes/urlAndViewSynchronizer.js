@@ -1,16 +1,23 @@
 // State of the view is also stored in redux.
-// This provides functionality to keep the data and the url 
+// This module provides functionality to keep the data and the url 
 // in sync.
+//
+// On each view change update the url and vice versa.
+// Only functionality needed is to convert between urls and the view.
+// The view in our case is captured completely by the path to the selected
+// entity in the tree and the view (of the entity).
+//
+// SEE below for how the entity path and the url is kept in sync.
 
 import createHistory from 'history/createHashHistory';
 import { VIEW_TYPE } from './constants';
 import { removeTrailingSlash, removeLeadingSlash } from './util';
 import { initView, selectPath, selectStartView } from '../actions/currentView';
-import { UDF, NODES, NAMESPACES, SETS }  from './entityTree';
 
 const history = createHistory();
 let currentPathname = null;
 
+// initialize the view based on url and set up the listener for url changes
 export function init(currentView, dispatch) {
   if (!currentView.isInitialized) {
     updateView(dispatch);
@@ -21,6 +28,7 @@ export function init(currentView, dispatch) {
   history.listen(() => updateView(dispatch));
 }
 
+// update view based on the current url
 function updateView(dispatch) {
   // prevent infinite loop
   const { pathname } = history.location;
@@ -28,12 +36,7 @@ function updateView(dispatch) {
     return;
   currentPathname = pathname;
 
-  if (pathname === '/') {
-    dispatch(selectStartView());
-    return;
-  }
-
-  const path = toEntityPath(pathname);
+  const path = urlToEntityPath(pathname);
   const entity = matchAndExtracURLVariabes(pathname);
   dispatch(selectPath(path, entity.view));
 }
@@ -68,15 +71,49 @@ export function updateURL(selectedEntityPath, view) {
 
 // Here we define path definitions for url and entity path. This helps 
 // to convert a url to an entity path and vice versa.
+//
+
+const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW } = VIEW_TYPE;
 const pathDefinitions = [{
-  url: 'cluster/:clusterID/view/:view',
-  entityPath: ':clusterID'
+  url: '',
+  entityPath: '',
+  viewType: START_VIEW
 }, {
-  url: 'cluster/:clusterID/node/:nodeHost/view/:view',
-  entityPath: ':clusterID/' + NODES + '/:nodeHost'
+  url: 'cluster/:clusterID/:view',
+  entityPath: ':clusterID',
+  viewType: CLUSTER,
 }, {
-  url: 'cluster/:clusterID/udf/:udfName',
-  entityPath: ':clusterID/' + UDF + '/:udfName'
+  url: 'udf-overview/:clusterID/:view',
+  entityPath: ':clusterID/' + UDF,
+  viewType: UDF_OVERVIEW,
+}, {
+  url: 'udf/:clusterID/:udfName/:view',
+  entityPath: ':clusterID/' + UDF + '/:udfName',
+  viewType: UDF,
+}, {
+  url: 'node/:clusterID/:nodeHost/:view',
+  entityPath: ':clusterID/' + NODE + '/:nodeHost',
+  viewType: NODE,
+}, {
+  url: 'namespace/:clusterID/:nodeHost/:namespaceName/:view',
+  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName',
+  viewType: NAMESPACE, 
+}, {
+  url: 'set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
+  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET + '/:setName',
+  viewType: SET, 
+}, {
+  url: 'node-overview/:clusterID/:view',
+  entityPath: ':clusterID/' + NODE,
+  viewType: NODE_OVERVIEW, 
+}, {
+  url: 'namespace-overview/:clusterID/:nodeHost/:view',
+  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE,
+  viewType: NAMESPACE_OVERVIEW, 
+}, {
+  url: 'set-overview/:clusterID/:nodeHost/:namespaceName/:view',
+  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET,
+  viewType: SET_OVERVIEW, 
 }];
 
 // generate a url from the entity path for the view
@@ -88,11 +125,23 @@ function toURL(entityPath, view) {
 }
 
 // generate an entity path from the url
-function toEntityPath(url) {
+function urlToEntityPath(url) {
   const match = findMatch(url, 'url');
   const variables = extractVariables(url, match.url);
   let path = insertVariables(match.entityPath, variables);
   return removeSlashes(path);
+}
+
+// generate the entity path for the given view type
+// entities is an object with 
+// keys = [clusterID, nodeHost, udfName, namespaceName, setName]
+export function toEntityPath(viewType, entities) {
+  const pathDef = pathDefinitions.find((p) => p.viewType === viewType);
+  if (!pathDef)
+    throw new Error(`No match found for view type=${viewType}`);
+
+  const path = insertVariables(pathDef.entityPath, entities);
+  return removeLeadingSlash(path);
 }
 
 // match the entityPath and extract the entity path variables
@@ -101,8 +150,17 @@ export function matchAndExtractEntityPathVariabes(entityPath) {
   return extractVariables(entityPath, match.entityPath);
 }
 
+// get the view type for the entity path
+export function getEntityPathViewType(entityPath) {
+  const match = findMatch(entityPath, 'entityPath');
+  return match.viewType;
+}
+
 // match the url and extract the path variables
 export function matchAndExtracURLVariabes(url) {
+  if (url.length === 0)
+    return {};
+
   const match = findMatch(url, 'url');
   return extractVariables(url, match.url);
 }
@@ -141,6 +199,9 @@ function insertVariables(pathDefinition, variables) {
       let k = extractVariableName(defItem);
       let v = variables[k];
       path += '/' + v;
+
+      if (!v) 
+        throw new Error(`Variable=${k} not defined for path ${pathDefinition}`);
     } else { // insert string item
       path += '/' + defItem;
     }
@@ -181,8 +242,8 @@ function isDefinitionMatch(path, pathDefinition) {
   path = removeSlashes(path);
   pathDefinition = removeSlashes(pathDefinition);
 
-  let defItems = pathDefinition.split('/');
-  let pathItems = path.split('/');
+  let defItems = pathDefinition.length === 0 ? [] : pathDefinition.split('/');
+  let pathItems = path.length === 0 ? [] : path.split('/');
   
   if (defItems.length !== pathItems.length)
     return false;

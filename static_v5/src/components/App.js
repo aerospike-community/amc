@@ -8,7 +8,6 @@ import MainDashboard from './MainDashboard';
 import Header from './Header';
 import Footer from './Footer';
 
-import { fetchClusters } from '../actions/clusters';
 import { init as initAuth } from '../actions/authenticate';
 import { init as initURLAndViewSync } from '../classes/urlAndViewSynchronizer';
 
@@ -28,14 +27,12 @@ class App extends React.Component {
   componentWillReceiveProps(nextProps) {
     const { dispatch, currentView, authentication } = this.props;
     if (!authentication.success && nextProps.authentication.success) {
-      this.props.dispatch(fetchClusters());
       initURLAndViewSync(currentView, dispatch);
     }
   }
 
   render() {
-    const main = <h3> Main Content </h3>;
-    // FIXME this should not be here
+    // FIXME should this be here
     const showLogin = !this.props.authentication.success;
 
     return (
@@ -48,10 +45,12 @@ class App extends React.Component {
           </div>
           {!showLogin && 
           <div className="row pl-0 pr-0">
-            <div className="col-2 pl-1 pr-1 as-leftpane">
-              <VisibleClusterConnections />
+            <div className="col-2 pr-1 as-leftpane">
+              <div>
+                <VisibleClusterConnections />
+              </div>
             </div>
-            <div className="col-10 pl-0 pr-0 as-maincontent">
+            <div className="col-10 offset-2 pl-0 pr-0 as-maincontent">
               <MainDashboard />
             </div>
           </div>}

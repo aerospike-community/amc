@@ -30,7 +30,7 @@ class Tree extends React.Component {
   renderTree(node, depth) {
     const expanded = this.props.isExpanded(node);
     const renderNode = this.props.renderNode;
-    const {label, children} = node;
+    const {label, children, path} = node;
     const hasChildren = Array.isArray(children) && children.length > 0;
     const isSelected = this.props.isNodeSelected(node);
     const style = {
@@ -38,8 +38,8 @@ class Tree extends React.Component {
       cursor: 'pointer',
     };
     let tree = (
-    <div key={label}>
-      <div className={classNames('as-tree-list-item', {'as-selected': isSelected})}>
+    <div key={path}>
+      <div className={classNames('as-tree-list-item', 'as-selectable', {'as-selected': isSelected, 'as-tree-root': depth === 0})}>
         <span className={classNames({
                           'as-arrow-down': hasChildren && expanded, 
                           'as-arrow-right': hasChildren && !expanded,

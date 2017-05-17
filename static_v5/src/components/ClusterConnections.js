@@ -13,6 +13,11 @@ class ClusterConnections extends React.Component {
     super(props);
   }
 
+  componentWillMount() {
+    if (!this.props.isInitialized)
+      this.props.initClusters();
+  }
+
   render() {
     let content;
     if (this.props.isFetching) {
@@ -39,7 +44,12 @@ ClusterConnections.PropTypes = {
   displayAddCluster: PropTypes.bool,
   // true when in the process of authenticating a connection
   displayAuthCluster: PropTypes.bool,
+  // are clusters being fetched
   isFetching: PropTypes.bool,
+  // have the clusters been initialized
+  isInitialized: PropTypes.bool,
+  // initialize the clusters
+  initClusters: PropTypes.func,
 };
 
 export default ClusterConnections;

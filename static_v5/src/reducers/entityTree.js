@@ -1,6 +1,7 @@
 import { ENTITY_NODE_EXPANDED, ENTITY_NODE_COLLAPSED } from '../actions/entityTree';
 
 // state of the entity tree
+// maintains a set of expanded nodes of the tree
 export default function entityTree(state = {
     expanded: new Set()
   }, action) {

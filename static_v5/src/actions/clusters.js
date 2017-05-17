@@ -1,4 +1,6 @@
 import { addConnection as addConnectionAPI, authConnection as authConnectionAPI, listConnections } from '../api/clusterConnections';
+import { expandEntityNode } from './entityTree';
+import { toClusterPath } from '../classes/entityTree';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -41,7 +43,7 @@ export function addClusterConnection(connection) {
         dispatch(fetchClusters());
       })
       .catch((response) => {
-        // TODO
+        console.log('Error');
       });
   }
 }
@@ -62,6 +64,24 @@ function receiveClusters(clusters = []) {
     type: RECEIVE_CLUSTERS,
     clusters
   };
+}
+
+export function initClusters() {
+  return (dispatch) => {
+    dispatch(requestClusters());
+
+    listConnections()
+      .then((connections) => {
+        dispatch(receiveClusters(connections));
+        connections.forEach((conn) => {
+          if (conn.connectOnLogin) // automatically connect to 'clusters without authentication'
+            authenticateClusterConnection(conn.id, '', '');
+        });
+      })
+      .catch(() => {
+        dispatch(receiveClusters([]))
+      });
+  }
 }
 
 export function fetchClusters() {
@@ -126,9 +146,12 @@ export function authenticateClusterConnection(id, name, password) {
     authConnectionAPI(id, name, password)
       .then((cluster) => {
         dispatch(authSuccess(cluster));
+
+        const path = toClusterPath(cluster.id);
+        dispatch(expandEntityNode(path));
       })
       .catch((message) => {
-        message = message || 'Failed to authenticated';
+        message = message || 'Failed to authenticate';
         dispatch(authFailed(message));
       })
   }

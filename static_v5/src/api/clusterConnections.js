@@ -5,7 +5,11 @@ const toURLPath = toURLConverter('connections');
 
 export function listConnections() {
   const url = toURLPath('');
-  return get(url);
+  return get(url).
+    then((connections) => {
+      connections = connections || [];
+      return connections;
+    });
 }
 
 export function addConnection(connection) {

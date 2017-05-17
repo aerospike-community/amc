@@ -9,6 +9,11 @@
 
 .as-leftpane {
   border-right: 1px solid lightgray;
+  position: fixed;
+  bottom: 0;
+  top: 60px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .as-toolbar {
@@ -26,8 +31,25 @@
   color: #666;
 }
 
+/* emphasize a selected item */
 .as-selected {
-  background-color: lightgray;
+  background-color: #ddd;
+  font-weight: bold;
+}
+
+.as-bold {
+  font-weight: bold;
+}
+
+.as-cursor-pointer {
+  cursor: pointer;
+}
+
+/* emphasize a selectable item */
+.as-selectable:hover {
+  cursor: pointer;
+  background: #eee;
+  font-weight: bold;
 }
 
 .as-tree-list-item {
@@ -100,4 +122,13 @@
 .as-warning-text {
   color: orange;
   font-size: 12px;
+}
+
+.as-ace-editor {
+  border: 1px solid #e5e5e5;
+}
+
+.as-tree-root {
+  border-bottom: 1px solid darkgray;
+  margin-top: 20px;
 }
