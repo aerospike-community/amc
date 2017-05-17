@@ -1,6 +1,7 @@
 import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from '../classes/urlAndViewSynchronizer';
 import { VIEW_TYPE } from '../classes/constants';
-import { toUDFOverviewPath } from '../classes/entityTree';
+import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from '../classes/entityTree';
+import { toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from '../classes/entityTree';
 
 export const INITIALIZE_VIEW = 'INITIALIZE_VIEW';
 export function initView() {
@@ -10,31 +11,45 @@ export function initView() {
 }
 
 export const SELECT_CLUSTER_VIEW = 'SELECT_CLUSTER_VIEW';
-function selectCluster(clusterID, entityPath, view) {
+export function selectCluster(clusterID, view) {
+  const path = toClusterPath(clusterID);
   return {
     type: SELECT_CLUSTER_VIEW,
-    entityPath: entityPath,
+    entityPath: path,
     view: view,
     clusterID: clusterID,
   };
 }
 
 export const SELECT_NODE_VIEW = 'SELECT_NODE_VIEW';
-function selectNode(clusterID, nodeHost, entityPath, view) {
+export function selectNode(clusterID, nodeHost, view) {
+  const path = toNodePath(clusterID, nodeHost);
   return {
     type: SELECT_NODE_VIEW,
-    entityPath: entityPath,
+    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
   };
 }
 
+export const SELECT_NODE_OVERVIEW = 'SELECT_NODE_OVERVIEW';
+export function selectNodeOverview(clusterID, view) {
+  const path = toNodeOverviewPath(clusterID);
+  return {
+    type: SELECT_NODE_OVERVIEW,
+    entityPath: path,
+    view: view,
+    clusterID: clusterID,
+  };
+}
+
 export const SELECT_NAMESPACE_VIEW = 'SELECT_NAMESPACE_VIEW';
-function selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view) {
+export function selectNamespace(clusterID, nodeHost, namespaceName, view) {
+  const path = toNamespacePath(clusterID, nodeHost, namespaceName);
   return {
     type: SELECT_NAMESPACE_VIEW,
-    entityPath: entityPath,
+    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -42,11 +57,24 @@ function selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view) {
   };
 }
 
+export const SELECT_NAMESPACE_OVERVIEW = 'SELECT_NAMESPACE_OVERVIEW';
+export function selectNamespaceOverview(clusterID, nodeHost, view) {
+  const path = toNamespaceOverviewPath(clusterID, nodeHost);
+  return {
+    type: SELECT_NAMESPACE_OVERVIEW,
+    entityPath: path,
+    view: view,
+    clusterID: clusterID,
+    nodeHost: nodeHost,
+  };
+}
+
 export const SELECT_SET_VIEW = 'SELECT_SET_VIEW';
-function selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view) {
+export function selectSet(clusterID, nodeHost, namespaceName, setName, view) {
+  const path = toSetPath(clusterID, nodeHost, namespaceName, setName);
   return {
     type: SELECT_SET_VIEW,
-    entityPath: entityPath,
+    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -55,21 +83,28 @@ function selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view
   };
 }
 
-export const SELECT_UDF_VIEW = 'SELECT_UDF_VIEW';
-function selectUDF(clusterID, udfName, entityPath, view) {
+export const SELECT_SET_OVERVIEW = 'SELECT_SET_OVERVIEW';
+export function selectSetOverview(clusterID, nodeHost, namespaceName, view) {
+  const path = toSetOverviewPath(clusterID, nodeHost, namespaceName);
   return {
-    type: SELECT_UDF_VIEW,
-    entityPath: entityPath,
+    type: SELECT_SET_OVERVIEW,
+    entityPath: path,
     view: view,
     clusterID: clusterID,
-    udfName: udfName,
+    nodeHost: nodeHost,
+    namespaceName: namespaceName,
   };
 }
 
-export const SELECT_START_VIEW = 'SELECT_START_VIEW';
-function selectStartView() {
+export const SELECT_UDF_VIEW = 'SELECT_UDF_VIEW';
+export function selectUDF(clusterID, udfName, view) {
+  const path = toUDFPath(clusterID, udfName);
   return {
-    type: SELECT_START_VIEW
+    type: SELECT_UDF_VIEW,
+    entityPath: path,
+    view: view,
+    clusterID: clusterID,
+    udfName: udfName,
   };
 }
 
@@ -84,6 +119,13 @@ export function selectUDFOverview(clusterID, view) {
   };
 }
 
+export const SELECT_START_VIEW = 'SELECT_START_VIEW';
+function selectStartView() {
+  return {
+    type: SELECT_START_VIEW
+  };
+}
+
 export function selectPath(entityPath, view) {
   const e = matchAndExtractEntityPathVariabes(entityPath);
   const { clusterID, udfName, namespaceName, setName, nodeHost } = e;
@@ -91,22 +133,31 @@ export function selectPath(entityPath, view) {
 
   switch (viewType) {
   case VIEW_TYPE.UDF:
-    return selectUDF(clusterID, udfName, entityPath, view);
+    return selectUDF(clusterID, udfName, view);
 
   case VIEW_TYPE.UDF_OVERVIEW:
     return selectUDFOverview(clusterID, view);
 
   case VIEW_TYPE.CLUSTER:
-    return selectCluster(clusterID, entityPath, view);
+    return selectCluster(clusterID, view);
 
   case VIEW_TYPE.NODE:
-    return selectNode(clusterID, nodeHost, entityPath, view);
+    return selectNode(clusterID, nodeHost, view);
+
+  case VIEW_TYPE.NODE_OVERVIEW:
+    return selectNodeOverview(clusterID, view);
 
   case VIEW_TYPE.NAMESPACE:
-    return selectNamespace(clusterID, nodeHost, namespaceName, entityPath, view);
+    return selectNamespace(clusterID, nodeHost, namespaceName, view);
+
+  case VIEW_TYPE.NAMESPACE_OVERVIEW:
+    return selectNamespaceOverview(clusterID, nodeHost, view);
 
   case VIEW_TYPE.SET:
-    return selectSet(clusterID, nodeHost, namespaceName, setName, entityPath, view);
+    return selectSet(clusterID, nodeHost, namespaceName, setName, view);
+
+  case VIEW_TYPE.SET_OVERVIEW:
+    return selectSetOverview(clusterID, nodeHost, namespaceName, view);
 
   default:
     return selectStartView();
