@@ -20,7 +20,12 @@ class ClusterToolbar extends React.Component {
   render() {
     return (
       <div className="as-toolbar">
-        <div className="float-left"> Clusters </div>
+        <div className="float-left"> 
+          Clusters 
+        </div>
+        <div className="float-right" title="Hide" onClick={() => this.onToolClick('hideEntityTree')}>
+          <i className="fa fa-angle-double-left"></i>
+        </div>
         <div className="float-right" onClick={() => this.onToolClick('addCluster')}> 
           <Button color="link" className="as-cursor-pointer"> Add </Button>
         </div>

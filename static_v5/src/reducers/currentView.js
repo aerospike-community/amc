@@ -1,11 +1,11 @@
 import { SELECT_NODE_VIEW, SELECT_CLUSTER_VIEW, INITIALIZE_VIEW } from '../actions/currentView';
 import { SELECT_START_VIEW, SELECT_NAMESPACE_VIEW, SELECT_SET_VIEW } from '../actions/currentView';
 import { SELECT_NODE_OVERVIEW, SELECT_NAMESPACE_OVERVIEW, SELECT_SET_OVERVIEW } from '../actions/currentView';
-import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW } from '../actions/currentView';
+import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } from '../actions/currentView';
 import { VIEW_TYPE } from '../classes/constants';
 import { updateURL } from '../classes/urlAndViewSynchronizer';
 
-// the current view of the app
+// the current state of the view of the app
 export default function currentView(state = {
     // is the current view initialized
     isInitialized: false,
@@ -20,6 +20,9 @@ export default function currentView(state = {
     // the whole path to the selected entity
     // Ex: clusterID/nodeHost/namespaceName
     selectedEntityPath: null,
+
+    // whether the left pane holding the entity tree is shown
+    showLeftPane: true,
 
     // the entities in the selected view
     // ex: namespace is identified by clusterID, nodeHost, namespaceName
@@ -142,6 +145,18 @@ export default function currentView(state = {
     case SELECT_START_VIEW:
       updated = Object.assign({}, state, {
         viewType: VIEW_TYPE.START_VIEW
+      });
+      break;
+
+    case HIDE_LEFT_PANE:
+      updated = Object.assign({}, state, {
+        showLeftPane: false
+      });
+      break;
+
+    case SHOW_LEFT_PANE:
+      updated = Object.assign({}, state, {
+        showLeftPane: true
       });
       break;
 

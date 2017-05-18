@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
 import app from './reducers';
 import { fetchClusters } from './actions/clusters';
-import App from './components/App';
+import VisibleApp from './containers/VisibleApp';
 
 const store = createStore(
   app,
@@ -16,6 +16,6 @@ const store = createStore(
 
 render(
   <Provider store={store}>
-    <App />
+    <VisibleApp />
   </Provider>
   , document.getElementById('app'));

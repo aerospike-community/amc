@@ -1,6 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
@@ -8,33 +10,48 @@ import MainDashboard from './MainDashboard';
 import Header from './Header';
 import Footer from './Footer';
 
-import { init as initAuth } from '../actions/authenticate';
-import { init as initURLAndViewSync } from '../classes/urlAndViewSynchronizer';
 
 import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.css';
 import '../styles/common.css';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    this.onShowLeftPane = this.onShowLeftPane.bind(this);
+  }
+
+  onShowLeftPane() {
+    this.props.onShowLeftPane();
   }
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    initAuth(dispatch);
+    this.props.initAuth();
   }
 
   componentWillReceiveProps(nextProps) {
-    const { dispatch, currentView, authentication } = this.props;
+    const { currentView, authentication } = this.props;
     if (!authentication.success && nextProps.authentication.success) {
-      initURLAndViewSync(currentView, dispatch);
+      this.props.initURLAndViewSync(currentView);
     }
   }
 
   render() {
     // FIXME should this be here
-    const showLogin = !this.props.authentication.success;
+    const loggedIn = this.props.authentication.success;
+    const { showLeftPane } = this.props.currentView;
+    let leftPane = null;
 
+    if (showLeftPane) {
+      leftPane = (
+        <div className="col-2 pr-1 as-leftpane">
+          <div>
+            <VisibleClusterConnections />
+          </div>
+        </div>
+      );
+    }
     return (
       <div>
         <div className="container-fluid">
@@ -43,19 +60,25 @@ class App extends React.Component {
               <Header />
             </div>
           </div>
-          {!showLogin && 
-          <div className="row pl-0 pr-0">
-            <div className="col-2 pr-1 as-leftpane">
-              <div>
-                <VisibleClusterConnections />
-              </div>
-            </div>
-            <div className="col-10 offset-2 pl-0 pr-0 as-maincontent">
+          {loggedIn && 
+          <div className="row" style={{position: 'relative'}}>
+            {leftPane}
+            <div className={classNames('as-maincontent', {
+                              'col-10': showLeftPane,
+                              'offset-2': showLeftPane,
+                              'col-12': !showLeftPane
+                            })}>
               <MainDashboard />
             </div>
+
+            {!showLeftPane &&
+              <div className="as-leftpane-expand" title="Expand" onClick={this.onShowLeftPane}>
+                <i className="fa fa-angle-double-right"> </i>
+              </div>
+            }
           </div>}
         </div>
-        {showLogin &&
+        {!loggedIn &&
          <VisibleAuthenticateModal />}
 
         <Footer />
@@ -64,12 +87,18 @@ class App extends React.Component {
   }
 }
 
-App = connect((state) => {
-  return {
-    authentication: state.session.authentication,
-    currentView: state.currentView,
-  };
-})(App);
+App.PropTypes = {
+  // authentication state
+  authentication: PropTypes.object,
+  // current view state
+  currentView: PropTypes.object,
+  // initialize auth module
+  // initAuth()
+  initAuth: PropTypes.func,
+  // initialize the url module
+  // initURLAndViewSync(currentView)
+  initURLAndViewSync: PropTypes.func
+};
 
 export default App;
 

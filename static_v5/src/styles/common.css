@@ -132,3 +132,10 @@
   border-bottom: 1px solid darkgray;
   margin-top: 20px;
 }
+
+.as-leftpane-expand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}

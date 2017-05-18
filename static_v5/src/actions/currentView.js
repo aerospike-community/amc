@@ -3,6 +3,20 @@ import { VIEW_TYPE } from '../classes/constants';
 import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from '../classes/entityTree';
 import { toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from '../classes/entityTree';
 
+export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
+export function showLeftPane() {
+  return {
+    type: SHOW_LEFT_PANE
+  };
+}
+
+export const HIDE_LEFT_PANE = 'HIDE_LEFT_PANE';
+export function hideLeftPane() {
+  return {
+    type: HIDE_LEFT_PANE
+  };
+}
+
 export const INITIALIZE_VIEW = 'INITIALIZE_VIEW';
 export function initView() {
   return {

@@ -2,14 +2,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ClusterToolbar from '../components/ClusterToolbar';
 import { displayAddClusterConnection } from '../actions/clusters';
+import { hideLeftPane } from '../actions/currentView';
 
 const mapDispatchToProps = (dispatch) => {
   return {
     onToolClick: (item) => {
       // TODO add more based on toolbar
-      if (true && item === 'addCluster') {
+      if (item === 'addCluster')
         dispatch(displayAddClusterConnection(true));
-      }
+      else if (item === 'hideEntityTree')
+        dispatch(hideLeftPane());
+      
     },
   };
 };
