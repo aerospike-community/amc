@@ -5,15 +5,15 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
 import Seed from './Seed';
-import '../styles/common.css';
+import '../../styles/common.css';
 
-class AddClusterModal extends React.Component {
+class UpdateClusterConnection extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      clusterName: '',
-      seeds: [],
+      clusterName: this.props.clusterName,
+      seeds: this.props.seeds.slice(), // copy
       input: {
         host: '',
         port: '',
@@ -23,7 +23,7 @@ class AddClusterModal extends React.Component {
       showWarnings: false,
     };
 
-    this.onAddConnection = this.onAddConnection.bind(this);
+    this.onUpdateConnection = this.onUpdateConnection.bind(this);
     this.onCancel = this.onCancel.bind(this);
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -32,7 +32,7 @@ class AddClusterModal extends React.Component {
     this.addSeed = this.addSeed.bind(this);
   }
 
-  onAddConnection() {
+  onUpdateConnection() {
     if (!this.isFormValid()) {
       this.setState({
         showWarnings: true
@@ -45,7 +45,7 @@ class AddClusterModal extends React.Component {
       name: clusterName,
       seeds: seeds,
     };
-    this.props.addConnection(connection);
+    this.props.updateConnection(connection);
   }
 
   onCancel() {
@@ -158,56 +158,57 @@ class AddClusterModal extends React.Component {
     const nameWarning = showWarnings && !this.state.clusterName;
     const seedsWarning = showWarnings && this.state.seeds.length === 0;
     return (
-      <Modal size="lg" isOpen={true} toggle={() => {
-                                       }}>
-        <ModalHeader>Add Cluster Connection</ModalHeader>
-        <ModalBody>
-          <form>
-            <div className={classNames('form-group', {
-                              'has-warning': nameWarning
-                            })}>
-              <label> Cluster Name </label>
-              <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} 
-                    disabled={inProgress} onChange={this.onInputChange} name="clusterName" value={this.state.clusterName} />
+      <div>
+        <form>
+          <div className={classNames('form-group', {
+                            'has-warning': nameWarning
+                          })}>
+            <label> Cluster Name </label>
+            <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} 
+                  disabled={inProgress} onChange={this.onInputChange} name="clusterName" value={this.state.clusterName} />
+          </div>
+          <legend>
+            Seeds
+            {seedsWarning && <span className="as-warning-text"> * seed node required for a cluster </span>}
+          </legend>
+          <div className="row">
+            <div className="col-3">
+              <label> Host </label>
             </div>
-            <legend>
-              Seeds
-              {seedsWarning && <span className="as-warning-text"> * seed node required for a cluster </span>}
-            </legend>
-            <div className="row">
-              <div className="col-3">
-                <label> Host </label>
-              </div>
-              <div className="col-3">
-                <label> Port </label>
-              </div>
-              <div className="col-3">
-                <label> TLS Name </label>
-              </div>
+            <div className="col-3">
+              <label> Port </label>
             </div>
-            {this.state.seeds.map((seed, i) => this.renderSeed(seed, i))}
-            {this.renderInput()}
-          </form>
-        </ModalBody>
-        <ModalFooter>
-          {inProgress &&
-           <span> Creating ... </span>}
-          <Button disabled={inProgress} color="primary" onClick={this.onAddConnection}>Add</Button>
-          <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
-        </ModalFooter>
-      </Modal>
+            <div className="col-3">
+              <label> TLS Name </label>
+            </div>
+          </div>
+          {this.state.seeds.map((seed, i) => this.renderSeed(seed, i))}
+          {this.renderInput()}
+
+        </form>
+
+        {inProgress &&
+         <span> Saving ... </span>}
+        <Button disabled={inProgress} color="primary" onClick={this.onUpdateConnection}>Save</Button>
+        <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+      </div>
       );
   }
 }
 
-AddClusterModal.PropTypes = {
+UpdateClusterConnection.PropTypes = {
+  // name of cluster
+  clusterName: PropTypes.string,
+  // seeds in the cluster
+  seeds: PropTypes.array,
   // adding a connection is in progress
   inProgress: PropTypes.bool,
-  // callback to add a connection
-  // callback(properties) TODO add properties
-  addConnection: PropTypes.func,
-  // callback to cancel the modal
+  // callback to update a connection
+  // callback(connection)
+  updateConnection: PropTypes.func,
+  // callback to cancel 
   cancel: PropTypes.func,
 };
 
-export default AddClusterModal;
+export default UpdateClusterConnection;
+

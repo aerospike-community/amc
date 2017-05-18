@@ -2,6 +2,7 @@ import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions/clusters';
 import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from '../actions/clusters';
+import { UPDATE_CLUSTER_CONNECTION } from '../actions/clusters';
 import { ADD_UDF } from '../actions/clusters';
 import { ENTITY_TYPE } from '../classes/constants';
 
@@ -30,6 +31,7 @@ export default function(state = {
 
   }, action) {
   let updated = clusters(state, action);
+  updated = updateClusterConnection(updated, action);
   updated = updateClusterEntities(updated, action);
   updated = newConnection(updated, action);
   updated = authConnection(updated, action);
@@ -68,7 +70,8 @@ function clusters(state, action) {
     case DISCONNECT_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
       return updateItem(state, id, {
-        entities: [],
+        [ENTITY_TYPE.UDF]: [],
+        [ENTITY_TYPE.NODES]: [],
         isAuthenticated: false,
       });
     default:
@@ -106,6 +109,21 @@ function updateClusterEntities(state, action) {
         entityType: ENTITY_TYPE.UDF,
       });
       return addToClusterEntity(state, id, ENTITY_TYPE.UDF, entity);
+    default:
+      return state;
+  }
+}
+
+// update the cluster itself
+function updateClusterConnection(state, action) {
+  let id;
+  switch (action.type) {
+    case UPDATE_CLUSTER_CONNECTION:
+      id = action.clusterID;
+      return updateItem(state, id, {
+        seeds: action.seeds,
+        name: action.name
+      });
     default:
       return state;
   }

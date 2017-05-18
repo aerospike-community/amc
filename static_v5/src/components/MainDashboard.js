@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import NodeDashboard from './NodeDashboard';
-import ClusterDashboard from './cluster/ClusterDashboard';
 import VisibleUDFDashboard from '../containers/VisibleUDFDashboard';
+import VisibleClusterDashboard from '../containers/VisibleClusterDashboard';
 import { VIEW_TYPE } from '../classes/constants';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -38,7 +38,7 @@ class MainDashboard extends React.Component {
     else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW)
       dashboard = <VisibleUDFDashboard />
     else if (viewType === VIEW_TYPE.CLUSTER)
-      dashboard = <ClusterDashboard clusterID={clusterID} />
+      dashboard = <VisibleClusterDashboard />
     else
       dashboard = viewType + ' ' + view;
 

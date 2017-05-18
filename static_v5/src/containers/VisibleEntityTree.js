@@ -5,7 +5,7 @@ import { selectPath } from '../actions/currentView';
 import { expandEntityNode, collapseEntityNode } from '../actions/entityTree';
 import { displayAuthClusterConnection, disconnectCluster } from '../actions/clusters';
 import { toPhysicalEntityTree } from '../classes/entityTree';
-import { VIEW_TYPE } from '../classes/constants';
+import { VIEW_TYPE, CLUSTER_ACTIONS } from '../classes/constants';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
@@ -31,9 +31,9 @@ const mapDispatchToProps = (dispatch) => {
     },
 
     onEntityAction: (entity, action) => {
-      if (action === 'Connect') 
+      if (action === CLUSTER_ACTIONS.Connect) 
         dispatch(displayAuthClusterConnection(true, entity.path));
-      else if (action === 'Disconnect')
+      else if (action === CLUSTER_ACTIONS.Disconnect)
         dispatch(disconnectCluster(entity.path));
       else // TODO
         dispatch(selectPath(entity.path, action));

@@ -17,6 +17,14 @@ export function addConnection(connection) {
   return postJSON(url, connection);
 }
 
+export function updateConnection(clusterID, connection) {
+  const url = toURLPath('');
+  const payload = Object.assign({}, connection, {
+    connId: clusterID
+  });
+  return postJSON(url, payload);
+}
+
 export function deleteConnection(id) {
   const url = toURLPath(id);
   return deleteAPI(url);

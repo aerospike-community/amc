@@ -38,8 +38,12 @@ export const UDF_ACTIONS = makeObjects(udf_actions, 'View');
 const udf_overview_actions = ['View', 'Create'];
 export const UDF_OVERVIEW_ACTIONS = makeObjects(udf_overview_actions, 'View');
 
+// permissible actions on cluster connection
+const cluster_actions = ['Connect', 'Disconnect', 'Edit', 'View', 'Overview'];
+export const CLUSTER_ACTIONS = makeObjects(cluster_actions, 'View');
+
 export const VIEW_TYPE_ACTIONS = {
-  [VIEW_TYPE.CLUSTER]: ['Connect', 'Disconnet'],
+  [VIEW_TYPE.CLUSTER]: cluster_actions, 
   [VIEW_TYPE.NODE]: ['Stats', 'Logs'],
   [VIEW_TYPE.NAMESPACE]: ['Stats', 'Import', 'Export', 'Create Index'],
   [VIEW_TYPE.SET]: ['Stats', 'Import', 'Export', 'Drop'],
