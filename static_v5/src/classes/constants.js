@@ -1,10 +1,10 @@
 // type of cluster entities as returned by the server
 export const ENTITY_TYPE = {
-  CLUSTER: 'CONNECTION',
-  NODE: 'NODE',
-  NAMESPACE: 'NAMESPACE',
-  SET: 'SET',
-  UDF: 'UDF',
+  CLUSTER: 'connection',
+  NODES: 'nodes',
+  NAMESPACES: 'namespaces',
+  SETS: 'sets',
+  UDF: 'modules',
 };
 
 // type of the entity view types

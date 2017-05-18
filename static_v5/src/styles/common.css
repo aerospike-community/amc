@@ -27,6 +27,10 @@
   height: 100%;
 }
 
+.as-maincontent.col-12 {
+  padding-left: 25px;
+}
+
 .as-disconnected {
   color: #666;
 }
@@ -126,6 +130,7 @@
 
 .as-ace-editor {
   border: 1px solid #e5e5e5;
+  margin-bottom: 10px;
 }
 
 .as-tree-root {
@@ -134,8 +139,12 @@
 }
 
 .as-leftpane-expand {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 60px;
   left: 0;
+  bottom: 0;
   cursor: pointer;
+  color: red;
+  background: black;
+  width: 20px;
 }

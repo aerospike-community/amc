@@ -2,6 +2,8 @@ import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions/clusters';
 import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from '../actions/clusters';
+import { ADD_UDF } from '../actions/clusters';
+import { ENTITY_TYPE } from '../classes/constants';
 
 // all the cluster connections of the user
 export default function(state = {
@@ -28,8 +30,9 @@ export default function(state = {
 
   }, action) {
   let updated = clusters(state, action);
+  updated = updateClusterEntities(updated, action);
   updated = newConnection(updated, action);
-  updated = authCluster(updated, action);
+  updated = authConnection(updated, action);
   return updated;
 }
 
@@ -44,7 +47,7 @@ function updateItem(state, clusterID, update) {
 }
 
 function clusters(state, action) {
-  let id;
+  let id, update;
   switch (action.type) {
     case REQUEST_CLUSTERS:
       return Object.assign({}, state, {
@@ -58,7 +61,7 @@ function clusters(state, action) {
       });
     case AUTHENTICATED_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
-      let update = Object.assign({}, action.cluster, {
+      update = Object.assign({}, action.cluster, {
         isAuthenticated: true
       });
       return updateItem(state, id, update);
@@ -68,6 +71,41 @@ function clusters(state, action) {
         entities: [],
         isAuthenticated: false,
       });
+    default:
+      return state;
+  }
+}
+
+// add entity to array of given entity type
+function addToClusterEntity(state, clusterID, entityType, entity) {
+  const clusters = state.items.slice(); // copy
+  const i = clusters.findIndex((c) => c.id === clusterID);
+  let c = Object.assign({}, clusters[i]); // copy
+
+  let e = [];
+  if (Array.isArray(c[entityType]))
+    e = c[entityType].slice(); // copy
+  e.push(entity);
+
+  c[entityType] = e;
+  clusters[i] = c;
+  return Object.assign({}, state, {
+    items: clusters
+  });
+}
+
+// add and remove entities from the cluster connections
+function updateClusterEntities(state, action) {
+  let entity, id;
+  switch (action.type) {
+    case ADD_UDF:
+      id = action.clusterID;
+      entity = Object.assign({}, {
+        type: action.type,
+        name: action.udfName, 
+        entityType: ENTITY_TYPE.UDF,
+      });
+      return addToClusterEntity(state, id, ENTITY_TYPE.UDF, entity);
     default:
       return state;
   }
@@ -100,7 +138,7 @@ function newConnection(state, action) {
   });
 }
 
-function authCluster(state, action) {
+function authConnection(state, action) {
   let auth;
   switch (action.type) {
     case DISPLAY_AUTH_CLUSTER_CONNECTION:

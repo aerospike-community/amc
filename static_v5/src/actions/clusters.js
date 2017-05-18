@@ -98,6 +98,19 @@ export function fetchClusters() {
   }
 }
 
+// ---------------------------------------
+// Add new entities to cluster connections
+
+export const ADD_UDF = 'ADD_UDF';
+export function addUDF(clusterID, udfName, udfType) {
+  return {
+    type: ADD_UDF,
+    clusterID: clusterID,
+    udfName: udfName,
+    udfType: udfType
+  };
+}
+
 // ---------------------------------
 // Cluster Connection Authentication
 

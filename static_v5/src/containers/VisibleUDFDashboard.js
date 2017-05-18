@@ -4,6 +4,7 @@ import UDFDashboard from '../components/udf/UDFDashboard';
 import { toUDFPath, toUDFOverviewPath } from '../classes/entityTree';
 import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from '../classes/constants';
 import { selectPath } from '../actions/currentView';
+import { addUDF } from '../actions/clusters';
 
 const mapStateToProps = (state) => {
   const { clusterID, udfName, viewType, view } = state.currentView;
@@ -27,9 +28,11 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(selectPath(path, UDF_ACTIONS.View));
     },
 
-    onCreateUDF: (clusterID) => {
-      const path = toUDFOverviewPath(clusterID);
-      dispatch(selectPath(path, UDF_OVERVIEW_ACTIONS.Create));
+    onCreateUDF: (clusterID, udfName, udfType) => {
+      dispatch(addUDF(clusterID, udfName, udfType));
+
+      const path = toUDFPath(clusterID, udfName);
+      dispatch(selectPath(path, UDF_ACTIONS.View));
     },
 
     onViewUDFOverview: (clusterID) => {

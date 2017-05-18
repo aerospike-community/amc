@@ -1,10 +1,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import NodeDashboard from './NodeDashboard';
+import ClusterDashboard from './cluster/ClusterDashboard';
 import VisibleUDFDashboard from '../containers/VisibleUDFDashboard';
-import { selectPath as selectPathAction} from '../actions/currentView';
 import { VIEW_TYPE } from '../classes/constants';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -22,7 +23,7 @@ class MainDashboard extends React.Component {
     if (toView === view)
       return;
 
-    this.props.selectPath(selectedEntityPath, toView);
+    this.props.onSelectPath(selectedEntityPath, toView);
   }
 
   render() {
@@ -36,6 +37,8 @@ class MainDashboard extends React.Component {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
     else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW)
       dashboard = <VisibleUDFDashboard />
+    else if (viewType === VIEW_TYPE.CLUSTER)
+      dashboard = <ClusterDashboard clusterID={clusterID} />
     else
       dashboard = viewType + ' ' + view;
 
@@ -47,14 +50,12 @@ class MainDashboard extends React.Component {
   }
 }
 
-const main = connect((state) => {
-  return {
-    currentView: state.currentView
-  };
-}, (dispatch) => {
-  return {
-    selectPath: (path, view) => dispatch(selectPathAction(path, view))
-  }
-})(MainDashboard);
+MainDashboard.PropTypes = {
+  // current view state
+  currentView: PropTypes.object,
+  // select a path
+  // onSelectPath(path, view)
+  onSelectPath: PropTypes.func,
+};
 
-export default main;
+export default MainDashboard;

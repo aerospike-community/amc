@@ -1,12 +1,11 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
-import MainDashboard from './MainDashboard';
+import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -61,14 +60,14 @@ class App extends React.Component {
             </div>
           </div>
           {loggedIn && 
-          <div className="row" style={{position: 'relative'}}>
+          <div className="row">
             {leftPane}
             <div className={classNames('as-maincontent', {
                               'col-10': showLeftPane,
                               'offset-2': showLeftPane,
-                              'col-12': !showLeftPane
+                              'col-12': !showLeftPane,
                             })}>
-              <MainDashboard />
+              <VisibleMainDashboard />
             </div>
 
             {!showLeftPane &&

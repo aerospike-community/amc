@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import VisibleEntityTree from '../containers/VisibleEntityTree';
 import VisibleClusterToolbar from '../containers/VisibleClusterToolbar';

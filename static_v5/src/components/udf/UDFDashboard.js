@@ -24,6 +24,7 @@ class UDFDashboard extends React.Component {
     this.onViewUDF = this.onViewUDF.bind(this);
     this.onCreateUDF = this.onCreateUDF.bind(this);
     this.onViewUDFOverview = this.onViewUDFOverview.bind(this);
+    this.onNewUDF = this.onNewUDF.bind(this);
   }
 
   isUDF() {
@@ -66,6 +67,11 @@ class UDFDashboard extends React.Component {
     this.props.onViewUDFOverview(clusterID);
   }
 
+  onNewUDF(udfName, udfSource, udfType) {
+    const {clusterID} = this.props;
+    this.props.onCreateUDF(clusterID, udfName, udfType);
+  }
+
   render() {
     let view;
     if (this.isUDFView())
@@ -73,7 +79,7 @@ class UDFDashboard extends React.Component {
     else if (this.isUDFEdit())
       view = <UDFEdit clusterID={this.props.clusterID} udfName={this.props.udfName} onViewUDF={this.onViewUDF} />;
     else if (this.isUDFCreate())
-      view = <UDFCreate clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} />;
+      view = <UDFCreate clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} onNewUDF={this.onNewUDF}/>;
     else if (this.isUDFOverview())
       view = 'UDF Overview';
 
@@ -101,7 +107,7 @@ UDFDashboard.PropTypes = {
   // onViewUDF(clusterID, udfName)
   onViewUDF: PropTypes.func,
   // create a UDF
-  // onCreateUDF()
+  // onCreateUDF(clusterID, udfName, udfSource, udfType)
   onCreateUDF: PropTypes.func,
   // view the UDF overview
   // onViewUDFOverview(clusterID)

@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { connect } from 'react-redux';
 import { system } from '../api/amc';
 
 import 'bootstrap/dist/css/bootstrap.css';

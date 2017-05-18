@@ -69,11 +69,11 @@ class UDFView extends React.Component {
     const { clusterID } = this.props;
     const { sourceCode, udfName } = this.state;
     saveUDF(clusterID, udfName, sourceCode)
-      .then(() => {
+      .then((udf) => {
         this.setState({
           isUpdating: false
         });
-        // TODO view UDF on success
+        this.props.onNewUDF(udf.name, udf.source, udf.type);
       })
       .catch((err) => {
         // TODO inject errors into the editor annotations
@@ -125,6 +125,9 @@ UDFView.PropTypes = {
   // callback to cancel the creation
   // onCancel()
   onCancel: PropTypes.func,
+  // callback on creating a new udf
+  // onNewUDF(udfName, udfSource, udfType)
+  onNewUDF: PropTypes.func,
 };
 
 export default UDFView;
