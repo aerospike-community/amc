@@ -25,7 +25,7 @@ class ClusterDashboard extends React.Component {
   }
 
   render() {
-    const { clusterID, view }  = this.props;
+    const { clusterID, view, onUpdateConnectionSuccess }  = this.props;
     const { name, seeds } = this.props.cluster;
 
     let dashboard;
@@ -33,7 +33,7 @@ class ClusterDashboard extends React.Component {
       dashboard = <ClusterOverview clusterID={clusterID} />;
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
-                      onUpdateConnection={this.props.onUpdateClusterConnection}
+                      onUpdateConnectionSuccess={onUpdateConnectionSuccess}
                       onCancel={this.onViewClusterOverview} />
     }
     return (
@@ -54,9 +54,9 @@ ClusterDashboard.PropTypes = {
   // callback to view cluster overview
   // onViewClusterOverview(clusterID)
   onViewClusterOverview: PropTypes.func, 
-  // callback to edit cluster connection
-  // onUpdateClusterConnection(clusterID, connection)
-  onUpdateClusterConnection: PropTypes.func,
+  // callback when the connection is successfully updated
+  // onUpdateConnectionSuccess(clusterID, connection)
+  onUpdateConnectionSuccess: PropTypes.func,
 };
 
 export default ClusterDashboard;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import AddClusterModal from '../components/cluster/AddClusterModal';
-import { addClusterConnection, displayAddClusterConnection } from '../actions/clusters';
+import { fetchClusters, displayAddClusterConnection } from '../actions/clusters';
 
 const mapStateToProps = (state) => {
   return {
@@ -11,10 +11,18 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addConnection: (connection) => {
-      dispatch(addClusterConnection(connection));
+    // on connection success
+    onConnectionAddSuccess: (connection) => {
+      // close modal
+      dispatch(displayAddClusterConnection(false));
+      // FIXME connection should be a success response
+      // from the server
+      // refetch clusters
+      dispatch(fetchClusters());
     },
-    cancel: () => {
+
+    // cancel the view
+    onCancel: () => {
       dispatch(displayAddClusterConnection(false));
     }
   };

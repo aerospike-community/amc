@@ -7,7 +7,12 @@ import classNames from 'classnames';
 import Seed from './Seed';
 import '../../styles/common.css';
 
-class UpdateClusterConnection extends React.Component {
+// SaveClusterConnection is a "view only" component to save
+// a cluster connection.
+//
+// The actual API call is the responsibility of the parent component.
+//
+class SaveClusterConnection extends React.Component {
   constructor(props) {
     super(props);
 
@@ -23,7 +28,7 @@ class UpdateClusterConnection extends React.Component {
       showWarnings: false,
     };
 
-    this.onUpdateConnection = this.onUpdateConnection.bind(this);
+    this.onSaveConnection = this.onSaveConnection.bind(this);
     this.onCancel = this.onCancel.bind(this);
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -32,7 +37,7 @@ class UpdateClusterConnection extends React.Component {
     this.addSeed = this.addSeed.bind(this);
   }
 
-  onUpdateConnection() {
+  onSaveConnection() {
     if (!this.isFormValid()) {
       this.setState({
         showWarnings: true
@@ -41,15 +46,19 @@ class UpdateClusterConnection extends React.Component {
     }
 
     const {clusterName, seeds} = this.state;
-    const connection = {
+    let connection = {
       name: clusterName,
-      seeds: seeds,
     };
-    this.props.updateConnection(connection);
+    connection.seeds = seeds.map((seed) => {
+      seed.port = parseInt(seed.port, 10);
+      return seed;
+    });
+
+    this.props.onSaveConnection(connection);
   }
 
   onCancel() {
-    this.props.cancel();
+    this.props.onCancel();
   }
 
   onInputChange(evt) {
@@ -189,26 +198,31 @@ class UpdateClusterConnection extends React.Component {
 
         {inProgress &&
          <span> Saving ... </span>}
-        <Button disabled={inProgress} color="primary" onClick={this.onUpdateConnection}>Save</Button>
+
+        <span> {this.props.onSaveErrorMessage} </span>
+        <Button disabled={inProgress} color="primary" onClick={this.onSaveConnection}>Save</Button>
         <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
       </div>
       );
   }
 }
 
-UpdateClusterConnection.PropTypes = {
+SaveClusterConnection.PropTypes = {
   // name of cluster
   clusterName: PropTypes.string,
   // seeds in the cluster
   seeds: PropTypes.array,
   // adding a connection is in progress
   inProgress: PropTypes.bool,
+  // error message on save
+  onSaveErrorMessage: PropTypes.bool,
   // callback to update a connection
   // callback(connection)
-  updateConnection: PropTypes.func,
+  onSaveConnection: PropTypes.func,
   // callback to cancel 
-  cancel: PropTypes.func,
+  // onCancel()
+  onCancel: PropTypes.func,
 };
 
-export default UpdateClusterConnection;
+export default SaveClusterConnection;
 

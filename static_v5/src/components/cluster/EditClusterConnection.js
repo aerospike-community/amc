@@ -4,14 +4,17 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
-import UpdateClusterConnection from './UpdateClusterConnection';
+import SaveClusterConnection from './SaveClusterConnection';
+import { updateConnection as updateConnectionAPI } from '../../api/clusterConnections';
 
+// EditClusterConnection shows a view to edit a cluster connection
 class EditClusterConnection extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      inProgress: false
+      inProgress: false,
+      onSaveErrorMessage: '',
     };
 
     this.onUpdateConnection = this.onUpdateConnection.bind(this);
@@ -20,11 +23,23 @@ class EditClusterConnection extends React.Component {
 
   onUpdateConnection(connection) {
     this.setState({
-      inProgress: true
+      inProgress: true,
+      onSaveErrorMessage: '',
     });
 
+    // send
     const { clusterID } = this.props;
-    this.props.onUpdateConnection(clusterID, connection);
+    updateConnectionAPI(clusterID, connection)
+      .then((response) => {
+        // FIXME the response should have the newly added connection
+        this.props.onUpdateConnectionSuccess(clusterID, connection);
+      })
+      .catch((response) => {
+        this.setState({
+          inProgress: false,
+          onSaveErrorMessage: response
+        });
+      });
   }
 
   onCancel() {
@@ -36,8 +51,9 @@ class EditClusterConnection extends React.Component {
     return (
       <div>
         <h3>Update Cluster Connection</h3>
-        <UpdateClusterConnection clusterName={clusterName} seeds={seeds} inProgress={this.state.inProgress}
-          updateConnection={this.onUpdateConnection} cancel={this.onCancel} />
+        <SaveClusterConnection clusterName={clusterName} seeds={seeds} inProgress={this.state.inProgress}
+          onSaveErrorMessage={this.state.onSaveErrorMessage}
+          onSaveConnection={this.onUpdateConnection} onCancel={this.onCancel} />
       </div>
       );
   }
@@ -48,10 +64,10 @@ EditClusterConnection.PropTypes = {
   clusterName: PropTypes.string,
   // seeds of cluster
   seeds: PropTypes.array,
-  // callback to add a connection
-  // onUpdateConnection(connection)
-  onUpdateConnection: PropTypes.func,
-  // callback to cancel the modal
+  // callback when the connection is successfully updated
+  // onUpdateConnectionSuccess(clusterID, connection)
+  onUpdateConnectionSuccess: PropTypes.func,
+  // callback to cancel the view
   // onCancel()
   onCancel: PropTypes.func,
 };

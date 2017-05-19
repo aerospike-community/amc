@@ -1,5 +1,4 @@
-import { addConnection as addConnectionAPI, authConnection as authConnectionAPI, listConnections } from '../api/clusterConnections';
-import { updateConnection as updateConnectionAPI } from '../api/clusterConnections';
+import {  authConnection as authConnectionAPI, listConnections } from '../api/clusterConnections';
 
 import { expandEntityNode } from './entityTree';
 import { toClusterPath } from '../classes/entityTree';
@@ -15,66 +14,14 @@ export function displayAddClusterConnection(display) {
   };
 }
 
-export const ADDING_CLUSTER_CONNECTION = 'ADDING_CLUSTER_CONNECTION';
-function addingConnection() {
-  return {
-    type: ADDING_CLUSTER_CONNECTION
-  };
-}
-
-export const ADD_CLUSTER_CONNECTION = 'ADD_CLUSTER_CONNECTION';
-function addConnection(connection) {
-  return {
-    type: ADD_CLUSTER_CONNECTION,
-    connection: connection
-  };
-}
-
-function parseConnection(connection) {
-  const seeds = connection.seeds.map((seed) => {
-    seed.port = parseInt(seed.port, 10);
-    return seed;
-  });
-  connection.seeds = seeds;
-}
-
-export function addClusterConnection(connection) {
-  parseConnection(connection);
-  return (dispatch) => {
-    dispatch(addingConnection());
-
-    addConnectionAPI(connection)
-      .then((response) => {
-        dispatch(addConnection(connection));
-        dispatch(fetchClusters());
-      })
-      .catch((response) => {
-        console.log('Error');
-      });
-  }
-}
-
 export const UPDATE_CLUSTER_CONNECTION = 'UPDATE_CLUSTER_CONNECTION';
-function updateConnection(clusterID, connection) {
+export function updateConnection(clusterID, connection) {
   return {
     type: UPDATE_CLUSTER_CONNECTION,
     seeds: connection.seeds,
     name: connection.name,
     clusterID: clusterID,
   };
-}
-
-export function updateClusterConnection(clusterID, connection) {
-  parseConnection(connection);
-  return (dispatch) => {
-    updateConnectionAPI(clusterID, connection)
-      .then((response) => {
-        dispatch(updateConnection(clusterID, connection));
-      })
-      .catch((response) => {
-        console.log('Error');
-      });
-  }
 }
 
 // -------------------------

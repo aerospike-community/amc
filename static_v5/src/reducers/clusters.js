@@ -1,5 +1,5 @@
 import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions/clusters';
-import { ADDING_CLUSTER_CONNECTION, ADD_CLUSTER_CONNECTION, DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
+import { DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from '../actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from '../actions/clusters';
 import { UPDATE_CLUSTER_CONNECTION } from '../actions/clusters';
@@ -11,7 +11,6 @@ export default function(state = {
     // adding a new connection
     newConnection: {
       inProgress: false, // in the process of adding a new connection
-      isUpdating: false,
     },
 
     // authenticating a cluster connection
@@ -135,17 +134,6 @@ function newConnection(state, action) {
     case DISPLAY_ADD_CLUSTER_CONNECTION:
       newConnection = Object.assign({}, state.newConnection, {
         inProgress: action.display
-      });
-      break;
-    case ADD_CLUSTER_CONNECTION:
-      newConnection = Object.assign({}, state.newConnection, {
-        inProgress: false,
-        isUpdating: false,
-      });
-      break;
-    case ADDING_CLUSTER_CONNECTION:
-      newConnection = Object.assign({}, state.newConnection, {
-        isUpdating: true,
       });
       break;
     default:

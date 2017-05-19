@@ -4,7 +4,7 @@ import ClusterDashboard from '../components/cluster/ClusterDashboard';
 import { toClusterPath } from '../classes/entityTree';
 import { CLUSTER_ACTIONS }  from '../classes/constants';
 import { selectPath } from '../actions/currentView';
-import { updateClusterConnection } from '../actions/clusters';
+import { updateConnection } from '../actions/clusters';
 
 const mapStateToProps = (state) => {
   const { clusterID, view } = state.currentView;
@@ -18,12 +18,15 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    // change view to the cluster overview
     onViewClusterOverview: (clusterID) => {
       const path = toClusterPath(clusterID);
       dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));
     },
-    onUpdateClusterConnection: (clusterID, connection) => {
-      dispatch(updateClusterConnection(clusterID, connection));
+
+    // update connection is a success
+    onUpdateConnectionSuccess: (clusterID, connection) => {
+      dispatch(updateConnection(clusterID, connection));
 
       const path = toClusterPath(clusterID);
       dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));

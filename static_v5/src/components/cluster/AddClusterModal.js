@@ -4,22 +4,46 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
-import UpdateClusterConnection from './UpdateClusterConnection';
+import SaveClusterConnection from './SaveClusterConnection';
+import { addConnection as addConnectionAPI } from '../../api/clusterConnections';
 
+// AddClusterModal shows a modal to add a cluster connection
 class AddClusterModal extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      inProgress: false,
+      onSaveErrorMessage: '',
+    };
 
     this.onAddConnection = this.onAddConnection.bind(this);
     this.onCancel = this.onCancel.bind(this);
   }
 
   onAddConnection(connection) {
-    this.props.addConnection(connection);
+    // sending data
+    this.setState({
+      inProgress: true,
+      onSaveErrorMessage: '',
+    });
+
+    // send
+    addConnectionAPI(connection)
+    .then((response) => {
+      // FIXME the response should have the newly added connection
+      this.props.onConnectionAddSuccess(connection);
+    })
+    .catch((response) => {
+      this.setState({
+        inProgress: false,
+        onSaveErrorMessage: response
+      });
+    });
   }
 
   onCancel() {
-    this.props.cancel();
+    this.props.onCancel();
   }
 
   render() {
@@ -28,8 +52,9 @@ class AddClusterModal extends React.Component {
                                        }}>
         <ModalHeader>Add Cluster Connection</ModalHeader>
         <ModalBody>
-          <UpdateClusterConnection clusterName={''} seeds={[]} inProgress={this.props.inProgress}
-            updateConnection={this.onAddConnection} cancel={this.onCancel} />
+          <SaveClusterConnection clusterName={''} seeds={[]} inProgress={this.props.inProgress}
+            onSaveErrorMessage={this.state.onSaveErrorMessage}
+            onSaveConnection={this.onAddConnection} onCancel={this.onCancel} />
         </ModalBody>  
       </Modal>
       );
@@ -37,14 +62,12 @@ class AddClusterModal extends React.Component {
 }
 
 AddClusterModal.PropTypes = {
-  // adding a connection is in progress
-  inProgress: PropTypes.bool,
   // callback to add a connection
-  // addConnection(connection)
-  addConnection: PropTypes.func,
+  // onConnectionAddSuccess(connection)
+  onConnectionAddSuccess: PropTypes.func,
   // callback to cancel the modal
-  // cancel()
-  cancel: PropTypes.func,
+  // onCancel()
+  onCancel: PropTypes.func,
 };
 
 export default AddClusterModal;
