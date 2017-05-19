@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
 import VisibleClusterConnections from '../containers/VisibleClusterConnections';
 import VisibleMainDashboard from '../containers/VisibleMainDashboard';
-import Header from './Header';
+import VisibleHeader from '../containers/VisibleHeader';
 import Footer from './Footer';
 
 
@@ -56,7 +56,7 @@ class App extends React.Component {
         <div className="container-fluid">
           <div className="row">
             <div className="col-12 pl-0 pr-0">
-              <Header />
+              <VisibleHeader />
             </div>
           </div>
           {loggedIn && 

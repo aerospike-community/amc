@@ -17,7 +17,7 @@ export function init(dispatch) {
     window.fetch = authorizedFetch(jwt, dispatch);
     dispatch(authSuccess(user)); // TODO user roles
   } else {
-    dispatch(logout());
+    dispatch(logoutUser());
   }
 }
 
@@ -34,10 +34,15 @@ function authFailed() {
   };
 }
 
-function logout() {
+function logoutUser() {
   return {
     type: LOGOUT_USER
   };
+}
+
+export function logout() {
+  ls.clear();
+  return logoutUser();
 }
 
 function authSuccess(user, roles = []) {
@@ -84,7 +89,7 @@ function authorizedFetch(jwt, dispatch) {
     return fetch(url, options)
       .then((response) => {
         if (response.status === 401) // unauthorized
-          dispatch(logout());
+          dispatch(logoutUser());
 
         return response; 
       });
