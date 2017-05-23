@@ -420,3 +420,29 @@ func (ns *Namespace) updateNotifications() error {
 
 	return nil
 }
+
+// func (na *Namespace) LatestThroughput() map[string]map[string]*common.SinglePointValue {
+// 	// statsHistory is not written to, so it doesn't need synchronization
+// 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
+// 	zeroVal := float64(0)
+// 	for name, bucket := range n.statsHistory {
+// 		if n.valid() {
+// 			val := bucket.LastValue()
+// 			if val == nil {
+// 				tm := n.ServerTime().Unix()
+// 				val = common.NewSinglePointValue(&tm, &zeroVal)
+// 			}
+// 			res[name] = map[string]*common.SinglePointValue{
+// 				n.Address(): val,
+// 			}
+// 		} else {
+// 			tm := n.ServerTime().Unix()
+// 			val := common.NewSinglePointValue(&tm, &zeroVal)
+// 			res[name] = map[string]*common.SinglePointValue{
+// 				n.Address(): val,
+// 			}
+// 		}
+// 	}
+
+// 	return res
+// }

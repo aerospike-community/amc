@@ -169,6 +169,7 @@ type ConnectionController interface {
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
 	Show(*ShowConnectionContext) error
+	Throughput(*ThroughputConnectionContext) error
 }
 
 // MountConnectionController "mounts" a Connection resource controller on the given service.
@@ -177,6 +178,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -274,6 +276,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId", ctrl.MuxHandler("show", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Show", "route", "GET /api/v1/connections/:connId", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewThroughputConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Throughput(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("throughput", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Throughput", "route", "GET /api/v1/connections/:connId/throughput", "security", "jwt")
 }
 
 // handleConnectionOrigin applies the CORS response headers corresponding to the origin.
@@ -464,6 +483,63 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 	}
 	goa.ContextRequest(ctx).Payload = payload.Publicize()
 	return nil
+}
+
+// NodeController is the controller interface for the Node actions.
+type NodeController interface {
+	goa.Muxer
+	Throughput(*ThroughputNodeContext) error
+}
+
+// MountNodeController "mounts" a Node resource controller on the given service.
+func MountNodeController(service *goa.Service, ctrl NodeController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewThroughputNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Throughput(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("throughput", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Throughput", "route", "GET /api/v1/connections/:connId/nodes/:node/throughput", "security", "jwt")
+}
+
+// handleNodeOrigin applies the CORS response headers corresponding to the origin.
+func handleNodeOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
 }
 
 // PublicController is the controller interface for the Public actions.

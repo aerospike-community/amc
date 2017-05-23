@@ -104,4 +104,26 @@ var _ = Resource("connection", func() {
 		Response(NotFound)
 		Response(InternalServerError)
 	})
+
+	Action("throughput", func() {
+		Description("Returns the aggregate throughput of the connection nodes for a given window of time. If From/To are not specified, the latest throughput will be returned.")
+		Routing(GET(":connId/throughput"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("connId")
+		})
+
+		Response(OK, HashOf(String, HashOf(String, ThroughputResponseMedia)))
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 })

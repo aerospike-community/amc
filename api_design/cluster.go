@@ -65,10 +65,6 @@ package design
 // e.GET("/aerospike/service/clusters/:clusterUuid", sessionValidator(getCluster))
 // e.POST("/aerospike/service/clusters/:clusterUuid/logout", postRemoveClusterFromSession)
 
-// e.GET("/aerospike/service/clusters/:clusterUuid/udfs", sessionValidator(getClusterUDFs))
-// e.POST("/aerospike/service/clusters/:clusterUuid/drop_udf", sessionValidator(postClusterDropUDF))
-// e.POST("/aerospike/service/clusters/:clusterUuid/add_udf", sessionValidator(postClusterAddUDF))
-
 // e.GET("/aerospike/service/clusters/:clusterUuid/throughput", sessionValidator(getClusterThroughput))
 // e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", sessionValidator(getClusterThroughputHistory))
 // e.GET("/aerospike/service/clusters/:clusterUuid/basic", sessionValidator(getClusterBasic))
@@ -85,10 +81,6 @@ package design
 // e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", sessionValidator(getClusterNodeAllStats))
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", sessionValidator(getClusterNamespaceNodeAllStats))
 // e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:port/nodes/:node/allstats", sessionValidator(getClusterXdrNodeAllStats))
-
-// e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", sessionValidator(getClusterNamespaceSindexNodeAllStats))
-// e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/add_index", sessionValidator(postClusterAddIndex))
-// e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/drop_index", sessionValidator(postClusterDropIndex))
 
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", sessionValidator(getClusterNamespaceSindexes))
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", sessionValidator(getClusterNamespaceSets))

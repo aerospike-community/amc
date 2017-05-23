@@ -53,6 +53,24 @@ func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 	return spv.timestamp
 }
 
+func (spv *SinglePointValue) TimestampJsonInt(defVal *time.Time) *int {
+	if spv == nil {
+		if defVal != nil {
+			val := int(defVal.Unix() * 1000)
+			return &val
+		}
+		return nil
+	}
+
+	if spv.timestamp != nil {
+		val := int(*spv.timestamp * 1000)
+		return &val
+	}
+
+	res := int(*spv.timestamp)
+	return &res
+}
+
 func (spv *SinglePointValue) Value(defVal *float64) *float64 {
 	if spv == nil || spv.value == nil {
 		return defVal

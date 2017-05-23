@@ -274,6 +274,7 @@ func GoaServer(config *common.Config) {
 
 	app.MountUserController(service, NewUserController(service))
 	app.MountConnectionController(service, NewConnectionController(service))
+	app.MountNodeController(service, NewNodeController(service))
 	app.MountModuleController(service, NewModuleController(service))
 	// app.MountClusterController(service, NewClusterController(service))
 

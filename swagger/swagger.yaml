@@ -1793,7 +1793,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Nulla laborum.
+          example: Et est laudantium recusandae quia est praesentium.
           type: string
         type: array
       username:
@@ -1904,9 +1904,6 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
     properties:
       connId:
         description: Connection Id
@@ -1927,9 +1924,6 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -1941,7 +1935,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: In hic doloremque facere perspiciatis ab et.
+      source: Doloremque facere perspiciatis ab et nostrum nulla.
       type: LUA
     properties:
       name:
@@ -1950,7 +1944,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: In hic doloremque facere perspiciatis ab et.
+        example: Doloremque facere perspiciatis ab et nostrum nulla.
         type: string
       type:
         description: Module's type
@@ -1996,7 +1990,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Est laudantium.
+          example: Modi facilis.
           type: string
         type: array
       username:
@@ -2448,6 +2442,101 @@ paths:
       summary: show module
       tags:
       - module
+  /api/v1/connections/{connId}/nodes/{node}/throughput:
+    get:
+      description: |-
+        Returns the aggregate throughput of the node namespaces for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:general`
+      operationId: node#throughput
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: throughput node
+      tags:
+      - node
+  /api/v1/connections/{connId}/throughput:
+    get:
+      description: |-
+        Returns the aggregate throughput of the connection nodes for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#throughput
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: throughput connection
+      tags:
+      - connection
   /api/v1/users:
     get:
       description: |-

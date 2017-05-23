@@ -437,6 +437,18 @@ type AerospikeAmcSystemResponse struct {
 	Version *string `form:"version,omitempty" json:"version,omitempty" xml:"version,omitempty"`
 }
 
+// Throughput Point (default view)
+//
+// Identifier: application/vnd.aerospike.amc.throughput.response+json; view=default
+type AerospikeAmcThroughputResponse struct {
+	// Timestamp in unix seconds
+	Timestamp *int `form:"timestamp,omitempty" json:"timestamp,omitempty" xml:"timestamp,omitempty"`
+	// Main Value. `Null` means the value was not available or missed.
+	X1 *float64 `form:"x1,omitempty" json:"x1,omitempty" xml:"x1,omitempty"`
+	// Secondary Value. `Null` means the value was not available or missed.
+	X2 *float64 `form:"x2,omitempty" json:"x2,omitempty" xml:"x2,omitempty"`
+}
+
 // User (default view)
 //
 // Identifier: application/vnd.aerospike.amc.user.query.response+json; view=default
