@@ -29,6 +29,9 @@ class ClusterOverview extends React.Component {
           isFetching: false,
           clusterOverview: details
         });
+      })
+      .catch(() => {
+        // TODO
       });
   }
 
@@ -44,8 +47,11 @@ class ClusterOverview extends React.Component {
         {!this.state.isFetching && 
           <div>
             <div className="row">
-              <div className="col-8">
-                <ClusterStorage memory={co.memory} disk={co.disk} />
+              <div className="col-4">
+                <ClusterStorage storage={co.disk} />
+              </div>
+              <div className="col-4">
+                <ClusterStorage storage={co.memory} />
               </div>
               <div className="col-4">
                 <ClusterSummary clusterOverview={co} />
