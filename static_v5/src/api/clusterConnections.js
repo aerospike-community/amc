@@ -25,17 +25,22 @@ export function updateConnection(clusterID, connection) {
   return postJSON(url, payload);
 }
 
-export function deleteConnection(id) {
-  const url = toURLPath(id);
+export function deleteConnection(clusterID) {
+  const url = toURLPath(clusterID);
   return deleteAPI(url);
 }
 
-export function authConnection(id, name, password) {
-  const url = toURLPath(id);
+export function authConnection(clusterID, name, password) {
+  const url = toURLPath(clusterID);
   const credentials = {
     username: name,
     password: password
   };
   return postJSON(url, credentials);
+}
+
+export function getConnectionDetails(clusterID) {
+  const url = toURLPath(clusterID);
+  return get(url);
 }
 

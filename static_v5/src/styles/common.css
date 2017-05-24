@@ -148,3 +148,14 @@
   background: black;
   width: 20px;
 }
+
+.as-d3-tooltip {
+  position: absolute;			
+  color: white;
+  max-width: 200px;					
+  max-height: 200px;					
+  padding: 2px;				
+  background: black;	
+  border-radius: 8px;			
+  pointer-events: none;			
+}

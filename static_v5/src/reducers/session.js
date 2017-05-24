@@ -1,4 +1,4 @@
-import { AUTHENTICATE_USER, USER_AUTHENTICATION_SUCCESS, USER_AUTHENTICATION_FAILURE, LOGOUT_USER } from '../actions/authenticate';
+import { AUTHENTICATE_USER, USER_AUTHENTICATION_SUCCESS, USER_AUTHENTICATION_FAILURE } from '../actions/authenticate';
 
 // the current session of the user
 export default function session(state = {
@@ -36,16 +36,6 @@ export default function session(state = {
         failureMessage: action.failureMessage,
       });
       user = {
-        name: '',
-        roles: []
-      };
-      break;
-    case LOGOUT_USER:
-      auth = Object.assign({}, state.authentication, {
-         inProgress: false,
-         success: false,
-      });
-      user = { 
         name: '',
         roles: []
       };
