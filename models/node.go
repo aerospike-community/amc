@@ -312,6 +312,16 @@ func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 	return res
 }
 
+func (n *Node) LatestThroughputPerNamespace() map[string]map[string]*common.SinglePointValue {
+	// statsHistory is not written to, so it doesn't need synchronization
+	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
+	for _, ns := range n.Namespaces() {
+		res[ns.name] = ns.LatestThroughput()
+	}
+
+	return res
+}
+
 func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))

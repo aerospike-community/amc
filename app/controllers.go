@@ -485,9 +485,67 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 	return nil
 }
 
+// NamespaceController is the controller interface for the Namespace actions.
+type NamespaceController interface {
+	goa.Muxer
+	Throughput(*ThroughputNamespaceContext) error
+}
+
+// MountNamespaceController "mounts" a Namespace resource controller on the given service.
+func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewThroughputNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Throughput(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("throughput", h, nil))
+	service.LogInfo("mount", "ctrl", "Namespace", "action", "Throughput", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", "security", "jwt")
+}
+
+// handleNamespaceOrigin applies the CORS response headers corresponding to the origin.
+func handleNamespaceOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
 // NodeController is the controller interface for the Node actions.
 type NodeController interface {
 	goa.Muxer
+	Show(*ShowNodeContext) error
 	Throughput(*ThroughputNodeContext) error
 }
 
@@ -495,7 +553,25 @@ type NodeController interface {
 func MountNodeController(service *goa.Service, ctrl NodeController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Show", "route", "GET /api/v1/connections/:connId/nodes/:node", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

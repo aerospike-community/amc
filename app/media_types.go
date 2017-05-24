@@ -449,6 +449,27 @@ type AerospikeAmcThroughputResponse struct {
 	X2 *float64 `form:"x2,omitempty" json:"x2,omitempty" xml:"x2,omitempty"`
 }
 
+// AMC Throughput Response (default view)
+//
+// Identifier: application/vnd.aerospike.amc.throughput.wrapper.response+json; view=default
+type AerospikeAmcThroughputWrapperResponse struct {
+	// Cluster/Node Status
+	Status string `form:"status" json:"status" xml:"status"`
+	// Throughput Data
+	Throughput map[string]map[string]*AerospikeAmcThroughputResponse `form:"throughput" json:"throughput" xml:"throughput"`
+}
+
+// Validate validates the AerospikeAmcThroughputWrapperResponse media type instance.
+func (mt *AerospikeAmcThroughputWrapperResponse) Validate() (err error) {
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Throughput == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "throughput"))
+	}
+	return
+}
+
 // User (default view)
 //
 // Identifier: application/vnd.aerospike.amc.user.query.response+json; view=default

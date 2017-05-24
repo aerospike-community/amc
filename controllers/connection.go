@@ -152,7 +152,7 @@ func (c *ConnectionController) Throughput(ctx *app.ThroughputConnectionContext) 
 	throughput := cluster.LatestThroughput()
 
 	zeroVal := float64(0)
-	res := map[string]map[string]*app.AerospikeAmcThroughputResponse{}
+	throughputData := map[string]map[string]*app.AerospikeAmcThroughputResponse{}
 	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[1]]
 		secondaryVals := throughput[aliases[0]]
@@ -162,9 +162,14 @@ func (c *ConnectionController) Throughput(ctx *app.ThroughputConnectionContext) 
 			statRes[node] = &app.AerospikeAmcThroughputResponse{Timestamp: yValues.TimestampJsonInt(nil), X1: yValues.Value(&zeroVal), X2: secondaryVals[node].Value(&zeroVal)}
 		}
 
-		res[outStatName] = statRes
+		throughputData[outStatName] = statRes
+	}
+
+	res := app.AerospikeAmcThroughputWrapperResponse{
+		Status:     string(cluster.Status()),
+		Throughput: throughputData,
 	}
 
 	// ConnectionController_Throughput: end_implement
-	return ctx.OK(res)
+	return ctx.OK(&res)
 }

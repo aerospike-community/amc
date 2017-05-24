@@ -16,6 +16,17 @@ func NewNodeController(service *goa.Service) *NodeController {
 	return &NodeController{Controller: service.NewController("NodeController")}
 }
 
+// Show runs the show action.
+func (c *NodeController) Show(ctx *app.ShowNodeContext) error {
+	// NodeController_Show: start_implement
+
+	// Put your logic here
+
+	// NodeController_Show: end_implement
+	res := &app.AerospikeAmcThroughputWrapperResponse{}
+	return ctx.OK(res)
+}
+
 // Throughput runs the throughput action.
 func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 	// NodeController_Throughput: start_implement
@@ -30,10 +41,10 @@ func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 		return ctx.BadRequest("Node not found.")
 	}
 
-	throughput := node.LatestThroughput()
+	throughput := node.LatestThroughputPerNamespace()
 
 	zeroVal := float64(0)
-	res := map[string]map[string]*app.AerospikeAmcThroughputResponse{}
+	throughputData := map[string]map[string]*app.AerospikeAmcThroughputResponse{}
 	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[1]]
 		secondaryVals := throughput[aliases[0]]
@@ -43,9 +54,14 @@ func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 			statRes[node] = &app.AerospikeAmcThroughputResponse{Timestamp: yValues.TimestampJsonInt(nil), X1: yValues.Value(&zeroVal), X2: secondaryVals[node].Value(&zeroVal)}
 		}
 
-		res[outStatName] = statRes
+		throughputData[outStatName] = statRes
+	}
+
+	res := app.AerospikeAmcThroughputWrapperResponse{
+		Status:     string(cluster.Status()),
+		Throughput: throughputData,
 	}
 
 	// NodeController_Throughput: end_implement
-	return nil
+	return ctx.OK(&res)
 }

@@ -580,8 +580,8 @@ func NewThroughputConnectionContext(ctx context.Context, r *http.Request, servic
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ThroughputConnectionContext) OK(r map[string]map[string]*AerospikeAmcThroughputResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *ThroughputConnectionContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
@@ -907,6 +907,152 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// ThroughputNamespaceContext provides the namespace throughput action context.
+type ThroughputNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	From      *int
+	Namespace string
+	Node      string
+	Until     *int
+}
+
+// NewThroughputNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller throughput action.
+func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*ThroughputNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ThroughputNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramFrom := req.Params["from"]
+	if len(paramFrom) > 0 {
+		rawFrom := paramFrom[0]
+		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
+			tmp6 := from
+			tmp5 := &tmp6
+			rctx.From = tmp5
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramUntil := req.Params["until"]
+	if len(paramUntil) > 0 {
+		rawUntil := paramUntil[0]
+		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
+			tmp8 := until
+			tmp7 := &tmp8
+			rctx.Until = tmp7
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ThroughputNamespaceContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ThroughputNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ThroughputNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ThroughputNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowNodeContext provides the node show action context.
+type ShowNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Node   string
+}
+
+// NewShowNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller show action.
+func NewShowNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowNodeContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ThroughputNodeContext provides the node throughput action context.
 type ThroughputNodeContext struct {
 	context.Context
@@ -939,9 +1085,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp6 := from
-			tmp5 := &tmp6
-			rctx.From = tmp5
+			tmp10 := from
+			tmp9 := &tmp10
+			rctx.From = tmp9
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -955,9 +1101,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp8 := until
-			tmp7 := &tmp8
-			rctx.Until = tmp7
+			tmp12 := until
+			tmp11 := &tmp12
+			rctx.Until = tmp11
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -966,8 +1112,8 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ThroughputNodeContext) OK(r map[string]map[string]*AerospikeAmcThroughputResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *ThroughputNodeContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 

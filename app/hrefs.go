@@ -27,3 +27,10 @@ func ModuleHref(connID, name interface{}) string {
 	paramname := strings.TrimLeftFunc(fmt.Sprintf("%v", name), func(r rune) bool { return r == '/' })
 	return fmt.Sprintf("/api/v1/connections/%v/modules/%v", paramconnID, paramname)
 }
+
+// NodeHref returns the resource href.
+func NodeHref(connID, node interface{}) string {
+	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })
+	paramnode := strings.TrimLeftFunc(fmt.Sprintf("%v", node), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/connections/%v/nodes/%v", paramconnID, paramnode)
+}

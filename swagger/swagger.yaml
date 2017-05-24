@@ -1764,6 +1764,37 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.system.response+json;
       view=default'
     type: object
+  AerospikeAmcThroughputWrapperResponse:
+    description: AMC Throughput Response (default view)
+    example:
+      status: "on"
+      throughput:
+        Et non cupiditate a dignissimos in hic.:
+          Perspiciatis ab et.:
+            timestamp: 8.885961e+18
+            x1: 0.7323876
+            x2: 0.59803003
+    properties:
+      status:
+        description: Cluster/Node Status
+        example: "on"
+        type: string
+      throughput:
+        additionalProperties: true
+        description: Throughput Data
+        example:
+          Et non cupiditate a dignissimos in hic.:
+            Perspiciatis ab et.:
+              timestamp: 8.885961e+18
+              x1: 0.7323876
+              x2: 0.59803003
+        type: object
+    required:
+    - status
+    - throughput
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.throughput.wrapper.response+json;
+      view=default'
+    type: object
   AerospikeAmcUserQueryResponse:
     description: User (default view)
     example:
@@ -1793,7 +1824,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Et est laudantium recusandae quia est praesentium.
+          example: Natus dolor autem aut vitae.
           type: string
         type: array
       username:
@@ -1898,9 +1929,15 @@ definitions:
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      connectOnLogin: true
+      connectOnLogin: false
       name: Payments Cluster
       seeds:
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
@@ -1912,7 +1949,7 @@ definitions:
         type: string
       connectOnLogin:
         description: Should AMC connect to this cluster automatically after user login?
-        example: true
+        example: false
         type: boolean
       name:
         description: Connection Name
@@ -1921,6 +1958,12 @@ definitions:
       seeds:
         description: Seeds
         example:
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
@@ -1935,7 +1978,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Doloremque facere perspiciatis ab et nostrum nulla.
+      source: Quia est praesentium tenetur modi facilis.
       type: LUA
     properties:
       name:
@@ -1944,7 +1987,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Doloremque facere perspiciatis ab et nostrum nulla.
+        example: Quia est praesentium tenetur modi facilis.
         type: string
       type:
         description: Module's type
@@ -1990,7 +2033,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Modi facilis.
+          example: Et dignissimos et et.
           type: string
         type: array
       username:
@@ -2442,6 +2485,105 @@ paths:
       summary: show module
       tags:
       - module
+  /api/v1/connections/{connId}/nodes/{node}:
+    get:
+      description: |-
+        Get a cluster's node
+
+        Required security scopes:
+          * `api:general`
+      operationId: node#show
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.throughput.wrapper.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: show node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/throughput:
+    get:
+      description: |-
+        Returns the aggregate throughput of the namespace for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:general`
+      operationId: namespace#throughput
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - application/vnd.aerospike.amc.throughput.wrapper.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: throughput namespace
+      tags:
+      - namespace
   /api/v1/connections/{connId}/nodes/{node}/throughput:
     get:
       description: |-
@@ -2473,10 +2615,12 @@ paths:
         required: false
         type: integer
       produces:
-      - text/plain
+      - application/vnd.aerospike.amc.throughput.wrapper.response+json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
         "400":
           description: Bad Request
         "401":
@@ -2518,10 +2662,12 @@ paths:
         required: false
         type: integer
       produces:
-      - text/plain
+      - application/vnd.aerospike.amc.throughput.wrapper.response+json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
         "400":
           description: Bad Request
         "401":
