@@ -603,6 +603,384 @@ func (ctx *ThroughputConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// DropIndexContext provides the index drop action context.
+type DropIndexContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Name      string
+	Namespace string
+	Node      string
+}
+
+// NewDropIndexContext parses the incoming request URL and body, performs validations and creates the
+// context used by the index controller drop action.
+func NewDropIndexContext(ctx context.Context, r *http.Request, service *goa.Service) (*DropIndexContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DropIndexContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramName := req.Params["name"]
+	if len(paramName) > 0 {
+		rawName := paramName[0]
+		rctx.Name = rawName
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DropIndexContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DropIndexContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DropIndexContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DropIndexContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryIndexContext provides the index query action context.
+type QueryIndexContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewQueryIndexContext parses the incoming request URL and body, performs validations and creates the
+// context used by the index controller query action.
+func NewQueryIndexContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryIndexContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryIndexContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryIndexContext) OK(r []*AerospikeAmcIndexResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryIndexContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryIndexContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *QueryIndexContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryIndexContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SaveIndexContext provides the index save action context.
+type SaveIndexContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+	Payload   *SaveIndexPayload
+}
+
+// NewSaveIndexContext parses the incoming request URL and body, performs validations and creates the
+// context used by the index controller save action.
+func NewSaveIndexContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveIndexContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SaveIndexContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// saveIndexPayload is the index save action payload.
+type saveIndexPayload struct {
+	// Index's Bin name
+	Bin *string `form:"bin,omitempty" json:"bin,omitempty" xml:"bin,omitempty"`
+	// Index's Name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Index's Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Index's Set name
+	Set *string `form:"set,omitempty" json:"set,omitempty" xml:"set,omitempty"`
+	// Index's type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *saveIndexPayload) Validate() (err error) {
+	if payload.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Namespace == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.Set == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "set"))
+	}
+	if payload.Bin == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "bin"))
+	}
+	if payload.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+	if payload.Type != nil {
+		if ok := goa.ValidatePattern(`(?i)[NUMERIC|STRING]`, *payload.Type); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, *payload.Type, `(?i)[NUMERIC|STRING]`))
+		}
+	}
+	return
+}
+
+// Publicize creates SaveIndexPayload from saveIndexPayload
+func (payload *saveIndexPayload) Publicize() *SaveIndexPayload {
+	var pub SaveIndexPayload
+	if payload.Bin != nil {
+		pub.Bin = *payload.Bin
+	}
+	if payload.Name != nil {
+		pub.Name = *payload.Name
+	}
+	if payload.Namespace != nil {
+		pub.Namespace = *payload.Namespace
+	}
+	if payload.Set != nil {
+		pub.Set = *payload.Set
+	}
+	if payload.Type != nil {
+		pub.Type = *payload.Type
+	}
+	return &pub
+}
+
+// SaveIndexPayload is the index save action payload.
+type SaveIndexPayload struct {
+	// Index's Bin name
+	Bin string `form:"bin" json:"bin" xml:"bin"`
+	// Index's Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Index's Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Index's Set name
+	Set string `form:"set" json:"set" xml:"set"`
+	// Index's type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SaveIndexPayload) Validate() (err error) {
+	if payload.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.Set == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "set"))
+	}
+	if payload.Bin == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "bin"))
+	}
+	if payload.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+	if ok := goa.ValidatePattern(`(?i)[NUMERIC|STRING]`, payload.Type); !ok {
+		err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.type`, payload.Type, `(?i)[NUMERIC|STRING]`))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SaveIndexContext) OK(r *AerospikeAmcIndexResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SaveIndexContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SaveIndexContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *SaveIndexContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SaveIndexContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowIndexContext provides the index show action context.
+type ShowIndexContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Name      string
+	Namespace string
+	Node      string
+}
+
+// NewShowIndexContext parses the incoming request URL and body, performs validations and creates the
+// context used by the index controller show action.
+func NewShowIndexContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowIndexContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowIndexContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramName := req.Params["name"]
+	if len(paramName) > 0 {
+		rawName := paramName[0]
+		rctx.Name = rawName
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowIndexContext) OK(r *AerospikeAmcIndexResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowIndexContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowIndexContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowIndexContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // DropModuleContext provides the module drop action context.
 type DropModuleContext struct {
 	context.Context
@@ -907,6 +1285,64 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// ShowNamespaceContext provides the namespace show action context.
+type ShowNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewShowNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller show action.
+func NewShowNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ThroughputNamespaceContext provides the namespace throughput action context.
 type ThroughputNamespaceContext struct {
 	context.Context
@@ -1131,6 +1567,216 @@ func (ctx *ThroughputNodeContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *ThroughputNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// DropSetContext provides the set drop action context.
+type DropSetContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+	SetName   string
+}
+
+// NewDropSetContext parses the incoming request URL and body, performs validations and creates the
+// context used by the set controller drop action.
+func NewDropSetContext(ctx context.Context, r *http.Request, service *goa.Service) (*DropSetContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DropSetContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramSetName := req.Params["setName"]
+	if len(paramSetName) > 0 {
+		rawSetName := paramSetName[0]
+		rctx.SetName = rawSetName
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DropSetContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DropSetContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DropSetContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DropSetContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QuerySetContext provides the set query action context.
+type QuerySetContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewQuerySetContext parses the incoming request URL and body, performs validations and creates the
+// context used by the set controller query action.
+func NewQuerySetContext(ctx context.Context, r *http.Request, service *goa.Service) (*QuerySetContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QuerySetContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QuerySetContext) OK(r []map[string]interface{}) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QuerySetContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QuerySetContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *QuerySetContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QuerySetContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowSetContext provides the set show action context.
+type ShowSetContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+	SetName   string
+}
+
+// NewShowSetContext parses the incoming request URL and body, performs validations and creates the
+// context used by the set controller show action.
+func NewShowSetContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowSetContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowSetContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramSetName := req.Params["setName"]
+	if len(paramSetName) > 0 {
+		rawSetName := paramSetName[0]
+		rctx.SetName = rawSetName
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowSetContext) OK(r map[string]interface{}) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowSetContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowSetContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowSetContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

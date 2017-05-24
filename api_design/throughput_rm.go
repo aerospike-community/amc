@@ -10,16 +10,16 @@ var ThroughputResponseMedia = MediaType("application/vnd.aerospike.amc.throughpu
 
 	Attributes(func() {
 		Attribute("timestamp", Integer, "Timestamp in unix seconds")
-		Attribute("x1", Number, "Main Value. `Null` means the value was not available or missed.")
-		Attribute("x2", Number, "Secondary Value. `Null` means the value was not available or missed.")
+		Attribute("successful", Number, "Main Value. `Null` means the value was not available or missed.")
+		Attribute("failed", Number, "Secondary Value. `Null` means the value was not available or missed.")
 
 		// Required("timestamp")
 	})
 
 	View("default", func() {
 		Attribute("timestamp")
-		Attribute("x1")
-		Attribute("x2")
+		Attribute("successful")
+		Attribute("failed")
 
 		// Required("timestamp")
 	})

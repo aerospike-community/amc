@@ -411,6 +411,47 @@ func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
 	return
 }
 
+// Throughput Point (default view)
+//
+// Identifier: application/vnd.aerospike.amc.index.response+json; view=default
+type AerospikeAmcIndexResponse struct {
+	// IndexStats
+	Stats map[string]interface{} `form:"Stats,omitempty" json:"Stats,omitempty" xml:"Stats,omitempty"`
+	// Bin name that is being indexed
+	Bin string `form:"bin" json:"bin" xml:"bin"`
+	// Index Type
+	BinType string `form:"binType" json:"binType" xml:"binType"`
+	// Index Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Set name
+	Set string `form:"set" json:"set" xml:"set"`
+	// Is the index synced on all nodes?
+	SyncOnAllNodes bool `form:"syncOnAllNodes" json:"syncOnAllNodes" xml:"syncOnAllNodes"`
+}
+
+// Validate validates the AerospikeAmcIndexResponse media type instance.
+func (mt *AerospikeAmcIndexResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "namespace"))
+	}
+	if mt.Set == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "set"))
+	}
+	if mt.Bin == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "bin"))
+	}
+	if mt.BinType == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "binType"))
+	}
+
+	return
+}
+
 // Resource Usage (default view)
 //
 // Identifier: application/vnd.aerospike.amc.resource.usage.response+json; view=default
@@ -441,12 +482,12 @@ type AerospikeAmcSystemResponse struct {
 //
 // Identifier: application/vnd.aerospike.amc.throughput.response+json; view=default
 type AerospikeAmcThroughputResponse struct {
+	// Secondary Value. `Null` means the value was not available or missed.
+	Failed *float64 `form:"failed,omitempty" json:"failed,omitempty" xml:"failed,omitempty"`
+	// Main Value. `Null` means the value was not available or missed.
+	Successful *float64 `form:"successful,omitempty" json:"successful,omitempty" xml:"successful,omitempty"`
 	// Timestamp in unix seconds
 	Timestamp *int `form:"timestamp,omitempty" json:"timestamp,omitempty" xml:"timestamp,omitempty"`
-	// Main Value. `Null` means the value was not available or missed.
-	X1 *float64 `form:"x1,omitempty" json:"x1,omitempty" xml:"x1,omitempty"`
-	// Secondary Value. `Null` means the value was not available or missed.
-	X2 *float64 `form:"x2,omitempty" json:"x2,omitempty" xml:"x2,omitempty"`
 }
 
 // AMC Throughput Response (default view)

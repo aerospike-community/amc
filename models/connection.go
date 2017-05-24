@@ -122,7 +122,7 @@ func (c *Connection) Save() error {
 			log.Error(err.Error())
 		}
 	} else {
-		if _, err := tx.Exec("UPDATE connections SET Username = ?1, Label=?2, Seeds=?3, ConnectOnLogin = ?4 WHERE Id = ?4", c.Username, c.Label, c.Seeds, c.ConnectOnLogin, c.Id); err != nil {
+		if _, err := tx.Exec("UPDATE connections SET Username = ?1, Label=?2, Seeds=?3, ConnectOnLogin = ?4 WHERE Id = ?5", c.Username, c.Label, c.Seeds, c.ConnectOnLogin, c.Id); err != nil {
 			log.Error(err.Error())
 		}
 	}

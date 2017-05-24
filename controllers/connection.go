@@ -159,7 +159,7 @@ func (c *ConnectionController) Throughput(ctx *app.ThroughputConnectionContext) 
 
 		statRes := make(map[string]*app.AerospikeAmcThroughputResponse, len(primaryVals))
 		for node, yValues := range primaryVals {
-			statRes[node] = &app.AerospikeAmcThroughputResponse{Timestamp: yValues.TimestampJsonInt(nil), X1: yValues.Value(&zeroVal), X2: secondaryVals[node].Value(&zeroVal)}
+			statRes[node] = &app.AerospikeAmcThroughputResponse{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}
 		}
 
 		throughputData[outStatName] = statRes

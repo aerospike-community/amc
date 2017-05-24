@@ -25,24 +25,19 @@ var _ = Resource("namespace", func() {
 	// 	Response(InternalServerError)
 	// })
 
-	// Action("show", func() {
-	// 	Description("Get a cluster's namespace")
-	// 	Routing(GET(":name"))
+	Action("show", func() {
+		Description("Get a cluster's namespace")
+		Routing(GET(":namespace"))
+		Params(func() {
+			Param("namespace", String, "Namespace", func() { Example("test") })
 
-	// 	Response(OK, func() {
-	// 		Media(ConnectionNamespaceResponseMedia, "full")
-	// 	})
-	// 	Response(BadRequest, String)
-	// 	Response(Unauthorized)
-	// 	Response(InternalServerError)
-	// })
+			Required("namespace")
+		})
 
-	// 	Response(NoContent)
-	// 	Response(BadRequest, String)
-	// 	Response(Forbidden)
-	// 	Response(Unauthorized)
-	// 	Response(InternalServerError)
-	// })
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 
 	// Action("drop", func() {
 	// 	Description("Drop a namespace from the cluster")

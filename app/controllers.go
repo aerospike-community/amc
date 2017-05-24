@@ -352,6 +352,139 @@ func unmarshalSaveConnectionPayload(ctx context.Context, service *goa.Service, r
 	return nil
 }
 
+// IndexController is the controller interface for the Index actions.
+type IndexController interface {
+	goa.Muxer
+	Drop(*DropIndexContext) error
+	Query(*QueryIndexContext) error
+	Save(*SaveIndexContext) error
+	Show(*ShowIndexContext) error
+}
+
+// MountIndexController "mounts" a Index resource controller on the given service.
+func MountIndexController(service *goa.Service, ctrl IndexController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewDropIndexContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Drop(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleIndexOrigin(h)
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("drop", h, nil))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQueryIndexContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleIndexOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Query", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSaveIndexContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*SaveIndexPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Save(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleIndexOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("save", h, unmarshalSaveIndexPayload))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Save", "route", "POST /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowIndexContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleIndexOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Show", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", "security", "jwt")
+}
+
+// handleIndexOrigin applies the CORS response headers corresponding to the origin.
+func handleIndexOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// unmarshalSaveIndexPayload unmarshals the request body into the context request data Payload field.
+func unmarshalSaveIndexPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &saveIndexPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
 // ModuleController is the controller interface for the Module actions.
 type ModuleController interface {
 	goa.Muxer
@@ -488,6 +621,7 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 // NamespaceController is the controller interface for the Namespace actions.
 type NamespaceController interface {
 	goa.Muxer
+	Show(*ShowNamespaceContext) error
 	Throughput(*ThroughputNamespaceContext) error
 }
 
@@ -495,7 +629,25 @@ type NamespaceController interface {
 func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Namespace", "action", "Show", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -668,6 +820,100 @@ func handlePublicOrigin(h goa.Handler) goa.Handler {
 			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
 				rw.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// SetController is the controller interface for the Set actions.
+type SetController interface {
+	goa.Muxer
+	Drop(*DropSetContext) error
+	Query(*QuerySetContext) error
+	Show(*ShowSetContext) error
+}
+
+// MountSetController "mounts" a Set resource controller on the given service.
+func MountSetController(service *goa.Service, ctrl SetController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets/:setName", ctrl.MuxHandler("preflight", handleSetOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets", ctrl.MuxHandler("preflight", handleSetOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewDropSetContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Drop(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleSetOrigin(h)
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets/:setName", ctrl.MuxHandler("drop", h, nil))
+	service.LogInfo("mount", "ctrl", "Set", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets/:setName", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQuerySetContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleSetOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Set", "action", "Query", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowSetContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleSetOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets/:setName", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Set", "action", "Show", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/sets/:setName", "security", "jwt")
+}
+
+// handleSetOrigin applies the CORS response headers corresponding to the origin.
+func handleSetOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
 			}
 			return h(ctx, rw, req)
 		}

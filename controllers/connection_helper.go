@@ -38,10 +38,11 @@ func toConnectionMedia(conn *models.Connection) (*app.AerospikeAmcConnectionQuer
 	}
 
 	return &app.AerospikeAmcConnectionQueryResponse{
-		ID:        conn.Id,
-		Name:      conn.Label,
-		Seeds:     seeds,
-		Connected: connectionIsConnected(conn.Id),
+		ID:             conn.Id,
+		Name:           conn.Label,
+		Seeds:          seeds,
+		Connected:      connectionIsConnected(conn.Id),
+		ConnectOnLogin: conn.ConnectOnLogin,
 	}, nil
 }
 
