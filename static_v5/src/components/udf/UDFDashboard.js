@@ -6,9 +6,6 @@ import UDFView from './UDFView';
 import UDFEdit from './UDFEdit';
 import UDFCreate from './UDFCreate';
 import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from '../../classes/constants';
-import 'bootstrap/dist/css/bootstrap.css';
-
-
 
 // UDFDashboard handles all the views for the udf.
 // It is also responsible for changing between different views

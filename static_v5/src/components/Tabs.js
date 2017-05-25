@@ -3,8 +3,6 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 class Tabs extends React.Component {
   constructor(props) {
     super(props);

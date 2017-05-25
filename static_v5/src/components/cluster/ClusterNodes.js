@@ -2,8 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 // ClusterNodes provides an overview of the cluster nodes
 class ClusterNodes extends React.Component {
   constructor(props) {

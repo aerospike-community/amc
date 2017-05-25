@@ -2,9 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import { system } from '../api/amc';
 
-import 'bootstrap/dist/css/bootstrap.css';
-import '../styles/common.css';
-
 class Footer extends React.Component {
   constructor(props) {
     super(props);

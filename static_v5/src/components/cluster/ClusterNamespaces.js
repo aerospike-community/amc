@@ -2,8 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 // ClusterNamespaces provides an overview of the cluster namespaces
 class ClusterNamespaces extends React.Component {
   constructor(props) {

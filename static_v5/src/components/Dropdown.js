@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import { nextNumber } from '../classes/util';
 import { Dropdown as ReactDropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 // A custom dropdown component
 // see https://reactstrap.github.io/components/dropdowns/
 class Dropdown extends React.Component {

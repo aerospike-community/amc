@@ -3,10 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
 
-import 'bootstrap/dist/css/bootstrap.css';
-import '../styles/common.css';
 import aerospikelogo from '../images/aerospike-logo.png';
-
 
 class Header extends React.Component {
   constructor(props) {

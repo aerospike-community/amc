@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { objectPropType, nextNumber } from '../classes/util';
-import 'bootstrap/dist/css/bootstrap.css';
-import '../styles/common.css';
 
 // Render a Tree view
 class Tree extends React.Component {

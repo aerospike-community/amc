@@ -7,8 +7,6 @@ import AceEditor from 'react-ace';
 import 'brace/mode/lua';
 import 'brace/theme/github';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 import { getUDF } from '../../api/udf';
 import { nextNumber } from '../../classes/util';
 

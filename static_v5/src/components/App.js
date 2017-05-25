@@ -9,11 +9,6 @@ import VisibleMainDashboard from '../containers/VisibleMainDashboard';
 import VisibleHeader from '../containers/VisibleHeader';
 import Footer from './Footer';
 
-
-import 'bootstrap/dist/css/bootstrap.css';
-import 'font-awesome/css/font-awesome.css';
-import '../styles/common.css';
-
 class App extends React.Component {
   constructor(props) {
     super(props);

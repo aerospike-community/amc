@@ -8,9 +8,6 @@ import VisibleUDFDashboard from '../containers/VisibleUDFDashboard';
 import VisibleClusterDashboard from '../containers/VisibleClusterDashboard';
 import { VIEW_TYPE } from '../classes/constants';
 
-import 'bootstrap/dist/css/bootstrap.css';
-import '../styles/common.css';
-
 class MainDashboard extends React.Component {
   constructor(props) {
     super(props);

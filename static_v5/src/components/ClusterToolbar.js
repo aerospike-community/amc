@@ -2,10 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 
-import 'bootstrap/dist/css/bootstrap.css';
-import 'font-awesome/css/font-awesome.css';
-import '../styles/common.css';
-
 import { Button } from 'reactstrap';
 
 class ClusterToolbar extends React.Component {

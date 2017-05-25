@@ -7,8 +7,9 @@ import app from './reducers';
 import { fetchClusters } from './actions/clusters';
 import VisibleApp from './containers/VisibleApp';
 
-// import css
+// import all css
 import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.css';
 import 'nvd3/build/nv.d3.min.css';
 
 import './styles/common.css';

@@ -2,8 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import 'bootstrap/dist/css/bootstrap.css';
-
 // ClusterPerformance provides an overview of the cluster performance
 class ClusterPerformance extends React.Component {
   constructor(props) {
