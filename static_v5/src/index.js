@@ -7,6 +7,13 @@ import app from './reducers';
 import { fetchClusters } from './actions/clusters';
 import VisibleApp from './containers/VisibleApp';
 
+// import css
+import 'bootstrap/dist/css/bootstrap.css';
+import 'nvd3/build/nv.d3.min.css';
+
+import './styles/common.css';
+import './styles/chart.css';
+
 const store = createStore(
   app,
   applyMiddleware(

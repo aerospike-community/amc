@@ -2,11 +2,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
-import * as d3 from 'd3';
+import bytes from 'bytes';
 
-import StorageChart from '../../classes/charts/StorageChart';
+import StorageChart from '../../charts/StorageChart';
 import { nextNumber } from '../../classes/util';
-import 'bootstrap/dist/css/bootstrap.css';
 
 const usedBytes = 'used-bytes';
 const totalBytes = 'total-bytes';
@@ -26,20 +25,16 @@ class ClusterStorage extends React.Component {
     this.chart.draw();
   }
 
-  componentWillUnmount() {
-    this.chart.destroy();
-  }
-
   renderStorage(storage) {
     let nodeStorage = [];
     for (const host in storage.nodeDetails) {
       const node = storage.nodeDetails[host];
       nodeStorage.push(
-        <tr key={node}> 
+        <tr key={host}> 
           <td> {host} </td>
-          <td> {node[usedBytes]} </td>
-          <td> {node[freeBytes]} </td>
-          <td> {node[totalBytes]}</td>
+          <td> {bytes(node[usedBytes])} </td>
+          <td> {bytes(node[freeBytes])} </td>
+          <td> {bytes(node[totalBytes])}</td>
         </tr>
       );
     }
@@ -48,18 +43,18 @@ class ClusterStorage extends React.Component {
       <Table size="sm" bordered>
         <thead>
           <tr>
-            <th> </th>
+            <th> {this.props.name} </th>
             <th> Used </th>
             <th> Free </th>
             <th> Total </th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr key={'cluster'}>
             <td> Cluster </td>
-            <td> {storage[usedBytes]} </td>
-            <td> {storage[freeBytes]} </td>
-            <td> {storage[totalBytes]}</td>
+            <td> {bytes(storage[usedBytes])} </td>
+            <td> {bytes(storage[freeBytes])} </td>
+            <td> {bytes(storage[totalBytes])}</td>
           </tr>
           {nodeStorage}
         </tbody>
@@ -73,7 +68,7 @@ class ClusterStorage extends React.Component {
       <div>
         <div className="row">
           <div className="col-12"> 
-            <svg id={this.id} width="200" height="200"> </svg>
+            <svg id={this.id} className="as-pie-chart"> </svg>
           </div>
         </div>
         <div className="row">
@@ -87,6 +82,8 @@ class ClusterStorage extends React.Component {
 ClusterStorage.PropTypes = {
   // storage details of the cluster
   storage: PropTypes.object.required,
+  // the name of the storage. Ex: RAM, Disk
+  name: PropTypes.string,
 };
 
 export default ClusterStorage;

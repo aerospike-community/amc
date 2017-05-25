@@ -48,10 +48,10 @@ class ClusterOverview extends React.Component {
           <div>
             <div className="row">
               <div className="col-4">
-                <ClusterStorage storage={co.disk} />
+                <ClusterStorage name={'Disk'} storage={co.disk} />
               </div>
               <div className="col-4">
-                <ClusterStorage storage={co.memory} />
+                <ClusterStorage name={'RAM'} storage={co.memory} />
               </div>
               <div className="col-4">
                 <ClusterSummary clusterOverview={co} />
