@@ -45,6 +45,7 @@ class StorageChart {
         .datum(data)
         .call(chart);
 
+      nv.utils.windowResize(() => chart.update());
       return chart;
     });
   }

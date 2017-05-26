@@ -10,7 +10,7 @@ import VisibleApp from './containers/VisibleApp';
 // import all css
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.css';
-import 'nvd3/build/nv.d3.min.css';
+import 'nvd3/build/nv.d3.css';
 
 import './styles/common.css';
 import './styles/chart.css';
