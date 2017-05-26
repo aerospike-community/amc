@@ -71,9 +71,6 @@ class ClusterStorage extends React.Component {
             <svg id={this.id} className="as-pie-chart"> </svg>
           </div>
         </div>
-        <div className="row">
-          <div className="col-12"> {this.renderStorage(storage)} </div>
-        </div>
       </div>
     );
   }

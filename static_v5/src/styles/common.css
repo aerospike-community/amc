@@ -169,3 +169,15 @@
   border-radius: 8px;			
   pointer-events: none;			
 }
+
+.as-section {
+  margin-bottom: 10px;
+}
+
+.as-section-header {
+  font-size: 16px;
+  background: #636363;
+  color: white;
+  padding: 5px 0 0 15px;
+  height: 40px;
+}

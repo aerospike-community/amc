@@ -30,6 +30,11 @@ class ClusterPerformance extends React.Component {
     return (
       <div>
         <div className="row">
+          <div className="col-12 as-section-header">
+            Performance
+          </div>
+        </div>
+        <div className="row">
           <svg style={bigStyle} id="cl_pf_0" className="col-6"> </svg>
           <svg style={bigStyle} id="cl_pf_1" className="col-6"> </svg>
         </div>

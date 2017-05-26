@@ -18,11 +18,11 @@ class ClusterSummary extends React.Component {
       <div> 
         <div>
           <span className="font-weight-bold"> Nodes: {nodes.length} </span>
-          {nodes.map((node) => node)}
+          {nodes.map((node) => node + ' ')}
         </div>
         <div>
           <span className="font-weight-bold"> Namespaces: {namespaces.length} </span>
-          {namespaces.map((ns) => ns)}
+          {namespaces.map((ns) => ns + ' ')}
         </div>
         <div>
           <span className="font-weight-bold"> Build </span>

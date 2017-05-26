@@ -7,6 +7,8 @@ class ThroughputChart {
   constructor(selector, throughput) {
     this.selector = selector; // element selector on which the chart will be drawn
     this.throughput = throughput; // the throughput
+
+    this.chart = null;
   }
   
   // transform the data to the throughput chart format
@@ -43,6 +45,10 @@ class ThroughputChart {
     // TODO redraw the chart
   }
 
+  redraw() {
+    this.chart.redraw();
+  }
+
   draw() {
     nv.addGraph(() => {
       let chart = nv.models.stackedAreaChart()
@@ -61,6 +67,8 @@ class ThroughputChart {
         .call(chart);
 
       nv.utils.windowResize(() => chart.update());
+
+      this.chart = chart;
       return chart;
     });
   }

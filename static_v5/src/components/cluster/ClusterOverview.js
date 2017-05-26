@@ -47,22 +47,51 @@ class ClusterOverview extends React.Component {
         {!this.state.isFetching && 
           <div>
             <div className="row">
-              <div className="col-4">
-                <ClusterStorage name={'Disk'} storage={co.disk} />
+              <div className="col-4 as-section">
+                <div className="row">
+                  <div className="col-12 as-section-header">
+                    Disk
+                  </div>
+                </div>
+                <div className="row">
+                  <ClusterStorage className="col-12" name={'Disk'} storage={co.disk} />
+                </div>
               </div>
-              <div className="col-4">
-                <ClusterStorage name={'RAM'} storage={co.memory} />
+              <div className="col-4 as-section">
+                <div className="row">
+                  <div className="col-12 as-section-header">
+                    RAM
+                  </div>
+                </div>
+                <div className="row">
+                  <ClusterStorage className="col-12" name={'RAM'} storage={co.memory} />
+                </div>
               </div>
-              <div className="col-4">
-                <ClusterSummary clusterOverview={co} />
+              <div className="col-4 as-section">
+                <div className="row">
+                  <div className="col-12 as-section-header">
+                    Summary
+                  </div>
+                </div>
+                <div className="row">
+                  <ClusterSummary className="col-12" clusterOverview={co} />
+                </div>
               </div>
             </div>
 
             <div className="row">
-              <div className="col-12">
+              <div className="col-12 as-section">
                 <ClusterPerformance clusterID={clusterID} />
-                <ClusterNodes       clusterID={clusterID} />
-                <ClusterNamespaces  clusterID={clusterID} />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12 as-section">
+                <ClusterNodes clusterID={clusterID} />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12 as-section">
+                <ClusterNamespaces clusterID={clusterID} />
               </div>
             </div>
           </div>
