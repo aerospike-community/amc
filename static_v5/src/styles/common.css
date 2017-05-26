@@ -1,6 +1,15 @@
 .as-header {
   background-color: #cc0000;
   height: 60px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 900;
+}
+
+.as-body {
+  top: 60px;
+  position: relative;
 }
 
 .as-logo {
@@ -23,11 +32,11 @@
   font-size: 18px;
 }
 
-.as-maincontent {
+.as-centerpane {
   height: 100%;
 }
 
-.as-maincontent.col-12 {
+.as-centerpane.col-12 {
   padding-left: 25px;
 }
 
@@ -110,6 +119,7 @@
 .as-footer {
   position: fixed;
   bottom: 0;
+  z-index: 900;
   width: 100%;
   height: 25px;
   font-size: 12px;

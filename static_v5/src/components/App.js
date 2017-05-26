@@ -48,16 +48,12 @@ class App extends React.Component {
     }
     return (
       <div>
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-12 pl-0 pr-0">
-              <VisibleHeader />
-            </div>
-          </div>
+        <VisibleHeader />
+        <div className="container-fluid as-body">
           {loggedIn && 
           <div className="row">
             {leftPane}
-            <div className={classNames('as-maincontent', {
+            <div className={classNames('as-centerpane', {
                               'col-10': showLeftPane,
                               'offset-2': showLeftPane,
                               'col-12': !showLeftPane,
