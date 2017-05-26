@@ -1,6 +1,6 @@
 .as-header {
-  background-color: #cc0000;
-  height: 60px;
+  background-color: black;
+  height: 35px;
   position: fixed;
   left: 0;
   right: 0;
@@ -8,19 +8,23 @@
 }
 
 .as-body {
-  top: 60px;
+  top: 35px;
   position: relative;
 }
 
 .as-logo {
-  padding: 10px;
+  padding: 2px 0 0 10px;
+}
+
+.as-logo img {
+  width: 180px;
 }
 
 .as-leftpane {
   border-right: 1px solid lightgray;
   position: fixed;
   bottom: 0;
-  top: 60px;
+  top: 35px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -124,7 +128,7 @@
   height: 25px;
   font-size: 12px;
   line-height: 30px; 
-  background-color: #c20000;
+  background-color: black;
   color: white;
 }
 
@@ -150,7 +154,7 @@
 
 .as-leftpane-expand {
   position: fixed;
-  top: 60px;
+  top: 35px;
   left: 0;
   bottom: 0;
   cursor: pointer;

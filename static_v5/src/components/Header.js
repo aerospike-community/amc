@@ -14,7 +14,9 @@ class Header extends React.Component {
     const { onLogout, userName } = this.props;
     return (
       <div className={'as-header'}>
-        <img className={'as-logo'} src={aerospikelogo} />
+        <div className="float-left as-logo">
+          <img src={aerospikelogo} />
+        </div>
         <div className="float-right">
           { userName }
           <Button color="link" onClick={onLogout}> Log out </Button>
