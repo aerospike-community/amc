@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
-import MainDashboard from '../components/MainDashboard';
-import { selectPath } from '../actions/currentView';
+import MainDashboard from 'components/MainDashboard';
+import { selectPath } from 'actions/currentView';
 
 const  mapStateToProps = (state) => {
   return {

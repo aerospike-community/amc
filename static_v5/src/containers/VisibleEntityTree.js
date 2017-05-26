@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import EntityTree from '../components/EntityTree';
-import { selectPath } from '../actions/currentView';
-import { expandEntityNode, collapseEntityNode } from '../actions/entityTree';
-import { displayAuthClusterConnection, disconnectCluster } from '../actions/clusters';
-import { toPhysicalEntityTree } from '../classes/entityTree';
-import { VIEW_TYPE, CLUSTER_ACTIONS } from '../classes/constants';
+import EntityTree from 'components/EntityTree';
+import { selectPath } from 'actions/currentView';
+import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
+import { displayAuthClusterConnection, disconnectCluster } from 'actions/clusters';
+import { toPhysicalEntityTree } from 'classes/entityTree';
+import { VIEW_TYPE, CLUSTER_ACTIONS } from 'classes/constants';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;

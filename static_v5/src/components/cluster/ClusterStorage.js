@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
 import bytes from 'bytes';
 
-import StorageChart from '../../charts/StorageChart';
-import { nextNumber } from '../../classes/util';
+import StorageChart from 'charts/StorageChart';
+import { nextNumber } from 'classes/util';
 
 const usedBytes = 'used-bytes';
 const totalBytes = 'total-bytes';

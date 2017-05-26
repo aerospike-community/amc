@@ -25,6 +25,14 @@ var config = {
     // see https://webpack.github.io/docs/configuration.html#output-publicpath
     publicPath: 'build/',
   },
+
+  resolve: {
+    modules: [
+      path.resolve(__dirname, './src'),
+      path.resolve(__dirname, './node_modules')
+    ]
+  },
+
 	module : {
     loaders : [
       {

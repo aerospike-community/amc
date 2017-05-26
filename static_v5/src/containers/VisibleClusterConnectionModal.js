@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import AuthClusterConnectionModal from '../components/AuthClusterConnectionModal';
-import { authenticateClusterConnection, displayAuthClusterConnection } from '../actions/clusters';
+import AuthClusterConnectionModal from 'components/AuthClusterConnectionModal';
+import { authenticateClusterConnection, displayAuthClusterConnection } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
   const { authConnection, items } = state.clusters;

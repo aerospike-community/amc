@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ClusterDashboard from '../components/cluster/ClusterDashboard';
-import { toClusterPath } from '../classes/entityTree';
-import { CLUSTER_ACTIONS }  from '../classes/constants';
-import { selectPath } from '../actions/currentView';
-import { updateConnection } from '../actions/clusters';
+import ClusterDashboard from 'components/cluster/ClusterDashboard';
+import { toClusterPath } from 'classes/entityTree';
+import { CLUSTER_ACTIONS }  from 'classes/constants';
+import { selectPath } from 'actions/currentView';
+import { updateConnection } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
   const { clusterID, view } = state.currentView;

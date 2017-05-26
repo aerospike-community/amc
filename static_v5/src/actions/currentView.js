@@ -1,7 +1,7 @@
-import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from '../classes/urlAndViewSynchronizer';
-import { VIEW_TYPE } from '../classes/constants';
-import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from '../classes/entityTree';
-import { toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from '../classes/entityTree';
+import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from 'classes/urlAndViewSynchronizer';
+import { VIEW_TYPE } from 'classes/constants';
+import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
+import { toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
 
 export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
 export function showLeftPane() {

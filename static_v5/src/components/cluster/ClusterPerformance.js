@@ -2,8 +2,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import ThroughputChart from '../../charts/ThroughputChart';
-import { nextNumber } from '../../classes/util';
+import ThroughputChart from 'charts/ThroughputChart';
+import { nextNumber } from 'classes/util';
 
 // ClusterPerformance provides an overview of the cluster performance
 class ClusterPerformance extends React.Component {

@@ -1,10 +1,10 @@
-import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from '../actions/clusters';
-import { DISPLAY_ADD_CLUSTER_CONNECTION } from '../actions/clusters';
-import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from '../actions/clusters';
-import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from '../actions/clusters';
-import { UPDATE_CLUSTER_CONNECTION } from '../actions/clusters';
-import { ADD_UDF } from '../actions/clusters';
-import { ENTITY_TYPE } from '../classes/constants';
+import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from 'actions/clusters';
+import { DISPLAY_ADD_CLUSTER_CONNECTION } from 'actions/clusters';
+import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from 'actions/clusters';
+import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
+import { UPDATE_CLUSTER_CONNECTION } from 'actions/clusters';
+import { ADD_UDF } from 'actions/clusters';
+import { ENTITY_TYPE } from 'classes/constants';
 
 // all the cluster connections of the user
 export default function(state = {

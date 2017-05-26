@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
 
-import App from '../components/App';
-import { init as initAuth } from '../actions/authenticate';
-import { init as initURLAndViewSync } from '../classes/urlAndViewSynchronizer';
-import { showLeftPane } from '../actions/currentView';
+import App from 'components/App';
+import { init as initAuth } from 'actions/authenticate';
+import { init as initURLAndViewSync } from 'classes/urlAndViewSynchronizer';
+import { showLeftPane } from 'actions/currentView';
 
 const  mapStateToProps = (state) => {
   return {

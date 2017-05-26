@@ -1,6 +1,6 @@
 import ls from 'local-storage';
 
-import { authenticate as authenticateAPI } from '../api/auth';
+import { authenticate as authenticateAPI } from 'api/auth';
 
 export const AUTHENTICATE_USER = 'AUTHENTICATE_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';

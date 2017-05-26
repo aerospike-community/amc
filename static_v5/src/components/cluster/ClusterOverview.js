@@ -2,13 +2,13 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import ClusterStorage from './ClusterStorage';
-import ClusterSummary from './ClusterSummary';
-import ClusterPerformance from './ClusterPerformance';
-import ClusterNodes from './ClusterNodes';
-import ClusterNamespaces from './ClusterNamespaces';
+import ClusterStorage from 'components/cluster/ClusterStorage';
+import ClusterSummary from 'components/cluster/ClusterSummary';
+import ClusterPerformance from 'components/cluster/ClusterPerformance';
+import ClusterNodes from 'components/cluster/ClusterNodes';
+import ClusterNamespaces from 'components/cluster/ClusterNamespaces';
 
-import { getConnectionDetails } from '../../api/clusterConnections';
+import { getConnectionDetails } from 'api/clusterConnections';
 
 // ClusterOverview provides an overview of the cluster
 class ClusterOverview extends React.Component {

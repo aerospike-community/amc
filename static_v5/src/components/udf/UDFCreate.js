@@ -7,8 +7,8 @@ import AceEditor from 'react-ace';
 import 'brace/mode/lua';
 import 'brace/theme/github';
 
-import { getUDF, saveUDF } from '../../api/udf';
-import { nextNumber } from '../../classes/util';
+import { getUDF, saveUDF } from 'api/udf';
+import { nextNumber } from 'classes/util';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 

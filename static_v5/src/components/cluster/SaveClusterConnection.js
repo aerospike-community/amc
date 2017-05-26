@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
-import Seed from './Seed';
+import Seed from 'components/cluster/Seed';
 
 // SaveClusterConnection is a "view only" component to save
 // a cluster connection.

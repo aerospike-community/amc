@@ -1,5 +1,5 @@
-import { deleteAPI, get, postJSON } from './http';
-import { toURLConverter } from './url';
+import { deleteAPI, get, postJSON } from 'api/http';
+import { toURLConverter } from 'api/url';
 
 const toURLPath = toURLConverter('connections');
 

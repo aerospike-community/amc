@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { system } from '../api/amc';
+import { system } from 'api/amc';
 
 class Footer extends React.Component {
   constructor(props) {

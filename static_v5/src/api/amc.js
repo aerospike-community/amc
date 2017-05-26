@@ -1,5 +1,5 @@
-import { toURLConverter } from './url';
-import { get } from './http';
+import { toURLConverter } from 'api/url';
+import { get } from 'api/http';
 
 const toURLPath = toURLConverter('amc');
 

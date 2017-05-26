@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
-import SaveClusterConnection from './SaveClusterConnection';
-import { updateConnection as updateConnectionAPI } from '../../api/clusterConnections';
+import SaveClusterConnection from 'components/cluster/SaveClusterConnection';
+import { updateConnection as updateConnectionAPI } from 'api/clusterConnections';
 
 // EditClusterConnection shows a view to edit a cluster connection
 class EditClusterConnection extends React.Component {

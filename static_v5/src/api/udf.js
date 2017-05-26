@@ -1,5 +1,5 @@
-import { toURLConverter } from './url';
-import { get, postJSON, deleteAPI } from './http';
+import { toURLConverter } from 'api/url';
+import { get, postJSON, deleteAPI } from 'api/http';
 
 const converter = toURLConverter('connections');
 function toURLPath(clusterID, name) {

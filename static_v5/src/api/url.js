@@ -1,5 +1,5 @@
 import queryString from 'query-string';
-import { removeTrailingSlash, removeLeadingSlash } from '../classes/util';
+import { removeTrailingSlash, removeLeadingSlash } from 'classes/util';
 
 const basePath = '/api/v1/';
 

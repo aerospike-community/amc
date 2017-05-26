@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import AddClusterModal from '../components/cluster/AddClusterModal';
-import { fetchClusters, displayAddClusterConnection } from '../actions/clusters';
+import AddClusterModal from 'components/cluster/AddClusterModal';
+import { fetchClusters, displayAddClusterConnection } from 'actions/clusters';
 
 const mapDispatchToProps = (dispatch) => {
   return {

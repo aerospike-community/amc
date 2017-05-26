@@ -1,4 +1,4 @@
-import { AUTHENTICATE_USER, USER_AUTHENTICATION_SUCCESS, USER_AUTHENTICATION_FAILURE } from '../actions/authenticate';
+import { AUTHENTICATE_USER, USER_AUTHENTICATION_SUCCESS, USER_AUTHENTICATION_FAILURE } from 'actions/authenticate';
 
 // the current session of the user
 export default function session(state = {

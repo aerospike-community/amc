@@ -10,9 +10,9 @@
 // SEE below for how the entity path and the url is kept in sync.
 
 import createHistory from 'history/createHashHistory';
-import { VIEW_TYPE } from './constants';
-import { removeTrailingSlash, removeLeadingSlash } from './util';
-import { initView, selectPath, selectStartView } from '../actions/currentView';
+import { VIEW_TYPE } from 'classes/constants';
+import { removeTrailingSlash, removeLeadingSlash } from 'classes/util';
+import { initView, selectPath, selectStartView } from 'actions/currentView';
 
 const history = createHistory();
 let currentPathname = null;

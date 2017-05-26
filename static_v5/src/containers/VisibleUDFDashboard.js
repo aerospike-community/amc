@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import UDFDashboard from '../components/udf/UDFDashboard';
-import { toUDFPath, toUDFOverviewPath } from '../classes/entityTree';
-import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from '../classes/constants';
-import { selectPath } from '../actions/currentView';
-import { addUDF } from '../actions/clusters';
+import UDFDashboard from 'components/udf/UDFDashboard';
+import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
+import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/constants';
+import { selectPath } from 'actions/currentView';
+import { addUDF } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
   const { clusterID, udfName, viewType, view } = state.currentView;

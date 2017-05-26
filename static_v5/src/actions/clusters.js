@@ -1,7 +1,7 @@
-import {  authConnection as authConnectionAPI, listConnections } from '../api/clusterConnections';
+import {  authConnection as authConnectionAPI, listConnections } from 'api/clusterConnections';
 
-import { expandEntityNode } from './entityTree';
-import { toClusterPath } from '../classes/entityTree';
+import { expandEntityNode } from 'actions/entityTree';
+import { toClusterPath } from 'classes/entityTree';
 
 // ---------------------------
 // Adding a Cluster Connection

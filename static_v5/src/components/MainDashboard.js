@@ -3,10 +3,10 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import NodeDashboard from './NodeDashboard';
-import VisibleUDFDashboard from '../containers/VisibleUDFDashboard';
-import VisibleClusterDashboard from '../containers/VisibleClusterDashboard';
-import { VIEW_TYPE } from '../classes/constants';
+import NodeDashboard from 'components/NodeDashboard';
+import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
+import VisibleClusterDashboard from 'containers/VisibleClusterDashboard';
+import { VIEW_TYPE } from 'classes/constants';
 
 class MainDashboard extends React.Component {
   constructor(props) {

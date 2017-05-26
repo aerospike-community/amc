@@ -1,5 +1,5 @@
-import { VIEW_TYPE } from './constants';
-import { toEntityPath } from './urlAndViewSynchronizer';
+import { VIEW_TYPE } from 'classes/constants';
+import { toEntityPath } from 'classes/urlAndViewSynchronizer';
 
 // Each entity is uniquely identified by the path from its cluster.
 // 'path' is defined by the entities it encounters on its traversal 

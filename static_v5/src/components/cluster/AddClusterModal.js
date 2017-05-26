@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
-import SaveClusterConnection from './SaveClusterConnection';
-import { addConnection as addConnectionAPI } from '../../api/clusterConnections';
+import SaveClusterConnection from 'components/cluster/SaveClusterConnection';
+import { addConnection as addConnectionAPI } from 'api/clusterConnections';
 
 // AddClusterModal shows a modal to add a cluster connection
 class AddClusterModal extends React.Component {

@@ -3,11 +3,11 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import VisibleAuthenticateModal from '../containers/VisibleAuthenticateModal';
-import VisibleClusterConnections from '../containers/VisibleClusterConnections';
-import VisibleMainDashboard from '../containers/VisibleMainDashboard';
-import VisibleHeader from '../containers/VisibleHeader';
-import Footer from './Footer';
+import VisibleAuthenticateModal from 'containers/VisibleAuthenticateModal';
+import VisibleClusterConnections from 'containers/VisibleClusterConnections';
+import VisibleMainDashboard from 'containers/VisibleMainDashboard';
+import VisibleHeader from 'containers/VisibleHeader';
+import Footer from 'components/Footer';
 
 class App extends React.Component {
   constructor(props) {

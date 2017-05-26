@@ -1,6 +1,6 @@
 import ls from 'local-storage';
-import { toURLConverter } from './url';
-import { postJSON } from './http';
+import { toURLConverter } from 'api/url';
+import { postJSON } from 'api/http';
 
 const toURLPath = toURLConverter('auth');
 

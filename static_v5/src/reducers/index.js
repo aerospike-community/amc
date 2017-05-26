@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux';
-import clusters from './clusters';
-import currentView from './currentView';
-import entityTree from './entityTree';
-import session from './session';
+import clusters from 'reducers/clusters';
+import currentView from 'reducers/currentView';
+import entityTree from 'reducers/entityTree';
+import session from 'reducers/session';
 
-import { LOGOUT_USER } from '../actions/authenticate';
+import { LOGOUT_USER } from 'actions/authenticate';
 
 const app = combineReducers({
   clusters,    // the aerospike clusters

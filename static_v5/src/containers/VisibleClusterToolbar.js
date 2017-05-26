@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ClusterToolbar from '../components/ClusterToolbar';
-import { displayAddClusterConnection } from '../actions/clusters';
-import { hideLeftPane } from '../actions/currentView';
+import ClusterToolbar from 'components/ClusterToolbar';
+import { displayAddClusterConnection } from 'actions/clusters';
+import { hideLeftPane } from 'actions/currentView';
 
 const mapDispatchToProps = (dispatch) => {
   return {

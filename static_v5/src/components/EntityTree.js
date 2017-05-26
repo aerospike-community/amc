@@ -4,9 +4,9 @@ import PropTypes from 'prop-types'
 import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
-import { objectPropType, nextNumber } from '../classes/util';
-import { VIEW_TYPE_ACTIONS } from '../classes/constants';
-import Tree from './Tree';
+import { objectPropType, nextNumber } from 'classes/util';
+import { VIEW_TYPE_ACTIONS } from 'classes/constants';
+import Tree from 'components/Tree';
 
 // Display all the clusters and its entites 
 // in a tree.
