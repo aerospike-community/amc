@@ -1,8 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import UDFDashboard from 'components/udf/UDFDashboard';
 import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
-import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/constants';
+import { VIEW_TYPE }  from 'classes/constants';
+import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
 import { selectPath } from 'actions/currentView';
 import { addUDF } from 'actions/clusters';
 

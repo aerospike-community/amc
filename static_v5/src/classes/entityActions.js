@@ -1,0 +1,206 @@
+// entityActions maintains the actions permissible for
+// each entity.
+
+import { VIEW_TYPE } from 'classes/constants';
+
+function extractActions(obj) {
+  let actions = {};
+  for (let k in obj) {
+    actions[k] = k;
+  }
+  return actions;
+}
+
+// cluster
+// template for defining actions. state and roles can be omitted
+// A default action is chosen based on the state and the roles.
+// Only a single default action should be defined for a given state and roles.
+const clusterActions = {
+  Connect: {
+    isDefault: true,
+    state: {
+      isAuthenticated: false
+    }
+  },
+  Disconnect: {
+    state: {
+      isAuthenticated: true
+    }
+  },
+  Edit: {
+    state: {
+      isAuthenticated: true
+    }
+  },
+  View: {
+    state: {
+      isAuthenticated: true
+    }
+  },
+  Overview: {
+    isDefault: true,
+    state: {
+      isAuthenticated: true
+    }
+  },
+};
+export const CLUSTER_ACTIONS = extractActions(clusterActions);
+
+// udf
+const udfActions = {
+  View: {
+    isDefault: true,
+  },
+  Edit: {}
+};
+export const UDF_ACTIONS = extractActions(udfActions);
+
+// udf overview
+const udfOverviewActions = {
+  View: {
+    isDefault: true,
+  },
+  Create: {}
+};
+export const UDF_OVERVIEW_ACTIONS = extractActions(udfOverviewActions);
+
+// node
+const nodeActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const NODE_ACTIONS = extractActions(nodeActions);
+
+// node overview
+const nodeOverviewActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const NODE_OVERVIEW_ACTIONS = extractActions(nodeOverviewActions);
+
+// namespace
+const namespaceActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const NAMESPACE_ACTIONS = extractActions(namespaceActions);
+
+// namespace overview
+const namespaceOverviewActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const NAMESPACE = extractActions(namespaceOverviewActions);
+
+// set
+const setActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const SET_ACTIONS = extractActions(setActions);
+
+// set overview
+const setOverviewActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const SET_OVERVIEW_ACTIONS = extractActions(setOverviewActions);
+
+// TODO implement this
+function satisfiesRoles(requiredRoles, userRoles) {
+  requiredRoles = requiredRoles || [];
+  return true;
+}
+
+// check for state compatibility
+function inPermissibleState(requiredState, state) {
+  requiredState = requiredState || {};
+  for (let k in requiredState) {
+    let r = requiredState[k];
+    let s = state[k];
+    if (s === undefined) {
+      if (r)
+        return false;
+    } else if (s !== r) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// filter the permissible actions based on roles and state
+function filterActions(actions, entity, userRoles) {
+  let filtered = [];
+  for (let k in actions) {
+    let {roles, state} = actions[k];
+    if (inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles))
+      filtered.push(k);
+  }
+
+  return filtered;
+}
+
+function getDefaultAction(actions, entity, userRoles) {
+  for (let k in actions) {
+    let {roles, state, isDefault} = actions[k];
+    if (isDefault && inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles))
+      return k;
+  }
+
+  throw new Error('Default action not found');
+}
+
+// get action based on view type
+function viewTypeAction(viewType) {
+  if (viewType === VIEW_TYPE.CLUSTER)
+    return clusterActions;
+
+  if (viewType === VIEW_TYPE.UDF) 
+    return udfActions;
+
+  if (viewType === VIEW_TYPE.UDF_OVERVIEW) 
+    return udfOverviewActions;
+
+  if (viewType === VIEW_TYPE.NODE) 
+    return nodeActions;
+
+  if (viewType === VIEW_TYPE.NODE_OVERVIEW) 
+    return nodeOverviewActions;
+
+  if (viewType === VIEW_TYPE.NAMESPACE) 
+    return nodeOverviewActions;
+
+  if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) 
+    return namespaceOverviewActions;
+
+  if (viewType === VIEW_TYPE.SET) 
+    return setActions;
+
+  if (viewType === VIEW_TYPE.SET_OVERVIEW) 
+    return setOverviewActions;
+
+  const msg = `Action for ${viewType} not found`;
+  console.error(msg);
+  throw new Error(msg);
+}
+
+// get all permissible actions for the user 
+// for an entity of the given view type
+export function actions(viewType, entity, userRoles) {
+  let actions = viewTypeAction(viewType);
+  return filterActions(actions, entity, userRoles);
+}
+
+// get default action for the user for an entity of 
+// the given view type
+export function defaultAction(viewType, entity, userRoles) {
+  let actions = viewTypeAction(viewType);
+  return getDefaultAction(actions, entity, userRoles);
+}
+

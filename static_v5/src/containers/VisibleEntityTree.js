@@ -5,7 +5,8 @@ import { selectPath } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
 import { displayAuthClusterConnection, disconnectCluster } from 'actions/clusters';
 import { toPhysicalEntityTree } from 'classes/entityTree';
-import { VIEW_TYPE, CLUSTER_ACTIONS } from 'classes/constants';
+import { VIEW_TYPE } from 'classes/constants';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;

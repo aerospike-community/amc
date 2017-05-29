@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
-import { CLUSTER_ACTIONS } from 'classes/constants';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -34,7 +34,7 @@ class ClusterDashboard extends React.Component {
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
                       onUpdateConnectionSuccess={onUpdateConnectionSuccess}
-                      onCancel={this.onViewClusterOverview} />
+                      onCancel={() => this.onViewClusterOverview()} />
     }
     return (
       <div>

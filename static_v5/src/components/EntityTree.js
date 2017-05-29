@@ -5,7 +5,7 @@ import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
 import { objectPropType, nextNumber } from 'classes/util';
-import { VIEW_TYPE_ACTIONS } from 'classes/constants';
+import { actions, defaultAction } from 'classes/entityActions';
 import Tree from 'components/Tree';
 
 // Display all the clusters and its entites 
@@ -25,11 +25,16 @@ class EntityTree extends React.Component {
     this.onNodeExpand = this.onNodeExpand.bind(this);
   }
 
-  getOptions(viewType) {
-    let options = VIEW_TYPE_ACTIONS[viewType];
-    return options.map((o) => {
+  getUserRoles() {
+    return []; // TODO get user roles
+  }
+
+  getOptions(entity) {
+    const roles = this.getUserRoles();
+    let views =  actions(entity.viewType, entity, roles);
+    return views.map((a) => {
       return {
-        label: o
+        label: a
       };
     });
   }
@@ -37,7 +42,7 @@ class EntityTree extends React.Component {
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
     const showContextMenu = this.state.contextMenuEntityPath === entity.path;
-    const options = this.getOptions(entity.viewType);
+    const options = this.getOptions(entity);
     const isDisconnected = this.isDisconnected(entity);
     const { isCategory } = entity;
 
@@ -99,6 +104,11 @@ class EntityTree extends React.Component {
     this.props.onNodeExpand(entity);
   }
 
+  getDefaultView(entity) {
+    const roles = this.getUserRoles();
+    return defaultAction(entity.viewType, entity, roles);
+  }
+
   onEntitySelect(entity) {
     if (this.state.contextMenuEntityPath !== null) {
       this.hideContextMenu();
@@ -109,11 +119,7 @@ class EntityTree extends React.Component {
       return;
     }
 
-    // select the default view on click
-    // const options = VIEW_TYPE_ACTIONS[entity.viewType];
-    // const view = options.default;
-    // FIXME
-    const view = 'View';
+    const view = this.getDefaultView(entity);
     this.props.onEntitySelect(entity, view);
   }
 

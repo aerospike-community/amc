@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import UDFView from 'components/udf/UDFView';
 import UDFEdit from 'components/udf/UDFEdit';
 import UDFCreate from 'components/udf/UDFCreate';
-import { VIEW_TYPE, UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/constants';
+import { VIEW_TYPE }  from 'classes/constants';
+import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
 
 // UDFDashboard handles all the views for the udf.
 // It is also responsible for changing between different views

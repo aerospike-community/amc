@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ClusterDashboard from 'components/cluster/ClusterDashboard';
 import { toClusterPath } from 'classes/entityTree';
-import { CLUSTER_ACTIONS }  from 'classes/constants';
+import { CLUSTER_ACTIONS }  from 'classes/entityActions';
 import { selectPath } from 'actions/currentView';
 import { updateConnection } from 'actions/clusters';
 
