@@ -10,6 +10,7 @@ class ThroughputChart {
     this.title = title;
 
     this.chart = null;
+    this.chartData = null;
   }
   
   // transform the data to the throughput chart format
@@ -43,7 +44,13 @@ class ThroughputChart {
 
   update(throughput) {
     this.throughput = throughput;
-    // TODO redraw the chart
+    // TODO get data from throughput
+    const data = this._data();
+    this.chartData
+      .datum(data)
+      .transition()
+      .duration(250)
+      .call(this.chart);
   }
 
   redraw() {
@@ -67,8 +74,8 @@ class ThroughputChart {
       const data = this._data();
       const svg = d3.select(this.selector);
       
-      svg.datum(data)
-        .call(chart);
+      this.chartData = svg.datum(data);
+      this.chartData.call(chart);
 
       // title
       if (this.title) {
