@@ -1756,7 +1756,7 @@ definitions:
     description: Throughput Point (default view)
     example:
       Stats:
-        Consequuntur saepe ut deserunt impedit.: 5536287e-d895-4864-9db7-cd141988de02
+        Consequuntur saepe ut deserunt impedit.: 6fb156a5-6077-457c-a604-0f8ced32100c
       bin: Non cupiditate a.
       binType: In hic doloremque facere perspiciatis ab et.
       name: Nulla laborum.
@@ -1768,7 +1768,7 @@ definitions:
         additionalProperties: true
         description: IndexStats
         example:
-          Consequuntur saepe ut deserunt impedit.: 5536287e-d895-4864-9db7-cd141988de02
+          Consequuntur saepe ut deserunt impedit.: 6fb156a5-6077-457c-a604-0f8ced32100c
         type: object
       bin:
         description: Bin name that is being indexed
@@ -1823,7 +1823,7 @@ definitions:
       throughput:
         Et et reiciendis dolore aut deserunt nulla.:
           Harum quia modi est sit iusto.:
-            failed: 0.43526423
+          - failed: 0.43526423
             successful: 0.0641444
             timestamp: 7.612186e+18
     properties:
@@ -1837,7 +1837,7 @@ definitions:
         example:
           Et et reiciendis dolore aut deserunt nulla.:
             Harum quia modi est sit iusto.:
-              failed: 0.43526423
+            - failed: 0.43526423
               successful: 0.0641444
               timestamp: 7.612186e+18
         type: object
@@ -1876,7 +1876,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Eligendi non nesciunt.
+          example: Quae et.
           type: string
         type: array
       username:
@@ -1981,12 +1981,9 @@ definitions:
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      connectOnLogin: true
+      connectOnLogin: false
       name: Payments Cluster
       seeds:
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
@@ -2001,7 +1998,7 @@ definitions:
         type: string
       connectOnLogin:
         description: Should AMC connect to this cluster automatically after user login?
-        example: true
+        example: false
         type: boolean
       name:
         description: Connection Name
@@ -2010,9 +2007,6 @@ definitions:
       seeds:
         description: Seeds
         example:
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
@@ -2029,15 +2023,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      bin: Totam enim sit ducimus tenetur.
+      bin: Sit ducimus tenetur quas repudiandae ea.
       name: idxAccounts
-      namespace: Repudiandae ea dolores aut.
-      set: Sint aliquam deleniti.
+      namespace: Aut ea sint aliquam deleniti.
+      set: Itaque sit doloremque.
       type: NUMERIC
     properties:
       bin:
         description: Index's Bin name
-        example: Totam enim sit ducimus tenetur.
+        example: Sit ducimus tenetur quas repudiandae ea.
         type: string
       name:
         description: Index's Name
@@ -2045,11 +2039,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Repudiandae ea dolores aut.
+        example: Aut ea sint aliquam deleniti.
         type: string
       set:
         description: Index's Set name
-        example: Sint aliquam deleniti.
+        example: Itaque sit doloremque.
         type: string
       type:
         description: Index's type
@@ -2067,7 +2061,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Itaque sit doloremque.
+      source: Eligendi non nesciunt.
       type: LUA
     properties:
       name:
@@ -2076,7 +2070,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Itaque sit doloremque.
+        example: Eligendi non nesciunt.
         type: string
       type:
         description: Module's type
@@ -2122,7 +2116,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quae et.
+          example: Sunt et accusamus qui.
           type: string
         type: array
       username:

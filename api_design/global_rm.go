@@ -20,7 +20,7 @@ var ThroughputWrapperResponseMedia = MediaType("application/vnd.aerospike.amc.th
 	Description("AMC Throughput Response")
 	Attributes(func() {
 		Attribute("status", String, "Cluster/Node Status", func() { Example("on") })
-		Attribute("throughput", HashOf(String, HashOf(String, ThroughputResponseMedia)), "Throughput Data")
+		Attribute("throughput", HashOf(String, HashOf(String, ArrayOf(ThroughputResponseMedia))), "Throughput Data")
 
 		Required("status", "throughput")
 	})

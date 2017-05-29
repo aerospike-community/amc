@@ -51,14 +51,14 @@ func (c *NamespaceController) Throughput(ctx *app.ThroughputNamespaceContext) er
 	}
 
 	zeroVal := float64(0)
-	throughputData := map[string]map[string]*app.AerospikeAmcThroughputResponse{}
+	throughputData := map[string]map[string][]*app.AerospikeAmcThroughputResponse{}
 	for outStatName, aliases := range statsNameAliases {
 		primaryVals := throughput[aliases[1]]
 		secondaryVals := throughput[aliases[0]]
 
-		statRes := make(map[string]*app.AerospikeAmcThroughputResponse, len(primaryVals))
+		statRes := make(map[string][]*app.AerospikeAmcThroughputResponse, len(primaryVals))
 		for node, yValues := range primaryVals {
-			statRes[node] = &app.AerospikeAmcThroughputResponse{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}
+			statRes[node] = []*app.AerospikeAmcThroughputResponse{{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}}
 		}
 
 		throughputData[outStatName] = statRes

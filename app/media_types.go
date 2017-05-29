@@ -497,7 +497,7 @@ type AerospikeAmcThroughputWrapperResponse struct {
 	// Cluster/Node Status
 	Status string `form:"status" json:"status" xml:"status"`
 	// Throughput Data
-	Throughput map[string]map[string]*AerospikeAmcThroughputResponse `form:"throughput" json:"throughput" xml:"throughput"`
+	Throughput map[string]map[string][]*AerospikeAmcThroughputResponse `form:"throughput" json:"throughput" xml:"throughput"`
 }
 
 // Validate validates the AerospikeAmcThroughputWrapperResponse media type instance.
