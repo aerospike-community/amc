@@ -9,9 +9,10 @@ const freeBytes = 'free-bytes';
 // StorageChart draws a chart for the
 // storage of the cluster
 class StorageChart {
-  constructor(selector, nodeDetails) {
+  constructor(selector, nodeDetails, title = '') {
     this.selector = selector; // element selector on which the chart will be drawn
     this.nodeDetails = nodeDetails; // the node details 
+    this.title = title;
   }
   
   // transform the data to the pie chart format
@@ -28,6 +29,7 @@ class StorageChart {
   }
 
   draw() {
+    const marginTop = 40;
     nv.addGraph(() => {
       let chart = nv.models.pieChart()
           .x((d) => d.host)
@@ -41,9 +43,19 @@ class StorageChart {
           .valueFormatter(bytes);
 
       const data = this._data();
-      d3.select(this.selector)
-        .datum(data)
+      const svg = d3.select(this.selector);
+
+      svg.datum(data)
         .call(chart);
+
+      // title
+      if (this.title) {
+        svg.append('text')
+          .attr('x', 10)
+          .attr('y', marginTop/2)
+          .style('font-size', '16px')
+          .text(this.title);
+      }
 
       nv.utils.windowResize(() => chart.update());
       return chart;

@@ -12,9 +12,11 @@ class ClusterPerformance extends React.Component {
   }
 
   componentDidMount() {
+    // FIXME
+    const charts = ['Read', 'Write', 'Query', 'Batch', 'Scan', 'XDR'];
     for (let i = 0; i < 6; i++) {
       const id = 'cl_pf_' + i;
-      const tc = new ThroughputChart('#' + id, null);
+      const tc = new ThroughputChart('#' + id, null, charts[i]);
       tc.draw();
     }
   }

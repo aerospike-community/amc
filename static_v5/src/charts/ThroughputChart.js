@@ -4,9 +4,10 @@ import bytes from 'bytes';
 
 // ThroughputChart draws a chart for the throughput
 class ThroughputChart {
-  constructor(selector, throughput) {
+  constructor(selector, throughput, title = 'Throughput') {
     this.selector = selector; // element selector on which the chart will be drawn
     this.throughput = throughput; // the throughput
+    this.title = title;
 
     this.chart = null;
   }
@@ -50,21 +51,33 @@ class ThroughputChart {
   }
 
   draw() {
+    const marginTop = 40;
     nv.addGraph(() => {
       let chart = nv.models.stackedAreaChart()
           .x((d) => d.time)
           .y((d) => d.value)
           .useInteractiveGuideline(true)
-          .showControls(false);
+          .showControls(false)
+          .margin({top: marginTop});
 
       const f = d3.time.format('%x');
       chart.xAxis
           .tickFormat((t) => f(new Date(t)));
 
       const data = this._data();
-      d3.select(this.selector)
-        .datum(data)
+      const svg = d3.select(this.selector);
+      
+      svg.datum(data)
         .call(chart);
+
+      // title
+      if (this.title) {
+        svg.append('text')
+          .attr('x', 10)
+          .attr('y', marginTop/2)
+          .style('font-size', '16px')
+          .text(this.title);
+      }
 
       nv.utils.windowResize(() => chart.update());
 
