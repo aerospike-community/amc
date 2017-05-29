@@ -32,11 +32,20 @@ class EntityTree extends React.Component {
   getOptions(entity) {
     const roles = this.getUserRoles();
     let views =  actions(entity.viewType, entity, roles);
-    return views.map((a) => {
-      return {
-        label: a
-      };
+    let options = [];
+    views.forEach((view) => {
+      view.forEach((v) => {
+        options.push({
+          label: v
+        });
+      });
+      options.push({
+        isDivider: true
+      });
     });
+
+    options.splice(-1); // remove last divider
+    return options;
   }
 
   // called from the Tree component to render a entity
@@ -55,6 +64,9 @@ class EntityTree extends React.Component {
          <Dropdown isOpen={true} toggle={() => {}}>
            <DropdownMenu>
              {options.map((option) => {
+                if (option.isDivider)
+                  return <DropdownItem divider />;
+
                 return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
                          {option.label}
                        </DropdownItem>

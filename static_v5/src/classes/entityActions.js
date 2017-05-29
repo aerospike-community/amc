@@ -11,10 +11,15 @@ function extractActions(obj) {
   return actions;
 }
 
-// cluster
-// template for defining actions. state and roles can be omitted
-// A default action is chosen based on the state and the roles.
-// Only a single default action should be defined for a given state and roles.
+// Template for defining actions. Field not pertinent can be omitted.
+// The order defined here is maintained.
+//
+// Properties are
+// roles: the roles needed to access the action
+// state: the state of the entity in which the action can be accessed
+// isDefault: the default view for the (role, state)
+// isEndOfGrouping: end of grouping for the actions
+//
 const clusterActions = {
   Connect: {
     isDefault: true,
@@ -25,7 +30,8 @@ const clusterActions = {
   Disconnect: {
     state: {
       isAuthenticated: true
-    }
+    },
+    isEndOfGrouping: true,
   },
   Edit: {
     state: {
@@ -136,12 +142,22 @@ function inPermissibleState(requiredState, state) {
 
 // filter the permissible actions based on roles and state
 function filterActions(actions, entity, userRoles) {
-  let filtered = [];
+  let filtered = [],
+      group = [];
   for (let k in actions) {
-    let {roles, state} = actions[k];
-    if (inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles))
-      filtered.push(k);
+    let {roles, state, isEndOfGrouping} = actions[k];
+
+    if (inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles)) 
+      group.push(k);
+
+    if (isEndOfGrouping && group.length > 0) {
+      filtered.push(group);
+      group = [];
+    }
   }
+
+  if (group.length > 0)
+    filtered.push(group);
 
   return filtered;
 }
@@ -192,6 +208,10 @@ function viewTypeAction(viewType) {
 
 // get all permissible actions for the user 
 // for an entity of the given view type
+//
+// returns an array of arrays based on the grouping.
+// actions are grouped by the arrays. i.e
+// [[View, Edit], [Add, Delete]]
 export function actions(viewType, entity, userRoles) {
   let actions = viewTypeAction(viewType);
   return filterActions(actions, entity, userRoles);
