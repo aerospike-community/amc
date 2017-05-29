@@ -22,6 +22,7 @@
     "babel-preset-react": "^6.23.0",
     "bootstrap": "^4.0.0-alpha.6",
     "bytes": "^2.5.0",
+    "chunk-manifest-webpack-plugin": "^1.1.0",
     "classnames": "^2.2.5",
     "css-loader": "^0.27.3",
     "d3": "^3.5.17",
@@ -31,6 +32,7 @@
     "font-awesome": "^4.7.0",
     "font-awesome-webpack": "0.0.5-beta.2",
     "history": "^4.6.1",
+    "html-webpack-plugin": "^2.28.0",
     "jasmine-core": "^2.5.2",
     "jasmine-enzyme": "^3.0.1",
     "jsdoc": "^3.4.3",
@@ -56,6 +58,7 @@
     "style-loader": "^0.16.1",
     "url-loader": "^0.5.8",
     "webpack": "^2.2.1",
+    "webpack-chunk-hash": "^0.4.0",
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {

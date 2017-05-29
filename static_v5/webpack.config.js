@@ -1,5 +1,8 @@
 var webpack = require('webpack');
 var path = require('path');
+var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
+var WebpackChunkHash = require('webpack-chunk-hash');
+var HTMLWebpackPLugin = require('html-webpack-plugin');
 
 var BUILD_DIR = path.resolve(__dirname, 'build');
 var APP_DIR = path.resolve(__dirname, 'src');
@@ -8,7 +11,7 @@ var config = {
   entry: ['whatwg-fetch', APP_DIR + '/index.js'],
   output: {
     path: BUILD_DIR,
-    filename: 'bundle.js',
+    filename: '[name].[chunkhash].js',
       
     // The publicPath specifies the public URL address of the output files when
     // referenced in a browser. Needs to be set for file-loader.
@@ -32,6 +35,39 @@ var config = {
       path.resolve(__dirname, './node_modules')
     ]
   },
+
+  plugins: [
+      // splitting into vendor, main and manifest
+      // see https://webpack.js.org/guides/code-splitting-libraries/#manifest-file
+      new webpack.optimize.CommonsChunkPlugin({
+          name: 'vendor',
+          minChunks: function (module) {
+             // this assumes your vendor imports exist in the node_modules directory
+             return module.context && module.context.indexOf('node_modules') !== -1;
+          }
+      }),
+      //CommonChunksPlugin will now extract all the common modules from vendor and main bundles
+      new webpack.optimize.CommonsChunkPlugin({ 
+          name: 'manifest' // But since there are no more common modules between them 
+                           // we end up with just the runtime code included in the manifest file
+      }),
+
+      // hashing vendor, main, manifest
+      // see https://webpack.js.org/guides/caching/#deterministic-hashes
+			new webpack.HashedModuleIdsPlugin(),
+			new WebpackChunkHash(),
+			new ChunkManifestPlugin({
+				filename: "chunk-manifest.json",
+				manifestVariable: "webpackManifest",
+				inlineManifest: true
+			}),
+
+      // insert the chunkhashed filenames into index.html
+      new HTMLWebpackPLugin({
+        template: './index.template.html',
+        filename: path.resolve(__dirname, './index.html'), // output
+      }),
+  ],
 
 	module : {
     loaders : [
