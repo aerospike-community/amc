@@ -3,6 +3,7 @@ import { toURLConverter } from 'api/url';
 
 const toURLPath = toURLConverter('connections');
 
+// list all the connections registered by the user
 export function listConnections() {
   const url = toURLPath('');
   return get(url).
@@ -12,11 +13,13 @@ export function listConnections() {
     });
 }
 
+// add a connection for the user
 export function addConnection(connection) {
   const url = toURLPath('');
   return postJSON(url, connection);
 }
 
+// update a registered connection
 export function updateConnection(clusterID, connection) {
   const url = toURLPath('');
   const payload = Object.assign({}, connection, {
@@ -25,11 +28,13 @@ export function updateConnection(clusterID, connection) {
   return postJSON(url, payload);
 }
 
+// delete a registered connection
 export function deleteConnection(clusterID) {
   const url = toURLPath(clusterID);
   return deleteAPI(url);
 }
 
+// login to a connection
 export function authConnection(clusterID, name, password) {
   const url = toURLPath(clusterID);
   const credentials = {
@@ -39,8 +44,21 @@ export function authConnection(clusterID, name, password) {
   return postJSON(url, credentials);
 }
 
+// get the details of the registered connection
 export function getConnectionDetails(clusterID) {
   const url = toURLPath(clusterID);
   return get(url);
 }
 
+// get all throughput stats for all the nodes of the connection
+// from, to are in unix seconds
+export function getThroughput(clusterID, from, to) {
+  let query = {}
+  if (from)
+    query.from = from;
+  if (to)
+    query.to = to;
+  const url = toURLPath(clusterID + '/throughput', query);
+
+  return get(url);
+}

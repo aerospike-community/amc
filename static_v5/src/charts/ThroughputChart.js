@@ -4,7 +4,7 @@ import bytes from 'bytes';
 
 // ThroughputChart draws a chart for the throughput
 class ThroughputChart {
-  constructor(selector, throughput, title = 'Throughput') {
+  constructor(selector, throughput, title = '') {
     this.selector = selector; // element selector on which the chart will be drawn
     this.throughput = throughput; // the throughput
     this.title = title;
@@ -13,67 +13,43 @@ class ThroughputChart {
     this.chartData = null;
   }
   
-  // transform the data to the throughput chart format
-  // TODO can abstract these out and make it separate
-  _data() {
-    const nodes = ['172.17.0.4:3000', '172.17.0.5'];
-    const now = new Date();
-
-    let data = [];
-    for (let i = 0; i < nodes.length; i++) {
-      data.push({
-        key: nodes[i],
-        values: getDataPoints()
-      });
-    }
-    return data;
-
-    function getDataPoints() {
-      let data = [];
-      for (let i = 0; i < 100; i++) {
-        const time = new Date(now.getTime() - i*10);
-        data.push({
-          time: time,
-          value: Math.ceil(Math.random()*1000)
-        });
-      }
-      data.reverse();
-      return data;
-    }
-  }
-
+  // update the chart with new data
   update(throughput) {
     this.throughput = throughput;
-    // TODO get data from throughput
-    const data = this._data();
     this.chartData
-      .datum(data)
+      .datum(throughput)
       .transition()
       .duration(250)
       .call(this.chart);
   }
 
+  // redraw the chart
   redraw() {
     this.chart.redraw();
   }
 
   draw() {
     const marginTop = 40;
+    const nsuccess = 'successful';
+    const nfailed = 'failed';
+    const time = 'timestamp';
+
     nv.addGraph(() => {
       let chart = nv.models.stackedAreaChart()
-          .x((d) => d.time)
-          .y((d) => d.value)
+          .x((d) => d[time])
+          .y((d) => d[nsuccess])
           .useInteractiveGuideline(true)
           .showControls(false)
           .margin({top: marginTop});
 
-      const f = d3.time.format('%x');
+      // Hour:Minutes:Seconds
+      const f = d3.time.format('%X');
       chart.xAxis
           .tickFormat((t) => f(new Date(t)));
 
-      const data = this._data();
+      // draw chart
+      const data = this.throughput;
       const svg = d3.select(this.selector);
-      
       this.chartData = svg.datum(data);
       this.chartData.call(chart);
 

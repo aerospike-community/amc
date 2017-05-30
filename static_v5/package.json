@@ -42,6 +42,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.2",
     "local-storage": "^1.4.2",
+    "moment": "^2.18.1",
     "nvd3": "^1.8.5",
     "prop-types": "^15.5.8",
     "query-string": "^4.3.4",
