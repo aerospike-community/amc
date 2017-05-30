@@ -23,7 +23,7 @@
 .as-leftpane {
   border-right: 1px solid lightgray;
   position: fixed;
-  bottom: 0;
+  bottom: 25px;
   top: 35px;
   overflow-y: auto;
   overflow-x: hidden;

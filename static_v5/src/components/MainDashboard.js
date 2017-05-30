@@ -24,13 +24,15 @@ class MainDashboard extends React.Component {
   }
 
   render() {
-    const { currentView } = this.props;
+    const { currentView, isClusterConnected, clusterName } = this.props;
     const { entities, viewType, view } = currentView;
     const { clusterID, nodeHost, namespaceName, setName, udfName } = currentView;
 
     let dashboard;
 
-    if (viewType === VIEW_TYPE.NODE)
+    if (clusterID && !isClusterConnected)
+      dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} to continue </h4>;
+    else if (viewType === VIEW_TYPE.NODE)
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
     else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW)
       dashboard = <VisibleUDFDashboard />
@@ -53,6 +55,11 @@ MainDashboard.PropTypes = {
   // select a path
   // onSelectPath(path, view)
   onSelectPath: PropTypes.func,
+  // if a cluster entity is selected 
+  // is the cluster connected
+  isClusterConnected: PropTypes.bool,
+  // name of the cluster the dashboard is in
+  clusterName: PropTypes.bool,
 };
 
 export default MainDashboard;
