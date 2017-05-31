@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -94,7 +95,11 @@ func getAMCVersion(c echo.Context) error {
 }
 
 func ShutdownServer() {
-	_server.Shutdown(_server.ShutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := _server.Shutdown(ctx); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Server(config *common.Config) {
@@ -109,8 +114,8 @@ func Server(config *common.Config) {
 
 	e := echo.New()
 	// Avoid stale connections
-	e.ReadTimeout = 30 * time.Second
-	e.WriteTimeout = 30 * time.Second
+	e.Server.ReadTimeout = 30 * time.Second
+	e.Server.WriteTimeout = 30 * time.Second
 
 	store := sessions.NewCookieStore([]byte("amc-secret-key"))
 	e.Use(sessions.Sessions("amc_session", store))
