@@ -5,6 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
 import Seed from 'components/cluster/Seed';
+import Spinner from 'components/Spinner';
 
 // SaveClusterConnection is a "view only" component to save
 // a cluster connection.
@@ -195,12 +196,14 @@ class SaveClusterConnection extends React.Component {
 
         </form>
 
-        {inProgress &&
-         <span> Saving ... </span>}
+        <div className="as-submit-footer">
+          {inProgress &&
+           <span> <Spinner /> Saving ... </span>}
 
-        <span> {this.props.onSaveErrorMessage} </span>
-        <Button disabled={inProgress} color="primary" onClick={this.onSaveConnection}>Save</Button>
-        <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+          <span> {this.props.onSaveErrorMessage} </span>
+          <Button disabled={inProgress} color="primary" onClick={this.onSaveConnection}>Save</Button>
+          <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+        </div>
       </div>
       );
   }

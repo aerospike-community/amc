@@ -7,6 +7,7 @@ import AceEditor from 'react-ace';
 import 'brace/mode/lua';
 import 'brace/theme/github';
 
+import Spinner from 'components/Spinner';
 import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber } from 'classes/util';
 
@@ -113,7 +114,7 @@ class UDFView extends React.Component {
 
   render() {
     if (this.state.isFetching) 
-      return <div> Loading ... </div>;
+      return <div> <Spinner /> Loading ... </div>;
 
     const { hasErrors, hasChanged, isUpdating } = this.state;
     return (

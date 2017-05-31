@@ -6,6 +6,7 @@ import VisibleEntityTree from 'containers/VisibleEntityTree';
 import VisibleClusterToolbar from 'containers/VisibleClusterToolbar';
 import VisibleAddClusterModal from 'containers/VisibleAddClusterModal';
 import VisibleClusterConnectionModal from 'containers/VisibleClusterConnectionModal';
+import Spinner from 'components/Spinner';
 
 class ClusterConnections extends React.Component {
   constructor(props) {
@@ -20,7 +21,7 @@ class ClusterConnections extends React.Component {
   render() {
     let content;
     if (this.props.isFetching) {
-      content = <h5> Loading ... </h5>;
+      content = <h5> <Spinner /> Loading ... </h5>;
     } else {
       content = (
         <div>

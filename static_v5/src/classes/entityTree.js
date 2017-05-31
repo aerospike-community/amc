@@ -61,7 +61,7 @@ function toNodes(cluster) {
   const path = toNodeOverviewPath(cluster.id);
   let nodes = {
     path: path,
-    name: 'Nodes',
+    name: 'NODES',
     children: [],
     isCategory: true, // aggregator of entities
     viewType: VIEW_TYPE.NODE_OVERVIEW,
@@ -103,7 +103,7 @@ function toNamespaces(cluster, node) {
   const path = toNamespaceOverviewPath(cluster.id, node.host);
   let namespaces = {
     path: path,
-    name: 'Namespaces',
+    name: 'NAMESPACES',
     children: [],
     isCategory: true, // aggregator of entities
     viewType: VIEW_TYPE.NAMESPACE_OVERVIEW,
@@ -144,7 +144,7 @@ function toSets(cluster, node, namespace) {
   const path = toSetOverviewPath(cluster.id, node.host, namespace.name);
   let sets = {
     path: path,
-    name: 'Sets',
+    name: 'SETS',
     children: [],
     isCategory: true, // aggregator of entities
     viewType: VIEW_TYPE.SET_OVERVIEW,

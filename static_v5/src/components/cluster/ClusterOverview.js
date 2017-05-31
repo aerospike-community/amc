@@ -7,6 +7,7 @@ import ClusterSummary from 'components/cluster/ClusterSummary';
 import ClusterPerformance from 'components/cluster/ClusterPerformance';
 import ClusterNodes from 'components/cluster/ClusterNodes';
 import ClusterNamespaces from 'components/cluster/ClusterNamespaces';
+import Spinner from 'components/Spinner';
 
 import { getConnectionDetails } from 'api/clusterConnections';
 
@@ -42,7 +43,7 @@ class ClusterOverview extends React.Component {
     return (
       <div> 
         {this.state.isFetching && 
-          <div> Loading ... </div>
+          <div> <Spinner /> Loading ... </div>
         }
         {!this.state.isFetching && 
           <div>

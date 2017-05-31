@@ -60,8 +60,8 @@ class AuthClusterConnectionModal extends React.Component {
            <span> Creating ... </span>}
           {!inProgress && hasFailed &&
            <span className="as-error-text"> {failureMessage} </span>}
-          <Button disabled={inProgress} color="primary" onClick={this.onConnect}>Authenticate</Button>
           <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+          <Button disabled={inProgress} color="primary" onClick={this.onConnect}>Authenticate</Button>
         </ModalFooter>
       </Modal>
       );

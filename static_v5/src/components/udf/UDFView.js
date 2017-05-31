@@ -9,6 +9,7 @@ import 'brace/theme/github';
 
 import { getUDF } from 'api/udf';
 import { nextNumber } from 'classes/util';
+import Spinner from 'components/Spinner';
 
 import { Button } from 'reactstrap';
 
@@ -62,7 +63,7 @@ class UDFView extends React.Component {
 
   render() {
     if (this.state.isFetching) 
-      return <div> Loading ... </div>;
+      return <div> <Spinner /> Loading ... </div>;
 
     return (
       <div>
