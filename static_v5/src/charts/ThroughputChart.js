@@ -2,7 +2,10 @@ import nv from 'nvd3';
 import d3 from 'd3';
 import bytes from 'bytes';
 
+import { watchElementSizeChange } from 'charts/util';
+
 // ThroughputChart draws a chart for the throughput
+// ThroughputChart assumes that the chart will be drawn on an svg element.
 class ThroughputChart {
   constructor(selector, throughput, title = '') {
     this.selector = selector; // element selector on which the chart will be drawn
@@ -62,7 +65,8 @@ class ThroughputChart {
           .text(this.title);
       }
 
-      nv.utils.windowResize(() => chart.update());
+      // redraw on element size change
+      watchElementSizeChange(this.selector, () => chart.update());
 
       this.chart = chart;
       return chart;
