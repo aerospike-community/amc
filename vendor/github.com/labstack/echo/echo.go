@@ -42,9 +42,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	slog "log"
+	stdLog "log"
+	"net"
 	"net/http"
 	"path"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"sync"
@@ -52,41 +54,41 @@ import (
 
 	"github.com/labstack/gommon/color"
 	"github.com/labstack/gommon/log"
-	"github.com/tylerb/graceful"
 	"golang.org/x/crypto/acme/autocert"
 )
 
 type (
 	// Echo is the top-level framework instance.
 	Echo struct {
-		DisableHTTP2     bool
-		Debug            bool
-		HTTPErrorHandler HTTPErrorHandler
-		Binder           Binder
-		Validator        Validator
-		Renderer         Renderer
-		AutoTLSManager   autocert.Manager
-		ReadTimeout      time.Duration
-		WriteTimeout     time.Duration
-		ShutdownTimeout  time.Duration
-		Color            *color.Color
-		Logger           Logger
-		stdLogger        *slog.Logger
-		server           *graceful.Server
-		tlsServer        *graceful.Server
+		stdLogger        *stdLog.Logger
+		colorer          *color.Color
 		premiddleware    []MiddlewareFunc
 		middleware       []MiddlewareFunc
 		maxParam         *int
 		router           *Router
 		notFoundHandler  HandlerFunc
 		pool             sync.Pool
+		Server           *http.Server
+		TLSServer        *http.Server
+		Listener         net.Listener
+		TLSListener      net.Listener
+		DisableHTTP2     bool
+		Debug            bool
+		HideBanner       bool
+		HTTPErrorHandler HTTPErrorHandler
+		Binder           Binder
+		Validator        Validator
+		Renderer         Renderer
+		AutoTLSManager   autocert.Manager
+		// Mutex            sync.RWMutex
+		Logger Logger
 	}
 
 	// Route contains a handler and information for matching against requests.
 	Route struct {
-		Method  string
-		Path    string
-		Handler string
+		Method  string `json:"method"`
+		Path    string `json:"path"`
+		Handler string `json:"handler"`
 	}
 
 	// HTTPError represents an error that occurred while handling a request.
@@ -144,6 +146,8 @@ const (
 	MIMEApplicationJavaScriptCharsetUTF8 = MIMEApplicationJavaScript + "; " + charsetUTF8
 	MIMEApplicationXML                   = "application/xml"
 	MIMEApplicationXMLCharsetUTF8        = MIMEApplicationXML + "; " + charsetUTF8
+	MIMETextXML                          = "text/xml"
+	MIMETextXMLCharsetUTF8               = MIMETextXML + "; " + charsetUTF8
 	MIMEApplicationForm                  = "application/x-www-form-urlencoded"
 	MIMEApplicationProtobuf              = "application/protobuf"
 	MIMEApplicationMsgpack               = "application/msgpack"
@@ -180,6 +184,7 @@ const (
 	HeaderXHTTPMethodOverride           = "X-HTTP-Method-Override"
 	HeaderXForwardedFor                 = "X-Forwarded-For"
 	HeaderXRealIP                       = "X-Real-IP"
+	HeaderXRequestID                    = "X-Request-ID"
 	HeaderServer                        = "Server"
 	HeaderOrigin                        = "Origin"
 	HeaderAccessControlRequestMethod    = "Access-Control-Request-Method"
@@ -198,6 +203,22 @@ const (
 	HeaderXFrameOptions           = "X-Frame-Options"
 	HeaderContentSecurityPolicy   = "Content-Security-Policy"
 	HeaderXCSRFToken              = "X-CSRF-Token"
+)
+
+const (
+	version = "3.1.0"
+	website = "https://echo.labstack.com"
+	// http://patorjk.com/software/taag/#p=display&f=Small%20Slant&t=Echo
+	banner = `
+   ____    __
+  / __/___/ /  ___
+ / _// __/ _ \/ _ \
+/___/\__/_//_/\___/ %s
+High performance, minimalist Go web framework
+%s
+____________________________________O/_______
+                                    O\
+`
 )
 
 var (
@@ -219,6 +240,7 @@ var (
 	ErrUnsupportedMediaType        = NewHTTPError(http.StatusUnsupportedMediaType)
 	ErrNotFound                    = NewHTTPError(http.StatusNotFound)
 	ErrUnauthorized                = NewHTTPError(http.StatusUnauthorized)
+	ErrForbidden                   = NewHTTPError(http.StatusForbidden)
 	ErrMethodNotAllowed            = NewHTTPError(http.StatusMethodNotAllowed)
 	ErrStatusRequestEntityTooLarge = NewHTTPError(http.StatusRequestEntityTooLarge)
 	ErrValidatorNotRegistered      = errors.New("Validator not registered")
@@ -241,18 +263,21 @@ var (
 // New creates an instance of Echo.
 func New() (e *Echo) {
 	e = &Echo{
+		Server:    new(http.Server),
+		TLSServer: new(http.Server),
 		AutoTLSManager: autocert.Manager{
 			Prompt: autocert.AcceptTOS,
 		},
-		ShutdownTimeout: 15 * time.Second,
-		Logger:          log.New("echo"),
-		maxParam:        new(int),
-		Color:           color.New(),
+		Logger:   log.New("echo"),
+		colorer:  color.New(),
+		maxParam: new(int),
 	}
+	e.Server.Handler = e
+	e.TLSServer.Handler = e
 	e.HTTPErrorHandler = e.DefaultHTTPErrorHandler
 	e.Binder = &DefaultBinder{}
 	e.Logger.SetLevel(log.OFF)
-	e.stdLogger = slog.New(e.Logger.Output(), e.Logger.Prefix()+": ", 0)
+	e.stdLogger = stdLog.New(e.Logger.Output(), e.Logger.Prefix()+": ", 0)
 	e.pool.New = func() interface{} {
 		return e.NewContext(nil, nil)
 	}
@@ -288,6 +313,8 @@ func (e *Echo) DefaultHTTPErrorHandler(err error, c Context) {
 	if he, ok := err.(*HTTPError); ok {
 		code = he.Code
 		msg = he.Message
+	} else if e.Debug {
+		msg = err.Error()
 	} else {
 		msg = http.StatusText(code)
 	}
@@ -393,12 +420,16 @@ func (e *Echo) Match(methods []string, path string, handler HandlerFunc, middlew
 // Static registers a new route with path prefix to serve static files from the
 // provided root directory.
 func (e *Echo) Static(prefix, root string) {
+	if root == "" {
+		root = "." // For security we want to restrict to CWD.
+	}
 	static(e, prefix, root)
 }
 
 func static(i i, prefix, root string) {
 	h := func(c Context) error {
-		return c.File(path.Join(root, c.Param("*")))
+		name := filepath.Join(root, path.Clean("/"+c.Param("*"))) // "/"+ for security
+		return c.File(name)
 	}
 	i.GET(prefix, h)
 	if prefix == "/" {
@@ -425,7 +456,7 @@ func (e *Echo) add(method, path string, handler HandlerFunc, middleware ...Middl
 		}
 		return h(c)
 	})
-	r := Route{
+	r := &Route{
 		Method:  method,
 		Path:    path,
 		Handler: name,
@@ -471,8 +502,8 @@ func (e *Echo) URL(h HandlerFunc, params ...interface{}) string {
 }
 
 // Routes returns the registered routes.
-func (e *Echo) Routes() []Route {
-	routes := []Route{}
+func (e *Echo) Routes() []*Route {
+	routes := []*Route{}
 	for _, v := range e.router.routes {
 		routes = append(routes, v)
 	}
@@ -493,13 +524,22 @@ func (e *Echo) ReleaseContext(c Context) {
 
 // ServeHTTP implements `http.Handler` interface, which serves HTTP requests.
 func (e *Echo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Acquire lock
+	// e.Mutex.RLock()
+	// defer e.Mutex.RUnlock()
+
+	// Acquire context
 	c := e.pool.Get().(*context)
+	defer e.pool.Put(c)
 	c.Reset(r, w)
 
 	// Middleware
 	h := func(c Context) error {
 		method := r.Method
-		path := r.URL.EscapedPath()
+		path := r.URL.RawPath
+		if path == "" {
+			path = r.URL.Path
+		}
 		e.router.Find(method, path, c)
 		h := c.Handler()
 		for i := len(e.middleware) - 1; i >= 0; i-- {
@@ -517,80 +557,83 @@ func (e *Echo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := h(c); err != nil {
 		e.HTTPErrorHandler(err, c)
 	}
-
-	e.pool.Put(c)
 }
 
-// Start starts the HTTP server.
+// Start starts an HTTP server.
 func (e *Echo) Start(address string) error {
-	return e.StartServer(&http.Server{
-		Addr:         address,
-		ReadTimeout:  e.ReadTimeout,
-		WriteTimeout: e.WriteTimeout,
-		ErrorLog:     e.stdLogger,
-	})
+	e.Server.Addr = address
+	return e.StartServer(e.Server)
 }
 
-// StartTLS starts the HTTPS server.
+// StartTLS starts an HTTPS server.
 func (e *Echo) StartTLS(address string, certFile, keyFile string) (err error) {
 	if certFile == "" || keyFile == "" {
 		return errors.New("invalid tls configuration")
 	}
-	config := new(tls.Config)
-	config.Certificates = make([]tls.Certificate, 1)
-	config.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+	s := e.TLSServer
+	s.TLSConfig = new(tls.Config)
+	s.TLSConfig.Certificates = make([]tls.Certificate, 1)
+	s.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		return
 	}
-	return e.startTLS(address, config)
+	return e.startTLS(address)
 }
 
-// StartAutoTLS starts the HTTPS server using certificates automatically from https://letsencrypt.org.
+// StartAutoTLS starts an HTTPS server using certificates automatically installed from https://letsencrypt.org.
 func (e *Echo) StartAutoTLS(address string) error {
-	config := new(tls.Config)
-	config.GetCertificate = e.AutoTLSManager.GetCertificate
-	return e.startTLS(address, config)
+	s := e.TLSServer
+	s.TLSConfig = new(tls.Config)
+	s.TLSConfig.GetCertificate = e.AutoTLSManager.GetCertificate
+	return e.startTLS(address)
 }
 
-func (e *Echo) startTLS(address string, config *tls.Config) error {
+func (e *Echo) startTLS(address string) error {
+	s := e.TLSServer
+	s.Addr = address
 	if !e.DisableHTTP2 {
-		config.NextProtos = append(config.NextProtos, "h2")
+		s.TLSConfig.NextProtos = append(s.TLSConfig.NextProtos, "h2")
 	}
-	return e.StartServer(&http.Server{
-		Addr:         address,
-		ReadTimeout:  e.ReadTimeout,
-		WriteTimeout: e.WriteTimeout,
-		TLSConfig:    config,
-		ErrorLog:     e.stdLogger,
-	})
+	return e.StartServer(e.TLSServer)
 }
 
-// StartServer runs a custom HTTP server.
-func (e *Echo) StartServer(s *http.Server) error {
+// StartServer starts a custom http server.
+func (e *Echo) StartServer(s *http.Server) (err error) {
+	// Setup
+	e.colorer.SetOutput(e.Logger.Output())
+	s.ErrorLog = e.stdLogger
 	s.Handler = e
-	gs := &graceful.Server{
-		Server:  s,
-		Timeout: e.ShutdownTimeout,
-		Logger:  e.stdLogger,
+	if e.Debug {
+		e.Logger.SetLevel(log.DEBUG)
 	}
+
+	if !e.HideBanner {
+		e.colorer.Printf(banner, e.colorer.Red("v"+version), e.colorer.Blue(website))
+	}
+
 	if s.TLSConfig == nil {
-		e.server = gs
-		e.Color.Printf(" ⇛ http server started on %s\n", color.Green(s.Addr))
-		return gs.ListenAndServe()
+		if e.Listener == nil {
+			e.Listener, err = newListener(s.Addr)
+			if err != nil {
+				return err
+			}
+		}
+		if !e.HideBanner {
+			e.colorer.Printf("⇨ http server started on %s\n", e.colorer.Green(e.Listener.Addr()))
+		}
+		return s.Serve(e.Listener)
 	}
-	e.tlsServer = gs
-	e.Color.Printf(" ⇛ https server started on %s\n", color.Green(s.Addr))
-	return gs.ListenAndServeTLSConfig(s.TLSConfig)
-}
-
-// Shutdown gracefully shutdown the HTTP server with timeout.
-func (e *Echo) Shutdown(timeout time.Duration) {
-	e.server.Stop(timeout)
-}
-
-// ShutdownTLS gracefully shutdown the TLS server with timeout.
-func (e *Echo) ShutdownTLS(timeout time.Duration) {
-	e.tlsServer.Stop(timeout)
+	if e.TLSListener == nil {
+		l, err := newListener(s.Addr)
+		if err != nil {
+			return err
+		}
+		e.TLSListener = tls.NewListener(l, s.TLSConfig)
+	}
+	if !e.HideBanner {
+		e.colorer.Printf("⇨ https server started on %s\n", e.colorer.Green(e.TLSListener.Addr()))
+	}
+	return s.Serve(e.TLSListener)
 }
 
 // NewHTTPError creates a new HTTPError instance.
@@ -634,4 +677,30 @@ func handlerName(h HandlerFunc) string {
 		return runtime.FuncForPC(reflect.ValueOf(h).Pointer()).Name()
 	}
 	return t.String()
+}
+
+// tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
+// connections. It's used by ListenAndServe and ListenAndServeTLS so
+// dead TCP connections (e.g. closing laptop mid-download) eventually
+// go away.
+type tcpKeepAliveListener struct {
+	*net.TCPListener
+}
+
+func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
+	tc, err := ln.AcceptTCP()
+	if err != nil {
+		return
+	}
+	tc.SetKeepAlive(true)
+	tc.SetKeepAlivePeriod(3 * time.Minute)
+	return tc, nil
+}
+
+func newListener(address string) (*tcpKeepAliveListener, error) {
+	l, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+	return &tcpKeepAliveListener{l.(*net.TCPListener)}, nil
 }
