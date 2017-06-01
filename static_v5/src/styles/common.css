@@ -29,6 +29,15 @@
   overflow-x: hidden;
 }
 
+.as-right-border-resizer {
+  position: absolute;
+  right: 5px;
+  top: 0px;
+  bottom: 0px;
+  width: 5px;
+  cursor: col-resize;
+}
+
 .as-toolbar {
   border-bottom: 1px solid darkgray;
   line-height: 40px;
@@ -69,9 +78,16 @@
   font-weight: bold;
 }
 
+/* 
+ * text overflow ellipsis
+ * see https://css-tricks.com/snippets/css/truncate-string-with-ellipsis
+ */
 .as-tree-list-item {
   height: 30px;
   line-height: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .as-tree-node-name {
@@ -195,4 +211,12 @@
 
 .as-submit-footer button {
   margin-left: 10px;
+}
+
+.as-hover > * {
+  visibility: hidden;
+}
+
+.as-hover:hover > * {
+  visibility: visible;
 }

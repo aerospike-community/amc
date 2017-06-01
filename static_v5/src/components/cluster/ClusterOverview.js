@@ -55,9 +55,12 @@ class ClusterOverview extends React.Component {
                   </div>
                 </div>
                 <div className="row">
-                  <ClusterStorage className="col-12" name={'Disk'} storage={co.disk} />
+                  <div className="col-12">
+                    <ClusterStorage name={'Disk'} storage={co.disk} />
+                  </div>
                 </div>
               </div>
+
               <div className="col-4 as-section">
                 <div className="row">
                   <div className="col-12 as-section-header">
@@ -65,9 +68,12 @@ class ClusterOverview extends React.Component {
                   </div>
                 </div>
                 <div className="row">
-                  <ClusterStorage className="col-12" name={'RAM'} storage={co.memory} />
+                  <div className="col-12">
+                    <ClusterStorage name={'RAM'} storage={co.memory} />
+                  </div>
                 </div>
               </div>
+
               <div className="col-4 as-section">
                 <div className="row">
                   <div className="col-12 as-section-header">
@@ -75,7 +81,9 @@ class ClusterOverview extends React.Component {
                   </div>
                 </div>
                 <div className="row">
-                  <ClusterSummary className="col-12" clusterOverview={co} />
+                  <div className="col-12">
+                    <ClusterSummary clusterOverview={co} />
+                  </div>
                 </div>
               </div>
             </div>
