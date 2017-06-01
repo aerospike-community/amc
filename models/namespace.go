@@ -421,9 +421,9 @@ func (ns *Namespace) updateNotifications() error {
 	return nil
 }
 
-func (ns *Namespace) LatestThroughput() map[string]*common.SinglePointValue {
+func (ns *Namespace) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
-	res := make(map[string]*common.SinglePointValue, len(ns.statsHistory))
+	tp := make(map[string]*common.SinglePointValue, len(ns.statsHistory))
 	zeroVal := float64(0)
 	for name, bucket := range ns.statsHistory {
 		if ns.node.valid() {
@@ -432,11 +432,31 @@ func (ns *Namespace) LatestThroughput() map[string]*common.SinglePointValue {
 				tm := ns.node.ServerTime().Unix()
 				val = common.NewSinglePointValue(&tm, &zeroVal)
 			}
-			res[name] = val
+			tp[name] = val
 		} else {
 			tm := ns.node.ServerTime().Unix()
 			val := common.NewSinglePointValue(&tm, &zeroVal)
-			res[name] = val
+			tp[name] = val
+		}
+	}
+
+	res := map[string]map[string]*common.SinglePointValue{ns.name: tp}
+	return res
+}
+
+func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
+	// statsHistory is not written to, so it doesn't need synchronization
+	res := make(map[string]map[string][]*common.SinglePointValue, len(ns.statsHistory))
+	zeroVal := float64(0)
+	st := ns.node.ServerTime().Unix()
+	for name, bucket := range ns.statsHistory {
+		vs := bucket.ValuesBetween(from, to)
+		if len(vs) == 0 {
+			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
+		}
+
+		res[name] = map[string][]*common.SinglePointValue{
+			ns.name: vs,
 		}
 	}
 

@@ -957,6 +957,31 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	return res
 }
 
+func (c *Cluster) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
+	// if no tm specified, return for the last 30 mins
+	if from.IsZero() {
+		from = c.ServerTime().Add(-time.Minute * 30)
+	}
+	if to.IsZero() {
+		to = c.ServerTime().Add(-time.Minute * 30)
+	}
+
+	res := map[string]map[string][]*common.SinglePointValue{}
+	for _, node := range c.Nodes() {
+		for statName, valueMap := range node.Throughput(from, to) {
+			if res[statName] == nil {
+				res[statName] = valueMap
+			} else {
+				for k, v := range valueMap {
+					res[statName][k] = v
+				}
+			}
+		}
+	}
+
+	return res
+}
+
 func (c *Cluster) FindNodeById(id string) *Node {
 	for _, node := range c.Nodes() {
 		if node.Id() == id {

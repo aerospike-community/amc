@@ -316,7 +316,9 @@ func (n *Node) LatestThroughputPerNamespace() map[string]map[string]*common.Sing
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
 	for _, ns := range n.Namespaces() {
-		res[ns.name] = ns.LatestThroughput()
+		for nsName, tp := range ns.LatestThroughput() {
+			res[nsName] = tp
+		}
 	}
 
 	return res
@@ -329,6 +331,25 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 	st := n.ServerTime().Unix()
 	for name, bucket := range n.statsHistory {
 		vs := bucket.ValuesSince(tm)
+		if len(vs) == 0 {
+			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
+		}
+
+		res[name] = map[string][]*common.SinglePointValue{
+			n.Address(): vs,
+		}
+	}
+
+	return res
+}
+
+func (n *Node) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
+	// statsHistory is not written to, so it doesn't need synchronization
+	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
+	zeroVal := float64(0)
+	st := n.ServerTime().Unix()
+	for name, bucket := range n.statsHistory {
+		vs := bucket.ValuesBetween(from, to)
 		if len(vs) == 0 {
 			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
 		}

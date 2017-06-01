@@ -174,6 +174,73 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	return res
 }
 
+func (b *Bucket) isEmpty() bool {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	return b.beginTime == nil || b.lastTimestamp == nil
+}
+
+func (b *Bucket) timeToOffset(tm time.Time) *int {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	if b.beginTime == nil || tm.Unix() < *b.beginTime || (b.lastTimestamp != nil && tm.Unix() > *b.lastTimestamp) {
+		return nil
+	}
+
+	offset := int((tm.Unix() - *b.beginTime) / int64(b.resolution))
+	return &offset
+}
+
+func (b *Bucket) currentOffset() *int {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	if b.beginTime == nil {
+		return nil
+	}
+
+	offset := int((time.Now().Unix() - *b.beginTime) / int64(b.resolution))
+	return &offset
+}
+
+func (b *Bucket) ValuesBetween(from, to time.Time) []*common.SinglePointValue {
+	// if map is empty,
+	if b.isEmpty() || from.After(to) {
+		return []*common.SinglePointValue{}
+	}
+
+	if from.Unix() < *b.beginTime {
+		from = time.Unix(*b.beginTime, 0)
+	}
+
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	if to.Unix() > *b.lastTimestamp {
+		to = time.Unix(*b.lastTimestamp, 0)
+	}
+
+	// these cannot be nil, we have adjusted the query time values already
+	fromOffset := *b.timeToOffset(from)
+	toOffset := *b.timeToOffset(to)
+	if fromOffset < toOffset-b.Size() {
+		fromOffset = toOffset - b.Size()
+	}
+
+	res := make([]*common.SinglePointValue, 0, toOffset-fromOffset+1)
+	for i := fromOffset; i <= toOffset; i++ {
+		tm := *b.beginTime + int64(i*b.resolution)
+		if b.values[i%b.Size()] != nil {
+			v := math.Floor(*b.values[i%b.Size()] / float64(b.resolution))
+			res = append(res, common.NewSinglePointValue(&tm, &v))
+		}
+	}
+
+	return res
+}
+
 func (b *Bucket) LastValue() *common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()

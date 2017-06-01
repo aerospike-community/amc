@@ -4,7 +4,6 @@ import (
 	"github.com/goadesign/goa"
 
 	"github.com/citrusleaf/amc/app"
-	"github.com/citrusleaf/amc/common"
 )
 
 // NamespaceController implements the namespace resource.
@@ -46,27 +45,9 @@ func (c *NamespaceController) Throughput(ctx *app.ThroughputNamespaceContext) er
 		return ctx.BadRequest("Namespace not found.")
 	}
 
-	throughput := map[string]map[string]*common.SinglePointValue{
-		ctx.Namespace: namespace.LatestThroughput(),
-	}
-
-	zeroVal := float64(0)
-	throughputData := map[string]map[string][]*app.AerospikeAmcThroughputResponse{}
-	for outStatName, aliases := range statsNameAliases {
-		primaryVals := throughput[aliases[1]]
-		secondaryVals := throughput[aliases[0]]
-
-		statRes := make(map[string][]*app.AerospikeAmcThroughputResponse, len(primaryVals))
-		for node, yValues := range primaryVals {
-			statRes[node] = []*app.AerospikeAmcThroughputResponse{{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}}
-		}
-
-		throughputData[outStatName] = statRes
-	}
-
 	res := app.AerospikeAmcThroughputWrapperResponse{
 		Status:     string(cluster.Status()),
-		Throughput: throughputData,
+		Throughput: throughput(namespace, ctx.From, ctx.Until),
 	}
 
 	// NamespaceController_Throughput: end_implement
