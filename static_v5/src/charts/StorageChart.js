@@ -2,6 +2,8 @@ import nv from 'nvd3';
 import d3 from 'd3';
 import bytes from 'bytes';
 
+import { watchElementSizeChange } from 'charts/util';
+
 const usedBytes = 'used-bytes';
 const totalBytes = 'total-bytes';
 const freeBytes = 'free-bytes';
@@ -57,7 +59,9 @@ class StorageChart {
           .text(this.title);
       }
 
-      nv.utils.windowResize(() => chart.update());
+      // redraw on element size change
+      watchElementSizeChange(this.selector, () => chart.update());
+
       return chart;
     });
   }

@@ -31,7 +31,7 @@
 
 .as-right-border-resizer {
   position: absolute;
-  right: 5px;
+  right: 0px;
   top: 0px;
   bottom: 0px;
   width: 5px;

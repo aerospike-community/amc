@@ -59,7 +59,7 @@ class App extends React.Component {
       }
 
       // between 3 and 11
-      ncols = Math.max(ncols, 3);
+      ncols = Math.max(ncols, 1);
       ncols = Math.min(ncols, 11);
 
       this.setState({
@@ -123,15 +123,21 @@ class App extends React.Component {
             <VisibleClusterConnections />
           </div>
 
-          <div className="as-right-border-resizer" onMouseDown={this.onResize}>
+          <div className="as-right-border-resizer" style={{top: 40}} onMouseDown={this.onResize}>
           </div>
         </div>
       );
     }
+
+    let bodyStyle = {};
+    if (!showLeftPane) {
+      bodyStyle = {marginLeft: 10};
+    }
+
     return (
       <div>
         <VisibleHeader />
-        <div className="container-fluid as-body">
+        <div className="container-fluid as-body" style={bodyStyle}>
           {loggedIn && 
           <div className="row">
             {leftPane}
