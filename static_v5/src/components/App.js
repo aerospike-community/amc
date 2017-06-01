@@ -107,12 +107,12 @@ class App extends React.Component {
       leftPanelStyle = {
         width: resizing.leftPanelWidth
       };
-      mainPanelCSS = `col-${resizing.mainPanelCols}`;
+      mainPanelCSS = `col-xl-${resizing.mainPanelCols}`;
     } else {
       const ncols = this.state.leftPaneCols;
-      leftPanelCSS = `col-${ncols} pr-1 as-leftpane`;
-      mainPanelCSS = showLeftPane ? `as-centerpane offset-${ncols} col-${12-ncols}` 
-                                      : 'as-centerpane col-12';
+      leftPanelCSS = `col-xl-${ncols} pr-1 as-leftpane`;
+      mainPanelCSS = showLeftPane ? `as-centerpane offset-${ncols} col-xl-${12-ncols}` 
+                                      : 'as-centerpane col-xl-12';
     }
 
     let leftPane = null;

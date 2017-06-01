@@ -48,40 +48,40 @@ class ClusterOverview extends React.Component {
         {!this.state.isFetching && 
           <div>
             <div className="row">
-              <div className="col-4 as-section">
+              <div className="col-xl-4 as-section">
                 <div className="row">
-                  <div className="col-12 as-section-header">
+                  <div className="col-xl-12 as-section-header">
                     Disk
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-12">
+                  <div className="col-xl-12">
                     <ClusterStorage name={'Disk'} storage={co.disk} />
                   </div>
                 </div>
               </div>
 
-              <div className="col-4 as-section">
+              <div className="col-xl-4 as-section">
                 <div className="row">
-                  <div className="col-12 as-section-header">
+                  <div className="col-xl-12 as-section-header">
                     RAM
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-12">
+                  <div className="col-xl-12">
                     <ClusterStorage name={'RAM'} storage={co.memory} />
                   </div>
                 </div>
               </div>
 
-              <div className="col-4 as-section">
+              <div className="col-xl-4 as-section">
                 <div className="row">
-                  <div className="col-12 as-section-header">
+                  <div className="col-xl-12 as-section-header">
                     Summary
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-12">
+                  <div className="col-xl-12">
                     <ClusterSummary clusterOverview={co} />
                   </div>
                 </div>
@@ -89,17 +89,17 @@ class ClusterOverview extends React.Component {
             </div>
 
             <div className="row">
-              <div className="col-12 as-section">
+              <div className="col-xl-12 as-section">
                 <ClusterPerformance clusterID={clusterID} />
               </div>
             </div>
             <div className="row">
-              <div className="col-12 as-section">
+              <div className="col-xl-12 as-section">
                 <ClusterNodes clusterID={clusterID} />
               </div>
             </div>
             <div className="row">
-              <div className="col-12 as-section">
+              <div className="col-xl-12 as-section">
                 <ClusterNamespaces clusterID={clusterID} />
               </div>
             </div>

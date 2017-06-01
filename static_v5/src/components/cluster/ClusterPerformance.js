@@ -91,19 +91,19 @@ class ClusterPerformance extends React.Component {
     return (
       <div>
         <div className="row">
-          <div className="col-12 as-section-header">
+          <div className="col-xl-12 as-section-header">
             Performance
           </div>
         </div>
         <div className="row">
-          <svg style={bigStyle} id={this.id(types.read_tps)} className="col-6"> </svg>
-          <svg style={bigStyle} id={this.id(types.write_tps)} className="col-6"> </svg>
+          <svg style={bigStyle} id={this.id(types.read_tps)} className="col-xl-6"> </svg>
+          <svg style={bigStyle} id={this.id(types.write_tps)} className="col-xl-6"> </svg>
         </div>
         <div className="row">
-          <svg style={smStyle} id={this.id(types.query_tps)} className="col-3"> </svg>
-          <svg style={smStyle} id={this.id(types.batch_read_tps)} className="col-3"> </svg>
-          <svg style={smStyle} id={this.id(types.scan_tps)} className="col-3"> </svg>
-          <svg style={smStyle} id={this.id(types.udf_tps)} className="col-3"> </svg>
+          <svg style={smStyle} id={this.id(types.query_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(types.batch_read_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(types.scan_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(types.udf_tps)} className="col-xl-3"> </svg>
         </div>
       </div>
     );

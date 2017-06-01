@@ -36,12 +36,12 @@ class ClusterNodes extends React.Component {
     return (
       <div>
         <div className="row">
-          <div className="col-12 as-section-header">
+          <div className="col-xl-12 as-section-header">
             Nodes
           </div>
         </div>
         <div className="row">
-          <div className="col-12"> 
+          <div className="col-xl-12"> 
             <Table size="sm" bordered>
               <thead>
                 <tr>

@@ -181,13 +181,13 @@ class SaveClusterConnection extends React.Component {
             {seedsWarning && <span className="as-warning-text"> * seed node required for a cluster </span>}
           </legend>
           <div className="row">
-            <div className="col-3">
+            <div className="col-xl-3">
               <label> Host </label>
             </div>
-            <div className="col-3">
+            <div className="col-xl-3">
               <label> Port </label>
             </div>
-            <div className="col-3">
+            <div className="col-xl-3">
               <label> TLS Name </label>
             </div>
           </div>
