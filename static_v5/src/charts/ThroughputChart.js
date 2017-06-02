@@ -50,6 +50,10 @@ class ThroughputChart {
       chart.xAxis
           .tickFormat((t) => f(new Date(t)));
 
+      // if all values are zero, nvd3 sets range of y axis to [-1, 1].
+      // this sets the minimum range of y axis to be zero.
+      chart.forceY([0, 1000]);
+
       // draw chart
       const data = this.throughput;
       const svg = d3.select(this.selector);
