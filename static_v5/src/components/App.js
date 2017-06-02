@@ -8,10 +8,13 @@ import VisibleClusterConnections from 'containers/VisibleClusterConnections';
 import VisibleMainDashboard from 'containers/VisibleMainDashboard';
 import VisibleHeader from 'containers/VisibleHeader';
 import Footer from 'components/Footer';
+import { nextNumber } from 'classes/util';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    this.toolbarHeight = 40;
 
     this.state = {
       leftPaneCols: 3,
@@ -19,9 +22,16 @@ class App extends React.Component {
         inProgress: false,
         leftPanelWidth: 0,
         mainPanelCols: 0
+      },
+
+      resizerStyle: {
+        top: this.toolbarHeight
       }
     };
 
+    this.leftPanelID = 'app_left_pane_' + nextNumber();
+
+    this.onLeftPaneScroll = this.onLeftPaneScroll.bind(this);
     this.onShowLeftPane = this.onShowLeftPane.bind(this);
     this.onResize = this.onResize.bind(this);
   }
@@ -93,6 +103,21 @@ class App extends React.Component {
     document.addEventListener('mouseup', onMouseUp);
   }
 
+  onLeftPaneScroll() {
+    const top = this.toolbarHeight; // toolbar height
+    const style = {
+      top: top
+    };
+
+    const elm = document.getElementById(this.leftPanelID);
+    if (elm !== null && elm.scrollTop > 0) // scrollTop > 0 implies there is a scroll bar
+      style.height = elm.scrollHeight - top;
+
+    this.setState({
+      resizerStyle: style
+    });
+  }
+
   render() {
     // FIXME should this be here
     const loggedIn = this.props.authentication.success;
@@ -105,12 +130,14 @@ class App extends React.Component {
 
     if (resizing.inProgress) {
       leftPanelStyle = {
-        width: resizing.leftPanelWidth
+        width: resizing.leftPanelWidth,
+        overflow: 'hidden',
       };
       mainPanelCSS = `col-xl-${resizing.mainPanelCols}`;
     } else {
       const ncols = this.state.leftPaneCols;
       leftPanelCSS = `col-xl-${ncols} pr-1 as-leftpane`;
+      leftPanelStyle = {};
       mainPanelCSS = showLeftPane ? `as-centerpane offset-${ncols} col-xl-${12-ncols}` 
                                       : 'as-centerpane col-xl-12';
     }
@@ -118,12 +145,12 @@ class App extends React.Component {
     let leftPane = null;
     if (showLeftPane) {
       leftPane = (
-        <div className={leftPanelCSS} style={leftPanelStyle}>
+        <div id={this.leftPanelID} className={leftPanelCSS} style={leftPanelStyle} onScroll={this.onLeftPaneScroll}>
           <div>
             <VisibleClusterConnections />
           </div>
 
-          <div className="as-right-border-resizer" style={{top: 40}} onMouseDown={this.onResize}>
+          <div className="as-right-border-resizer" style={this.state.resizerStyle} onMouseDown={this.onResize}>
           </div>
         </div>
       );
