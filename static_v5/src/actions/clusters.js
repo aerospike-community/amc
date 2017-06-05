@@ -1,4 +1,4 @@
-import {  authConnection as authConnectionAPI, listConnections } from 'api/clusterConnections';
+import {  authConnection as authConnectionAPI, listConnections, getConnectionDetails } from 'api/clusterConnections';
 
 import { expandEntityNode } from 'actions/entityTree';
 import { toClusterPath } from 'classes/entityTree';
@@ -50,7 +50,10 @@ export function initClusters() {
       .then((connections) => {
         dispatch(receiveClusters(connections));
         connections.forEach((conn) => {
-          if (conn.connectOnLogin) // automatically connect to 'clusters without authentication'
+          // TODO uncomment this when the API is fixed
+          // if (conn.connected) 
+          //   dispatch(getClusterDetails(conn.id));
+          if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
             authenticateClusterConnection(conn.id, '', '');
         });
       })
@@ -130,12 +133,38 @@ export function disconnectCluster(clusterID) {
   };
 }
 
+export const CLUSTER_CONNECTION_FETCHED = 'CLUSTER_CONNECTION_FETCHED';
+function clusterDetails(cluster) {
+  return {
+    type: CLUSTER_CONNECTION_FETCHED,
+    cluster: cluster
+  };
+}
+
+// gets the cluster details
+// WARNING: the cluster needs to be connected
+export function getClusterDetails(clusterID) {
+  return (dispatch) => {
+    getConnectionDetails(clusterID)
+      .then((cluster) => {
+        dispatch(clusterDetails(cluster));
+        
+        expandClusterTree(clusterID);
+      })
+      .catch((error) => {
+        // TODO
+        console.error('Failed to fetch cluster details for ' + clusterID);
+      });
+  }
+}
+
 export function authenticateClusterConnection(id, name, password) {
   return (dispatch) => {
     authConnectionAPI(id, name, password)
       .then((cluster) => {
         dispatch(authSuccess(cluster));
 
+        // expand the cluster on authentication
         const path = toClusterPath(cluster.id);
         dispatch(expandEntityNode(path));
       })

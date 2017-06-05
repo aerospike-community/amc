@@ -2,7 +2,7 @@ import { REQUEST_CLUSTERS, RECEIVE_CLUSTERS } from 'actions/clusters';
 import { DISPLAY_ADD_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
-import { UPDATE_CLUSTER_CONNECTION } from 'actions/clusters';
+import { UPDATE_CLUSTER_CONNECTION, CLUSTER_CONNECTION_FETCHED } from 'actions/clusters';
 import { ADD_UDF } from 'actions/clusters';
 import { ENTITY_TYPE } from 'classes/constants';
 
@@ -62,6 +62,12 @@ function clusters(state, action) {
       });
     case AUTHENTICATED_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
+      update = Object.assign({}, action.cluster, {
+        isAuthenticated: true
+      });
+      return updateItem(state, id, update);
+    case CLUSTER_CONNECTION_FETCHED:
+      id = action.cluster.id;
       update = Object.assign({}, action.cluster, {
         isAuthenticated: true
       });
