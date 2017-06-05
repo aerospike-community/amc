@@ -16,9 +16,15 @@ class Tabs extends React.Component {
       <div>
         <Nav tabs>
           {names.map((name) => {
+            let nav;
+            if (name === selected)
+              nav = <NavLink active> {name} </NavLink>;
+            else
+              nav = <NavLink > {name} </NavLink>;
+
             return (
                 <NavItem> 
-                  <NavLink href="#"> {name} </NavLink> 
+                  {nav}
                 </NavItem>
             );
           })}

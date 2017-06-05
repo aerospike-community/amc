@@ -52,7 +52,8 @@ const udfActions = {
   View: {
     isDefault: true,
   },
-  Edit: {}
+  Edit: {},
+  Delete: {},
 };
 export const UDF_ACTIONS = extractActions(udfActions);
 

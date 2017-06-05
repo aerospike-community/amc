@@ -39,8 +39,10 @@ class MainDashboard extends React.Component {
       dashboard = <VisibleUDFDashboard />
     else if (viewType === VIEW_TYPE.CLUSTER)
       dashboard = <VisibleClusterDashboard />
-    else
+    else if (view === null && viewType === null)
       dashboard = <Welcome />;
+    else
+      dashboard = <div className="as-centerpane-header"> {view + ' ' + viewType} </div>;
 
     return (
       <div>

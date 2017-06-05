@@ -30,7 +30,8 @@ class UDFDashboard extends React.Component {
   }
 
   isUDFView() {
-    return this.isUDF() && this.props.view === UDF_ACTIONS.View;
+    const { view } = this.props;
+    return this.isUDF() && (view === UDF_ACTIONS.View || view === UDF_ACTIONS.Delete);
   }
 
   isUDFEdit() {
@@ -73,7 +74,7 @@ class UDFDashboard extends React.Component {
   render() {
     let view;
     if (this.isUDFView())
-      view = <UDFView clusterID={this.props.clusterID} udfName={this.props.udfName} onEditUDF={this.onEditUDF} />;
+      view = <UDFView clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} udfName={this.props.udfName} onEditUDF={this.onEditUDF} />;
     else if (this.isUDFEdit())
       view = <UDFEdit clusterID={this.props.clusterID} udfName={this.props.udfName} onViewUDF={this.onViewUDF} />;
     else if (this.isUDFCreate())
