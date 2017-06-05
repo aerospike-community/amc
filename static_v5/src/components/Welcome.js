@@ -5,7 +5,7 @@ class Welcome extends React.Component {
   render() {
     return (
       <div>
-        <h1> Welcome to AMC </h1>
+        <h3> Welcome to AMC </h3>
       </div>
     );
   }

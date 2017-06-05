@@ -8,7 +8,7 @@ import 'brace/mode/lua';
 import 'brace/theme/github';
 
 import { getUDF } from 'api/udf';
-import { nextNumber } from 'classes/util';
+import { nextNumber, distanceToBottom } from 'classes/util';
 import Spinner from 'components/Spinner';
 
 import { Button } from 'reactstrap';
@@ -21,13 +21,21 @@ class UDFView extends React.Component {
       isFetching: false,
       sourceCode: '',
       udfType: '',
+
+      editorHeight: 500,
     };
 
     this.id = 'udf_editor' + nextNumber();
     this.onEdit = this.onEdit.bind(this);
   }
 
-	componentDidMount() {
+  componentDidMount() {
+    const editor = document.getElementById(this.id);
+    const height = distanceToBottom(editor);
+    this.setState({
+      editorHeight: height - 80
+    });
+
     const { clusterID, udfName } = this.props;
     this.fetchUDF(clusterID, udfName);
   }
@@ -65,11 +73,14 @@ class UDFView extends React.Component {
     if (this.state.isFetching) 
       return <div> <Spinner /> Loading ... </div>;
 
+    const editorHeight = this.state.editorHeight + 'px';
     return (
       <div>
-        <h4> {this.props.udfName} </h4>
+        <div className="as-centerpane-header"> 
+          {this.props.udfName} 
+        </div>
         <div className="as-ace-editor">
-          <AceEditor width={'100%'} mode="lua" readOnly={true} theme="github" name={this.id} value={this.state.sourceCode} />
+          <AceEditor width={'100%'} height={editorHeight} mode="lua" readOnly={true} theme="github" name={this.id} value={this.state.sourceCode} />
         </div>
         <div>
           <Button color="primary" size="sm" onClick={this.onEdit}> Edit </Button>

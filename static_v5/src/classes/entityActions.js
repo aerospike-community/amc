@@ -38,11 +38,6 @@ const clusterActions = {
       isAuthenticated: true
     }
   },
-  View: {
-    state: {
-      isAuthenticated: true
-    }
-  },
   Overview: {
     isDefault: true,
     state: {

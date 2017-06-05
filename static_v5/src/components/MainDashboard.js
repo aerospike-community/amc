@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import NodeDashboard from 'components/NodeDashboard';
 import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
 import VisibleClusterDashboard from 'containers/VisibleClusterDashboard';
+import Welcome from 'components/Welcome';
 import { VIEW_TYPE } from 'classes/constants';
 
 class MainDashboard extends React.Component {
@@ -39,7 +40,7 @@ class MainDashboard extends React.Component {
     else if (viewType === VIEW_TYPE.CLUSTER)
       dashboard = <VisibleClusterDashboard />
     else
-      dashboard = viewType + ' ' + view;
+      dashboard = <Welcome />;
 
     return (
       <div>

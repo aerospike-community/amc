@@ -79,11 +79,10 @@ class UDFDashboard extends React.Component {
     else if (this.isUDFCreate())
       view = <UDFCreate clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} onNewUDF={this.onNewUDF}/>;
     else if (this.isUDFOverview())
-      view = 'UDF Overview';
+      view = <div className="as-centerpane-header"> UDF Overview </div>;
 
     return (
       <div>
-        <h2> UDF </h2>
         {view}
       </div>
     );

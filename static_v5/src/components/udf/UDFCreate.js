@@ -8,7 +8,7 @@ import 'brace/mode/lua';
 import 'brace/theme/github';
 
 import { getUDF, saveUDF } from 'api/udf';
-import { nextNumber } from 'classes/util';
+import { nextNumber, distanceToBottom } from 'classes/util';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
@@ -21,6 +21,8 @@ class UDFView extends React.Component {
       sourceCode: '',
       udfName: '',
       hasErrors: false, // does the source code have errors
+
+      editorHeight: 500,
     };
 
     this.id = 'udf_editor' + nextNumber();
@@ -88,12 +90,23 @@ class UDFView extends React.Component {
     });
   }
 
+  componentDidMount() {
+    const editor = document.getElementById(this.id);
+    const height = distanceToBottom(editor);
+    this.setState({
+      editorHeight: height - 80
+    });
+  }
+
   render() {
     const { hasErrors, isUpdating } = this.state;
+    const editorHeight = this.state.editorHeight + 'px';
 
     return (
       <div>
-        <h4> Create UDF </h4>
+        <div className="as-centerpane-header"> 
+          Create UDF
+        </div>
         <Form>
           <FormGroup>
             <Label> UDF Name </Label>
@@ -102,14 +115,14 @@ class UDFView extends React.Component {
           </FormGroup>
 
           <div className="as-ace-editor">
-            <AceEditor width={'100%'} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
+            <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
               onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
           </div>
           <div>
             {isUpdating && 
              <span> Updating ... </span>}
             <Button disabled={hasErrors} color="primary" size="sm" onClick={this.onCreate}> Add </Button>
-            <Button size="sm" onClick={this.onCancel}> Cancel </Button>
+            <Button style={{marginLeft: 10}} size="sm" onClick={this.onCancel}> Cancel </Button>
           </div>
         </Form>
       </div>

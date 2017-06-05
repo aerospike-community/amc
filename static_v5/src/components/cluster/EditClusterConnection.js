@@ -50,7 +50,9 @@ class EditClusterConnection extends React.Component {
     const { clusterName, seeds } = this.props;
     return (
       <div>
-        <h3>Update Cluster Connection</h3>
+        <div className="as-centerpane-header">
+          Update Cluster Connection
+        </div>
         <SaveClusterConnection clusterName={clusterName} seeds={seeds} inProgress={this.state.inProgress}
           onSaveErrorMessage={this.state.onSaveErrorMessage}
           onSaveConnection={this.onUpdateConnection} onCancel={this.onCancel} />

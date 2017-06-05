@@ -1,5 +1,6 @@
 .as-header {
   background-color: black;
+  color: white;
   height: 35px;
   position: fixed;
   left: 0;
@@ -47,6 +48,13 @@
 
 .as-centerpane {
   height: 100%;
+}
+
+.as-centerpane-header {
+  padding: 5px;
+  border-bottom: 1px solid black;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
 }
 
 .as-centerpane.col-12 {

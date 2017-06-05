@@ -9,7 +9,7 @@ import 'brace/theme/github';
 
 import Spinner from 'components/Spinner';
 import { getUDF, saveUDF } from 'api/udf';
-import { nextNumber } from 'classes/util';
+import { nextNumber, distanceToBottom } from 'classes/util';
 
 import { Button } from 'reactstrap';
 
@@ -21,6 +21,8 @@ class UDFView extends React.Component {
       isFetching: false,
       isUpdating: false,
       sourceCode: '',
+
+      editorHeight: 500,
 
       hasErrors: false, // does the source code have errors
       hasChanged: false, // has the source code changed
@@ -36,6 +38,12 @@ class UDFView extends React.Component {
   }
 
 	componentDidMount() {
+    const editor = document.getElementById(this.id);
+    const height = distanceToBottom(editor);
+    this.setState({
+      editorHeight: height - 80
+    });
+
     const { clusterID, udfName } = this.props;
     this.fetchUDF(clusterID, udfName);
   }
@@ -117,18 +125,22 @@ class UDFView extends React.Component {
       return <div> <Spinner /> Loading ... </div>;
 
     const { hasErrors, hasChanged, isUpdating } = this.state;
+    const editorHeight = this.state.editorHeight + 'px';
+
     return (
       <div>
-        <h4> Edit {this.props.udfName} </h4>
+        <div className="as-centerpane-header"> 
+          Edit {this.props.udfName}
+        </div>
         <div className="as-ace-editor">
-          <AceEditor width={'100%'} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
+          <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
             onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
         </div>
         <div>
           {isUpdating && 
            <span> Updating ... </span>}
           <Button disabled={!hasChanged || hasErrors} color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
-          <Button size="sm" onClick={this.onView}> Cancel </Button>
+          <Button style={{marginLeft: 10}} size="sm" onClick={this.onView}> Cancel </Button>
         </div>
       </div>
     );
