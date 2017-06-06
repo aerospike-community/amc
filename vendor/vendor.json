@@ -15,70 +15,70 @@
 			"revisionTime": "2016-12-02T02:35:07Z"
 		},
 		{
-			"checksumSHA1": "+Ujafg08C248DjRbZUpqsSNiF64=",
+			"checksumSHA1": "wQNAfMRaksaB9ZyBKKrFAkuiMyg=",
 			"path": "github.com/aerospike/aerospike-client-go",
-			"revision": "95e1ad7791bdbca44707fedbb29be42024900d9c",
-			"revisionTime": "2017-01-11T18:48:17Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "W0qDBTDKs92L+SoZCMOyVK44D50=",
+			"checksumSHA1": "d4xK10eJLsaYKsmmAjoafc0puhg=",
 			"path": "github.com/aerospike/aerospike-client-go/internal/lua",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
 			"checksumSHA1": "XbQ7dIXjGH+/wl5UyVWosqpuoys=",
 			"path": "github.com/aerospike/aerospike-client-go/internal/lua/resources",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "fYSpefZKMHv83OuzaDxQ0nHle7E=",
+			"checksumSHA1": "wGou8ehkc2gw/zWdteA/aq1/fOA=",
 			"path": "github.com/aerospike/aerospike-client-go/logger",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
 			"checksumSHA1": "W19k/UVPrMdsV1KM0VgDRLv1EvU=",
 			"path": "github.com/aerospike/aerospike-client-go/pkg/bcrypt",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
 			"checksumSHA1": "HbzUx5DlBO8erbGl2h2/55xzue8=",
 			"path": "github.com/aerospike/aerospike-client-go/pkg/ripemd160",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "fYeaX6i1ebgDbEFYzX4vLtrQreA=",
+			"checksumSHA1": "YXD/8mq9CMfBpO7QF5T6SsaxgZg=",
 			"path": "github.com/aerospike/aerospike-client-go/types",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "57JZ+v7H14KafVVH7t+qs+ajem4=",
+			"checksumSHA1": "/i89V7W9fy6PqAskdRyWqN2IlZ4=",
 			"path": "github.com/aerospike/aerospike-client-go/types/atomic",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "NrFI5vRv+LuYh1JrU4ggz7Kicsg=",
+			"checksumSHA1": "1xmzaXT3uA8K5FL92TNw/PfG0TU=",
 			"path": "github.com/aerospike/aerospike-client-go/types/particle_type",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "ppGHWawcl+KrOXmnaH7MNK4Y6NA=",
+			"checksumSHA1": "cXow2vGzsUtayrJuhz57vCDb2w0=",
 			"path": "github.com/aerospike/aerospike-client-go/types/rand",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
-			"checksumSHA1": "NrgxhIn8WonOIuXaf2ZbwxcWUYE=",
+			"checksumSHA1": "BdxmIb2XgZufRGpQSlE8R9UEqWc=",
 			"path": "github.com/aerospike/aerospike-client-go/utils/buffer",
-			"revision": "bb8f292672a1a6eef36c8db46c7af6861e7fd11a",
-			"revisionTime": "2016-12-26T11:48:27Z"
+			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
+			"revisionTime": "2017-04-28T13:56:54Z"
 		},
 		{
 			"checksumSHA1": "ATs3+0ulN1kwSFm7YcI3SGj5DLc=",

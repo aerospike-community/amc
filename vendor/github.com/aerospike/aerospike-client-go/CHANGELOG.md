@@ -1,5 +1,75 @@
 # Change History
 
+## April 25 2017: v1.27.0
+
+  Feature, Performance improvements and bug fix release.
+
+  * **New Features**
+
+    - Added `BatchGetObjects` method.
+    - Added Exponential Backoff by introducing `BasePolicy.SleepMultiplier`. Only Values > 1.0 are effective. PR #192, thanks to [Venil Noronha](https://github.com/venilnoronha)
+
+  * **Improvements**
+
+    - Packer tries to see if it can use generic data types before using reflection.
+    - Operations, including CDTs do not allocate a buffer anymore, unless reused.
+
+  * **Incompatible changes**:
+    - `BinName` and `BinValue` are not exported in `Operation` anymore. These fields shouldn't have been used anyway since `Operation`s used to cache their internal command.
+
+  * **Fixes**
+
+    - Documentation Fixes. Thanks to [Nassor Paulino da Silva](https://github.com/nassor) and [HArmen](https://github.com/alicebob)
+
+
+## April 5 2017: v1.26.0
+
+  Feature, Performance improvements and bug fix release.
+
+  * **New Features**
+
+    - Predicate API is supported (for server v3.12+)
+    - Added `Truncate` method to quickly remove all data from namespaces or sets (for server v3.12+).
+    - Support `ScanPolicy.ServerSocketTimeout` (for server v3.12+).
+    - Support `ClientPolicy.IgnoreOtherSubnetAliases` to ignore hosts from other subnets. PR #182, thanks to [wedi-dev](https://github.com/wedi-dev)
+
+  * **Improvements**
+
+    - Added a lot of predefined generic slice and map types in `NewValue` method to avoid hitting reflection as much as possible.
+    - Fix `go vet` complaints.
+
+  * **Fixes**
+
+    - Allow streaming commands (scan/query/aggregation) to retry unless the error occurs during parsing of the results. Fixes issue #187
+    - Use `net.JoinHostPort` to concatinate host and port values instead of doing it directly. Fixes some issues in IPv6 connection strings.
+    - Improved initial Tend run.
+    - Fixes `cluster-name` checking bug.
+
+## March 8 2017: v1.25.1
+
+  Hot fix release. Updating the client is recommended.
+
+  * **Fixes**
+
+    - Fixed an issue where errors in Scan/Query unmarshalling would be duplicated and could cause a deadlock.
+
+## February 28 2017: v1.25.0
+
+  Performance improvements and fix release.
+
+  * **Improvements**
+
+    - Check tend duration and compare it to tend interval, and warn the user if tend takes longer than tend interval.
+    - Seed the cluster concurrently, and return as soon as any of the seeds is validated.
+    - Tend the cluster concurrently. Allows use of very big clusters with no delay.
+    - Partitions the connection queue to avoid contention.
+    - Cluster partition map is merged from all node fragments and updated only once per tend to reduce contention to absolute minimum.
+
+  * **Fixes**
+
+    - Fixed an issue where a valid but unreachable seed could timeout and stall connecting and tending the cluster..
+    - Fix result code comments.
+
 ## January 11 2017: v1.24.0
 
   Minor feature and fix release.

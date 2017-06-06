@@ -21,16 +21,19 @@ import "fmt"
 type ResultCode int
 
 const (
+	// Cluster Name does not match the ClientPolicy.ClusterName value.
+	CLUSTER_NAME_MISMATCH_ERROR ResultCode = -10
+
 	// Recordset has already been closed or cancelled
 	RECORDSET_CLOSED ResultCode = -9
 
 	// There were no connections available to the node in the pool, and the pool was limited
 	NO_AVAILABLE_CONNECTIONS_TO_NODE ResultCode = -8
 
-	// Asynchronous max concurrent database commands have been exceeded and therefore rejected.
+	// Data type is not supported by aerospike server.
 	TYPE_NOT_SUPPORTED ResultCode = -7
 
-	// Asynchronous max concurrent database commands have been exceeded and therefore rejected.
+	// Info Command was rejected by the server.
 	COMMAND_REJECTED ResultCode = -6
 
 	// Query was terminated by user.
@@ -105,7 +108,7 @@ const (
 	// Specified bin name does not exist in record.
 	BIN_NOT_FOUND ResultCode = 17
 
-	// Specified bin name does not exist in record.
+	// Device not keeping up with writes.
 	DEVICE_OVERLOAD ResultCode = 18
 
 	// Key type mismatch.
@@ -121,10 +124,10 @@ const (
 	FAIL_FORBIDDEN ResultCode = 22
 
 	// Element Not Found in CDT
-	FAIL_ELEMENT_NOT_FOUND = 23
+	FAIL_ELEMENT_NOT_FOUND ResultCode = 23
 
 	// Element Already Exists in CDT
-	FAIL_ELEMENT_EXISTS = 24
+	FAIL_ELEMENT_EXISTS ResultCode = 24
 
 	// There are no more records left for query.
 	QUERY_END ResultCode = 50
@@ -196,7 +199,7 @@ const (
 	BATCH_QUEUES_FULL ResultCode = 152
 
 	// Invalid GeoJSON on insert/update
-	GEO_INVALID_GEOJSON = 160
+	GEO_INVALID_GEOJSON ResultCode = 160
 
 	// Secondary index already exists.
 	INDEX_FOUND ResultCode = 200
@@ -276,6 +279,9 @@ func KeepConnection(err error) bool {
 // Return result code as a string.
 func ResultCodeToString(resultCode ResultCode) string {
 	switch ResultCode(resultCode) {
+	case CLUSTER_NAME_MISMATCH_ERROR:
+		return "Cluster Name does not match the ClientPolicy.ClusterName value"
+
 	case RECORDSET_CLOSED:
 		return "Recordset has already been closed or cancelled."
 

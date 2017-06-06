@@ -1,3 +1,5 @@
+// +build go1.8
+
 // Copyright 2013-2017 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package atomic_test
+package aerospike
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
-	"testing"
+	"crypto/tls"
 )
 
-func TestAerospike(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Atomic Types Suite")
+func cloneTlsConfig(c *tls.Config) *tls.Config {
+	return c.Clone()
 }
