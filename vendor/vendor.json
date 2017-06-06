@@ -257,26 +257,26 @@
 		{
 			"checksumSHA1": "NvfQq6Y6kh9cMw+y1m00ivEd5b4=",
 			"path": "github.com/labstack/gommon/bytes",
-			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
-			"revisionTime": "2016-12-29T16:36:05Z"
+			"revision": "1121fd3e243c202482226a7afe4dcd07ffc4139a",
+			"revisionTime": "2017-05-06T16:25:42Z"
 		},
 		{
 			"checksumSHA1": "R6DzcBLEP0BONPpsyr+11N7xh5w=",
 			"path": "github.com/labstack/gommon/color",
-			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
-			"revisionTime": "2016-12-29T16:36:05Z"
+			"revision": "1121fd3e243c202482226a7afe4dcd07ffc4139a",
+			"revisionTime": "2017-05-06T16:25:42Z"
 		},
 		{
-			"checksumSHA1": "8kYg34fqMUS7xbSWA9lyWbVNELg=",
+			"checksumSHA1": "uHA6zbtxzJce4r+6uk8zu11qkuk=",
 			"path": "github.com/labstack/gommon/log",
-			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
-			"revisionTime": "2016-12-29T16:36:05Z"
+			"revision": "1121fd3e243c202482226a7afe4dcd07ffc4139a",
+			"revisionTime": "2017-05-06T16:25:42Z"
 		},
 		{
-			"checksumSHA1": "XvsHo25Kr69E5xxTDatXzCQc6sI=",
+			"checksumSHA1": "lW02E/TGpV59u9q49TsK0Cmva0c=",
 			"path": "github.com/labstack/gommon/random",
-			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
-			"revisionTime": "2016-12-29T16:36:05Z"
+			"revision": "1121fd3e243c202482226a7afe4dcd07ffc4139a",
+			"revisionTime": "2017-05-06T16:25:42Z"
 		},
 		{
 			"checksumSHA1": "I4njd26dG5hxFT2nawuByM4pxzY=",
