@@ -32,7 +32,7 @@ type (
 	}
 
 	// KeyAuthValidator defines a function to validate KeyAuth credentials.
-	KeyAuthValidator func(string, echo.Context) bool
+	KeyAuthValidator func(string, echo.Context) (bool, error)
 
 	keyExtractor func(echo.Context) (string, error)
 )
@@ -40,7 +40,7 @@ type (
 var (
 	// DefaultKeyAuthConfig is the default KeyAuth middleware config.
 	DefaultKeyAuthConfig = KeyAuthConfig{
-		Skipper:    defaultSkipper,
+		Skipper:    DefaultSkipper,
 		KeyLookup:  "header:" + echo.HeaderAuthorization,
 		AuthScheme: "Bearer",
 	}
@@ -94,7 +94,10 @@ func KeyAuthWithConfig(config KeyAuthConfig) echo.MiddlewareFunc {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			if config.Validator(key, c) {
+			valid, err := config.Validator(key, c)
+			if err != nil {
+				return err
+			} else if valid {
 				return next(c)
 			}
 

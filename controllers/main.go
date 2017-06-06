@@ -147,11 +147,11 @@ func Server(config *common.Config) {
 	}
 
 	if basicAuthUser != "" {
-		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) bool {
+		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 			if username == basicAuthUser && password == basicAuthPassword {
-				return true
+				return true, nil
 			}
-			return false
+			return false, nil
 		}))
 	}
 
