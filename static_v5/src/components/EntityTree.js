@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
-import { Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
+import { Checkbox, Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
 import { objectPropType, nextNumber } from 'classes/util';
@@ -56,24 +56,36 @@ class EntityTree extends React.Component {
     const { isCategory } = entity;
 
     return (
-      <span className={classNames({'as-disconnected': isDisconnected, 'as-bold': !isDisconnected && isCategory})}
-          onClick={(evt) => this.onEntitySelect(entity)} onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
-        <span className="as-tree-node-name"> {entity.name} </span>
+      <div>
+        <div className="float-left">
+          <input type="checkbox" />
+        </div>
+        <div style={{width: '90%', position: 'relative'}} 
+            className={classNames('float-left', {
+                                  'as-disconnected': isDisconnected, 
+                                  'as-bold': !isDisconnected && isCategory})}
+            onClick={(evt) => this.onEntitySelect(entity)} 
+            onContextMenu={(evt) => this.onContextMenu(evt, entity)}>
 
-        {showContextMenu &&
-         <Dropdown isOpen={true} toggle={() => {}}>
-           <DropdownMenu>
-             {options.map((option) => {
-                if (option.isDivider)
-                  return <DropdownItem divider />;
+          {showContextMenu &&
+          <div style={{position: 'absolute', top: '90%', width: 0, height: 0}}>
+           <Dropdown isOpen={true} toggle={() => {}}>
+             <DropdownMenu>
+               {options.map((option) => {
+                  if (option.isDivider)
+                    return <DropdownItem divider />;
 
-                return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
-                         {option.label}
-                       </DropdownItem>
-              })}
-           </DropdownMenu>
-         </Dropdown>}
-      </span>
+                  return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
+                           {option.label}
+                         </DropdownItem>
+                })}
+             </DropdownMenu>
+           </Dropdown>
+          </div>}
+
+          <div className="as-tree-node-name"> {entity.name} </div>
+        </div>
+      </div>
       );
   }
 

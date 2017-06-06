@@ -95,7 +95,22 @@
   line-height: 30px;
 }
 
+.as-tree-list-item > div:nth-child(1) {
+  float: left;
+  width: 5%;
+  max-width: 15px;
+}
+
+.as-tree-list-item > div:nth-child(2) {
+  float: left;
+  width: 95%;
+  height: 100%;
+}
+
 .as-tree-node-name {
+  float: left;
+  margin-left: 5px;
+  width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

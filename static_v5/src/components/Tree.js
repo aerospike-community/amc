@@ -33,19 +33,25 @@ class Tree extends React.Component {
     const isSelected = this.props.isNodeSelected(node);
     const style = {
       marginLeft: depth * 10,
-      cursor: 'pointer',
     };
     let tree = (
     <div key={path}>
-      <div className={classNames('as-tree-list-item', 'as-selectable', {'as-selected': isSelected, 'as-tree-root': depth === 0})}>
-        <span className={classNames({
-                          'as-arrow-down': hasChildren && expanded, 
-                          'as-arrow-right': hasChildren && !expanded,
-                        })}
-              style={style} onClick={() => this.onToggleCollapse(node)} />
+      <div style={style} className={classNames('as-tree-list-item', 'as-selectable', {
+                                                'as-selected': isSelected, 
+                                                'as-tree-root': depth === 0})}>
+        <div onClick={() => this.onToggleCollapse(node)}>
+          {hasChildren && expanded &&
+            <span className="as-arrow-down"></span>}
+          {hasChildren && !expanded &&
+            <span className="as-arrow-right"></span>}
+          {!hasChildren &&
+            <span> &nbsp; </span>}
+        </div>
+
         {typeof renderNode === 'function' ? renderNode(node) :
          <span onClick={this.onNodeClick}> {label} </span>}
       </div>
+
       <div>
         {hasChildren && expanded &&
          children.map((node, i) => this.renderTree(node, depth + 1)

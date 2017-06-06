@@ -54,11 +54,12 @@ class App extends React.Component {
   // resize the left panel
   onResize(evt) {
     const startX = evt.clientX;
+    const minSize = 200; // minimum size is 200px
 
     const onMouseUp = (evt) => {
       const endX = evt.clientX;
       const colSize = window.screen.width/12;
-      let ncols = Math.floor((endX)/colSize);
+      let ncols = Math.ceil((endX)/colSize);
 
       const cur = this.state.leftPaneCols;
       if (ncols === cur) {
@@ -68,8 +69,9 @@ class App extends React.Component {
           ncols = cur - 1;
       }
 
-      // between 3 and 11
-      ncols = Math.max(ncols, 1);
+      // between minSize and 11 cols
+      const minCols = Math.ceil(minSize/colSize);
+      ncols = Math.max(ncols, minCols);
       ncols = Math.min(ncols, 11);
 
       this.setState({
