@@ -135,8 +135,8 @@ class SaveClusterConnection extends React.Component {
     };
     const onInputChange = (evt) => this.onSeedChange(evt, i);
     return (
-      <div style={{marginBottom: 5}}>
-        <Seed key={i} seed={seed} showWarnings={showWarnings} disabled={inProgress} button={button} onInputChange={onInputChange} />
+      <div key={i} style={{marginBottom: 5}}>
+        <Seed seed={seed} showWarnings={showWarnings} disabled={inProgress} button={button} onInputChange={onInputChange} />
       </div>
       );
   }
@@ -159,7 +159,7 @@ class SaveClusterConnection extends React.Component {
       style.marginTop = 20;
 
     return (
-      <div style={style}>
+      <div key={"input-seed"} style={style}>
         <Seed seed={seed} showWarnings={false} disabled={inProgress} button={button} onInputChange={onInputChange} />
       </div>
       );

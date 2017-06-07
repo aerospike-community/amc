@@ -71,11 +71,11 @@ class EntityTree extends React.Component {
           <div style={{position: 'absolute', top: '90%', width: 0, height: 0}}>
            <Dropdown isOpen={true} toggle={() => {}}>
              <DropdownMenu>
-               {options.map((option) => {
+               {options.map((option, i) => {
                   if (option.isDivider)
-                    return <DropdownItem divider />;
+                    return <DropdownItem key={'divider' + i} divider />;
 
-                  return <DropdownItem key={nextNumber()} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
+                  return <DropdownItem key={option.label} onClick={(evt) => this.onContextMenuClick(entity, option.label)}>
                            {option.label}
                          </DropdownItem>
                 })}
