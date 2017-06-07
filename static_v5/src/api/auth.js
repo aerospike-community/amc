@@ -1,4 +1,3 @@
-import ls from 'local-storage';
 import { toURLConverter } from 'api/url';
 import { postJSON } from 'api/http';
 

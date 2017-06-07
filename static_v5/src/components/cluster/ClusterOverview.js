@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import ClusterStorage from 'components/cluster/ClusterStorage';
 import ClusterSummary from 'components/cluster/ClusterSummary';
-import ClusterPerformance from 'components/cluster/ClusterPerformance';
+import ClusterThroughput from 'components/cluster/ClusterThroughput';
 import ClusterNodes from 'components/cluster/ClusterNodes';
 import ClusterNamespaces from 'components/cluster/ClusterNamespaces';
 import Spinner from 'components/Spinner';
@@ -90,7 +90,7 @@ class ClusterOverview extends React.Component {
 
             <div className="row">
               <div className="col-xl-12 as-section">
-                <ClusterPerformance clusterID={clusterID} />
+                <ClusterThroughput clusterID={clusterID} />
               </div>
             </div>
             <div className="row">

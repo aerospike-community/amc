@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import NodeDashboard from 'components/NodeDashboard';
+import NodeDashboard from 'components/node/NodeDashboard';
 
 class VisibleNodeDashboard extends React.Component {
   constructor(props) {

@@ -19,8 +19,9 @@ const types = {
   udf_tps: 'UDF',
 };
 
-// ClusterPerformance provides an overview of the cluster performance
-class ClusterPerformance extends React.Component {
+// ThroughputCharts displays the throughput charts for all types
+// in the given data
+class ThroughputCharts extends React.Component {
   constructor(props) {
     super(props);
 
@@ -101,7 +102,7 @@ class ClusterPerformance extends React.Component {
     const from = moment().subtract(30, 'minutes').unix();
     const to = moment().unix();
 
-    getThroughput(clusterID, from, to)
+    this.props.getThroughput(from, to)
       .then((response) => {
         this.setThroughput(response.throughput);
         this.setupCharts();
@@ -132,7 +133,7 @@ class ClusterPerformance extends React.Component {
     }
 
     const { clusterID } = this.props;
-    getThroughput(clusterID, from.unix(), to.unix())
+    this.props.getThroughput(from.unix(), to.unix())
       .then((response) => {
         this.updateCharts(response.throughput);
       })
@@ -159,6 +160,8 @@ class ClusterPerformance extends React.Component {
       height: 200
     };
     const { showDateTimePicker } = this.state;
+    const { disableTimeWindowSelection } = this.props;
+    const title = this.props.title || 'Throughput';
 
     return (
       <div>
@@ -168,10 +171,11 @@ class ClusterPerformance extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 as-section-header">
-            Performance
+            {title}
+            {!disableTimeWindowSelection && 
             <div className="float-right">
               <Button color="link" onClick={this.onShowDateTimePicker}> Interval </Button>
-            </div>
+            </div>}
           </div>
         </div>
         <div className="row">
@@ -189,8 +193,17 @@ class ClusterPerformance extends React.Component {
   }
 }
 
-ClusterPerformance.PropTypes = {
-  clusterID: PropTypes.string.required,
+ThroughputCharts.PropTypes = {
+  // function to fetch throughput
+  //
+  // getThroughput returns a promise with the response
+  // from, to are in unix seconds
+  getThroughput: PropTypes.func,
+  // title of the throughputs
+  title: PropTypes.string,
+  // whether to allow selection of time window
+  disableTimeWindowSelection: PropTypes.bool,
 };
 
-export default ClusterPerformance;
+export default ThroughputCharts;
+

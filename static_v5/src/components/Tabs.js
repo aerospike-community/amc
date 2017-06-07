@@ -23,7 +23,7 @@ class Tabs extends React.Component {
               nav = <NavLink > {name} </NavLink>;
 
             return (
-                <NavItem> 
+                <NavItem key={name}> 
                   {nav}
                 </NavItem>
             );

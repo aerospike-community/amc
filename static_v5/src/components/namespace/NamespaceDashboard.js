@@ -2,36 +2,36 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import Tabs from './Tabs';
+import Tabs from 'components/Tabs';
+import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
 
-class NodeDashboard extends React.Component {
+class NamespaceDashboard extends React.Component {
   constructor(props) {
     super(props);
-
-    this.views = ['Machine', 'Storage', 'Performance'];
   }
 
   render() {
-    const {clusterID, nodeHost, onViewSelect} = this.props;
+    const {clusterID, nodeHost, namespaceName, onViewSelect} = this.props;
     const view = this.props.view || 'Machine';
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={onViewSelect}/>
         <div>
-          {`Cluster ${clusterID}, Node ${nodeHost}, View ${view}`}
+          <NamespaceThroughput clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         </div>
       </div>
       );
   }
 }
 
-NodeDashboard.PropTypes = {
+NamespaceDashboard.PropTypes = {
   clusterID: PropTypes.string,
   nodeHost: PropTypes.string,
+  namespaceName: PropTypes.string,
   view: PropTypes.string,
   // callback for when a view for the node dashboard is selected
   // onViewSelect('view')
   onViewSelect: PropTypes.func,
 };
 
-export default NodeDashboard;
+export default NamespaceDashboard;
+
