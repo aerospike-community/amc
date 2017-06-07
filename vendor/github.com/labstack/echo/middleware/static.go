@@ -67,19 +67,19 @@ func StaticWithConfig(config StaticConfig) echo.MiddlewareFunc {
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c echo.Context) (err error) {
 			if config.Skipper(c) {
 				return next(c)
 			}
 
-			p, err := url.PathUnescape(c.Request().URL.Path)
-			if err != nil {
-				return err
-			}
+			p := c.Request().URL.Path
 			if strings.HasSuffix(c.Path(), "*") { // When serving from a group, e.g. `/static*`.
 				p = c.Param("*")
 			}
-
+			p, err = url.PathUnescape(p)
+			if err != nil {
+				return err
+			}
 			name := filepath.Join(config.Root, path.Clean("/"+p)) // "/"+ for security
 
 			fi, err := os.Stat(name)
