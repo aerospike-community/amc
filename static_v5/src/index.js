@@ -11,9 +11,16 @@ import VisibleApp from './containers/VisibleApp';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.css';
 import 'nvd3/build/nv.d3.css';
+import 'react-widgets/lib/less/react-widgets.less';
 
 import './styles/common.css';
 import './styles/chart.css';
+
+// some initialization
+// see http://jquense.github.io/react-widgets/docs/#/i18n?_k=gqx37t
+import moment from 'moment';
+import momentLocalizer from 'react-widgets/lib/localizers/moment';
+momentLocalizer(moment);
 
 const store = createStore(
   app,

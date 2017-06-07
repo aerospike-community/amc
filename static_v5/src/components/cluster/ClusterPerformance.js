@@ -2,10 +2,12 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { Button } from 'reactstrap';
 
 import ThroughputChart from 'charts/ThroughputChart';
 import { nextNumber } from 'classes/util';
 import { getThroughput } from 'api/clusterConnections';
+import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const types = {
   read_tps: 'Read',
@@ -22,12 +24,20 @@ class ClusterPerformance extends React.Component {
   constructor(props) {
     super(props);
 
-    // map of 'chart type' to the throughput statistics
-    this.throughput = {};
+    this.state = {
+      showDateTimePicker: false
+    };
+
+    this.throughput = {}; // map of 'chart type' to the throughput statistics
+    this.charts = {}; // map of 'chart type' to chart instance
+
+    this.onShowDateTimePicker = this.onShowDateTimePicker.bind(this);
+    this.onHideDateTimePicker = this.onHideDateTimePicker.bind(this);
+    this.onSelectDateTime = this.onSelectDateTime.bind(this);
   }
 
   // process all the throughput
-  initThroughput(throughput) {
+  setThroughput(throughput) {
     let data = {};
     for (const k in types) {
       const v = types[k];
@@ -57,14 +67,33 @@ class ClusterPerformance extends React.Component {
     return 'cluster_performance_' + type;
   }
 
-  // draw the charts
-  draw() {
+  // set up the charts
+  // throughput needs to be setup before calling setupCharts
+  setupCharts() {
     for (const type in this.throughput) {
-      const {throughput, name} = this.throughput[type];
+      const {name, throughput} = this.throughput[type];
       const id = '#' + this.id(type);
       const chart = new ThroughputChart(id, throughput, name);
       chart.draw();
+
+      this.charts[type] = chart;
     }
+  }
+
+  // draw the charts
+  // the charts need to be setup before calling drawCharts
+  drawCharts() {
+    for (const type in this.throughput) {
+      const {throughput} = this.throughput[type];
+      const chart = this.charts[type];
+      chart.update(throughput);
+    }
+  }
+
+  // update the charts
+  updateCharts(throughput) {
+    this.setThroughput(throughput);
+    this.drawCharts();
   }
 
   componentDidMount() {
@@ -74,10 +103,52 @@ class ClusterPerformance extends React.Component {
 
     getThroughput(clusterID, from, to)
       .then((response) => {
-        this.initThroughput(response.throughput);
-        this.draw();
+        this.setThroughput(response.throughput);
+        this.setupCharts();
       })
       .catch((message) => console.error(message));
+  }
+  
+  // update chart based on the selected from and to
+  onSelectDateTime(from, to) {
+    this.setState({
+      showDateTimePicker: false
+    });
+
+    if (!from && !to)
+      return;
+
+    if (!from) {
+      to = moment(to);
+      from = moment(to).subtract(30, 'minutes');
+    } else if (!to) {
+      from = moment(from);
+      to = moment(from).add(30, 'minutes');
+    } else {
+      from = moment(from);
+      to = moment(to);
+      if (to.isBefore(from))
+        to = moment(from).add(30, 'minutes');
+    }
+
+    const { clusterID } = this.props;
+    getThroughput(clusterID, from.unix(), to.unix())
+      .then((response) => {
+        this.updateCharts(response.throughput);
+      })
+      .catch((message) => console.error(message));
+  }
+
+  onShowDateTimePicker() {
+    this.setState({
+      showDateTimePicker: true
+    });
+  }
+
+  onHideDateTimePicker() {
+    this.setState({
+      showDateTimePicker: false
+    });
   }
 
   render() {
@@ -87,12 +158,20 @@ class ClusterPerformance extends React.Component {
     const smStyle = {
       height: 200
     };
+    const { showDateTimePicker } = this.state;
 
     return (
       <div>
+        {showDateTimePicker &&
+        <DateTimePickerModal title="Select Time Window" 
+            onCancel={this.onHideDateTimePicker} onSelect={this.onSelectDateTime}/>}
+
         <div className="row">
           <div className="col-xl-12 as-section-header">
             Performance
+            <div className="float-right">
+              <Button color="link" onClick={this.onShowDateTimePicker}> Interval </Button>
+            </div>
           </div>
         </div>
         <div className="row">
@@ -115,6 +194,3 @@ ClusterPerformance.PropTypes = {
 };
 
 export default ClusterPerformance;
-
-
-

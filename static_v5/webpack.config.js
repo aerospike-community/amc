@@ -79,6 +79,9 @@ var config = {
           presets: ['es2015', 'react']
         },
       }, {
+        test: /\.less$/,
+        loader: 'style-loader!css-loader!less-loader'
+      }, {
         test: /\.css$/,
         loader: 'style-loader!css-loader'
       }, {
