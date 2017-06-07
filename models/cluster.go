@@ -128,7 +128,8 @@ func (c *Cluster) setPermanent(v bool) {
 }
 
 func (c *Cluster) origClient() *as.Client {
-	return c.client.Get().(*as.Client)
+	cl, _ := c.client.Get().(*as.Client)
+	return cl // nil if type assertion failed
 }
 
 func (c *Cluster) updateLastestPing() {
