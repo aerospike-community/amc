@@ -69,7 +69,7 @@ class EntityTree extends React.Component {
 
           {showContextMenu &&
           <div style={{position: 'absolute', top: '90%', width: 0, height: 0}}>
-           <Dropdown isOpen={true} toggle={() => {}}>
+           <Dropdown isOpen={true} toggle={() => this.hideContextMenu()}>
              <DropdownMenu>
                {options.map((option, i) => {
                   if (option.isDivider)
@@ -94,6 +94,12 @@ class EntityTree extends React.Component {
       return;
 
     evt.preventDefault();
+
+    // shown, hide it
+    if (this.state.contextMenuEntityPath) {
+      this.hideContextMenu();
+      return;
+    }
 
     this.setState({
       contextMenuEntityPath: entity.path
