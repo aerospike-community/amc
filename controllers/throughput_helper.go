@@ -37,6 +37,9 @@ func throughput(obj throughputEntity, ctxFrom, ctxUntil *int) map[string]map[str
 		} else if ctxFrom == nil && ctxUntil != nil {
 			from = time.Time{}
 			to = time.Unix(int64(*ctxUntil), 0)
+		} else {
+			from = time.Unix(int64(*ctxFrom), 0)
+			to = time.Unix(int64(*ctxUntil), 0)
 		}
 
 		throughput := obj.Throughput(from, to)
