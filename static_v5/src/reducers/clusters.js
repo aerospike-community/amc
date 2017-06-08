@@ -73,7 +73,7 @@ function clusters(state, action) {
       });
       return updateItem(state, id, update);
     case DISCONNECT_CLUSTER_CONNECTION:
-      id = state.authConnection.clusterID;
+      id = action.clusterID;
       return updateItem(state, id, {
         [ENTITY_TYPE.UDF]: [],
         [ENTITY_TYPE.NODES]: [],

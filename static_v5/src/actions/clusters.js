@@ -1,4 +1,4 @@
-import {  authConnection as authConnectionAPI, listConnections, getConnectionDetails } from 'api/clusterConnections';
+import {  authConnection as authConnectionAPI, listConnections, getClusterEntityTree as getClusterEntityTreeAPI } from 'api/clusterConnections';
 
 import { expandEntityNode } from 'actions/entityTree';
 import { toClusterPath } from 'classes/entityTree';
@@ -50,10 +50,9 @@ export function initClusters() {
       .then((connections) => {
         dispatch(receiveClusters(connections));
         connections.forEach((conn) => {
-          // TODO uncomment this when the API is fixed
-          // if (conn.connected) 
-          //   dispatch(getClusterDetails(conn.id));
-          if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
+          if (conn.connected) 
+            dispatch(getClusterEntityTree(conn.id));
+          else if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
             authenticateClusterConnection(conn.id, '', '');
         });
       })
@@ -141,15 +140,22 @@ function clusterDetails(cluster) {
   };
 }
 
-// gets the cluster details
+// expand the cluster tree identified by the cluster id
+function expandClusterTree(clusterID) {
+  const path = toClusterPath(clusterID);
+  return expandEntityNode(path);
+}
+
+// get the cluster entity tree
 // WARNING: the cluster needs to be connected
-export function getClusterDetails(clusterID) {
+export function getClusterEntityTree(clusterID) {
   return (dispatch) => {
-    getConnectionDetails(clusterID)
+    getClusterEntityTreeAPI(clusterID)
       .then((cluster) => {
         dispatch(clusterDetails(cluster));
         
-        expandClusterTree(clusterID);
+        // expand the cluster tree
+        dispatch(expandClusterTree(clusterID));
       })
       .catch((error) => {
         // TODO
@@ -165,8 +171,7 @@ export function authenticateClusterConnection(id, name, password) {
         dispatch(authSuccess(cluster));
 
         // expand the cluster on authentication
-        const path = toClusterPath(cluster.id);
-        dispatch(expandEntityNode(path));
+        dispatch(expandClusterTree(cluster.id));
       })
       .catch((message) => {
         message = message || 'Failed to authenticate';

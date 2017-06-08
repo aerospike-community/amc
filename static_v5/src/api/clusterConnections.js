@@ -50,6 +50,11 @@ export function getConnectionDetails(clusterID) {
   return get(url);
 }
 
+// get the entity tree of the cluster
+export function getClusterEntityTree(clusterID) {
+  return authConnection(clusterID, '', '');
+}
+
 // get all throughput stats for all the nodes of the connection
 // from, to are in unix seconds
 export function getThroughput(clusterID, from, to) {
