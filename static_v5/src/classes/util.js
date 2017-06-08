@@ -72,13 +72,21 @@ export function formatTimeWindow(from, to, sep = ' - ') {
   from = moment(from);
   to = moment(to);
 
-  let fromFormat = 'h:mm';
-  if (!from.isSame(to, 'day') || (from.hours() < 12 && to.hours() >= 12)) 
-    fromFormat += ' a';
-  if (!from.isSame(to, 'month'))
-    fromFormat += ' Do';
-  if (!from.isSame(to, 'year'))
-    fromFormat += ' MMM';
+  const format = 'h:mm a Do MMM';
+  const now = moment();
 
-  return from.format(fromFormat) + sep + to.format('h:mm a Do MMM');
+  let fromFormat = format;
+  if (!from.isSame(to, 'year'))
+    fromFormat += ' YY';
+  else if (from.isSame(to, 'month') && from.isSame(to, 'day')) { // same day
+    fromFormat = 'h:mm';
+    if (from.hours() < 12 && to.hours() >= 12) // not same meridiem, i.e am/pm
+      fromFormat += ' a';
+  }
+
+  let toFormat = format;
+  if (!from.isSame(to, 'year') || !to.isSame(now, 'year'))
+    toFormat += ' YY';
+
+  return from.format(fromFormat) + sep + to.format(toFormat);
 }
