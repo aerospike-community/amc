@@ -95,6 +95,11 @@ func connectionIsConnected(connId string) bool {
 	defer connections.m.Unlock()
 
 	cluster, exists := connections.conns[connId]
+	if !exists || !cluster.IsSet() {
+		// the cluster existed, but is not active anymore
+		delete(connections.conns, connId)
+		return false
+	}
 
 	return exists && (cluster.Status() == models.ClusterStatusOn)
 }
