@@ -56,8 +56,9 @@ export function initClusters() {
             authenticateClusterConnection(conn.id, '', '');
         });
       })
-      .catch(() => {
-        dispatch(receiveClusters([]))
+      .catch((message) => {
+        // TODO 
+        console.error('Fetching cluster failed: ' + message);
       });
   }
 }
