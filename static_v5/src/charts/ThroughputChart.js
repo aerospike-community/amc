@@ -53,6 +53,7 @@ class ThroughputChart {
           .x((d) => d[time])
           .y((d) => d[nsuccess])
           .useInteractiveGuideline(true)
+          .showLegend(false)
           .showControls(false)
           .margin({top: marginTop});
 
@@ -74,9 +75,10 @@ class ThroughputChart {
       // title
       if (this.title) {
         svg.append('text')
-          .attr('x', 10)
+          .attr('x', '50%')
           .attr('y', marginTop/2)
           .style('font-size', '16px')
+          .style('text-decoration', 'underline')
           .text(this.title);
       }
 

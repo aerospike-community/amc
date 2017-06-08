@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 /** 
  * Returns a function that checks for "obj" property type in React
  * @param {object} obj - the property type to check for
@@ -59,4 +61,24 @@ function joinURL(s, t) {
   s = removeTrailingSlash(s);
   t = removeLeadingSlash(t);
   return s + '/' + t;
+}
+
+// formatTimeWindow formats the time window
+//
+// 2:55 - 3:25 p.m 8th Jun 
+// 11:55 a.m - 12:25 p.m 8th Jun
+// 11:55 p.m 7th Jun - 12:25 a.m 8th Jun
+export function formatTimeWindow(from, to, sep = ' - ') {
+  from = moment(from);
+  to = moment(to);
+
+  let fromFormat = 'h:mm';
+  if (!from.isSame(to, 'day') || (from.hours() < 12 && to.hours() >= 12)) 
+    fromFormat += ' a';
+  if (!from.isSame(to, 'month'))
+    fromFormat += ' Do';
+  if (!from.isSame(to, 'year'))
+    fromFormat += ' MMM';
+
+  return from.format(fromFormat) + sep + to.format('h:mm a Do MMM');
 }

@@ -11,11 +11,10 @@ class DateTimePickerModal extends React.Component {
     super(props);
 
     // from and to range
-    const from = this.props.from || moment().subtract(30, 'minutes');
-    const to = this.props.to || moment(from).add(30, 'minutes');
+    const { from, to } = this.props;
 
-    this.from = from.toDate();
-    this.to = to.toDate();
+    this.from = from ? from : moment().subtract(30, minutes).toDate()
+    this.to = to ? to : moment().toDate();
 
     this.onSelect = this.onSelect.bind(this);
     this.onCancel = this.onCancel.bind(this);
@@ -68,7 +67,11 @@ DateTimePickerModal.PropTypes = {
   // callback when the modal is cancelled
   onCancel: PropTypes.func,
   // title of the modal
-  title: PropTypes.string
+  title: PropTypes.string,
+  // [from, to] time window
+  // Date objects
+  from: PropTypes.object,
+  to: PropTypes.object,
 };
 
 export default DateTimePickerModal;

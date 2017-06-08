@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Button } from 'reactstrap';
 
 import ThroughputChart from 'charts/ThroughputChart';
-import { nextNumber } from 'classes/util';
+import { nextNumber, formatTimeWindow } from 'classes/util';
 import { getThroughput } from 'api/clusterConnections';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
@@ -26,7 +26,11 @@ class ThroughputCharts extends React.Component {
     super(props);
 
     this.state = {
-      showDateTimePicker: false
+      showDateTimePicker: false,
+      // [from, to] time window for which
+      // the throughputs are shown
+      from: moment().subtract(30, 'minutes'),
+      to: moment(),
     };
 
     this.throughput = {}; // map of 'chart type' to the throughput statistics
@@ -99,10 +103,9 @@ class ThroughputCharts extends React.Component {
 
   componentDidMount() {
     const { clusterID } = this.props;
-    const from = moment().subtract(30, 'minutes').unix();
-    const to = moment().unix();
+    const { from, to } = this.state;
 
-    this.props.getThroughput(from, to)
+    this.props.getThroughput(from.unix(), to.unix())
       .then((response) => {
         this.setThroughput(response.throughput);
         this.setupCharts();
@@ -132,6 +135,13 @@ class ThroughputCharts extends React.Component {
         to = moment(from).add(30, 'minutes');
     }
 
+    // set window
+    this.setState({
+      from: from,
+      to: to
+    });
+
+    // fetch data for window
     const { clusterID } = this.props;
     this.props.getThroughput(from.unix(), to.unix())
       .then((response) => {
@@ -159,22 +169,24 @@ class ThroughputCharts extends React.Component {
     const smStyle = {
       height: 200
     };
-    const { showDateTimePicker } = this.state;
+    const { showDateTimePicker, from, to } = this.state;
     const { disableTimeWindowSelection } = this.props;
     const title = this.props.title || 'Throughput';
+
+    const timeWindow = formatTimeWindow(from, to);
 
     return (
       <div>
         {showDateTimePicker &&
-        <DateTimePickerModal title="Select Time Window" 
+        <DateTimePickerModal title="Select Time Window" from={from.toDate()} to={to.toDate()}
             onCancel={this.onHideDateTimePicker} onSelect={this.onSelectDateTime}/>}
 
         <div className="row">
           <div className="col-xl-12 as-section-header">
             {title}
             {!disableTimeWindowSelection && 
-            <div className="float-right">
-              <Button color="link" onClick={this.onShowDateTimePicker}> Interval </Button>
+            <div style={{cursor: 'pointer', marginRight: '10px'}} className="float-right" onClick={this.onShowDateTimePicker}>
+              {timeWindow}
             </div>}
           </div>
         </div>
