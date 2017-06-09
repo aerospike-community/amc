@@ -18,7 +18,7 @@ class ClusterOverview extends React.Component {
 
     this.state = {
       isFetching: true,
-      clusterOverview: null
+      clusterOverview: null,
     };
   }
 
@@ -39,6 +39,7 @@ class ClusterOverview extends React.Component {
   render() {
     const { clusterID }  = this.props;
     const co = this.state.clusterOverview;
+    const nodeHosts = co ? co.nodes : [];
 
     return (
       <div> 
@@ -95,7 +96,7 @@ class ClusterOverview extends React.Component {
             </div>
             <div className="row">
               <div className="col-xl-12 as-section">
-                <ClusterNodes clusterID={clusterID} />
+                <ClusterNodes clusterID={clusterID} nodeHosts={nodeHosts}/>
               </div>
             </div>
             <div className="row">
