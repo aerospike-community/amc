@@ -1756,7 +1756,7 @@ definitions:
     description: Throughput Point (default view)
     example:
       Stats:
-        Consequuntur saepe ut deserunt impedit.: 6fb156a5-6077-457c-a604-0f8ced32100c
+        Consequuntur saepe ut deserunt impedit.: 528ad86d-af25-4c18-9d9b-2943db1316de
       bin: Non cupiditate a.
       binType: In hic doloremque facere perspiciatis ab et.
       name: Nulla laborum.
@@ -1768,7 +1768,7 @@ definitions:
         additionalProperties: true
         description: IndexStats
         example:
-          Consequuntur saepe ut deserunt impedit.: 6fb156a5-6077-457c-a604-0f8ced32100c
+          Consequuntur saepe ut deserunt impedit.: 528ad86d-af25-4c18-9d9b-2943db1316de
         type: object
       bin:
         description: Bin name that is being indexed
@@ -1821,11 +1821,17 @@ definitions:
     example:
       status: "on"
       throughput:
-        Et et reiciendis dolore aut deserunt nulla.:
-          Harum quia modi est sit iusto.:
-          - failed: 0.43526423
-            successful: 0.0641444
-            timestamp: 7.612186e+18
+        Enim sit ducimus tenetur.:
+          Ea dolores aut ea sint aliquam deleniti.:
+          - failed: 0.98755574
+            successful: 0.088176
+            timestamp: 3.055842e+18
+          - failed: 0.98755574
+            successful: 0.088176
+            timestamp: 3.055842e+18
+          - failed: 0.98755574
+            successful: 0.088176
+            timestamp: 3.055842e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1835,11 +1841,17 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Et et reiciendis dolore aut deserunt nulla.:
-            Harum quia modi est sit iusto.:
-            - failed: 0.43526423
-              successful: 0.0641444
-              timestamp: 7.612186e+18
+          Enim sit ducimus tenetur.:
+            Ea dolores aut ea sint aliquam deleniti.:
+            - failed: 0.98755574
+              successful: 0.088176
+              timestamp: 3.055842e+18
+            - failed: 0.98755574
+              successful: 0.088176
+              timestamp: 3.055842e+18
+            - failed: 0.98755574
+              successful: 0.088176
+              timestamp: 3.055842e+18
         type: object
     required:
     - status
@@ -1876,7 +1888,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quae et.
+          example: Reprehenderit dolorem nobis pariatur ut earum.
           type: string
         type: array
       username:
@@ -2023,15 +2035,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      bin: Sit ducimus tenetur quas repudiandae ea.
+      bin: Et accusamus qui.
       name: idxAccounts
-      namespace: Aut ea sint aliquam deleniti.
-      set: Itaque sit doloremque.
+      namespace: Inventore et ea molestiae.
+      set: Aliquam consectetur ab omnis praesentium.
       type: NUMERIC
     properties:
       bin:
         description: Index's Bin name
-        example: Sit ducimus tenetur quas repudiandae ea.
+        example: Et accusamus qui.
         type: string
       name:
         description: Index's Name
@@ -2039,11 +2051,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Aut ea sint aliquam deleniti.
+        example: Inventore et ea molestiae.
         type: string
       set:
         description: Index's Set name
-        example: Itaque sit doloremque.
+        example: Aliquam consectetur ab omnis praesentium.
         type: string
       type:
         description: Index's type
@@ -2061,7 +2073,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Eligendi non nesciunt.
+      source: Et neque et.
       type: LUA
     properties:
       name:
@@ -2070,7 +2082,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Eligendi non nesciunt.
+        example: Et neque et.
         type: string
       type:
         description: Module's type
@@ -2116,7 +2128,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Sunt et accusamus qui.
+          example: Tempora rerum quis.
           type: string
         type: array
       username:
@@ -2571,7 +2583,7 @@ paths:
   /api/v1/connections/{connId}/nodes/{node}:
     get:
       description: |-
-        Get a cluster's node
+        Get a cluster's nodes
 
         Required security scopes:
           * `api:general`
@@ -2583,18 +2595,16 @@ paths:
         pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
         type: string
       produces:
-      - application/vnd.aerospike.amc.throughput.wrapper.response+json
+      - text/plain
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
         "400":
           description: Bad Request
         "401":
@@ -2630,7 +2640,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2671,7 +2681,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2717,7 +2727,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2776,7 +2786,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2822,7 +2832,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2869,7 +2879,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2916,7 +2926,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -2963,7 +2973,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -3018,7 +3028,7 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: Node Address
+      - description: Node Addresses
         in: path
         name: node
         required: true
@@ -3081,12 +3091,10 @@ paths:
         required: false
         type: integer
       produces:
-      - application/vnd.aerospike.amc.throughput.wrapper.response+json
+      - text/plain
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
         "400":
           description: Bad Request
         "401":

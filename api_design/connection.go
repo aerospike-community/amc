@@ -120,7 +120,7 @@ var _ = Resource("connection", func() {
 			Required("connId")
 		})
 
-		Response(OK, ThroughputWrapperResponseMedia)
+		Response(OK, HashOf(String, ThroughputWrapperResponseMedia))
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)

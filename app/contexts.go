@@ -1466,8 +1466,8 @@ func NewShowNodeContext(ctx context.Context, r *http.Request, service *goa.Servi
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ShowNodeContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
+func (ctx *ShowNodeContext) OK(r map[string]*AerospikeAmcNodeResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
@@ -1548,8 +1548,8 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ThroughputNodeContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
+func (ctx *ThroughputNodeContext) OK(r map[string]*AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 

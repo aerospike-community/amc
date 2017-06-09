@@ -142,10 +142,10 @@ func ShowNodeInternalServerError(t goatest.TInterface, ctx context.Context, serv
 }
 
 // ShowNodeOK runs the method Show of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.NodeController, connID string, node string) (http.ResponseWriter, *app.AerospikeAmcThroughputWrapperResponse) {
+func ShowNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.NodeController, connID string, node string) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -194,21 +194,9 @@ func ShowNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service,
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.AerospikeAmcThroughputWrapperResponse
-	if resp != nil {
-		var ok bool
-		mt, ok = resp.(*app.AerospikeAmcThroughputWrapperResponse)
-		if !ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcThroughputWrapperResponse", resp)
-		}
-		_err = mt.Validate()
-		if _err != nil {
-			t.Errorf("invalid response media type: %s", _err)
-		}
-	}
 
 	// Return results
-	return rw, mt
+	return rw
 }
 
 // ShowNodeUnauthorized runs the method Show of the given controller with the given parameters.
@@ -422,10 +410,10 @@ func ThroughputNodeInternalServerError(t goatest.TInterface, ctx context.Context
 }
 
 // ThroughputNodeOK runs the method Throughput of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ThroughputNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.NodeController, connID string, node string, from *int, until *int) (http.ResponseWriter, *app.AerospikeAmcThroughputWrapperResponse) {
+func ThroughputNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.NodeController, connID string, node string, from *int, until *int) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -492,21 +480,9 @@ func ThroughputNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Se
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.AerospikeAmcThroughputWrapperResponse
-	if resp != nil {
-		var ok bool
-		mt, ok = resp.(*app.AerospikeAmcThroughputWrapperResponse)
-		if !ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcThroughputWrapperResponse", resp)
-		}
-		_err = mt.Validate()
-		if _err != nil {
-			t.Errorf("invalid response media type: %s", _err)
-		}
-	}
 
 	// Return results
-	return rw, mt
+	return rw
 }
 
 // ThroughputNodeUnauthorized runs the method Throughput of the given controller with the given parameters.

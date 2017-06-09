@@ -68,7 +68,7 @@ var _ = Resource("namespace", func() {
 			Required("namespace")
 		})
 
-		Response(OK, ThroughputWrapperResponseMedia)
+		Response(OK, HashOf(String, ThroughputWrapperResponseMedia))
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
