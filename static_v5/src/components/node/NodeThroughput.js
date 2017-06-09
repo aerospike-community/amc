@@ -37,7 +37,11 @@ class NodeThroughput extends React.Component {
 
   getThroughput(from, to) {
     const { clusterID, nodeHost } = this.props;
-    return getThroughputAPI(clusterID, nodeHost, from, to);
+    const p = getThroughputAPI(clusterID, nodeHost, from, to)
+                .then((response) => {
+                  return response[nodeHost];
+                });
+    return p;
   }
   
   render() {
