@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
 import NodeThroughput from 'components/node/NodeThroughput';
+import NodesSummary from 'components/node/NodesSummary';
 
 class NodeDashboard extends React.Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class NodeDashboard extends React.Component {
       <div>
         <Tabs names={this.views} selected={view} onSelect={onViewSelect}/>
         <div>
+          <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} />
           <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
         </div>
       </div>

@@ -6,8 +6,8 @@ import { Table } from 'reactstrap';
 import { getNodesSummary } from 'api/node';
 import bytes from 'bytes';
 
-// ClusterNodes provides an overview of the cluster nodes
-class ClusterNodes extends React.Component {
+// NodesSummary provides a summary of the cluster nodes
+class NodesSummary extends React.Component {
   constructor(props) {
     super(props);
 
@@ -108,13 +108,13 @@ class ClusterNodes extends React.Component {
   }
 }
 
-ClusterNodes.PropTypes = {
+NodesSummary.PropTypes = {
   clusterID: PropTypes.string.required,
   // the member nodes of the cluster
   nodeHosts: PropTypes.arrayOf(PropTypes.string).required,
 };
 
-export default ClusterNodes;
+export default NodesSummary;
 
 
 
