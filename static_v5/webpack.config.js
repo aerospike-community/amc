@@ -3,7 +3,10 @@ var path = require('path');
 var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 var WebpackChunkHash = require('webpack-chunk-hash');
 var HTMLWebpackPLugin = require('html-webpack-plugin');
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+var CompressionPlugin = require("compression-webpack-plugin");
 
+var isProd = (process.env.NODE_ENV === 'production');
 var BUILD_DIR = path.resolve(__dirname, 'build');
 var APP_DIR = path.resolve(__dirname, 'src');
 
@@ -36,38 +39,7 @@ var config = {
     ]
   },
 
-  plugins: [
-      // splitting into vendor, main and manifest
-      // see https://webpack.js.org/guides/code-splitting-libraries/#manifest-file
-      new webpack.optimize.CommonsChunkPlugin({
-          name: 'vendor',
-          minChunks: function (module) {
-             // this assumes your vendor imports exist in the node_modules directory
-             return module.context && module.context.indexOf('node_modules') !== -1;
-          }
-      }),
-      //CommonChunksPlugin will now extract all the common modules from vendor and main bundles
-      new webpack.optimize.CommonsChunkPlugin({ 
-          name: 'manifest' // But since there are no more common modules between them 
-                           // we end up with just the runtime code included in the manifest file
-      }),
-
-      // hashing vendor, main, manifest
-      // see https://webpack.js.org/guides/caching/#deterministic-hashes
-			new webpack.HashedModuleIdsPlugin(),
-			new WebpackChunkHash(),
-			new ChunkManifestPlugin({
-				filename: "chunk-manifest.json",
-				manifestVariable: "webpackManifest",
-				inlineManifest: true
-			}),
-
-      // insert the chunkhashed filenames into index.html
-      new HTMLWebpackPLugin({
-        template: './index.template.html',
-        filename: path.resolve(__dirname, './index.html'), // output
-      }),
-  ],
+  plugins: plugins(),
 
 	module : {
     loaders : [
@@ -105,7 +77,70 @@ var config = {
       }
     ]
   },
-  devtool: 'inline-source-map',
+
+  // see https://webpack.js.org/configuration/devtool/
+  devtool: isProd ? 'source-map' : 'cheap-module-eval-source-map',
 };
+
+function plugins() {
+  var plugins = [
+    // splitting into vendor, main and manifest
+    // see https://webpack.js.org/guides/code-splitting-libraries/#manifest-file
+    new webpack.optimize.CommonsChunkPlugin({
+        name: 'vendor',
+        minChunks: function (module) {
+           // this assumes your vendor imports exist in the node_modules directory
+           return module.context && module.context.indexOf('node_modules') !== -1;
+        }
+    }),
+    //CommonChunksPlugin will now extract all the common modules from vendor and main bundles
+    new webpack.optimize.CommonsChunkPlugin({ 
+        name: 'manifest' // But since there are no more common modules between them 
+                         // we end up with just the runtime code included in the manifest file
+    }),
+
+    // hashing vendor, main, manifest
+    // see https://webpack.js.org/guides/caching/#deterministic-hashes
+    new webpack.HashedModuleIdsPlugin(),
+    new WebpackChunkHash(),
+    new ChunkManifestPlugin({
+      filename: "chunk-manifest.json",
+      manifestVariable: "webpackManifest",
+      inlineManifest: true
+    }),
+
+    // load only locale english in moment
+    // see https://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
+
+    // insert the chunkhashed filenames into index.html
+    new HTMLWebpackPLugin({
+      template: './index.template.html',
+      filename: path.resolve(__dirname, './index.html'), // output
+    }),
+
+    // show the bundle sizes
+    // new BundleAnalyzerPlugin(),
+  ];
+
+  if (isProd) {
+    plugins = plugins.concat([
+      // minify everything
+      new webpack.optimize.UglifyJsPlugin(),
+
+      // TODO setup server to serve gzipped files
+      // gzip files 
+      new CompressionPlugin({
+        asset: "[path].gz[query]",
+        algorithm: "gzip",
+        test: /(main|vendor).*\.js$/, // minimize only vendor and main bundles
+        threshold: 10240,
+        minRatio: 0.8
+      }),
+    ]);
+  }
+
+  return plugins;
+}
 
 module.exports = config;
