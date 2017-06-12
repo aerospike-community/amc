@@ -33,7 +33,13 @@ class ThroughputCharts extends React.Component {
       to: moment(),
     };
 
-    this.throughput = {}; // map of 'chart type' to the throughput statistics
+    // polling values
+    this.intervalID = null; // poller id
+    if (!this.props.doNotSyncWithCurrentTime) {
+      this.keepInSync();
+    }
+
+    this.throughput = {}; // throughput data returned by the server
     this.charts = {}; // map of 'chart type' to chart instance
 
     this.onShowDateTimePicker = this.onShowDateTimePicker.bind(this);
@@ -41,42 +47,53 @@ class ThroughputCharts extends React.Component {
     this.onSelectDateTime = this.onSelectDateTime.bind(this);
   }
 
-  // process all the throughput
-  setThroughput(throughput) {
+  componentWillReceiveProps(nextProps) {
+    const props = this.props;
+    if (props.doNotSyncWithCurrentTime === nextProps.doNotSyncWithCurrentTime)
+      return;
+
+    if (nextProps.doNotSyncWithCurrentTime)
+      window.clearInterval(this.intervalID);
+    else 
+      this.keepInSync();
+  }
+
+  // convert throghput to a format consumable by the charts
+  chartThroughput(throughput) {
     let data = {};
     for (const k in types) {
       const v = types[k];
-      const tp = this.processThroughput(throughput[k]);
+      const tp = typeThroughput(throughput[k]);
       data[v] = {
         name: v,
         throughput: tp
       };
     }
-    this.throughput = data;
+    return data;
+
+    // process the throughput for a single type
+    function typeThroughput(throughput) {
+      let data = [];
+      for (const nodeHost in throughput) {
+        data.push({
+          key: nodeHost,
+          values: throughput[nodeHost]
+        });
+      }
+      return data;
+    }
   }
 
-  // process the throughput for a single type
-  processThroughput(throughput) {
-    let data = [];
-    for (const nodeHost in throughput) {
-      data.push({
-        key: nodeHost,
-        values: throughput[nodeHost]
-      });
-    }
-    return data;
-  }
-  
   // get the id for the chart type
   id(type) {
     return 'cluster_performance_' + type;
   }
 
   // set up the charts
-  // throughput needs to be setup before calling setupCharts
   setupCharts() {
-    for (const type in this.throughput) {
-      const {name, throughput} = this.throughput[type];
+    const chartTP = this.chartThroughput(this.throughput);
+    for (const type in chartTP) {
+      const {name, throughput} = chartTP[type];
       const id = '#' + this.id(type);
       const chart = new ThroughputChart(id, throughput, name);
       chart.draw();
@@ -88,17 +105,17 @@ class ThroughputCharts extends React.Component {
   // draw the charts
   // the charts need to be setup before calling drawCharts
   drawCharts() {
-    for (const type in this.throughput) {
-      const {throughput} = this.throughput[type];
+    const chartTP = this.chartThroughput(this.throughput);
+    for (const type in chartTP) {
+      const {throughput} = chartTP[type];
       const chart = this.charts[type];
       chart.update(throughput);
     }
   }
 
-  // update the charts
-  updateCharts(throughput) {
-    this.setThroughput(throughput);
-    this.drawCharts();
+  componentWillUnmount() {
+    if (this.intervalID !== null) 
+      window.clearInterval(this.intervalID);
   }
 
   componentDidMount() {
@@ -107,12 +124,65 @@ class ThroughputCharts extends React.Component {
 
     this.props.getThroughput(from.unix(), to.unix())
       .then((response) => {
-        this.setThroughput(response.throughput);
+        this.throughput = response.throughput;
         this.setupCharts();
       })
       .catch((message) => console.error(message));
   }
   
+  // keep the data in sync with current time
+  keepInSync() {
+    if (this.intervalID !== null) 
+      window.clearInterval(this.intervalID);
+  
+    this.intervalID = window.setInterval(() => {
+      const to = moment(this.state.to); // copy
+
+      // present 'to' should be close enough to now
+      if (moment().subtract(2, 'minutes').isAfter(to)) 
+        return;
+
+      this.props.getThroughput(to.unix())
+        .then((response) => {
+          if (!to.isSame(this.state.to)) // updated in the interim
+            return;
+
+          // append values
+          const tp = response.throughput;
+          let lastTimestamp = null; // latest timestamp
+          for (const type in tp) {
+            for (const nodeHost in tp[type]) {
+              const val = tp[type][nodeHost];
+              if (val.length === 0)
+                continue;
+
+              // append values
+              const orig = this.throughput[type][nodeHost];
+              const last = orig.length === 0 ? null : orig[orig.length-1].timestamp;
+              val.forEach((v) => {
+                if (last === null || v.timestamp > last)
+                  orig.push(v);
+              });
+
+              // latest time
+              const time = val[val.length-1].timestamp; 
+              if (lastTimestamp === null || time > lastTimestamp)
+                lastTimestamp = time;
+            }
+          }
+
+          this.drawCharts();
+
+          // update timestamp
+          if (lastTimestamp !== null) {
+            this.setState({
+              to: moment(lastTimestamp)
+            });
+          }
+        });
+    }, 60*1000); // every minute
+  }
+
   // update chart based on the selected from and to
   onSelectDateTime(from, to) {
     this.setState({
@@ -145,7 +215,8 @@ class ThroughputCharts extends React.Component {
     const { clusterID } = this.props;
     this.props.getThroughput(from.unix(), to.unix())
       .then((response) => {
-        this.updateCharts(response.throughput);
+        this.throughput = response.throughput;
+        this.drawCharts();
       })
       .catch((message) => console.error(message));
   }
@@ -215,6 +286,9 @@ ThroughputCharts.PropTypes = {
   title: PropTypes.string,
   // whether to allow selection of time window
   disableTimeWindowSelection: PropTypes.bool,
+  // set this value if you do not want the chart
+  // to keep itself in sync with the current time
+  doNotSyncWithCurrentTime: PropTypes.bool,
 };
 
 export default ThroughputCharts;
