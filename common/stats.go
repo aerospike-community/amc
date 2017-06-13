@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -21,6 +22,13 @@ func NewSinglePointValue(timestamp *int64, value *float64) *SinglePointValue {
 		timestamp: timestamp,
 		value:     value,
 	}
+}
+
+func (spv *SinglePointValue) String() string {
+	if spv.timestamp != nil && spv.value != nil {
+		return fmt.Sprintf("%v:%v", *spv.timestamp, *spv.value)
+	}
+	return "{:}"
 }
 
 func (spv *SinglePointValue) Timestamp(mult int64) *int64 {

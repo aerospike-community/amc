@@ -529,7 +529,7 @@ type AerospikeAmcThroughputResponse struct {
 	Timestamp *int `form:"timestamp,omitempty" json:"timestamp,omitempty" xml:"timestamp,omitempty"`
 }
 
-// AMC Throughput Response (default view)
+// AMC Throughput Response Wrapper (default view)
 //
 // Identifier: application/vnd.aerospike.amc.throughput.wrapper.response+json; view=default
 type AerospikeAmcThroughputWrapperResponse struct {

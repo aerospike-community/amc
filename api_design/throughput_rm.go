@@ -24,3 +24,20 @@ var ThroughputResponseMedia = MediaType("application/vnd.aerospike.amc.throughpu
 		// Required("timestamp")
 	})
 })
+
+var ThroughputWrapperResponseMedia = MediaType("application/vnd.aerospike.amc.throughput.wrapper.response+json", func() {
+	Description("AMC Throughput Response Wrapper")
+	Attributes(func() {
+		Attribute("status", String, "Cluster/Node Status", func() { Example("on") })
+		Attribute("throughput", HashOf(String, HashOf(String, ArrayOf(ThroughputResponseMedia))), "Throughput Data")
+
+		Required("status", "throughput")
+	})
+
+	View("default", func() {
+		Attribute("status")
+		Attribute("throughput")
+
+		Required("status", "throughput")
+	})
+})

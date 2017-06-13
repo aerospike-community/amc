@@ -45,7 +45,7 @@ var _ = Resource("node", func() {
 			Required("node")
 		})
 
-		Response(OK, HashOf(String, ThroughputWrapperResponseMedia))
+		Response(OK, ThroughputWrapperResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)

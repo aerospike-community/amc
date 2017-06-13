@@ -1756,7 +1756,7 @@ definitions:
     description: Throughput Point (default view)
     example:
       Stats:
-        Consequuntur saepe ut deserunt impedit.: 528ad86d-af25-4c18-9d9b-2943db1316de
+        Consequuntur saepe ut deserunt impedit.: 40423ad3-de5c-494c-bbb1-1c170825d311
       bin: Non cupiditate a.
       binType: In hic doloremque facere perspiciatis ab et.
       name: Nulla laborum.
@@ -1768,7 +1768,7 @@ definitions:
         additionalProperties: true
         description: IndexStats
         example:
-          Consequuntur saepe ut deserunt impedit.: 528ad86d-af25-4c18-9d9b-2943db1316de
+          Consequuntur saepe ut deserunt impedit.: 40423ad3-de5c-494c-bbb1-1c170825d311
         type: object
       bin:
         description: Bin name that is being indexed
@@ -1817,7 +1817,7 @@ definitions:
       view=default'
     type: object
   AerospikeAmcThroughputWrapperResponse:
-    description: AMC Throughput Response (default view)
+    description: AMC Throughput Response Wrapper (default view)
     example:
       status: "on"
       throughput:
@@ -3091,10 +3091,12 @@ paths:
         required: false
         type: integer
       produces:
-      - text/plain
+      - application/vnd.aerospike.amc.throughput.wrapper.response+json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcThroughputWrapperResponse'
         "400":
           description: Bad Request
         "401":

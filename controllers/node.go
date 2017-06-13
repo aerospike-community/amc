@@ -60,39 +60,16 @@ func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 		return ctx.BadRequest(err.Error())
 	}
 
-	nodeList := strings.Split(ctx.Node, ",")
-	res := map[string]*app.AerospikeAmcThroughputWrapperResponse{}
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
 
-	for _, nodeName := range nodeList {
-		node := cluster.FindNodeByAddress(strings.Trim(nodeName, " "))
-		if node == nil {
-			return ctx.BadRequest("Node not found.")
-		}
-
-		throughput := node.LatestThroughputPerNamespace()
-
-		zeroVal := float64(0)
-		throughputData := map[string]map[string][]*app.AerospikeAmcThroughputResponse{}
-		for outStatName, aliases := range statsNameAliases {
-			primaryVals := throughput[aliases[1]]
-			secondaryVals := throughput[aliases[0]]
-
-			statRes := make(map[string][]*app.AerospikeAmcThroughputResponse, len(primaryVals))
-			for node, yValues := range primaryVals {
-				statRes[node] = []*app.AerospikeAmcThroughputResponse{{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}}
-			}
-
-			throughputData[outStatName] = statRes
-		}
-
-		nodeRes := app.AerospikeAmcThroughputWrapperResponse{
-			Status:     string(cluster.Status()),
-			Throughput: throughputData,
-		}
-
-		res[nodeName] = &nodeRes
+	res := app.AerospikeAmcThroughputWrapperResponse{
+		Status:     string(node.Status()),
+		Throughput: throughput(node, ctx.From, ctx.Until),
 	}
 
 	// NodeController_Throughput: end_implement
-	return ctx.OK(res)
+	return ctx.OK(&res)
 }

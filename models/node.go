@@ -287,24 +287,15 @@ func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 }
 
 func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
-	// statsHistory is not written to, so it doesn't need synchronization
-	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
-	zeroVal := float64(0)
-	for name, bucket := range n.statsHistory {
-		if n.valid() {
-			val := bucket.LastValue()
-			if val == nil {
-				tm := n.ServerTime().Unix()
-				val = common.NewSinglePointValue(&tm, &zeroVal)
-			}
-			res[name] = map[string]*common.SinglePointValue{
-				n.Address(): val,
-			}
-		} else {
-			tm := n.ServerTime().Unix()
-			val := common.NewSinglePointValue(&tm, &zeroVal)
-			res[name] = map[string]*common.SinglePointValue{
-				n.Address(): val,
+	res := map[string]map[string]*common.SinglePointValue{}
+	for _, ns := range n.Namespaces() {
+		for statName, valueMap := range ns.LatestThroughput() {
+			if res[statName] == nil {
+				res[statName] = valueMap
+			} else {
+				for nsName, v := range valueMap {
+					res[statName][nsName] = v
+				}
 			}
 		}
 	}
@@ -344,18 +335,24 @@ func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.Sin
 }
 
 func (n *Node) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
-	// statsHistory is not written to, so it doesn't need synchronization
-	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
-	zeroVal := float64(0)
-	st := n.ServerTime().Unix()
-	for name, bucket := range n.statsHistory {
-		vs := bucket.ValuesBetween(from, to)
-		if len(vs) == 0 {
-			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
-		}
+	// if no tm specified, return for the last 30 mins
+	if from.IsZero() {
+		from = n.ServerTime().Add(-time.Minute * 30)
+	}
+	if to.IsZero() {
+		to = n.ServerTime().Add(-time.Minute * 30)
+	}
 
-		res[name] = map[string][]*common.SinglePointValue{
-			n.Address(): vs,
+	res := map[string]map[string][]*common.SinglePointValue{}
+	for _, ns := range n.Namespaces() {
+		for statName, valueMap := range ns.Throughput(from, to) {
+			if res[statName] == nil {
+				res[statName] = valueMap
+			} else {
+				for k, v := range valueMap {
+					res[statName][k] = v
+				}
+			}
 		}
 	}
 

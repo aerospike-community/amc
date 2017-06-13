@@ -1548,8 +1548,8 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ThroughputNodeContext) OK(r map[string]*AerospikeAmcThroughputWrapperResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *ThroughputNodeContext) OK(r *AerospikeAmcThroughputWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.throughput.wrapper.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 

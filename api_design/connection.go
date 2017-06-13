@@ -120,10 +120,30 @@ var _ = Resource("connection", func() {
 			Required("connId")
 		})
 
-		Response(OK, HashOf(String, ThroughputWrapperResponseMedia))
+		Response(OK, ThroughputWrapperResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	// Action("namespace", func() {
+	// 	Description("Returns the aggregate throughput of the connection nodes for a given window of time. If From/To are not specified, the latest throughput will be returned.")
+	// 	Routing(GET(":connId/namespaces/:naemspace"))
+	// 	Params(func() {
+	// 		Param("connId", String, "Connection Id", func() {
+	// 			Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+	// 			Pattern(uuidv4Regex)
+	// 		})
+
+	// 		Param("namespace", string, "Namespace name")
+
+	// 		Required("connId")
+	// 	})
+
+	// 	Response(OK, HashOf(String, ThroughputWrapperResponseMedia))
+	// 	Response(BadRequest, String)
+	// 	Response(Unauthorized)
+	// 	Response(InternalServerError)
+	// })
 
 })

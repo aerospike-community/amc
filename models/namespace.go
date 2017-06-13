@@ -423,7 +423,7 @@ func (ns *Namespace) updateNotifications() error {
 
 func (ns *Namespace) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
-	tp := make(map[string]*common.SinglePointValue, len(ns.statsHistory))
+	res := make(map[string]map[string]*common.SinglePointValue, len(ns.statsHistory))
 	zeroVal := float64(0)
 	for name, bucket := range ns.statsHistory {
 		if ns.node.valid() {
@@ -432,19 +432,26 @@ func (ns *Namespace) LatestThroughput() map[string]map[string]*common.SinglePoin
 				tm := ns.node.ServerTime().Unix()
 				val = common.NewSinglePointValue(&tm, &zeroVal)
 			}
-			tp[name] = val
+			res[name] = map[string]*common.SinglePointValue{ns.name: val}
 		} else {
 			tm := ns.node.ServerTime().Unix()
 			val := common.NewSinglePointValue(&tm, &zeroVal)
-			tp[name] = val
+			res[name] = map[string]*common.SinglePointValue{ns.name: val}
 		}
 	}
 
-	res := map[string]map[string]*common.SinglePointValue{ns.name: tp}
 	return res
 }
 
 func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
+	// if no tm specified, return for the last 30 mins
+	if from.IsZero() {
+		from = n.ServerTime().Add(-time.Minute * 30)
+	}
+	if to.IsZero() {
+		to = n.ServerTime().Add(-time.Minute * 30)
+	}
+
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(ns.statsHistory))
 	zeroVal := float64(0)
