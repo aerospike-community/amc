@@ -411,7 +411,7 @@ func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
 	return
 }
 
-// Throughput Point (default view)
+// Index Point (default view)
 //
 // Identifier: application/vnd.aerospike.amc.index.response+json; view=default
 type AerospikeAmcIndexResponse struct {
@@ -428,7 +428,7 @@ type AerospikeAmcIndexResponse struct {
 	// Set name
 	Set string `form:"set" json:"set" xml:"set"`
 	// Is the index synced on all nodes?
-	SyncOnAllNodes bool `form:"syncOnAllNodes" json:"syncOnAllNodes" xml:"syncOnAllNodes"`
+	SyncOnAllNodes string `form:"syncOnAllNodes" json:"syncOnAllNodes" xml:"syncOnAllNodes"`
 }
 
 // Validate validates the AerospikeAmcIndexResponse media type instance.
@@ -448,7 +448,30 @@ func (mt *AerospikeAmcIndexResponse) Validate() (err error) {
 	if mt.BinType == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "binType"))
 	}
+	if mt.SyncOnAllNodes == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "syncOnAllNodes"))
+	}
+	return
+}
 
+// AMC Index Response Wrapper (default view)
+//
+// Identifier: application/vnd.aerospike.amc.index.wrapper.response+json; view=default
+type AerospikeAmcIndexWrapperResponse struct {
+	// Index Data
+	Indexes map[string][]*AerospikeAmcIndexResponse `form:"indexes" json:"indexes" xml:"indexes"`
+	// Cluster/Node Status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcIndexWrapperResponse media type instance.
+func (mt *AerospikeAmcIndexWrapperResponse) Validate() (err error) {
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Indexes == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "indexes"))
+	}
 	return
 }
 

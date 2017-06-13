@@ -608,10 +608,9 @@ type DropIndexContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID    string
-	Name      string
-	Namespace string
-	Node      string
+	ConnID  string
+	Name    string
+	Payload *DropIndexPayload
 }
 
 // NewDropIndexContext parses the incoming request URL and body, performs validations and creates the
@@ -636,17 +635,57 @@ func NewDropIndexContext(ctx context.Context, r *http.Request, service *goa.Serv
 		rawName := paramName[0]
 		rctx.Name = rawName
 	}
-	paramNamespace := req.Params["namespace"]
-	if len(paramNamespace) > 0 {
-		rawNamespace := paramNamespace[0]
-		rctx.Namespace = rawNamespace
-	}
-	paramNode := req.Params["node"]
-	if len(paramNode) > 0 {
-		rawNode := paramNode[0]
-		rctx.Node = rawNode
-	}
 	return &rctx, err
+}
+
+// dropIndexPayload is the index drop action payload.
+type dropIndexPayload struct {
+	// Index's Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Index's Set Name
+	SetName *string `form:"setName,omitempty" json:"setName,omitempty" xml:"setName,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *dropIndexPayload) Validate() (err error) {
+	if payload.Namespace == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.SetName == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "setName"))
+	}
+	return
+}
+
+// Publicize creates DropIndexPayload from dropIndexPayload
+func (payload *dropIndexPayload) Publicize() *DropIndexPayload {
+	var pub DropIndexPayload
+	if payload.Namespace != nil {
+		pub.Namespace = *payload.Namespace
+	}
+	if payload.SetName != nil {
+		pub.SetName = *payload.SetName
+	}
+	return &pub
+}
+
+// DropIndexPayload is the index drop action payload.
+type DropIndexPayload struct {
+	// Index's Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Index's Set Name
+	SetName string `form:"setName" json:"setName" xml:"setName"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *DropIndexPayload) Validate() (err error) {
+	if payload.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.SetName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "setName"))
+	}
+	return
 }
 
 // NoContent sends a HTTP response with status code 204.
@@ -678,9 +717,8 @@ type QueryIndexContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID    string
-	Namespace string
-	Node      string
+	ConnID       string
+	IncludeStats bool
 }
 
 // NewQueryIndexContext parses the incoming request URL and body, performs validations and creates the
@@ -700,22 +738,23 @@ func NewQueryIndexContext(ctx context.Context, r *http.Request, service *goa.Ser
 			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
-	paramNamespace := req.Params["namespace"]
-	if len(paramNamespace) > 0 {
-		rawNamespace := paramNamespace[0]
-		rctx.Namespace = rawNamespace
-	}
-	paramNode := req.Params["node"]
-	if len(paramNode) > 0 {
-		rawNode := paramNode[0]
-		rctx.Node = rawNode
+	paramIncludeStats := req.Params["includeStats"]
+	if len(paramIncludeStats) == 0 {
+		err = goa.MergeErrors(err, goa.MissingParamError("includeStats"))
+	} else {
+		rawIncludeStats := paramIncludeStats[0]
+		if includeStats, err2 := strconv.ParseBool(rawIncludeStats); err2 == nil {
+			rctx.IncludeStats = includeStats
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("includeStats", rawIncludeStats, "boolean"))
+		}
 	}
 	return &rctx, err
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *QueryIndexContext) OK(r []*AerospikeAmcIndexResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *QueryIndexContext) OK(r *AerospikeAmcIndexWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.wrapper.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
@@ -748,10 +787,8 @@ type SaveIndexContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID    string
-	Namespace string
-	Node      string
-	Payload   *SaveIndexPayload
+	ConnID  string
+	Payload *SaveIndexPayload
 }
 
 // NewSaveIndexContext parses the incoming request URL and body, performs validations and creates the
@@ -771,46 +808,36 @@ func NewSaveIndexContext(ctx context.Context, r *http.Request, service *goa.Serv
 			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
 		}
 	}
-	paramNamespace := req.Params["namespace"]
-	if len(paramNamespace) > 0 {
-		rawNamespace := paramNamespace[0]
-		rctx.Namespace = rawNamespace
-	}
-	paramNode := req.Params["node"]
-	if len(paramNode) > 0 {
-		rawNode := paramNode[0]
-		rctx.Node = rawNode
-	}
 	return &rctx, err
 }
 
 // saveIndexPayload is the index save action payload.
 type saveIndexPayload struct {
 	// Index's Bin name
-	Bin *string `form:"bin,omitempty" json:"bin,omitempty" xml:"bin,omitempty"`
+	BinName *string `form:"binName,omitempty" json:"binName,omitempty" xml:"binName,omitempty"`
 	// Index's Name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	IndexName *string `form:"indexName,omitempty" json:"indexName,omitempty" xml:"indexName,omitempty"`
 	// Index's Namespace
 	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
 	// Index's Set name
-	Set *string `form:"set,omitempty" json:"set,omitempty" xml:"set,omitempty"`
+	SetName *string `form:"setName,omitempty" json:"setName,omitempty" xml:"setName,omitempty"`
 	// Index's type
 	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
 func (payload *saveIndexPayload) Validate() (err error) {
-	if payload.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	if payload.IndexName == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "indexName"))
 	}
 	if payload.Namespace == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
 	}
-	if payload.Set == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "set"))
+	if payload.SetName == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "setName"))
 	}
-	if payload.Bin == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "bin"))
+	if payload.BinName == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "binName"))
 	}
 	if payload.Type == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
@@ -826,17 +853,17 @@ func (payload *saveIndexPayload) Validate() (err error) {
 // Publicize creates SaveIndexPayload from saveIndexPayload
 func (payload *saveIndexPayload) Publicize() *SaveIndexPayload {
 	var pub SaveIndexPayload
-	if payload.Bin != nil {
-		pub.Bin = *payload.Bin
+	if payload.BinName != nil {
+		pub.BinName = *payload.BinName
 	}
-	if payload.Name != nil {
-		pub.Name = *payload.Name
+	if payload.IndexName != nil {
+		pub.IndexName = *payload.IndexName
 	}
 	if payload.Namespace != nil {
 		pub.Namespace = *payload.Namespace
 	}
-	if payload.Set != nil {
-		pub.Set = *payload.Set
+	if payload.SetName != nil {
+		pub.SetName = *payload.SetName
 	}
 	if payload.Type != nil {
 		pub.Type = *payload.Type
@@ -847,30 +874,30 @@ func (payload *saveIndexPayload) Publicize() *SaveIndexPayload {
 // SaveIndexPayload is the index save action payload.
 type SaveIndexPayload struct {
 	// Index's Bin name
-	Bin string `form:"bin" json:"bin" xml:"bin"`
+	BinName string `form:"binName" json:"binName" xml:"binName"`
 	// Index's Name
-	Name string `form:"name" json:"name" xml:"name"`
+	IndexName string `form:"indexName" json:"indexName" xml:"indexName"`
 	// Index's Namespace
 	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
 	// Index's Set name
-	Set string `form:"set" json:"set" xml:"set"`
+	SetName string `form:"setName" json:"setName" xml:"setName"`
 	// Index's type
 	Type string `form:"type" json:"type" xml:"type"`
 }
 
 // Validate runs the validation rules defined in the design.
 func (payload *SaveIndexPayload) Validate() (err error) {
-	if payload.Name == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	if payload.IndexName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "indexName"))
 	}
 	if payload.Namespace == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
 	}
-	if payload.Set == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "set"))
+	if payload.SetName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "setName"))
 	}
-	if payload.Bin == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "bin"))
+	if payload.BinName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "binName"))
 	}
 	if payload.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
@@ -881,10 +908,10 @@ func (payload *SaveIndexPayload) Validate() (err error) {
 	return
 }
 
-// OK sends a HTTP response with status code 200.
-func (ctx *SaveIndexContext) OK(r *AerospikeAmcIndexResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.response+json")
-	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+// NoContent sends a HTTP response with status code 204.
+func (ctx *SaveIndexContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
 }
 
 // BadRequest sends a HTTP response with status code 400.
@@ -916,10 +943,8 @@ type ShowIndexContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID    string
-	Name      string
-	Namespace string
-	Node      string
+	ConnID string
+	Name   string
 }
 
 // NewShowIndexContext parses the incoming request URL and body, performs validations and creates the
@@ -944,22 +969,12 @@ func NewShowIndexContext(ctx context.Context, r *http.Request, service *goa.Serv
 		rawName := paramName[0]
 		rctx.Name = rawName
 	}
-	paramNamespace := req.Params["namespace"]
-	if len(paramNamespace) > 0 {
-		rawNamespace := paramNamespace[0]
-		rctx.Namespace = rawNamespace
-	}
-	paramNode := req.Params["node"]
-	if len(paramNode) > 0 {
-		rawNode := paramNode[0]
-		rctx.Node = rawNode
-	}
 	return &rctx, err
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ShowIndexContext) OK(r *AerospikeAmcIndexResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.response+json")
+func (ctx *ShowIndexContext) OK(r *AerospikeAmcIndexWrapperResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.index.wrapper.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
@@ -1376,9 +1391,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp6 := from
-			tmp5 := &tmp6
-			rctx.From = tmp5
+			tmp7 := from
+			tmp6 := &tmp7
+			rctx.From = tmp6
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1397,9 +1412,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp8 := until
-			tmp7 := &tmp8
-			rctx.Until = tmp7
+			tmp9 := until
+			tmp8 := &tmp9
+			rctx.Until = tmp8
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -1521,9 +1536,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp10 := from
-			tmp9 := &tmp10
-			rctx.From = tmp9
+			tmp11 := from
+			tmp10 := &tmp11
+			rctx.From = tmp10
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1537,9 +1552,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp12 := until
-			tmp11 := &tmp12
-			rctx.Until = tmp11
+			tmp13 := until
+			tmp12 := &tmp13
+			rctx.Until = tmp12
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}

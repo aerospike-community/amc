@@ -7,7 +7,7 @@ import (
 
 var _ = Resource("index", func() {
 	BasePath("indexes")
-	Parent("namespace")
+	Parent("connection")
 	Description("Index Endpoints")
 
 	Security(JWT, func() {
@@ -18,7 +18,13 @@ var _ = Resource("index", func() {
 		Description("Query a cluster's indexes")
 		Routing(GET(""))
 
-		Response(OK, ArrayOf(IndexResponseMedia))
+		Params(func() {
+			Member("includeStats", Boolean, "Index stats should be included in the results", func() { Example(false) })
+
+			Required("includeStats")
+		})
+
+		Response(OK, IndexWrapperResponseMedia)
 		Response(BadRequest, String)
 		Response(Forbidden)
 		Response(Unauthorized)
@@ -29,7 +35,7 @@ var _ = Resource("index", func() {
 		Description("Get a index")
 		Routing(GET(":name"))
 
-		Response(OK, IndexResponseMedia)
+		Response(OK, IndexWrapperResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
@@ -40,21 +46,21 @@ var _ = Resource("index", func() {
 		Routing(POST(""))
 
 		Payload(func() {
-			Member("name", String, "Index's Name", func() {
+			Member("indexName", String, "Index's Name", func() {
 				Example("idxAccounts")
 			})
 			Member("namespace", String, "Index's Namespace")
-			Member("set", String, "Index's Set name")
-			Member("bin", String, "Index's Bin name")
+			Member("setName", String, "Index's Set name")
+			Member("binName", String, "Index's Bin name")
 			Member("type", String, "Index's type", func() {
 				Example("NUMERIC")
 				Pattern("(?i)[NUMERIC|STRING]")
 			})
 
-			Required("name", "namespace", "set", "bin", "type")
+			Required("indexName", "namespace", "setName", "binName", "type")
 		})
 
-		Response(OK, IndexResponseMedia)
+		Response(NoContent)
 		Response(BadRequest, String)
 		Response(Forbidden)
 		Response(Unauthorized)
@@ -66,9 +72,16 @@ var _ = Resource("index", func() {
 		Routing(DELETE(":name"))
 
 		Params(func() {
-			Member("name", String, "Index's Name", func() { Example("idxAccountsName") })
+			Member("name", String, "Index's Name", func() { Example("idxIndexName") })
 
 			Required("name")
+		})
+
+		Payload(func() {
+			Member("namespace", String, "Index's Namespace", func() { Example("test") })
+			Member("setName", String, "Index's Set Name", func() { Example("test") })
+
+			Required("namespace", "setName")
 		})
 
 		Response(NoContent)

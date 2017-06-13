@@ -365,8 +365,8 @@ type IndexController interface {
 func MountIndexController(service *goa.Service, ctrl IndexController) {
 	initService(service)
 	var h goa.Handler
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/indexes/:name", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/indexes", ctrl.MuxHandler("preflight", handleIndexOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -378,12 +378,18 @@ func MountIndexController(service *goa.Service, ctrl IndexController) {
 		if err != nil {
 			return err
 		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*DropIndexPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
 		return ctrl.Drop(rctx)
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleIndexOrigin(h)
-	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("drop", h, nil))
-	service.LogInfo("mount", "ctrl", "Index", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", "security", "jwt")
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/indexes/:name", ctrl.MuxHandler("drop", h, unmarshalDropIndexPayload))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/indexes/:name", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -399,8 +405,8 @@ func MountIndexController(service *goa.Service, ctrl IndexController) {
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleIndexOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("query", h, nil))
-	service.LogInfo("mount", "ctrl", "Index", "action", "Query", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", "security", "jwt")
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/indexes", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Query", "route", "GET /api/v1/connections/:connId/indexes", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -422,8 +428,8 @@ func MountIndexController(service *goa.Service, ctrl IndexController) {
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleIndexOrigin(h)
-	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", ctrl.MuxHandler("save", h, unmarshalSaveIndexPayload))
-	service.LogInfo("mount", "ctrl", "Index", "action", "Save", "route", "POST /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes", "security", "jwt")
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/indexes", ctrl.MuxHandler("save", h, unmarshalSaveIndexPayload))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Save", "route", "POST /api/v1/connections/:connId/indexes", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -439,8 +445,8 @@ func MountIndexController(service *goa.Service, ctrl IndexController) {
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleIndexOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", ctrl.MuxHandler("show", h, nil))
-	service.LogInfo("mount", "ctrl", "Index", "action", "Show", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/indexes/:name", "security", "jwt")
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/indexes/:name", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Index", "action", "Show", "route", "GET /api/v1/connections/:connId/indexes/:name", "security", "jwt")
 }
 
 // handleIndexOrigin applies the CORS response headers corresponding to the origin.
@@ -468,6 +474,21 @@ func handleIndexOrigin(h goa.Handler) goa.Handler {
 
 		return h(ctx, rw, req)
 	}
+}
+
+// unmarshalDropIndexPayload unmarshals the request body into the context request data Payload field.
+func unmarshalDropIndexPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &dropIndexPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
 }
 
 // unmarshalSaveIndexPayload unmarshals the request body into the context request data Payload field.

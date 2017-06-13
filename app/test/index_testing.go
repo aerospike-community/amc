@@ -24,546 +24,11 @@ import (
 	"net/url"
 )
 
-// DropIndexBadRequest runs the method Drop of the given controller with the given parameters.
+// DropIndexBadRequest runs the method Drop of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func DropIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
-	}
-	req, err := http.NewRequest("DELETE", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	prms["name"] = []string{fmt.Sprintf("%v", name)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	dropCtx, _err := app.NewDropIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Drop(dropCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 400 {
-		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// DropIndexInternalServerError runs the method Drop of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func DropIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
-	}
-	req, err := http.NewRequest("DELETE", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	prms["name"] = []string{fmt.Sprintf("%v", name)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	dropCtx, _err := app.NewDropIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Drop(dropCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 500 {
-		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// DropIndexNoContent runs the method Drop of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func DropIndexNoContent(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
-	}
-	req, err := http.NewRequest("DELETE", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	prms["name"] = []string{fmt.Sprintf("%v", name)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	dropCtx, _err := app.NewDropIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Drop(dropCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 204 {
-		t.Errorf("invalid response status code: got %+v, expected 204", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// DropIndexUnauthorized runs the method Drop of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func DropIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
-	}
-	req, err := http.NewRequest("DELETE", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	prms["name"] = []string{fmt.Sprintf("%v", name)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	dropCtx, _err := app.NewDropIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Drop(dropCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 401 {
-		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// QueryIndexBadRequest runs the method Query of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func QueryIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Query(queryCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 400 {
-		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// QueryIndexForbidden runs the method Query of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func QueryIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Query(queryCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 403 {
-		t.Errorf("invalid response status code: got %+v, expected 403", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// QueryIndexInternalServerError runs the method Query of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func QueryIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Query(queryCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 500 {
-		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// QueryIndexOK runs the method Query of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func QueryIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Query(queryCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 200 {
-		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// QueryIndexUnauthorized runs the method Query of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func QueryIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		panic("invalid test " + err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
-	if _err != nil {
-		panic("invalid test data " + _err.Error()) // bug
-	}
-
-	// Perform action
-	_err = ctrl.Query(queryCtx)
-
-	// Validate response
-	if _err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
-	}
-	if rw.Code != 401 {
-		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// SaveIndexBadRequest runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, payload *app.SaveIndexPayload) http.ResponseWriter {
+func DropIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string, payload *app.DropIndexPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -595,7 +60,634 @@ func SaveIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
+	}
+	req, _err := http.NewRequest("DELETE", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	prms["name"] = []string{fmt.Sprintf("%v", name)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	dropCtx, __err := app.NewDropIndexContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	dropCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Drop(dropCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// DropIndexInternalServerError runs the method Drop of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func DropIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string, payload *app.DropIndexPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
+	}
+	req, _err := http.NewRequest("DELETE", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	prms["name"] = []string{fmt.Sprintf("%v", name)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	dropCtx, __err := app.NewDropIndexContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	dropCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Drop(dropCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// DropIndexNoContent runs the method Drop of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func DropIndexNoContent(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string, payload *app.DropIndexPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
+	}
+	req, _err := http.NewRequest("DELETE", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	prms["name"] = []string{fmt.Sprintf("%v", name)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	dropCtx, __err := app.NewDropIndexContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	dropCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Drop(dropCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 204 {
+		t.Errorf("invalid response status code: got %+v, expected 204", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// DropIndexUnauthorized runs the method Drop of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func DropIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string, payload *app.DropIndexPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
+	}
+	req, _err := http.NewRequest("DELETE", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	prms["name"] = []string{fmt.Sprintf("%v", name)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	dropCtx, __err := app.NewDropIndexContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	dropCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Drop(dropCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// QueryIndexBadRequest runs the method Query of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func QueryIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, includeStats bool) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		query["includeStats"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		prms["includeStats"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Query(queryCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// QueryIndexForbidden runs the method Query of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func QueryIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, includeStats bool) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		query["includeStats"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		prms["includeStats"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Query(queryCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 403 {
+		t.Errorf("invalid response status code: got %+v, expected 403", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// QueryIndexInternalServerError runs the method Query of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func QueryIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, includeStats bool) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		query["includeStats"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		prms["includeStats"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Query(queryCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// QueryIndexOK runs the method Query of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func QueryIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, includeStats bool) (http.ResponseWriter, *app.AerospikeAmcIndexWrapperResponse) {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		query["includeStats"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		prms["includeStats"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Query(queryCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcIndexWrapperResponse
+	if resp != nil {
+		var ok bool
+		mt, ok = resp.(*app.AerospikeAmcIndexWrapperResponse)
+		if !ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcIndexWrapperResponse", resp)
+		}
+		_err = mt.Validate()
+		if _err != nil {
+			t.Errorf("invalid response media type: %s", _err)
+		}
+	}
+
+	// Return results
+	return rw, mt
+}
+
+// QueryIndexUnauthorized runs the method Query of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func QueryIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, includeStats bool) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		query["includeStats"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	{
+		sliceVal := []string{fmt.Sprintf("%v", includeStats)}
+		prms["includeStats"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	queryCtx, _err := app.NewQueryIndexContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Query(queryCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// SaveIndexBadRequest runs the method Save of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func SaveIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, payload *app.SaveIndexPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -603,8 +695,6 @@ func SaveIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -634,7 +724,7 @@ func SaveIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, payload *app.SaveIndexPayload) http.ResponseWriter {
+func SaveIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, payload *app.SaveIndexPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -666,7 +756,7 @@ func SaveIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -674,8 +764,6 @@ func SaveIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -705,7 +793,7 @@ func SaveIndexForbidden(t goatest.TInterface, ctx context.Context, service *goa.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, payload *app.SaveIndexPayload) http.ResponseWriter {
+func SaveIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, payload *app.SaveIndexPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -737,7 +825,7 @@ func SaveIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -745,8 +833,6 @@ func SaveIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -772,94 +858,11 @@ func SaveIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 	return rw
 }
 
-// SaveIndexOK runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, payload *app.SaveIndexPayload) (http.ResponseWriter, *app.AerospikeAmcIndexResponse) {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Validate payload
-	err := payload.Validate()
-	if err != nil {
-		e, ok := err.(goa.ServiceError)
-		if !ok {
-			panic(err) // bug
-		}
-		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil, nil
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
-	}
-	req, _err := http.NewRequest("POST", u.String(), nil)
-	if _err != nil {
-		panic("invalid test " + _err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveIndexContext(goaCtx, req, service)
-	if __err != nil {
-		panic("invalid test data " + __err.Error()) // bug
-	}
-	saveCtx.Payload = payload
-
-	// Perform action
-	__err = ctrl.Save(saveCtx)
-
-	// Validate response
-	if __err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
-	}
-	if rw.Code != 200 {
-		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
-	}
-	var mt *app.AerospikeAmcIndexResponse
-	if resp != nil {
-		var _ok bool
-		mt, _ok = resp.(*app.AerospikeAmcIndexResponse)
-		if !_ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcIndexResponse", resp)
-		}
-		__err = mt.Validate()
-		if __err != nil {
-			t.Errorf("invalid response media type: %s", __err)
-		}
-	}
-
-	// Return results
-	return rw, mt
-}
-
-// SaveIndexUnauthorized runs the method Save of the given controller with the given parameters and payload.
+// SaveIndexNoContent runs the method Save of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, payload *app.SaveIndexPayload) http.ResponseWriter {
+func SaveIndexNoContent(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, payload *app.SaveIndexPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -891,7 +894,7 @@ func SaveIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes", connID, node, namespace),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -899,8 +902,75 @@ func SaveIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *g
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "IndexTest"), rw, req, prms)
+	saveCtx, __err := app.NewSaveIndexContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	saveCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Save(saveCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 204 {
+		t.Errorf("invalid response status code: got %+v, expected 204", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// SaveIndexUnauthorized runs the method Save of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func SaveIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, payload *app.SaveIndexPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -930,7 +1000,7 @@ func SaveIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *g
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
+func ShowIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -951,7 +1021,7 @@ func ShowIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -959,8 +1029,6 @@ func ShowIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	prms["name"] = []string{fmt.Sprintf("%v", name)}
 	if ctx == nil {
 		ctx = context.Background()
@@ -990,7 +1058,7 @@ func ShowIndexBadRequest(t goatest.TInterface, ctx context.Context, service *goa
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
+func ShowIndexInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -1011,7 +1079,7 @@ func ShowIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -1019,8 +1087,6 @@ func ShowIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	prms["name"] = []string{fmt.Sprintf("%v", name)}
 	if ctx == nil {
 		ctx = context.Background()
@@ -1050,7 +1116,7 @@ func ShowIndexInternalServerError(t goatest.TInterface, ctx context.Context, ser
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) (http.ResponseWriter, *app.AerospikeAmcIndexResponse) {
+func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string) (http.ResponseWriter, *app.AerospikeAmcIndexWrapperResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -1071,7 +1137,7 @@ func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -1079,8 +1145,6 @@ func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	prms["name"] = []string{fmt.Sprintf("%v", name)}
 	if ctx == nil {
 		ctx = context.Background()
@@ -1101,12 +1165,12 @@ func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.AerospikeAmcIndexResponse
+	var mt *app.AerospikeAmcIndexWrapperResponse
 	if resp != nil {
 		var ok bool
-		mt, ok = resp.(*app.AerospikeAmcIndexResponse)
+		mt, ok = resp.(*app.AerospikeAmcIndexWrapperResponse)
 		if !ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcIndexResponse", resp)
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcIndexWrapperResponse", resp)
 		}
 		_err = mt.Validate()
 		if _err != nil {
@@ -1122,7 +1186,7 @@ func ShowIndexOK(t goatest.TInterface, ctx context.Context, service *goa.Service
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, node string, namespace string, name string) http.ResponseWriter {
+func ShowIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.IndexController, connID string, name string) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -1143,7 +1207,7 @@ func ShowIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/indexes/%v", connID, node, namespace, name),
+		Path: fmt.Sprintf("/api/v1/connections/%v/indexes/%v", connID, name),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -1151,8 +1215,6 @@ func ShowIndexUnauthorized(t goatest.TInterface, ctx context.Context, service *g
 	}
 	prms := url.Values{}
 	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	prms["node"] = []string{fmt.Sprintf("%v", node)}
-	prms["namespace"] = []string{fmt.Sprintf("%v", namespace)}
 	prms["name"] = []string{fmt.Sprintf("%v", name)}
 	if ctx == nil {
 		ctx = context.Background()

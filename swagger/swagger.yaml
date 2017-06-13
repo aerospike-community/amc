@@ -1752,56 +1752,59 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.entity.set.response+json;
       view=default'
     type: object
-  AerospikeAmcIndexResponse:
-    description: Throughput Point (default view)
+  AerospikeAmcIndexWrapperResponse:
+    description: AMC Index Response Wrapper (default view)
     example:
-      Stats:
-        Consequuntur saepe ut deserunt impedit.: 40423ad3-de5c-494c-bbb1-1c170825d311
-      bin: Non cupiditate a.
-      binType: In hic doloremque facere perspiciatis ab et.
-      name: Nulla laborum.
-      namespace: Est laudantium.
-      set: Quia est praesentium tenetur modi facilis.
-      syncOnAllNodes: false
+      indexes:
+        Dignissimos et.:
+        - Stats:
+            Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+          bin: Non cupiditate a.
+          binType: In hic doloremque facere perspiciatis ab et.
+          name: Nulla laborum.
+          namespace: Est laudantium.
+          set: Quia est praesentium tenetur modi facilis.
+          syncOnAllNodes: Natus dolor autem aut vitae.
+        - Stats:
+            Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+          bin: Non cupiditate a.
+          binType: In hic doloremque facere perspiciatis ab et.
+          name: Nulla laborum.
+          namespace: Est laudantium.
+          set: Quia est praesentium tenetur modi facilis.
+          syncOnAllNodes: Natus dolor autem aut vitae.
+      status: "on"
     properties:
-      Stats:
+      indexes:
         additionalProperties: true
-        description: IndexStats
+        description: Index Data
         example:
-          Consequuntur saepe ut deserunt impedit.: 40423ad3-de5c-494c-bbb1-1c170825d311
+          Dignissimos et.:
+          - Stats:
+              Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+            bin: Non cupiditate a.
+            binType: In hic doloremque facere perspiciatis ab et.
+            name: Nulla laborum.
+            namespace: Est laudantium.
+            set: Quia est praesentium tenetur modi facilis.
+            syncOnAllNodes: Natus dolor autem aut vitae.
+          - Stats:
+              Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+            bin: Non cupiditate a.
+            binType: In hic doloremque facere perspiciatis ab et.
+            name: Nulla laborum.
+            namespace: Est laudantium.
+            set: Quia est praesentium tenetur modi facilis.
+            syncOnAllNodes: Natus dolor autem aut vitae.
         type: object
-      bin:
-        description: Bin name that is being indexed
-        example: Non cupiditate a.
+      status:
+        description: Cluster/Node Status
+        example: "on"
         type: string
-      binType:
-        description: Index Type
-        example: In hic doloremque facere perspiciatis ab et.
-        type: string
-      name:
-        description: Index Name
-        example: Nulla laborum.
-        type: string
-      namespace:
-        description: Namespace
-        example: Est laudantium.
-        type: string
-      set:
-        description: Set name
-        example: Quia est praesentium tenetur modi facilis.
-        type: string
-      syncOnAllNodes:
-        description: Is the index synced on all nodes?
-        example: false
-        type: boolean
     required:
-    - name
-    - namespace
-    - set
-    - bin
-    - binType
-    - syncOnAllNodes
-    title: 'Mediatype identifier: application/vnd.aerospike.amc.index.response+json;
+    - status
+    - indexes
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.index.wrapper.response+json;
       view=default'
     type: object
   AerospikeAmcSystemResponse:
@@ -1821,17 +1824,17 @@ definitions:
     example:
       status: "on"
       throughput:
-        Enim sit ducimus tenetur.:
-          Ea dolores aut ea sint aliquam deleniti.:
-          - failed: 0.98755574
-            successful: 0.088176
-            timestamp: 3.055842e+18
-          - failed: 0.98755574
-            successful: 0.088176
-            timestamp: 3.055842e+18
-          - failed: 0.98755574
-            successful: 0.088176
-            timestamp: 3.055842e+18
+        Tenetur quas.:
+          Dolores aut ea sint aliquam deleniti.:
+          - failed: 0.44114548
+            successful: 0.7126705
+            timestamp: 1.8232948e+18
+          - failed: 0.44114548
+            successful: 0.7126705
+            timestamp: 1.8232948e+18
+          - failed: 0.44114548
+            successful: 0.7126705
+            timestamp: 1.8232948e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1841,17 +1844,17 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Enim sit ducimus tenetur.:
-            Ea dolores aut ea sint aliquam deleniti.:
-            - failed: 0.98755574
-              successful: 0.088176
-              timestamp: 3.055842e+18
-            - failed: 0.98755574
-              successful: 0.088176
-              timestamp: 3.055842e+18
-            - failed: 0.98755574
-              successful: 0.088176
-              timestamp: 3.055842e+18
+          Tenetur quas.:
+            Dolores aut ea sint aliquam deleniti.:
+            - failed: 0.44114548
+              successful: 0.7126705
+              timestamp: 1.8232948e+18
+            - failed: 0.44114548
+              successful: 0.7126705
+              timestamp: 1.8232948e+18
+            - failed: 0.44114548
+              successful: 0.7126705
+              timestamp: 1.8232948e+18
         type: object
     required:
     - status
@@ -1965,6 +1968,24 @@ definitions:
     - password
     title: ConnectConnectionPayload
     type: object
+  DropIndexPayload:
+    example:
+      namespace: test
+      setName: test
+    properties:
+      namespace:
+        description: Index's Namespace
+        example: test
+        type: string
+      setName:
+        description: Index's Set Name
+        example: test
+        type: string
+    required:
+    - namespace
+    - setName
+    title: DropIndexPayload
+    type: object
   NodeSeed:
     example:
       host: 127.0.0.1
@@ -2035,17 +2056,17 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      bin: Et accusamus qui.
-      name: idxAccounts
+      binName: Et accusamus qui.
+      indexName: idxAccounts
       namespace: Inventore et ea molestiae.
-      set: Aliquam consectetur ab omnis praesentium.
+      setName: Aliquam consectetur ab omnis praesentium.
       type: NUMERIC
     properties:
-      bin:
+      binName:
         description: Index's Bin name
         example: Et accusamus qui.
         type: string
-      name:
+      indexName:
         description: Index's Name
         example: idxAccounts
         type: string
@@ -2053,7 +2074,7 @@ definitions:
         description: Index's Namespace
         example: Inventore et ea molestiae.
         type: string
-      set:
+      setName:
         description: Index's Set name
         example: Aliquam consectetur ab omnis praesentium.
         type: string
@@ -2063,10 +2084,10 @@ definitions:
         pattern: (?i)[NUMERIC|STRING]
         type: string
     required:
-    - name
+    - indexName
     - namespace
-    - set
-    - bin
+    - setName
+    - binName
     - type
     title: SaveIndexPayload
     type: object
@@ -2422,6 +2443,172 @@ paths:
       summary: connect connection
       tags:
       - connection
+  /api/v1/connections/{connId}/indexes:
+    get:
+      description: |-
+        Query a cluster's indexes
+
+        Required security scopes:
+          * `api:general`
+      operationId: index#query
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Index stats should be included in the results
+        in: query
+        name: includeStats
+        required: true
+        type: boolean
+      produces:
+      - application/vnd.aerospike.amc.index.wrapper.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcIndexWrapperResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: query index
+      tags:
+      - index
+    post:
+      description: |-
+        Save a index in the cluster
+
+        Required security scopes:
+          * `api:general`
+      operationId: index#save
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SaveIndexPayload'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: save index
+      tags:
+      - index
+  /api/v1/connections/{connId}/indexes/{name}:
+    delete:
+      description: |-
+        Drop a index from the cluster
+
+        Required security scopes:
+          * `api:general`
+      operationId: index#drop
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Index's Name
+        in: path
+        name: name
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/DropIndexPayload'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: drop index
+      tags:
+      - index
+    get:
+      description: |-
+        Get a index
+
+        Required security scopes:
+          * `api:general`
+      operationId: index#show
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.index.wrapper.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcIndexWrapperResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: show index
+      tags:
+      - index
   /api/v1/connections/{connId}/modules:
     get:
       description: |-
@@ -2661,204 +2848,6 @@ paths:
       summary: show namespace
       tags:
       - namespace
-  /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/indexes:
-    get:
-      description: |-
-        Query a cluster's indexes
-
-        Required security scopes:
-          * `api:general`
-      operationId: index#query
-      parameters:
-      - description: Connection Id
-        in: path
-        name: connId
-        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
-        required: true
-        type: string
-      - description: Namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: Node Addresses
-        in: path
-        name: node
-        required: true
-        type: string
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "500":
-          description: Internal Server Error
-      schemes:
-      - http
-      - https
-      security:
-      - jwt:
-        - api:general
-      summary: query index
-      tags:
-      - index
-    post:
-      description: |-
-        Save a index in the cluster
-
-        Required security scopes:
-          * `api:general`
-      operationId: index#save
-      parameters:
-      - description: Connection Id
-        in: path
-        name: connId
-        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
-        required: true
-        type: string
-      - description: Namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: Node Addresses
-        in: path
-        name: node
-        required: true
-        type: string
-      - in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/SaveIndexPayload'
-      produces:
-      - application/vnd.aerospike.amc.index.response+json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/AerospikeAmcIndexResponse'
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "500":
-          description: Internal Server Error
-      schemes:
-      - http
-      - https
-      security:
-      - jwt:
-        - api:general
-      summary: save index
-      tags:
-      - index
-  /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/indexes/{name}:
-    delete:
-      description: |-
-        Drop a index from the cluster
-
-        Required security scopes:
-          * `api:general`
-      operationId: index#drop
-      parameters:
-      - description: Connection Id
-        in: path
-        name: connId
-        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
-        required: true
-        type: string
-      - description: Index's Name
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: Namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: Node Addresses
-        in: path
-        name: node
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      schemes:
-      - http
-      - https
-      security:
-      - jwt:
-        - api:general
-      summary: drop index
-      tags:
-      - index
-    get:
-      description: |-
-        Get a index
-
-        Required security scopes:
-          * `api:general`
-      operationId: index#show
-      parameters:
-      - description: Connection Id
-        in: path
-        name: connId
-        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
-        required: true
-        type: string
-      - in: path
-        name: name
-        required: true
-        type: string
-      - description: Namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: Node Addresses
-        in: path
-        name: node
-        required: true
-        type: string
-      produces:
-      - application/vnd.aerospike.amc.index.response+json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/AerospikeAmcIndexResponse'
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      schemes:
-      - http
-      - https
-      security:
-      - jwt:
-        - api:general
-      summary: show index
-      tags:
-      - index
   /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/sets:
     get:
       description: |-

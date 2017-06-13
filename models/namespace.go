@@ -446,10 +446,10 @@ func (ns *Namespace) LatestThroughput() map[string]map[string]*common.SinglePoin
 func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
 	// if no tm specified, return for the last 30 mins
 	if from.IsZero() {
-		from = n.ServerTime().Add(-time.Minute * 30)
+		from = ns.node.ServerTime().Add(-time.Minute * 30)
 	}
 	if to.IsZero() {
-		to = n.ServerTime().Add(-time.Minute * 30)
+		to = ns.node.ServerTime().Add(-time.Minute * 30)
 	}
 
 	// statsHistory is not written to, so it doesn't need synchronization
