@@ -7,7 +7,7 @@ export function getThroughput(clusterID, nodeHost, namespaceName, from, to) {
   let query = {}
   if (from)
     query.from = from;
-  if (false && to) // FIXME breaks API
+  if (to)
     query.until = to; 
 
   const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/namespaces/' + namespaceName + '/throughput', query);

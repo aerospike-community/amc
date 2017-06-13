@@ -9,9 +9,9 @@ import { nextNumber, formatTimeWindow } from 'classes/util';
 import { getThroughput } from 'api/clusterConnections';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
-const types = {
-  read_tps: 'Read',
-  write_tps: 'Write',
+const Types = {
+  read_tps: 'Reads per second',
+  write_tps: 'Writes per second',
 
   batch_read_tps: 'Batch',
   query_tps: 'Query',
@@ -32,6 +32,8 @@ class ThroughputCharts extends React.Component {
       from: moment().subtract(30, 'minutes'),
       to: moment(),
     };
+
+    this.sequenceNumber = nextNumber();
 
     // polling values
     this.intervalID = null; // poller id
@@ -61,11 +63,10 @@ class ThroughputCharts extends React.Component {
   // convert throghput to a format consumable by the charts
   chartThroughput(throughput) {
     let data = {};
-    for (const k in types) {
-      const v = types[k];
+    for (const k in Types) {
       const tp = typeThroughput(throughput[k]);
-      data[v] = {
-        name: v,
+      data[k] = {
+        name: Types[k],
         throughput: tp
       };
     }
@@ -86,7 +87,7 @@ class ThroughputCharts extends React.Component {
 
   // get the id for the chart type
   id(type) {
-    return 'cluster_performance_' + type;
+    return 'throughput_chart_' + this.sequenceNumber + '_' + type.replace(/ /g, '');
   }
 
   // set up the charts
@@ -94,7 +95,7 @@ class ThroughputCharts extends React.Component {
     const chartTP = this.chartThroughput(this.throughput);
     for (const type in chartTP) {
       const {name, throughput} = chartTP[type];
-      const id = '#' + this.id(type);
+      const id = '#' + this.id(Types[type]);
       const chart = new ThroughputChart(id, throughput, name);
       chart.draw();
 
@@ -262,14 +263,14 @@ class ThroughputCharts extends React.Component {
           </div>
         </div>
         <div className="row">
-          <svg style={bigStyle} id={this.id(types.read_tps)} className="col-xl-6"> </svg>
-          <svg style={bigStyle} id={this.id(types.write_tps)} className="col-xl-6"> </svg>
+          <svg style={bigStyle} id={this.id(Types.read_tps)} className="col-xl-6"> </svg>
+          <svg style={bigStyle} id={this.id(Types.write_tps)} className="col-xl-6"> </svg>
         </div>
         <div className="row">
-          <svg style={smStyle} id={this.id(types.query_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(types.batch_read_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(types.scan_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(types.udf_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(Types.query_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(Types.batch_read_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(Types.scan_tps)} className="col-xl-3"> </svg>
+          <svg style={smStyle} id={this.id(Types.udf_tps)} className="col-xl-3"> </svg>
         </div>
       </div>
     );
