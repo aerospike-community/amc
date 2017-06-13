@@ -2,16 +2,19 @@ var webpack = require('webpack');
 var path = require('path');
 var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 var WebpackChunkHash = require('webpack-chunk-hash');
-var HTMLWebpackPLugin = require('html-webpack-plugin');
+var HTMLWebpackPlugin = require('html-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-var CompressionPlugin = require("compression-webpack-plugin");
+var CompressionPlugin = require('compression-webpack-plugin');
 
 var isProd = (process.env.NODE_ENV === 'production');
 var BUILD_DIR = path.resolve(__dirname, 'build');
 var APP_DIR = path.resolve(__dirname, 'src');
 
 var config = {
-  entry: ['whatwg-fetch', APP_DIR + '/index.js'],
+  entry: {
+    main: ['whatwg-fetch', APP_DIR + '/index.js'],
+  },
+
   output: {
     path: BUILD_DIR,
     filename: '[name].[chunkhash].js',
@@ -82,30 +85,71 @@ var config = {
   devtool: isProd ? 'source-map' : 'cheap-module-eval-source-map',
 };
 
+// bigChunkPlugin configures a chunk of 'name' containing
+// the given node_module chunks
+function bigChunkPlugin(name, chunks) {
+  return new webpack.optimize.CommonsChunkPlugin({
+      name: name,
+      chunks: ['main'].concat(chunks),
+      minChunks: function (module) {
+        var context = module.context;
+        if (!context)
+          return false;
+
+        for (var i = 0; i < chunks.length; i++) {
+          if (context.indexOf('node_modules/' + chunks[i]) !== -1)
+            return true;
+        }
+
+        return false;
+      }
+  });
+}
+
 function plugins() {
-  var plugins = [
-    // splitting into vendor, main and manifest
+  var k;
+  var plugins = [];
+
+  // all the big libs go into their own chunks
+  var BigChunks = {
+    brace: ['brace'],
+    jquery: ['jquery'],
+    nvd3: ['d3', 'nvd3'], 
+    reactwidgets: ['react-widgets'],
+    reactstrap: ['bootstrap', 'reactstrap'],
+  };
+  var BigChunkNames = [];
+
+  for (k in BigChunks) {
+    BigChunkNames.push(k);
+    plugins.push(bigChunkPlugin(k, BigChunks[k]));
+  }
+
+  plugins = plugins.concat([
+    // everything else in vendor except BigChunks
     // see https://webpack.js.org/guides/code-splitting-libraries/#manifest-file
     new webpack.optimize.CommonsChunkPlugin({
         name: 'vendor',
+        chunks: ['main'],
         minChunks: function (module) {
-           // this assumes your vendor imports exist in the node_modules directory
            return module.context && module.context.indexOf('node_modules') !== -1;
         }
     }),
-    //CommonChunksPlugin will now extract all the common modules from vendor and main bundles
+
+    // CommonChunksPlugin will now extract all the common modules from vendor,
+    // main and the BigChunks
     new webpack.optimize.CommonsChunkPlugin({ 
         name: 'manifest' // But since there are no more common modules between them 
                          // we end up with just the runtime code included in the manifest file
     }),
 
-    // hashing vendor, main, manifest
+    // hashing all the chunks
     // see https://webpack.js.org/guides/caching/#deterministic-hashes
     new webpack.HashedModuleIdsPlugin(),
     new WebpackChunkHash(),
     new ChunkManifestPlugin({
-      filename: "chunk-manifest.json",
-      manifestVariable: "webpackManifest",
+      filename: 'chunk-manifest.json',
+      manifestVariable: 'webpackManifest',
       inlineManifest: true
     }),
 
@@ -114,14 +158,26 @@ function plugins() {
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
 
     // insert the chunkhashed filenames into index.html
-    new HTMLWebpackPLugin({
+    new HTMLWebpackPlugin({
       template: './index.template.html',
       filename: path.resolve(__dirname, './index.html'), // output
+      chunksSortMode: function(c1, c2) {
+        // the order of dependencies is
+        // manifest, vendor, BigChunks ..., main
+        var order = ['manifest', 'vendor'];
+        order = order.concat(BigChunkNames);
+        order.push('main'); // load main after all its dependencies
+
+        var n1 = c1.names[0];
+        var n2 = c2.names[0];
+        return order.indexOf(n1) - order.indexOf(n2);
+      },
     }),
 
     // show the bundle sizes
+    // uncomment to analyze bundle sizes
     // new BundleAnalyzerPlugin(),
-  ];
+  ]);
 
   if (isProd) {
     plugins = plugins.concat([
@@ -129,11 +185,11 @@ function plugins() {
       new webpack.optimize.UglifyJsPlugin(),
 
       // TODO setup server to serve gzipped files
-      // gzip files 
+      // gzip all javascript files 
       new CompressionPlugin({
-        asset: "[path].gz[query]",
-        algorithm: "gzip",
-        test: /(main|vendor).*\.js$/, // minimize only vendor and main bundles
+        asset: '[path].gz[query]',
+        algorithm: 'gzip',
+        test: /.*\.js$/,
         threshold: 10240,
         minRatio: 0.8
       }),
