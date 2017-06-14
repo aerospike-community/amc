@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -214,9 +215,39 @@ func Server(config *common.Config) {
 	// Start server
 	if config.AMC.CertFile != "" {
 		log.Infof("In HTTPS (secure) Mode")
+
+		tlsConfig := new(tls.Config)
+		tlsConfig.Certificates = make([]tls.Certificate, 1)
+		var err error
+		tlsConfig.Certificates[0], err = tls.LoadX509KeyPair(config.AMC.CertFile, config.AMC.KeyFile)
+		if err != nil {
+			log.Fatalln("Error reading the certificate files from disk: " + err.Error())
+		}
+
+		if config.AMC.ForceTLS12 || config.AMC.MaxTLSSecurity {
+			log.Infof("Forcing TLS v1.2")
+			tlsConfig.MinVersion = tls.VersionTLS12
+		}
+
+		if config.AMC.MaxTLSSecurity {
+			log.Infof("Forcing Maximum security mode for TLS (Uses >=256 bit curves, ciphersuites and prefers server cypher suites)")
+			tlsConfig.CurvePreferences = []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256}
+			tlsConfig.PreferServerCipherSuites = true
+			tlsConfig.CipherSuites = []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			}
+		}
+
+		e.TLSServer.TLSConfig = tlsConfig
+		e.TLSServer.Addr = config.AMC.Bind
 		// redirect all http requests to https
 		e.Pre(middleware.HTTPSRedirect())
-		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
+
+		// starts a listener for normal http port to support http -> https redirect
+		e.StartServer(e.TLSServer)
 	} else {
 		log.Infof("In HTTP (insecure) Mode.")
 		e.Start(config.AMC.Bind)

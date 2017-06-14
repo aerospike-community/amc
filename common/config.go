@@ -37,6 +37,8 @@ type Config struct {
 		InactiveDurBeforeRemoval int    `toml:"cluster_inactive_before_removal"`
 		CertFile                 string `toml:"certfile"`
 		KeyFile                  string `toml:"keyfile"`
+		ForceTLS12               bool   `toml:"force_tls12"`
+		MaxTLSSecurity           bool   `toml:"max_tls_security"`
 		StaticPath               string `toml:"static_dir"`
 
 		// BackupHost         string `toml:"backup_host"`
