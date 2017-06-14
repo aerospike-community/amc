@@ -37,19 +37,17 @@ class NodeThroughput extends React.Component {
 
   getThroughput(from, to) {
     const { clusterID, nodeHost } = this.props;
-    const p = getThroughputAPI(clusterID, nodeHost, from, to)
-                .then((response) => {
-                  return response[nodeHost];
-                });
-    return p;
+    return getThroughputAPI(clusterID, nodeHost, from, to);
   }
   
   render() {
     const { throughput, showChart } = this.state;
+    const { nodeHost } = this.props;
+    const title = `Node - ${nodeHost} Throughput`;
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} title="Node Throughput" />;
+      charts = <ThroughputCharts getThroughput={this.getThroughput} title={title} />;
 
     return charts;
   }

@@ -78,9 +78,21 @@ class ThroughputCharts extends React.Component {
       for (const nodeHost in throughput) {
         data.push({
           key: nodeHost,
-          values: throughput[nodeHost]
+          values: throughput[nodeHost],
         });
       }
+
+      // HACK 
+      // FIXME the API has to make sure that the values
+      // returned are of the same length
+      let shortestLen = Number.MAX_VALUE;
+      data.forEach((d) => {
+        shortestLen = Math.min(shortestLen, d.values.length);
+      });
+
+      data.forEach((d) => {
+        d.values = d.values.slice(0, shortestLen);
+      });
       return data;
     }
   }
