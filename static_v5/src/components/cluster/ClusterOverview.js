@@ -49,6 +49,12 @@ class ClusterOverview extends React.Component {
         {!this.state.isFetching && 
           <div>
             <div className="row">
+              <div className="col-xl-12 as-section">
+                <ClusterThroughput clusterID={clusterID} />
+              </div>
+            </div>
+
+            <div className="row">
               <div className="col-xl-4 as-section">
                 <div className="row">
                   <div className="col-xl-12 as-section-header">
@@ -89,11 +95,6 @@ class ClusterOverview extends React.Component {
               </div>
             </div>
 
-            <div className="row">
-              <div className="col-xl-12 as-section">
-                <ClusterThroughput clusterID={clusterID} />
-              </div>
-            </div>
             <div className="row">
               <div className="col-xl-12 as-section">
                 <NodesSummary clusterID={clusterID} nodeHosts={nodeHosts}/>

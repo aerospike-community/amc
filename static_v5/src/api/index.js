@@ -1,0 +1,16 @@
+import { toURLConverter } from 'api/url';
+import { get } from 'api/http';
+
+const toURLPath = toURLConverter('connections');
+
+export function getIndexes(clusterID, includeStats = true) {
+  const query = {
+    includeStats: includeStats,
+  };
+
+  const url = toURLPath(clusterID + '/indexes', query);
+  return get(url);
+}
+
+
+

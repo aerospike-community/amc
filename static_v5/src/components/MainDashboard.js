@@ -7,6 +7,7 @@ import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
 import VisibleClusterDashboard from 'containers/VisibleClusterDashboard';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
+import IndexesOverview from 'components/cluster/IndexesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import Welcome from 'components/Welcome';
 import { VIEW_TYPE } from 'classes/constants';
@@ -41,6 +42,8 @@ class MainDashboard extends React.Component {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
     else if (viewType === VIEW_TYPE.NAMESPACE)
       dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
+    else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW)
+      dashboard = <IndexesOverview clusterID={clusterID} />
     else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW)
       dashboard = <VisibleUDFDashboard />
     else if (viewType === VIEW_TYPE.CLUSTER)

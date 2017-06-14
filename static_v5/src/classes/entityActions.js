@@ -114,6 +114,14 @@ const setOverviewActions = {
 };
 export const SET_OVERVIEW_ACTIONS = extractActions(setOverviewActions);
 
+// indexes overview
+const indexesOverviewActions = {
+  Overview: {
+    isDefault: true
+  }
+}
+export const INDEXES_OVERVIEW_ACTIONS = extractActions(indexesOverviewActions);
+
 // TODO implement this
 function satisfiesRoles(requiredRoles, userRoles) {
   requiredRoles = requiredRoles || [];
@@ -196,6 +204,9 @@ function viewTypeAction(viewType) {
 
   if (viewType === VIEW_TYPE.SET_OVERVIEW) 
     return setOverviewActions;
+
+  if (viewType === VIEW_TYPE.INDEXES_OVERVIEW)
+    return indexesOverviewActions;
 
   const msg = `Action for ${viewType} not found`;
   console.error(msg);

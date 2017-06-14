@@ -2,6 +2,7 @@ import { SELECT_NODE_VIEW, SELECT_CLUSTER_VIEW, INITIALIZE_VIEW } from 'actions/
 import { SELECT_START_VIEW, SELECT_NAMESPACE_VIEW, SELECT_SET_VIEW } from 'actions/currentView';
 import { SELECT_NODE_OVERVIEW, SELECT_NAMESPACE_OVERVIEW, SELECT_SET_OVERVIEW } from 'actions/currentView';
 import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } from 'actions/currentView';
+import { SELECT_INDEXES_OVERVIEW } from 'actions/currentView';
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
 
@@ -126,12 +127,23 @@ export default function currentView(state = {
       });
       break;
 
+
     case SELECT_UDF_OVERVIEW:
       updated =  Object.assign({}, state, {
         view: action.view, 
         selectedEntityPath: action.entityPath,
 
         viewType: VIEW_TYPE.UDF_OVERVIEW,
+        clusterID: action.clusterID,
+      });
+      break;
+
+    case SELECT_INDEXES_OVERVIEW:
+      updated =  Object.assign({}, state, {
+        view: action.view,
+        selectedEntityPath: action.entityPath,
+        
+        viewType: VIEW_TYPE.INDEXES_OVERVIEW,
         clusterID: action.clusterID,
       });
       break;

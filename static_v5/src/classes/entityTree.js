@@ -140,6 +140,23 @@ export function toSetPath(clusterID, nodeHost, namespaceName, setName) {
   });
 }
 
+export function toIndexesOverviewPath(clusterID) {
+  return toEntityPath(VIEW_TYPE.INDEXES_OVERVIEW, {
+    clusterID: clusterID,
+  });
+}
+
+function toIndexes(cluster) {
+  const path = toIndexesOverviewPath(cluster.id);
+  return {
+    path: path,
+    name: 'INDEXES',
+    children: [],
+    isCategory: true, // aggregator of entities
+    viewType: VIEW_TYPE.INDEXES_OVERVIEW
+  };
+}
+
 function toSets(cluster, node, namespace) {
   const path = toSetOverviewPath(cluster.id, node.host, namespace.name);
   let sets = {
@@ -182,7 +199,9 @@ export function toPhysicalEntityTree(cluster) {
     children.push(toUDF(cluster));
   if (Array.isArray(cluster.nodes)) 
     children.push(toNodes(cluster));
-  
+
+  // TODO change with the API
+  children.push(toIndexes(cluster));
 
   root.children = children;
   return root;

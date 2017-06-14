@@ -1,7 +1,7 @@
 import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from 'classes/urlAndViewSynchronizer';
 import { VIEW_TYPE } from 'classes/constants';
 import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
-import { toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
+import { toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
 
 export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
 export function showLeftPane() {
@@ -133,6 +133,17 @@ export function selectUDFOverview(clusterID, view) {
   };
 }
 
+export const SELECT_INDEXES_OVERVIEW = 'SELECT_INDEXES_OVERVIEW';
+export function selectIndexesOverview(clusterID, view) {
+  const path = toIndexesOverviewPath(clusterID);
+  return {
+    type: SELECT_INDEXES_OVERVIEW,
+    clusterID: clusterID,
+    entityPath: path,
+    view: view
+  };
+}
+
 export const SELECT_START_VIEW = 'SELECT_START_VIEW';
 function selectStartView() {
   return {
@@ -151,6 +162,9 @@ export function selectPath(entityPath, view) {
 
   case VIEW_TYPE.UDF_OVERVIEW:
     return selectUDFOverview(clusterID, view);
+
+  case VIEW_TYPE.INDEXES_OVERVIEW:
+    return selectIndexesOverview(clusterID, view);
 
   case VIEW_TYPE.CLUSTER:
     return selectCluster(clusterID, view);

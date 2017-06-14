@@ -73,7 +73,8 @@ export function updateURL(selectedEntityPath, view) {
 // to convert a url to an entity path and vice versa.
 //
 
-const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW } = VIEW_TYPE;
+const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
+const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEXES_OVERVIEW } = VIEW_TYPE;
 const pathDefinitions = [{
   url: '',
   entityPath: '',
@@ -90,6 +91,10 @@ const pathDefinitions = [{
   url: 'udf/:clusterID/:udfName/:view',
   entityPath: ':clusterID/' + UDF + '/:udfName',
   viewType: UDF,
+}, {
+  url: 'indexes-overview/:clusterID',
+  entityPath: ':clusterID/indexes',
+  viewType: INDEXES_OVERVIEW,
 }, {
   url: 'node/:clusterID/:nodeHost/:view',
   entityPath: ':clusterID/' + NODE + '/:nodeHost',
