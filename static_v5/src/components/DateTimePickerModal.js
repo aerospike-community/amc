@@ -121,9 +121,9 @@ class DateTimePickerModal extends React.Component {
             <FormGroup row>
               <Label sm={2}> Last </Label>
               <Col sm={10}>
-                <Input type="select" name="last" onChange={this.onTimeOptionChange}>
+                <Input type="select" name="last" value={selectedOption.minutes} onChange={this.onTimeOptionChange}>
                   {this.timeOptions.map((o) =>
-                    <option key={o.label} value={o.minutes} selected={selectedOption.label === o.label}> {o.label} </option>
+                    <option key={o.label} value={o.minutes}> {o.label} </option>
                   )}
                 </Input>
               </Col>
