@@ -9,7 +9,18 @@ export function getIndexes(clusterID, includeStats = true) {
   };
 
   const url = toURLPath(clusterID + '/indexes', query);
-  return get(url);
+  const p = get(url)
+            .then((response) => {
+              let indexes = [];
+              // server returns data for each node
+              // pick any
+              for (let n in response.indexes) {
+                indexes = response.indexes[n];
+              }
+              return indexes;
+            });
+
+  return p;
 }
 
 

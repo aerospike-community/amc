@@ -28,13 +28,7 @@ class IndexesOverview extends React.Component {
     });
 
     getIndexesAPI(clusterID)
-      .then((response) => {
-        let indexes = [];
-        for (let n in response.indexes) {
-          const idxs = response.indexes[n];
-          indexes = indexes.concat(idxs);
-        }
-
+      .then((indexes) => {
         this.setState({
           indexes: indexes,
           isFetching: false
