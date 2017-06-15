@@ -2,3 +2,11 @@
   height: 200px;
   width: 200px;
 }
+
+/*
+ * Displaying the x axis on charts.
+ * see http://jsfiddle.net/3r88bgjw/
+ */
+.nvd3 .nv-y .nv-axis .tick.zero line {
+  stroke: #000;
+}
