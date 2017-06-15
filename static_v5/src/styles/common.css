@@ -21,13 +21,40 @@
   width: 180px;
 }
 
-.as-leftpane {
-  border-right: 1px solid lightgray;
-  position: fixed;
-  bottom: 25px;
-  top: 35px;
-  overflow-y: auto;
-  overflow-x: hidden;
+/* 
+ * since we use bootstrap xl settings everywhere,
+ * bootstrap will keep the columns horizontal for devices
+ * greater than 1200 pixels
+ * 
+ * Different styles based on device widths
+ */
+@media (min-width: 1200px) {
+  .as-leftpane {
+    border-right: 1px solid lightgray;
+    position: fixed;
+    bottom: 25px;
+    top: 35px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .as-centerpane {
+    height: 100%;
+  }
+}
+
+@media (max-width: 1199px) {
+  .as-leftpane {
+    border-right: 1px solid lightgray;
+    height: 40vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .as-centerpane {
+    height: 100%;
+    border-top: 3px solid #636363;
+  }
 }
 
 .as-right-border-resizer {
@@ -44,10 +71,6 @@
   line-height: 40px;
   height: 40px;
   font-size: 18px;
-}
-
-.as-centerpane {
-  height: 100%;
 }
 
 .as-centerpane-header {
