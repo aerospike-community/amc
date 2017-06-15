@@ -1,0 +1,70 @@
+@import 'theme';
+
+.as-tree-list-item {
+  height: 30px;
+  line-height: 30px;
+
+  > div:nth-child(1) {
+    float: left;
+    width: 5%;
+    max-width: 15px;
+  }
+
+  > div:nth-child(2) {
+    float: left;
+    width: 95%;
+    height: 100%;
+  }
+}
+
+.as-tree-root {
+  border-bottom: 1px solid darkgray;
+  margin-top: 20px;
+}
+
+.as-tree-node-name {
+  float: left;
+  margin-left: 5px;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+%arrow {
+	display: inline-block;
+	width: 0; 
+	height: 0; 
+}
+
+%arrow-tb {
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+  @extend %arrow;
+}
+
+.as-arrow-up {
+	border-bottom: 5px solid black;
+  @extend %arrow-tb;
+}
+
+.as-arrow-down {
+	border-top: 5px solid black;
+  @extend %arrow-tb;
+}
+
+%arrow-lr {
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+  @extend %arrow;
+}
+
+.as-arrow-right {
+	border-left: 5px solid black;
+  @extend %arrow-lr;
+}
+
+.as-arrow-left {
+	border-right:5px solid black; 
+  @extend %arrow-lr;
+}
