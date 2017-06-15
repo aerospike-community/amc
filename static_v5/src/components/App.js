@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import $ from 'jquery';
 
 import VisibleAuthenticateModal from 'containers/VisibleAuthenticateModal';
 import VisibleClusterConnections from 'containers/VisibleClusterConnections';
@@ -26,7 +27,13 @@ class App extends React.Component {
 
       resizerStyle: {
         top: this.toolbarHeight
-      }
+      },
+
+      // to trigger redraw on window resize
+      windowDimesions: {
+        width: 0,
+        height: 0
+      },
     };
 
     this.leftPanelID = 'app_left_pane_' + nextNumber();
@@ -42,6 +49,21 @@ class App extends React.Component {
 
   componentDidMount() {
     this.props.initAuth();
+
+    const setDimensions = () => {
+      this.setState({
+        windowDimesions: {
+          width: $(window).width(),
+          height: $(window).height(),
+        }
+      });
+    };
+
+    // initially set dimensions
+    setDimensions();
+
+    // set on rtesize
+    $(window).on('resize', (evt) => setDimensions());
   }
 
   componentWillReceiveProps(nextProps) {
@@ -124,6 +146,7 @@ class App extends React.Component {
     // FIXME should this be here
     const loggedIn = this.props.authentication.success;
     const { showLeftPane } = this.props.currentView;
+    const { windowDimesions } = this.state;
 
     const { resizing } = this.state;
     let leftPanelCSS = ''; 
@@ -139,9 +162,20 @@ class App extends React.Component {
     } else {
       const ncols = this.state.leftPaneCols;
       leftPanelCSS = `col-xl-${ncols} pr-1 as-leftpane`;
-      leftPanelStyle = {};
-      mainPanelCSS = showLeftPane ? `as-centerpane offset-${ncols} col-xl-${12-ncols}` 
-                                      : 'as-centerpane col-xl-12';
+
+      // HACK
+      // since we use bootstrap xl settings everywhere,
+      // bootstrap will keep the columns horizontal for devices
+      // greater than 1200 pixels
+      // as-leftpane uses display fixed when width > 1200, so need
+      // to set the main-panel to have an offset.
+      if (showLeftPane) {
+        mainPanelCSS = `as-centerpane col-xl-${12-ncols}`;
+        if (windowDimesions.width >= 1200)
+          mainPanelCSS += ` offset-xl-${ncols}`;
+      } else {
+        mainPanelCSS = 'as-centerpane col-xl-12';
+      }
     }
 
     let leftPane = null;

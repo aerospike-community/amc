@@ -1,0 +1,197 @@
+@import 'theme';
+
+.as-header {
+  background-color: black;
+  color: $section-color;
+  height: 35px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 900;
+}
+
+.as-body {
+  top: 35px;
+  position: relative;
+}
+
+.as-logo {
+  padding: 2px 0 0 10px;
+
+  img {
+    width: 180px;
+  }
+}
+
+.as-text-overflow-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* 
+ * since we use bootstrap xl settings everywhere,
+ * bootstrap will keep the columns horizontal for devices
+ * greater than 1200 pixels
+ * 
+ * Different styles based on device widths
+ */
+.as-leftpane {
+    border-right: 1px solid lightgray;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    @media (min-width: 1200px) {
+      position: fixed;
+      bottom: 25px;
+      top: 35px;
+    }
+
+    @media (max-width: 1199px) {
+      height: 40vh;
+    }
+}
+
+.as-centerpane {
+  height: 100%;
+
+  @media (max-width: 1199px) {
+    border-top: 3px solid black;
+  }
+}
+
+.as-right-border-resizer {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: 5px;
+  cursor: col-resize;
+}
+
+.as-toolbar {
+  border-bottom: 1px solid $section-bgcolor;
+  line-height: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.as-centerpane-header {
+  padding: 5px;
+  border-bottom: 1px solid $section-bgcolor;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.as-centerpane.col-12 {
+  padding-left: 25px;
+}
+
+.as-disconnected {
+  color: #666;
+}
+
+/* emphasize a selected item */
+.as-selected {
+  background-color: #ddd;
+  font-weight: bold;
+}
+
+.as-bold {
+  font-weight: bold;
+}
+
+.as-cursor-pointer {
+  cursor: pointer;
+}
+
+/* emphasize a selectable item */
+.as-selectable {
+  &:hover {
+    cursor: pointer;
+    background: #eee;
+    font-weight: bold;
+  }
+}
+
+.as-footer {
+  position: fixed;
+  bottom: 0;
+  z-index: 900;
+  width: 100%;
+  height: 25px;
+  font-size: 12px;
+  line-height: 30px; 
+  background-color: black;
+  color: $section-color;
+}
+
+.as-error-text {
+  color: $err-color;
+  font-size: 12px;
+}
+
+.as-warning-text {
+  color: $warn-color;
+  font-size: 12px;
+}
+
+.as-ace-editor {
+  border: 1px solid #e5e5e5;
+  margin-bottom: 10px;
+}
+
+.as-leftpane-expand {
+  position: fixed;
+  top: 35px;
+  left: 0;
+  bottom: 0;
+  cursor: pointer;
+  color: red;
+  background: black;
+  width: 20px;
+}
+
+.as-d3-tooltip {
+  position: absolute;			
+  color: white;
+  max-width: 200px;					
+  max-height: 200px;					
+  padding: 2px;				
+  background: black;	
+  border-radius: 8px;			
+  pointer-events: none;			
+}
+
+.as-section {
+  margin-bottom: 10px;
+}
+
+.as-section-header {
+  background: #636363;
+  font-weight: 100;
+  color: white;
+  padding: 5px 0 0 15px;
+  height: 40px;
+}
+
+/* footer for submit actions */
+.as-submit-footer {
+  margin-top: 40px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+
+  & button {
+    margin-left: 10px;
+  }
+}
+
+.as-hover {
+  & > * {
+    visibility: hidden;
+  }
+
+  &:hover > * {
+    visibility: visible;
+  }
+}

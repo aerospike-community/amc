@@ -1,0 +1,16 @@
+.as-pie-chart {
+  height: 200px;
+  width: 200px;
+}
+
+/*
+ * Displaying the x axis on charts.
+ * see - http://jsfiddle.net/3r88bgjw/
+ *
+ * also see 
+ *  https://github.com/novus/nvd3/issues/392
+ *  https://stackoverflow.com/questions/29609257/nvd3-line-chart-display-x-axis
+ */
+.nvd3 .nv-y .nv-axis .tick.zero line {
+  stroke: #000;
+}

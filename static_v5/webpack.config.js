@@ -57,6 +57,9 @@ var config = {
         test: /\.less$/,
         loader: 'style-loader!css-loader!less-loader'
       }, {
+        test: /\.scss$/,
+        loader: 'style-loader!css-loader!sass-loader'
+      }, {
         test: /\.css$/,
         loader: 'style-loader!css-loader'
       }, {

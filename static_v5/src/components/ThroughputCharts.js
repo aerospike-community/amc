@@ -274,15 +274,27 @@ class ThroughputCharts extends React.Component {
             </div>}
           </div>
         </div>
-        <div className="row">
-          <svg style={bigStyle} id={this.id(Types.read_tps)} className="col-xl-6"> </svg>
-          <svg style={bigStyle} id={this.id(Types.write_tps)} className="col-xl-6"> </svg>
+        <div className="row" style={{borderBottom: '1px solid #ccc'}}>
+          <div className="col-xl-6">
+            <svg style={bigStyle} id={this.id(Types.read_tps)}> </svg>
+          </div>
+          <div className="col-xl-6">
+            <svg style={bigStyle} id={this.id(Types.write_tps)}> </svg>
+          </div>
         </div>
-        <div className="row">
-          <svg style={smStyle} id={this.id(Types.query_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(Types.batch_read_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(Types.scan_tps)} className="col-xl-3"> </svg>
-          <svg style={smStyle} id={this.id(Types.udf_tps)} className="col-xl-3"> </svg>
+        <div className="row" style={{marginTop: 10}}>
+          <div className="col-xl-3">
+            <svg style={smStyle} id={this.id(Types.query_tps)}> </svg>
+          </div>
+          <div className="col-xl-3">
+            <svg style={smStyle} id={this.id(Types.batch_read_tps)}> </svg>
+          </div>
+          <div className="col-xl-3">
+            <svg style={smStyle} id={this.id(Types.scan_tps)}> </svg>
+          </div>
+          <div className="col-xl-3">
+            <svg style={smStyle} id={this.id(Types.udf_tps)}> </svg>
+          </div>
         </div>
       </div>
     );
