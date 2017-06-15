@@ -23,6 +23,11 @@
   }
 }
 
+.as-text-overflow-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
 /* 
  * since we use bootstrap xl settings everywhere,
@@ -40,6 +45,10 @@
       position: fixed;
       bottom: 25px;
       top: 35px;
+    }
+
+    @media (max-width: 1199px) {
+      height: 40vh;
     }
 }
 
@@ -160,6 +169,7 @@
 
 .as-section-header {
   background: #636363;
+  font-weight: 100;
   color: white;
   padding: 5px 0 0 15px;
   height: 40px;

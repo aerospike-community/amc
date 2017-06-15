@@ -51,7 +51,7 @@ class MainDashboard extends React.Component {
     else if (view === null && viewType === null)
       dashboard = <Welcome />;
     else
-      dashboard = <div className="as-centerpane-header"> {view + ' ' + viewType} </div>;
+      dashboard = <div className="as-centerpane-header"> {(view ? view : '') + ' ' + viewType} </div>;
 
     return (
       <div>
