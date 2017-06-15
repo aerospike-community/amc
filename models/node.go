@@ -286,6 +286,28 @@ func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 	return vsTyped
 }
 
+func (n *Node) Latency(from, to time.Time) []map[string]common.Stats {
+	// if no tm specified, return for the last 30 mins
+	if from.IsZero() {
+		from = n.ServerTime().Add(-time.Minute * 30)
+	}
+	if to.IsZero() {
+		to = n.ServerTime()
+	}
+
+	vs := n.latencyHistory.ValuesBetween(from, to)
+	vsTyped := make([]map[string]common.Stats, len(vs))
+	for i := range vs {
+		if vIfc := vs[i]; vIfc != nil {
+			if v, ok := vIfc.(*interface{}); ok {
+				vsTyped[i] = (*v).(map[string]common.Stats)
+			}
+		}
+	}
+
+	return vsTyped
+}
+
 func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	res := map[string]map[string]*common.SinglePointValue{}
 	for _, ns := range n.Namespaces() {
@@ -340,7 +362,7 @@ func (n *Node) Throughput(from, to time.Time) map[string]map[string][]*common.Si
 		from = n.ServerTime().Add(-time.Minute * 30)
 	}
 	if to.IsZero() {
-		to = n.ServerTime().Add(-time.Minute * 30)
+		to = n.ServerTime()
 	}
 
 	res := map[string]map[string][]*common.SinglePointValue{}
@@ -921,13 +943,13 @@ func (n *Node) ServerTime() time.Time {
 	return time.Now().Add(serverTimeDelta)
 }
 
-func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
+func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, map[string]common.Stats) {
 	ip := common.NewInfoParser(s)
 
 	//typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
 
 	nodeStats := map[string]common.Stats{}
-	res := map[string]common.Stats{}
+	res := map[string]map[string]common.Stats{}
 	for {
 		if err := ip.Expect("{"); err != nil {
 			// it's an error string, read to next section
@@ -1010,7 +1032,7 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 		}
 
 		if res[ns] == nil {
-			res[ns] = common.Stats{
+			res[ns] = map[string]common.Stats{
 				op: stats,
 			}
 		} else {

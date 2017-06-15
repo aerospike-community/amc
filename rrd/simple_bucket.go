@@ -144,7 +144,7 @@ func (b *SimpleBucket) currentOffset() *int {
 
 func (b *SimpleBucket) ValuesBetween(from, to time.Time) []interface{} {
 	// if map is empty,
-	if b.isEmpty() || from.After(to) {
+	if b.isEmpty() || to.Unix() < *b.beginTime || from.After(to) {
 		return []interface{}{}
 	}
 

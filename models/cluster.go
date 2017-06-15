@@ -963,7 +963,7 @@ func (c *Cluster) Throughput(from, to time.Time) map[string]map[string][]*common
 		from = c.ServerTime().Add(-time.Minute * 30)
 	}
 	if to.IsZero() {
-		to = c.ServerTime().Add(-time.Minute * 30)
+		to = c.ServerTime()
 	}
 
 	res := map[string]map[string][]*common.SinglePointValue{}

@@ -36,7 +36,7 @@ var _ = Resource("node", func() {
 		Routing(GET(":node/throughput"))
 		Params(func() {
 			Param("node", String, "Node Address", func() {
-				Example("127.0.0.1:3000,127.0.0.2:3000")
+				Example("127.0.0.1:3000")
 			})
 
 			Param("from", Integer, "From time in unix seconds")
@@ -47,6 +47,31 @@ var _ = Resource("node", func() {
 
 		Response(OK, ThroughputWrapperResponseMedia)
 		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("latency", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the aggregate latency of the node namespaces for a given window of time. If From/To are not specified, the latest throughput will be returned.")
+		Routing(GET(":node/latency"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("node")
+		})
+
+		Response(OK, HashOf(String, LatencyResponseMedia))
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})

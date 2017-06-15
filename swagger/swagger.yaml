@@ -1758,7 +1758,7 @@ definitions:
       indexes:
         Dignissimos et.:
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+            Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
           bin: Non cupiditate a.
           binType: In hic doloremque facere perspiciatis ab et.
           name: Nulla laborum.
@@ -1766,7 +1766,7 @@ definitions:
           set: Quia est praesentium tenetur modi facilis.
           syncOnAllNodes: Natus dolor autem aut vitae.
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+            Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
           bin: Non cupiditate a.
           binType: In hic doloremque facere perspiciatis ab et.
           name: Nulla laborum.
@@ -1781,7 +1781,7 @@ definitions:
         example:
           Dignissimos et.:
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+              Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
             bin: Non cupiditate a.
             binType: In hic doloremque facere perspiciatis ab et.
             name: Nulla laborum.
@@ -1789,7 +1789,7 @@ definitions:
             set: Quia est praesentium tenetur modi facilis.
             syncOnAllNodes: Natus dolor autem aut vitae.
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: a242c051-b645-40e8-8bd7-bf826a58d398
+              Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
             bin: Non cupiditate a.
             binType: In hic doloremque facere perspiciatis ab et.
             name: Nulla laborum.
@@ -1824,17 +1824,11 @@ definitions:
     example:
       status: "on"
       throughput:
-        Tenetur quas.:
-          Dolores aut ea sint aliquam deleniti.:
-          - failed: 0.44114548
-            successful: 0.7126705
-            timestamp: 1.8232948e+18
-          - failed: 0.44114548
-            successful: 0.7126705
-            timestamp: 1.8232948e+18
-          - failed: 0.44114548
-            successful: 0.7126705
-            timestamp: 1.8232948e+18
+        Sit doloremque asperiores eligendi non nesciunt aut.:
+          Fuga sunt et.:
+          - failed: 0.5223272
+            successful: 0.8121206
+            timestamp: 6.639922e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1844,17 +1838,11 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Tenetur quas.:
-            Dolores aut ea sint aliquam deleniti.:
-            - failed: 0.44114548
-              successful: 0.7126705
-              timestamp: 1.8232948e+18
-            - failed: 0.44114548
-              successful: 0.7126705
-              timestamp: 1.8232948e+18
-            - failed: 0.44114548
-              successful: 0.7126705
-              timestamp: 1.8232948e+18
+          Sit doloremque asperiores eligendi non nesciunt aut.:
+            Fuga sunt et.:
+            - failed: 0.5223272
+              successful: 0.8121206
+              timestamp: 6.639922e+18
         type: object
     required:
     - status
@@ -1891,7 +1879,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Reprehenderit dolorem nobis pariatur ut earum.
+          example: Repellendus sed numquam nostrum asperiores laudantium id.
           type: string
         type: array
       username:
@@ -2056,15 +2044,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Et accusamus qui.
+      binName: Praesentium voluptates et.
       indexName: idxAccounts
-      namespace: Inventore et ea molestiae.
-      setName: Aliquam consectetur ab omnis praesentium.
+      namespace: Et unde reprehenderit.
+      setName: Nobis pariatur ut earum veniam tempora.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Et accusamus qui.
+        example: Praesentium voluptates et.
         type: string
       indexName:
         description: Index's Name
@@ -2072,11 +2060,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Inventore et ea molestiae.
+        example: Et unde reprehenderit.
         type: string
       setName:
         description: Index's Set name
-        example: Aliquam consectetur ab omnis praesentium.
+        example: Nobis pariatur ut earum veniam tempora.
         type: string
       type:
         description: Index's type
@@ -2094,7 +2082,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Et neque et.
+      source: Quis odit dignissimos sequi ducimus et.
       type: LUA
     properties:
       name:
@@ -2103,7 +2091,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Et neque et.
+        example: Quis odit dignissimos sequi ducimus et.
         type: string
       type:
         description: Module's type
@@ -2149,7 +2137,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Tempora rerum quis.
+          example: Quo et cumque nihil dignissimos.
           type: string
         type: array
       username:
@@ -2807,6 +2795,58 @@ paths:
       summary: show node
       tags:
       - node
+  /api/v1/connections/{connId}/nodes/{node}/latency:
+    get:
+      description: |-
+        Returns the aggregate latency of the node namespaces for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#latency
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: latency node
+      tags:
+      - node
   /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}:
     get:
       description: |-
@@ -2846,6 +2886,63 @@ paths:
       - jwt:
         - api:general
       summary: show namespace
+      tags:
+      - namespace
+  /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/latency:
+    get:
+      description: |-
+        Returns the aggregate latency of the namespace for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: namespace#latency
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Node Addresses
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: latency namespace
       tags:
       - namespace
   /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/sets:

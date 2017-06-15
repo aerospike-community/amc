@@ -18,6 +18,31 @@ func NewNodeController(service *goa.Service) *NodeController {
 	return &NodeController{Controller: service.NewController("NodeController")}
 }
 
+// Latency runs the latency action.
+func (c *NodeController) Latency(ctx *app.LatencyNodeContext) error {
+	// NodeController_Latency: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	res := map[string]*app.AerospikeAmcLatencyResponse{
+		node.Address(): &app.AerospikeAmcLatencyResponse{
+			Status:  string(node.Status()),
+			Latency: latency(node, ctx.From, ctx.Until),
+		},
+	}
+
+	// NodeController_Latency: end_implement
+	return ctx.OK(res)
+}
+
 // Show runs the show action.
 func (c *NodeController) Show(ctx *app.ShowNodeContext) error {
 	// NodeController_Show: start_implement

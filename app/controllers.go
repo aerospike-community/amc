@@ -642,6 +642,7 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 // NamespaceController is the controller interface for the Namespace actions.
 type NamespaceController interface {
 	goa.Muxer
+	Latency(*LatencyNamespaceContext) error
 	Show(*ShowNamespaceContext) error
 	Throughput(*ThroughputNamespaceContext) error
 }
@@ -650,8 +651,26 @@ type NamespaceController interface {
 func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLatencyNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Latency(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", ctrl.MuxHandler("latency", h, nil))
+	service.LogInfo("mount", "ctrl", "Namespace", "action", "Latency", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -718,6 +737,7 @@ func handleNamespaceOrigin(h goa.Handler) goa.Handler {
 // NodeController is the controller interface for the Node actions.
 type NodeController interface {
 	goa.Muxer
+	Latency(*LatencyNodeContext) error
 	Show(*ShowNodeContext) error
 	Throughput(*ThroughputNodeContext) error
 }
@@ -726,8 +746,26 @@ type NodeController interface {
 func MountNodeController(service *goa.Service, ctrl NodeController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLatencyNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Latency(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("latency", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Latency", "route", "GET /api/v1/connections/:connId/nodes/:node/latency", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

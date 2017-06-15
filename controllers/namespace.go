@@ -16,6 +16,36 @@ func NewNamespaceController(service *goa.Service) *NamespaceController {
 	return &NamespaceController{Controller: service.NewController("NamespaceController")}
 }
 
+// Latency runs the latency action.
+func (c *NamespaceController) Latency(ctx *app.LatencyNamespaceContext) error {
+	// NamespaceController_Latency: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	namespace := node.NamespaceByName(ctx.Namespace)
+	if namespace == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	res := map[string]*app.AerospikeAmcLatencyResponse{
+		namespace.Name(): &app.AerospikeAmcLatencyResponse{
+			Status:  string(node.Status()),
+			Latency: latency(namespace, ctx.From, ctx.Until),
+		},
+	}
+
+	// NamespaceController_Latency: end_implement
+	return ctx.OK(res)
+}
+
 // Show runs the show action.
 func (c *NamespaceController) Show(ctx *app.ShowNamespaceContext) error {
 	// NamespaceController_Show: start_implement
@@ -41,7 +71,7 @@ func (c *NamespaceController) Throughput(ctx *app.ThroughputNamespaceContext) er
 	}
 
 	namespace := node.NamespaceByName(ctx.Namespace)
-	if node == nil {
+	if namespace == nil {
 		return ctx.BadRequest("Namespace not found.")
 	}
 

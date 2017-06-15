@@ -73,4 +73,27 @@ var _ = Resource("namespace", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("latency", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the aggregate latency of the namespace for a given window of time. If From/To are not specified, the latest throughput will be returned.")
+		Routing(GET(":namespace/latency"))
+		Params(func() {
+			Param("namespace", String, "Namespace name", func() { Example("test") })
+
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("namespace")
+		})
+
+		Response(OK, HashOf(String, LatencyResponseMedia))
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 })

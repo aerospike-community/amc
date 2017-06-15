@@ -475,6 +475,27 @@ func (mt *AerospikeAmcIndexWrapperResponse) Validate() (err error) {
 	return
 }
 
+// Latency Data (default view)
+//
+// Identifier: application/vnd.aerospike.amc.latency.response+json; view=default
+type AerospikeAmcLatencyResponse struct {
+	// Latency values
+	Latency []interface{} `form:"latency" json:"latency" xml:"latency"`
+	// Node Status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcLatencyResponse media type instance.
+func (mt *AerospikeAmcLatencyResponse) Validate() (err error) {
+	if mt.Latency == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "latency"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	return
+}
+
 // Node End Point (default view)
 //
 // Identifier: application/vnd.aerospike.amc.node.response+json; view=default

@@ -1300,6 +1300,100 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// LatencyNamespaceContext provides the namespace latency action context.
+type LatencyNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	From      *int
+	Namespace string
+	Node      string
+	Until     *int
+}
+
+// NewLatencyNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller latency action.
+func NewLatencyNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*LatencyNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := LatencyNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramFrom := req.Params["from"]
+	if len(paramFrom) > 0 {
+		rawFrom := paramFrom[0]
+		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
+			tmp7 := from
+			tmp6 := &tmp7
+			rctx.From = tmp6
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramUntil := req.Params["until"]
+	if len(paramUntil) > 0 {
+		rawUntil := paramUntil[0]
+		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
+			tmp9 := until
+			tmp8 := &tmp9
+			rctx.Until = tmp8
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *LatencyNamespaceContext) OK(r map[string]*AerospikeAmcLatencyResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *LatencyNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *LatencyNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *LatencyNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *LatencyNamespaceContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // ShowNamespaceContext provides the namespace show action context.
 type ShowNamespaceContext struct {
 	context.Context
@@ -1391,9 +1485,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp7 := from
-			tmp6 := &tmp7
-			rctx.From = tmp6
+			tmp11 := from
+			tmp10 := &tmp11
+			rctx.From = tmp10
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1412,9 +1506,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp9 := until
-			tmp8 := &tmp9
-			rctx.Until = tmp8
+			tmp13 := until
+			tmp12 := &tmp13
+			rctx.Until = tmp12
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -1444,6 +1538,94 @@ func (ctx *ThroughputNamespaceContext) Unauthorized() error {
 func (ctx *ThroughputNamespaceContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
+}
+
+// LatencyNodeContext provides the node latency action context.
+type LatencyNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	From   *int
+	Node   string
+	Until  *int
+}
+
+// NewLatencyNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller latency action.
+func NewLatencyNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*LatencyNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := LatencyNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramFrom := req.Params["from"]
+	if len(paramFrom) > 0 {
+		rawFrom := paramFrom[0]
+		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
+			tmp15 := from
+			tmp14 := &tmp15
+			rctx.From = tmp14
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramUntil := req.Params["until"]
+	if len(paramUntil) > 0 {
+		rawUntil := paramUntil[0]
+		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
+			tmp17 := until
+			tmp16 := &tmp17
+			rctx.Until = tmp16
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *LatencyNodeContext) OK(r map[string]*AerospikeAmcLatencyResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *LatencyNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *LatencyNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *LatencyNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *LatencyNodeContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
 }
 
 // ShowNodeContext provides the node show action context.
@@ -1536,9 +1718,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp11 := from
-			tmp10 := &tmp11
-			rctx.From = tmp10
+			tmp19 := from
+			tmp18 := &tmp19
+			rctx.From = tmp18
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1552,9 +1734,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp13 := until
-			tmp12 := &tmp13
-			rctx.Until = tmp12
+			tmp21 := until
+			tmp20 := &tmp21
+			rctx.Until = tmp20
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}

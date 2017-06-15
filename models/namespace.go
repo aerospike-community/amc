@@ -40,7 +40,7 @@ type Namespace struct {
 
 	latestStats  common.SyncStats
 	calcStats    common.SyncStats
-	latencystats common.SyncStats
+	latencystats common.SyncValue
 
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
@@ -59,6 +59,10 @@ func NewNamespace(node *Node, name string) *Namespace {
 	}
 
 	return ns
+}
+
+func (ns *Namespace) Name() string {
+	return ns.name
 }
 
 func (ns *Namespace) ServerTime() time.Time {
@@ -93,8 +97,12 @@ func (ns *Namespace) updateIndexInfo(indexes map[string]common.Info) error {
 	return nil
 }
 
-func (ns *Namespace) updateLatencyInfo(latStats common.Stats) {
-	ns.latencystats.SetStats(latStats)
+func (ns *Namespace) updateLatencyInfo(latStats map[string]common.Stats) {
+	if len(latStats) == 0 {
+		ns.latencystats.Set(nil)
+		return
+	}
+	ns.latencystats.Set(latStats)
 }
 
 func (ns *Namespace) setInfo(stats common.Info) {
@@ -186,6 +194,10 @@ func (ns *Namespace) updateHistory() {
 	for _, stat := range _recordedNamespaceStats {
 		bucket := ns.statsHistory[stat]
 		bucket.Add(tm, ns.calcStats.TryFloat(stat, 0))
+	}
+
+	if ll := ns.LatestLatency(); ll != nil {
+		ns.latencyHistory.Add(tm, ll)
 	}
 }
 
@@ -449,7 +461,7 @@ func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*com
 		from = ns.node.ServerTime().Add(-time.Minute * 30)
 	}
 	if to.IsZero() {
-		to = ns.node.ServerTime().Add(-time.Minute * 30)
+		to = ns.node.ServerTime()
 	}
 
 	// statsHistory is not written to, so it doesn't need synchronization
@@ -468,4 +480,34 @@ func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*com
 	}
 
 	return res
+}
+
+func (ns *Namespace) LatestLatency() map[string]common.Stats {
+	res := ns.latencystats.Get()
+	if res == nil {
+		return nil
+	}
+	return res.(map[string]common.Stats)
+}
+
+func (ns *Namespace) Latency(from, to time.Time) []map[string]common.Stats {
+	// if no tm specified, return for the last 30 mins
+	if from.IsZero() {
+		from = ns.node.ServerTime().Add(-time.Minute * 30)
+	}
+	if to.IsZero() {
+		to = ns.node.ServerTime()
+	}
+
+	vs := ns.latencyHistory.ValuesBetween(from, to)
+	vsTyped := make([]map[string]common.Stats, len(vs))
+	for i := range vs {
+		if vIfc := vs[i]; vIfc != nil {
+			if v, ok := vIfc.(*interface{}); ok {
+				vsTyped[i] = (*v).(map[string]common.Stats)
+			}
+		}
+	}
+
+	return vsTyped
 }
