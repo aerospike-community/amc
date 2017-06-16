@@ -33,6 +33,7 @@ lockfile="/var/lock/subsys/$prog"
 logfile="/var/log/$prog.log"
 conffile="/etc/amc/amc.conf"
 confdir="/etc/amc"
+STOP_TIMEOUT=${STOP_TIMEOUT-30}
 
 # pull in sysconfig settings
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
@@ -72,7 +73,7 @@ start() {
 stop() {
     echo -n $"Shutting down $prog: "
     ## graceful shutdown with SIGINT
-    killproc -p $pidfile $exec -INT
+    killproc -d ${STOP_TIMEOUT} $exec
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && rm -f $lockfile
