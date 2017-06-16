@@ -1,8 +1,6 @@
 package design
 
 import (
-	"math"
-
 	. "github.com/goadesign/goa/design"
 	. "github.com/goadesign/goa/design/apidsl"
 )
@@ -13,7 +11,7 @@ var NodeSeed = Type("NodeSeed", func() {
 	Member("tlsName", String, "Node's TLS name", func() { Example("") })
 	Member("port", Integer, "Node's port", func() {
 		Minimum(0)
-		Maximum(math.MaxInt16)
+		Maximum(65535)
 		Example(3000)
 	})
 	Required("host", "port")
