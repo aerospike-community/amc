@@ -28,7 +28,7 @@ class ThroughputCharts extends React.Component {
       showDateTimePicker: false,
       // [from, to] time window for which
       // the throughputs are shown
-      from: moment().subtract(30, 'minutes'),
+      from: moment().subtract(10, 'minutes'),
       to: moment(),
     };
 
@@ -273,26 +273,44 @@ class ThroughputCharts extends React.Component {
             </div>}
           </div>
         </div>
-        <div className="row" style={{borderBottom: '1px solid #ccc'}}>
+        <div className="row">
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.read_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.read_tps} </div>
+            <div className="row">
+              <svg style={bigStyle} id={this.id(Types.read_tps)}> </svg>
+            </div>
           </div>
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.write_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.write_tps} </div>
+            <div className="row">
+              <svg style={bigStyle} id={this.id(Types.write_tps)}> </svg>
+            </div>
           </div>
         </div>
         <div className="row" style={{marginTop: 10}}>
           <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.query_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.query_tps} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.query_tps)}> </svg>
+            </div>
           </div>
           <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.batch_read_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.batch_read_tps} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.batch_read_tps)}> </svg>
+            </div>
           </div>
           <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.scan_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.scan_tps} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.scan_tps)}> </svg>
+            </div>
           </div>
           <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.udf_tps)}> </svg>
+            <div className="row as-chart-title"> {Types.udf_tps} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.udf_tps)}> </svg>
+            </div>
           </div>
         </div>
       </div>

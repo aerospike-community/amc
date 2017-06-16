@@ -26,10 +26,12 @@ class NamespaceLatency extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { clusterID, nodeHost } = nextProps;
+    const { clusterID, nodeHost, namespaceName } = nextProps;
 
-    if (this.props.clusterID === clusterID && this.props.nodeHost === nodeHost)
+    if (this.props.clusterID === clusterID && this.props.nodeHost === nodeHost 
+        && this.props.namespaceName === namespaceName) {
       return;
+    }
 
     this.redrawCharts();
   }
@@ -37,7 +39,7 @@ class NamespaceLatency extends React.Component {
   getLatency(from, to) {
     const { clusterID, nodeHost, namespaceName } = this.props;
     const p = getLatencyAPI(clusterID, nodeHost, namespaceName, from, to)
-                .then((r) => r[namespaceName].latency);
+                .then((r) => r[namespaceName].latency || []);
     return p;
   }
   

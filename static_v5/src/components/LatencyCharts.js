@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Button } from 'reactstrap';
 
 import LatencyChart from 'charts/LatencyChart';
-import { nextNumber, formatTimeWindow } from 'classes/util';
+import { nextNumber, formatTimeWindow, replaceUnicode } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const Types = {
@@ -27,7 +27,7 @@ class LatencyCharts extends React.Component {
 
       // [from, to] time window for which
       // the latency is shown
-      from: moment().subtract(30, 'minutes'),
+      from: moment().subtract(10, 'minutes'),
       to: moment(),
     };
 
@@ -79,8 +79,7 @@ class LatencyCharts extends React.Component {
         const timestamp = lat[type].timestampUnix*1000;
 
         lat[type].data.forEach((d) => {
-            const measure = Object.keys(d)[0]; // < 1ms, >1ms && <8ms, ...
-
+          for (let measure in d) {
             if (!data[measure]) {
               data[measure] = [];
             }
@@ -89,6 +88,7 @@ class LatencyCharts extends React.Component {
               value: d[measure].value,
               timestamp: timestamp,
             });
+          }
         });
 
       });
@@ -97,7 +97,7 @@ class LatencyCharts extends React.Component {
       const arr = [];
       for (let measure in data) {
         arr.push({
-          key: measure,
+          key: replaceUnicode(measure),
           values: data[measure]
         });
       }
@@ -171,7 +171,8 @@ class LatencyCharts extends React.Component {
           // calculate latest timestamp
           let lastTimestamp = null; 
           latency.forEach((lat) => {
-            const time = lat.timestampUnix*1000;
+            const k = Object.keys(lat)[0];
+            const time = lat[k].timestampUnix*1000;
             if (lastTimestamp === null || time > lastTimestamp)
               lastTimestamp = time;
           });
@@ -267,20 +268,32 @@ class LatencyCharts extends React.Component {
             </div>}
           </div>
         </div>
-        <div className="row" style={{borderBottom: '1px solid #ccc'}}>
+        <div className="row">
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.reads)}> </svg>
+            <div className="row as-chart-title"> {Types.reads} </div>
+            <div className="row">
+              <svg style={bigStyle} id={this.id(Types.reads)}> </svg>
+            </div>
           </div>
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.writes)}> </svg>
+            <div className="row as-chart-title"> {Types.writes} </div>
+            <div className="row">
+              <svg style={bigStyle} id={this.id(Types.writes)}> </svg>
+            </div>
           </div>
         </div>
         <div className="row" style={{marginTop: 10}}>
           <div className="col-xl-6">
-            <svg style={smStyle} id={this.id(Types.query)}> </svg>
+            <div className="row as-chart-title"> {Types.query} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.query)}> </svg>
+            </div>
           </div>
           <div className="col-xl-6">
-            <svg style={smStyle} id={this.id(Types.udf)}> </svg>
+            <div className="row as-chart-title"> {Types.udf} </div>
+            <div className="row">
+              <svg style={smStyle} id={this.id(Types.udf)}> </svg>
+            </div>
           </div>
         </div>
       </div>

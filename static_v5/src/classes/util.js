@@ -90,3 +90,18 @@ export function formatTimeWindow(from, to, sep = ' - ') {
 
   return from.format(fromFormat) + sep + to.format(toFormat);
 }
+
+// replaceUnicode replaces embedded unicode with the 
+// corresponding values
+//
+// Ex: replaceUnicode('&#2264; 1ms') => ≤ 1ms
+export function replaceUnicode(s) {
+  const prefix = '&#x';
+  const suffix = ';';
+  const re = new RegExp(prefix + '[0-9]+' + suffix, 'g');
+  return s.replace(re, (t) => {
+    t = t.slice(prefix.length, -1*suffix.length);
+    t = parseInt(t, 16); // hexadecimal code point
+    return String.fromCharCode(t);
+  });
+}

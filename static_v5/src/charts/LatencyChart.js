@@ -17,10 +17,9 @@ import { watchElementSizeChange } from 'charts/util';
 //      }, ...]
 //  }, ...]
 class LatencyChart {
-  constructor(selector, latency, title = '') {
+  constructor(selector, latency) {
     this.selector = selector; // element selector on which the chart will be drawn
     this.latency = latency; // the latency
-    this.title = title;
 
     this.chart = null; // nvd3 chart
     this.chartData = null;  // d3 chart data on element
@@ -51,7 +50,7 @@ class LatencyChart {
           .x((d) => d[time])
           .y((d) => d[value])
           .useInteractiveGuideline(true)
-          .showLegend(false)
+          .showLegend(true)
           .showControls(false)
           .margin({top: marginTop});
 
@@ -69,16 +68,6 @@ class LatencyChart {
       const svg = d3.select(this.selector);
       this.chartData = svg.datum(data);
       this.chartData.call(chart);
-
-      // title
-      if (this.title) {
-        svg.append('text')
-          .attr('x', '50%')
-          .attr('y', marginTop/2)
-          .style('font-size', '16px')
-          .style('text-decoration', 'underline')
-          .text(this.title);
-      }
 
       // redraw on element size change
       watchElementSizeChange(this.selector, () => chart.update());

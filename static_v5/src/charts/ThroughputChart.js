@@ -18,10 +18,9 @@ import { watchElementSizeChange } from 'charts/util';
 //      }, ...]
 //  }, ...]
 class ThroughputChart {
-  constructor(selector, throughput, title = '') {
+  constructor(selector, throughput) {
     this.selector = selector; // element selector on which the chart will be drawn
     this.throughput = throughput; // the throughput
-    this.title = title;
 
     this.chart = null; // nvd3 chart
     this.chartData = null;  // d3 chart data on element
@@ -71,16 +70,6 @@ class ThroughputChart {
       const svg = d3.select(this.selector);
       this.chartData = svg.datum(data);
       this.chartData.call(chart);
-
-      // title
-      if (this.title) {
-        svg.append('text')
-          .attr('x', '50%')
-          .attr('y', marginTop/2)
-          .style('font-size', '16px')
-          .style('text-decoration', 'underline')
-          .text(this.title);
-      }
 
       // redraw on element size change
       watchElementSizeChange(this.selector, () => chart.update());
