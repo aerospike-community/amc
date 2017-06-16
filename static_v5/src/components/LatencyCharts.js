@@ -4,30 +4,29 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Button } from 'reactstrap';
 
-import ThroughputChart from 'charts/ThroughputChart';
+import LatencyChart from 'charts/LatencyChart';
 import { nextNumber, formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const Types = {
-  read_tps: 'Reads per second',
-  write_tps: 'Writes per second',
-
-  batch_read_tps: 'Batch',
-  query_tps: 'Query',
-  scan_tps: 'Scan',
-  udf_tps: 'UDF',
+  reads: 'Reads',
+  writes: 'Writes',
+  query: 'Query',
+  udf: 'UDF',
 };
 
-// ThroughputCharts displays the throughput charts for all types
+// LatencyCharts displays the latency charts for all types
 // in the given data
-class ThroughputCharts extends React.Component {
+class LatencyCharts extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       showDateTimePicker: false,
+      latencyWindows: [], // an array of latency windows <1ms, >1ms && <8ms, ...
+
       // [from, to] time window for which
-      // the throughputs are shown
+      // the latency is shown
       from: moment().subtract(30, 'minutes'),
       to: moment(),
     };
@@ -40,7 +39,7 @@ class ThroughputCharts extends React.Component {
       this.keepInSync();
     }
 
-    this.throughput = {}; // throughput data returned by the server
+    this.latency = {}; // latency data returned by the server
     this.charts = {}; // map of 'chart type' to chart instance
 
     this.onShowDateTimePicker = this.onShowDateTimePicker.bind(this);
@@ -59,55 +58,65 @@ class ThroughputCharts extends React.Component {
       this.keepInSync();
   }
 
-  // convert throghput to a format consumable by the charts
-  chartThroughput(throughput) {
-    let data = {};
-    for (const k in Types) {
-      const tp = typeThroughput(throughput[k]);
-      data[k] = {
-        name: Types[k],
-        throughput: tp
+  // convert latency to a format consumable by the charts
+  chartLatency(latency) {
+    let chartLat = {}; 
+    let type;
+
+    for (type in Types) {
+      chartLat[type] = {
+        name: Types[type],
+        latency: toTypeLatency(latency, type)
       };
     }
-    return data;
 
-    // process the throughput for a single type
-    function typeThroughput(throughput) {
-      let data = [];
-      for (const nodeHost in throughput) {
-        data.push({
-          key: nodeHost,
-          values: throughput[nodeHost],
+    return chartLat;
+
+    // convert to type latency
+    function toTypeLatency(latency, type) {
+      const data = {};
+      latency.forEach((lat) => {
+        const timestamp = lat[type].timestampUnix*1000;
+
+        lat[type].data.forEach((d) => {
+            const measure = Object.keys(d)[0]; // < 1ms, >1ms && <8ms, ...
+
+            if (!data[measure]) {
+              data[measure] = [];
+            }
+
+            data[measure].push({
+              value: d[measure].value,
+              timestamp: timestamp,
+            });
+        });
+
+      });
+
+      // convert to array
+      const arr = [];
+      for (let measure in data) {
+        arr.push({
+          key: measure,
+          values: data[measure]
         });
       }
-
-      // HACK 
-      // FIXME the API has to make sure that the values
-      // returned are of the same length
-      let shortestLen = Number.MAX_VALUE;
-      data.forEach((d) => {
-        shortestLen = Math.min(shortestLen, d.values.length);
-      });
-
-      data.forEach((d) => {
-        d.values = d.values.slice(0, shortestLen);
-      });
-      return data;
+      return arr;
     }
   }
 
   // get the id for the chart type
   id(type) {
-    return 'throughput_chart_' + this.sequenceNumber + '_' + type.replace(/ /g, '');
+    return 'latency_chart_' + this.sequenceNumber + '_' + type.replace(/ /g, '');
   }
 
   // set up the charts
   setupCharts() {
-    const chartTP = this.chartThroughput(this.throughput);
-    for (const type in chartTP) {
-      const {name, throughput} = chartTP[type];
+    const chartLat = this.chartLatency(this.latency);
+    for (const type in Types) {
+      const {name, latency} = chartLat[type];
       const id = '#' + this.id(Types[type]);
-      const chart = new ThroughputChart(id, throughput, name);
+      const chart = new LatencyChart(id, latency, name);
       chart.draw();
 
       this.charts[type] = chart;
@@ -117,11 +126,11 @@ class ThroughputCharts extends React.Component {
   // draw the charts
   // the charts need to be setup before calling drawCharts
   drawCharts() {
-    const chartTP = this.chartThroughput(this.throughput);
-    for (const type in chartTP) {
-      const {throughput} = chartTP[type];
+    const chartLat = this.chartLatency(this.latency);
+    for (const type in Types) {
+      const {latency} = chartLat[type];
       const chart = this.charts[type];
-      chart.update(throughput);
+      chart.update(latency);
     }
   }
 
@@ -134,9 +143,9 @@ class ThroughputCharts extends React.Component {
     const { clusterID } = this.props;
     const { from, to } = this.state;
 
-    this.props.getThroughput(from.unix(), to.unix())
-      .then((response) => {
-        this.throughput = response.throughput;
+    this.props.getLatency(from.unix(), to.unix())
+      .then((latency) => {
+        this.latency = latency;
         this.setupCharts();
       })
       .catch((message) => console.error(message));
@@ -154,35 +163,20 @@ class ThroughputCharts extends React.Component {
       if (moment().subtract(2, 'minutes').isAfter(to)) 
         return;
 
-      this.props.getThroughput(to.unix())
-        .then((response) => {
+      this.props.getLatency(to.unix())
+        .then((latency) => {
           if (!to.isSame(this.state.to)) // updated in the interim
             return;
 
-          // append values
-          const tp = response.throughput;
-          let lastTimestamp = null; // latest timestamp
-          for (const type in tp) {
-            for (const nodeHost in tp[type]) {
-              const val = tp[type][nodeHost];
-              if (val.length === 0)
-                continue;
+          // calculate latest timestamp
+          let lastTimestamp = null; 
+          latency.forEach((lat) => {
+            const time = lat.timestampUnix*1000;
+            if (lastTimestamp === null || time > lastTimestamp)
+              lastTimestamp = time;
+          });
 
-              // append values
-              const orig = this.throughput[type][nodeHost];
-              const last = orig.length === 0 ? null : orig[orig.length-1].timestamp;
-              val.forEach((v) => {
-                if (last === null || v.timestamp > last)
-                  orig.push(v);
-              });
-
-              // latest time
-              const time = val[val.length-1].timestamp; 
-              if (lastTimestamp === null || time > lastTimestamp)
-                lastTimestamp = time;
-            }
-          }
-
+          this.latency = this.latency.concat(latency);
           this.drawCharts();
 
           // update timestamp
@@ -225,9 +219,9 @@ class ThroughputCharts extends React.Component {
 
     // fetch data for window
     const { clusterID } = this.props;
-    this.props.getThroughput(from.unix(), to.unix())
-      .then((response) => {
-        this.throughput = response.throughput;
+    this.props.getLatency(from.unix(), to.unix())
+      .then((latency) => {
+        this.latency = latency;
         this.drawCharts();
       })
       .catch((message) => console.error(message));
@@ -254,7 +248,7 @@ class ThroughputCharts extends React.Component {
     };
     const { showDateTimePicker, from, to } = this.state;
     const { disableTimeWindowSelection } = this.props;
-    const title = this.props.title || 'Throughput';
+    const title = this.props.title || 'Latency';
 
     const timeWindow = formatTimeWindow(from, to);
 
@@ -275,24 +269,18 @@ class ThroughputCharts extends React.Component {
         </div>
         <div className="row" style={{borderBottom: '1px solid #ccc'}}>
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.read_tps)}> </svg>
+            <svg style={bigStyle} id={this.id(Types.reads)}> </svg>
           </div>
           <div className="col-xl-6">
-            <svg style={bigStyle} id={this.id(Types.write_tps)}> </svg>
+            <svg style={bigStyle} id={this.id(Types.writes)}> </svg>
           </div>
         </div>
         <div className="row" style={{marginTop: 10}}>
-          <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.query_tps)}> </svg>
+          <div className="col-xl-6">
+            <svg style={smStyle} id={this.id(Types.query)}> </svg>
           </div>
-          <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.batch_read_tps)}> </svg>
-          </div>
-          <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.scan_tps)}> </svg>
-          </div>
-          <div className="col-xl-3">
-            <svg style={smStyle} id={this.id(Types.udf_tps)}> </svg>
+          <div className="col-xl-6">
+            <svg style={smStyle} id={this.id(Types.udf)}> </svg>
           </div>
         </div>
       </div>
@@ -300,12 +288,12 @@ class ThroughputCharts extends React.Component {
   }
 }
 
-ThroughputCharts.PropTypes = {
-  // function to fetch throughput
+LatencyCharts.PropTypes = {
+  // function to fetch latency
   //
-  // getThroughput returns a promise with the response
+  // getLatency returns a promise with the latency.
   // from, to are in unix seconds
-  getThroughput: PropTypes.func,
+  getLatency: PropTypes.func,
   // title of the throughputs
   title: PropTypes.string,
   // whether to allow selection of time window
@@ -315,5 +303,6 @@ ThroughputCharts.PropTypes = {
   doNotSyncWithCurrentTime: PropTypes.bool,
 };
 
-export default ThroughputCharts;
+export default LatencyCharts;
+
 

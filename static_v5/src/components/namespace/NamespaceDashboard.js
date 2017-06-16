@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
 import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
+import NamespaceLatency from 'components/namespace/NamespaceLatency';
 
 class NamespaceDashboard extends React.Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class NamespaceDashboard extends React.Component {
       <div>
         <div>
           <NamespaceThroughput clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
+          <NamespaceLatency clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         </div>
       </div>
       );

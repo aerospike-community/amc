@@ -16,6 +16,19 @@ export function getThroughput(clusterID, nodeHost, from, to) {
   return get(url);
 }
 
+// getLatency fetches the latency for the node in 
+// the given time window
+export function getLatency(clusterID, nodeHost, from, to) {
+  let query = {}
+  if (from)
+    query.from = from;
+  if (to)
+    query.until = to; 
+
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/latency', query);
+  return get(url);
+}
+
 // getNodesSummary fetches the summary for the member nodes
 // identified by nodeHosts
 //
