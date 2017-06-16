@@ -33,11 +33,7 @@ const clusterActions = {
     },
     isEndOfGrouping: true,
   },
-  Edit: {
-    state: {
-      isAuthenticated: true
-    }
-  },
+  Edit: {},
   Overview: {
     isDefault: true,
     state: {
