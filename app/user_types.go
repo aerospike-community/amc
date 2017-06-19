@@ -38,8 +38,8 @@ func (ut *nodeSeed) Validate() (err error) {
 		}
 	}
 	if ut.Port != nil {
-		if *ut.Port > 32767 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, *ut.Port, 32767, false))
+		if *ut.Port > 65535 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, *ut.Port, 65535, false))
 		}
 	}
 	return
@@ -79,8 +79,8 @@ func (ut *NodeSeed) Validate() (err error) {
 	if ut.Port < 0 {
 		err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, ut.Port, 0, true))
 	}
-	if ut.Port > 32767 {
-		err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, ut.Port, 32767, false))
+	if ut.Port > 65535 {
+		err = goa.MergeErrors(err, goa.InvalidRangeError(`response.port`, ut.Port, 65535, false))
 	}
 	return
 }
