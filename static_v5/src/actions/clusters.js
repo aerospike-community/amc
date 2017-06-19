@@ -25,6 +25,24 @@ export function updateConnection(clusterID, connection) {
   };
 }
 
+// -----------------------------
+// Deleting a cluster connection
+export const DISPLAY_DELETE_CLUSTER_CONNECTION = 'DISPLAY_DELETE_CLUSTER_CONNECTION';
+export function displayDeleteClusterConnection(display) {
+  return {
+    type: DISPLAY_DELETE_CLUSTER_CONNECTION,
+    display: display,
+  };
+}
+
+export const DELETE_CLUSTER_CONNECTION = 'DELETE_CLUSTER_CONNECTION';
+export function deleteClusterConnection(clusterID) {
+  return {
+    type: DELETE_CLUSTER_CONNECTION,
+    clusterID: clusterID,
+  };
+}
+
 // -------------------------
 // Fetch Cluster Connections
 

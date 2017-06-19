@@ -6,34 +6,35 @@ import { SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP } from 'actions/curr
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
 
+const InitState = {
+  // is the current view initialized
+  isInitialized: false,
+
+  // type of view
+  // see VIEW_TYPE
+  viewType: null,
+  // the view of interest of the VIEW_TYPE
+  // like Performance, Machine, Storage
+  view: null, 
+
+  // the whole path to the selected entity
+  // Ex: clusterID/nodeHost/namespaceName
+  selectedEntityPath: null,
+
+  // whether the left pane holding the entity tree is shown
+  showLeftPane: true,
+
+  // the entities in the selected view
+  // ex: namespace is identified by clusterID, nodeHost, namespaceName
+  clusterID: null,
+  nodeHost: null,
+  namespaceName: null,
+  setName:null,
+  udfName: null,
+};
+
 // the current state of the view of the app
-export default function currentView(state = {
-    // is the current view initialized
-    isInitialized: false,
-
-    // type of view
-    // see VIEW_TYPE
-    viewType: null,
-    // the view of interest of the VIEW_TYPE
-    // like Performance, Machine, Storage
-    view: null, 
-
-    // the whole path to the selected entity
-    // Ex: clusterID/nodeHost/namespaceName
-    selectedEntityPath: null,
-
-    // whether the left pane holding the entity tree is shown
-    showLeftPane: true,
-
-    // the entities in the selected view
-    // ex: namespace is identified by clusterID, nodeHost, namespaceName
-    clusterID: null,
-    nodeHost: null,
-    namespaceName: null,
-    setName:null,
-    udfName: null,
-  }, action) {
-
+export default function currentView(state = InitState, action) {
   let updated;
   const wasInitialized = state.isInitialized;
   switch (action.type) {
@@ -170,7 +171,7 @@ export default function currentView(state = {
       break;
 
     case SELECT_START_VIEW:
-      updated = Object.assign({}, state, {
+      updated = Object.assign({}, InitState, {
         viewType: VIEW_TYPE.START_VIEW
       });
       break;
