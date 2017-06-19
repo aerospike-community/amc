@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
-import VisibleClusterDashboard from 'containers/VisibleClusterDashboard';
+import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import IndexesOverview from 'components/cluster/IndexesOverview';

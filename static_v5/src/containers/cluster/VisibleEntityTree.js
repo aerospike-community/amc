@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import EntityTree from 'components/EntityTree';
+import EntityTree from 'components/cluster/EntityTree';
 import { selectPath } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
 import { displayAuthClusterConnection, disconnectCluster } from 'actions/clusters';

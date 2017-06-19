@@ -2,10 +2,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import VisibleDeleteConnectionModal from 'containers/cluster/VisibleDeleteConnectionModal';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
-import VisibleDeleteConnectionModal from 'containers/VisibleDeleteConnectionModal';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
