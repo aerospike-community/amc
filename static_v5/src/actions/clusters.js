@@ -2,6 +2,7 @@ import {  authConnection as authConnectionAPI, listConnections, getClusterEntity
 
 import { expandEntityNode } from 'actions/entityTree';
 import { toClusterPath } from 'classes/entityTree';
+import { selectClusterOnStartup } from 'actions/currentView';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -49,12 +50,24 @@ export function initClusters() {
     listConnections()
       .then((connections) => {
         dispatch(receiveClusters(connections));
+
+        // connect to clusters
         connections.forEach((conn) => {
           if (conn.connected) 
             dispatch(getClusterEntityTree(conn.id));
           else if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
             authenticateClusterConnection(conn.id, '', '');
         });
+
+        // select a cluster for overview
+        for (let i = 0; i < connections.length; i++) {
+          const c = connections[i];
+          if (c.connected || c.connectOnLogin) {
+            const clusterID = c.id;
+            dispatch(selectClusterOnStartup(clusterID));
+            break;
+          }
+        }
       })
       .catch((message) => {
         // TODO 

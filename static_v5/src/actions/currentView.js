@@ -1,5 +1,6 @@
 import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from 'classes/urlAndViewSynchronizer';
 import { VIEW_TYPE } from 'classes/constants';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
 import { toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
 
@@ -21,6 +22,18 @@ export const INITIALIZE_VIEW = 'INITIALIZE_VIEW';
 export function initView() {
   return {
     type: INITIALIZE_VIEW
+  };
+}
+
+// select a cluster view on startup
+export const SELECT_CLUSTER_ON_STARTUP = 'SELECT_CLUSTER_ON_STARTUP';
+export function selectClusterOnStartup(clusterID) {
+  const path = toClusterPath(clusterID);
+  return {
+    type: SELECT_CLUSTER_ON_STARTUP,
+    entityPath: path,
+    view: CLUSTER_ACTIONS.Overview, // cluster overview
+    clusterID: clusterID,
   };
 }
 
