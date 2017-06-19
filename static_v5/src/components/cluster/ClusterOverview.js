@@ -113,7 +113,7 @@ class ClusterOverview extends React.Component {
 }
 
 ClusterOverview.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
 };
 
 export default ClusterOverview;

@@ -109,7 +109,7 @@ class IndexesOverview extends React.Component {
 }
 
 IndexesOverview.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
 };
 
 export default IndexesOverview;

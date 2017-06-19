@@ -65,7 +65,7 @@ class ClusterNamespaces extends React.Component {
 }
 
 ClusterNamespaces.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
 };
 
 export default ClusterNamespaces;

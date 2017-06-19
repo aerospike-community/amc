@@ -25,7 +25,7 @@ class NodesOverview extends React.Component {
 }
 
 NodesOverview.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
 };
 
 export default NodesOverview;

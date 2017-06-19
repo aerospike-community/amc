@@ -78,7 +78,7 @@ class ClusterStorage extends React.Component {
 
 ClusterStorage.PropTypes = {
   // storage details of the cluster
-  storage: PropTypes.object.required,
+  storage: PropTypes.object.isRequired,
   // the name of the storage. Ex: RAM, Disk
   name: PropTypes.string,
 };

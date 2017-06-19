@@ -57,9 +57,9 @@ class NamespaceLatency extends React.Component {
 }
 
 NamespaceLatency.PropTypes = {
-  clusterID: PropTypes.string.required,
-  nodeHost: PropTypes.string.required,
-  namespaceName: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
+  nodeHost: PropTypes.string.isRequired,
+  namespaceName: PropTypes.string.isRequired,
 };
 
 export default NamespaceLatency;

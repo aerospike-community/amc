@@ -68,8 +68,8 @@ class AuthClusterConnectionModal extends React.Component {
 }
 
 AuthClusterConnectionModal.PropTypes = {
-  clusterName: PropTypes.string.required,
-  clusterID: PropTypes.string.required,
+  clusterName: PropTypes.string.isRequired,
+  clusterID: PropTypes.string.isRequired,
   // adding a connection is in progress
   inProgress: PropTypes.bool,
   // authentication failed

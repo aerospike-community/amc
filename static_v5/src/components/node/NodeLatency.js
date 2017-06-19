@@ -56,8 +56,8 @@ class NodeLatency extends React.Component {
 }
 
 NodeLatency.PropTypes = {
-  clusterID: PropTypes.string.required,
-  nodeHost: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
+  nodeHost: PropTypes.string.isRequired,
 };
 
 export default NodeLatency;

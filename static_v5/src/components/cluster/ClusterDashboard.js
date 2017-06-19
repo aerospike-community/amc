@@ -45,7 +45,7 @@ class ClusterDashboard extends React.Component {
 }
 
 ClusterDashboard.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
   // the selected cluster
   cluster: PropTypes.object, 
   // the view of the cluster

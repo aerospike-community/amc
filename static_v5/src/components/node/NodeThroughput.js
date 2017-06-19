@@ -54,8 +54,8 @@ class NodeThroughput extends React.Component {
 }
 
 NodeThroughput.PropTypes = {
-  clusterID: PropTypes.string.required,
-  nodeHost: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
+  nodeHost: PropTypes.string.isRequired,
 };
 
 export default NodeThroughput;
