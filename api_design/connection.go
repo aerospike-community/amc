@@ -145,4 +145,54 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the config of all the nodes in the cluster.")
+		Routing(GET(":connId/config"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+
+		Response(OK, HashOf(String, NodeConfigResponseMedia))
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("set config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Changes the config of the node.")
+		Routing(POST(":connId/config"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+
+		Payload(func() {
+			Member("newConfig", HashOf(String, String), "New config parameters", func() { Example(map[string]interface{}{"some-config": "some-value"}) })
+			Required("newConfig")
+		})
+
+		Response(OK, HashOf(String, NodeConfigResponseMedia))
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 })

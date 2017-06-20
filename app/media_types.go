@@ -573,6 +573,34 @@ func (mt *AerospikeAmcNamespaceResponse) Validate() (err error) {
 	return
 }
 
+// Node Config (default view)
+//
+// Identifier: application/vnd.aerospike.amc.node.config.response+json; view=default
+type AerospikeAmcNodeConfigResponse struct {
+	// Node Address
+	Address string `form:"address" json:"address" xml:"address"`
+	// Node config
+	Config map[string]interface{} `form:"config" json:"config" xml:"config"`
+	// Error message
+	Error *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Node status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcNodeConfigResponse media type instance.
+func (mt *AerospikeAmcNodeConfigResponse) Validate() (err error) {
+	if mt.Address == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "address"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Config == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "config"))
+	}
+	return
+}
+
 // Node End Point (default view)
 //
 // Identifier: application/vnd.aerospike.amc.node.response+json; view=default

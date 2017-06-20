@@ -1448,7 +1448,7 @@ definitions:
         used-bytes: 4.00024e+18
       name: Qui debitis.
       stats:
-        Ea molestiae veritatis aliquam.: 73fc4605-edbf-4fa3-8ea8-1bc62a4b4fbd
+        Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
       status: Omnis praesentium.
     properties:
       disk:
@@ -1463,7 +1463,7 @@ definitions:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Ea molestiae veritatis aliquam.: 73fc4605-edbf-4fa3-8ea8-1bc62a4b4fbd
+          Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
         type: object
       status:
         description: Cluster/Node status
@@ -1476,6 +1476,40 @@ definitions:
     - status
     - stats
     title: 'Mediatype identifier: application/vnd.aerospike.amc.namespace.response+json;
+      view=default'
+    type: object
+  AerospikeAmcNodeConfigResponse:
+    description: Node Config (default view)
+    example:
+      address: Et neque et.
+      config:
+        Dolorem nobis pariatur.: false
+      error: Tempora rerum quis.
+      status: Dignissimos sequi ducimus et deleniti repellendus sed.
+    properties:
+      address:
+        description: Node Address
+        example: Et neque et.
+        type: string
+      config:
+        additionalProperties: true
+        description: Node config
+        example:
+          Dolorem nobis pariatur.: false
+        type: object
+      error:
+        description: Error message
+        example: Tempora rerum quis.
+        type: string
+      status:
+        description: Node status
+        example: Dignissimos sequi ducimus et deleniti repellendus sed.
+        type: string
+    required:
+    - address
+    - status
+    - config
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.node.config.response+json;
       view=default'
     type: object
   AerospikeAmcResourceUsageResponse:
@@ -1524,11 +1558,14 @@ definitions:
     example:
       status: "on"
       throughput:
-        Cumque nihil dignissimos sit quas.:
-          Ut voluptas.:
-          - failed: 0.83985823
-            successful: 0.27065128
-            timestamp: 8.2189924e+17
+        Et rerum molestiae enim.:
+          Inventore modi repudiandae distinctio.:
+          - failed: 0.64899236
+            successful: 0.024429869
+            timestamp: 6.54588e+18
+          - failed: 0.64899236
+            successful: 0.024429869
+            timestamp: 6.54588e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1538,11 +1575,14 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Cumque nihil dignissimos sit quas.:
-            Ut voluptas.:
-            - failed: 0.83985823
-              successful: 0.27065128
-              timestamp: 8.2189924e+17
+          Et rerum molestiae enim.:
+            Inventore modi repudiandae distinctio.:
+            - failed: 0.64899236
+              successful: 0.024429869
+              timestamp: 6.54588e+18
+            - failed: 0.64899236
+              successful: 0.024429869
+              timestamp: 6.54588e+18
         type: object
     required:
     - status
@@ -1579,7 +1619,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quam dicta natus.
+          example: Quibusdam ipsa rerum deserunt ipsum.
           type: string
         type: array
       username:
@@ -1708,6 +1748,9 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
     properties:
       connId:
         description: Connection Id
@@ -1728,6 +1771,9 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -1738,15 +1784,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Et voluptate et rerum molestiae enim.
+      binName: Eveniet velit ducimus laboriosam quod quam.
       indexName: idxAccounts
-      namespace: Ut inventore.
-      setName: Repudiandae distinctio magnam accusantium voluptas et.
+      namespace: Natus saepe.
+      setName: Et odit doloremque.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Et voluptate et rerum molestiae enim.
+        example: Eveniet velit ducimus laboriosam quod quam.
         type: string
       indexName:
         description: Index's Name
@@ -1754,11 +1800,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Ut inventore.
+        example: Natus saepe.
         type: string
       setName:
         description: Index's Set name
-        example: Repudiandae distinctio magnam accusantium voluptas et.
+        example: Et odit doloremque.
         type: string
       type:
         description: Index's type
@@ -1776,7 +1822,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Sit porro natus eveniet velit ducimus laboriosam.
+      source: Est ipsa dolorem.
       type: LUA
     properties:
       name:
@@ -1785,7 +1831,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Sit porro natus eveniet velit ducimus laboriosam.
+        example: Est ipsa dolorem.
         type: string
       type:
         description: Module's type
@@ -1831,7 +1877,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Et et odit doloremque et.
+          example: Ut exercitationem molestiae ipsam inventore perferendis quia.
           type: string
         type: array
       username:
@@ -1842,6 +1888,36 @@ definitions:
     - username
     - roles
     title: SaveUserPayload
+    type: object
+  SetConfigConnectionPayload:
+    example:
+      newConfig:
+        some-config: some-value
+    properties:
+      newConfig:
+        additionalProperties: true
+        description: New config parameters
+        example:
+          some-config: some-value
+        type: object
+    required:
+    - newConfig
+    title: SetConfigConnectionPayload
+    type: object
+  SetConfigNodePayload:
+    example:
+      newConfig:
+        some-config: some-value
+    properties:
+      newConfig:
+        additionalProperties: true
+        description: New config parameters
+        example:
+          some-config: some-value
+        type: object
+    required:
+    - newConfig
+    title: SetConfigNodePayload
     type: object
   error:
     description: Error response media type (default view)
@@ -2123,6 +2199,84 @@ paths:
       - jwt:
         - api:general
       summary: connect connection
+      tags:
+      - connection
+  /api/v1/connections/{connId}/config:
+    get:
+      description: |-
+        Returns the config of all the nodes in the cluster.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: connection#config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: config connection
+      tags:
+      - connection
+    post:
+      description: |-
+        Changes the config of the node.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: connection#set config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SetConfigConnectionPayload'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: set config connection
       tags:
       - connection
   /api/v1/connections/{connId}/indexes:
@@ -2524,6 +2678,98 @@ paths:
       - jwt:
         - api:general
       summary: show node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/config:
+    get:
+      description: |-
+        Returns the config of the node.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.node.config.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNodeConfigResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: config node
+      tags:
+      - node
+    post:
+      description: |-
+        Changes the config of the node.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#set config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SetConfigNodePayload'
+      produces:
+      - application/vnd.aerospike.amc.node.config.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNodeConfigResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: set config node
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/latency:

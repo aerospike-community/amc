@@ -142,6 +142,64 @@ func (ctx *AuthenticateAuthContext) InternalServerError() error {
 	return nil
 }
 
+// ConfigConnectionContext provides the connection config action context.
+type ConfigConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewConfigConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller config action.
+func NewConfigConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*ConfigConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ConfigConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ConfigConnectionContext) OK(r map[string]*AerospikeAmcNodeConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ConfigConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ConfigConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ConfigConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *ConfigConnectionContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // ConnectConnectionContext provides the connection connect action context.
 type ConnectConnectionContext struct {
 	context.Context
@@ -529,6 +587,102 @@ func (ctx *SaveConnectionContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *SaveConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SetConfigConnectionContext provides the connection set config action context.
+type SetConfigConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *SetConfigConnectionPayload
+}
+
+// NewSetConfigConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller set config action.
+func NewSetConfigConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*SetConfigConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SetConfigConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// setConfigConnectionPayload is the connection set config action payload.
+type setConfigConnectionPayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig,omitempty" json:"newConfig,omitempty" xml:"newConfig,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *setConfigConnectionPayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// Publicize creates SetConfigConnectionPayload from setConfigConnectionPayload
+func (payload *setConfigConnectionPayload) Publicize() *SetConfigConnectionPayload {
+	var pub SetConfigConnectionPayload
+	if payload.NewConfig != nil {
+		pub.NewConfig = payload.NewConfig
+	}
+	return &pub
+}
+
+// SetConfigConnectionPayload is the connection set config action payload.
+type SetConfigConnectionPayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig" json:"newConfig" xml:"newConfig"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SetConfigConnectionPayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SetConfigConnectionContext) OK(r map[string]*AerospikeAmcNodeConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SetConfigConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SetConfigConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *SetConfigConnectionContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SetConfigConnectionContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -1674,6 +1828,70 @@ func (ctx *ThroughputNamespaceContext) InternalServerError() error {
 	return nil
 }
 
+// ConfigNodeContext provides the node config action context.
+type ConfigNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Node   string
+}
+
+// NewConfigNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller config action.
+func NewConfigNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*ConfigNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ConfigNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ConfigNodeContext) OK(r *AerospikeAmcNodeConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.node.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ConfigNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ConfigNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ConfigNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *ConfigNodeContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // LatencyNodeContext provides the node latency action context.
 type LatencyNodeContext struct {
 	context.Context
@@ -1760,6 +1978,108 @@ func (ctx *LatencyNodeContext) InternalServerError() error {
 func (ctx *LatencyNodeContext) NotImplemented(r string) error {
 	ctx.ResponseData.Header().Set("Content-Type", "")
 	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
+// SetConfigNodeContext provides the node set config action context.
+type SetConfigNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Node    string
+	Payload *SetConfigNodePayload
+}
+
+// NewSetConfigNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller set config action.
+func NewSetConfigNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*SetConfigNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SetConfigNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// setConfigNodePayload is the node set config action payload.
+type setConfigNodePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig,omitempty" json:"newConfig,omitempty" xml:"newConfig,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *setConfigNodePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// Publicize creates SetConfigNodePayload from setConfigNodePayload
+func (payload *setConfigNodePayload) Publicize() *SetConfigNodePayload {
+	var pub SetConfigNodePayload
+	if payload.NewConfig != nil {
+		pub.NewConfig = payload.NewConfig
+	}
+	return &pub
+}
+
+// SetConfigNodePayload is the node set config action payload.
+type SetConfigNodePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig" json:"newConfig" xml:"newConfig"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SetConfigNodePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SetConfigNodeContext) OK(r *AerospikeAmcNodeConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.node.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SetConfigNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SetConfigNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *SetConfigNodeContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SetConfigNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
 }
 
 // ShowNodeContext provides the node show action context.
