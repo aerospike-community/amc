@@ -496,6 +496,42 @@ func (mt *AerospikeAmcLatencyResponse) Validate() (err error) {
 	return
 }
 
+// Namespace End Point (default view)
+//
+// Identifier: application/vnd.aerospike.amc.namespace.response+json; view=default
+type AerospikeAmcNamespaceResponse struct {
+	// Disk Usage
+	Disk *AerospikeAmcResourceUsageResponse `form:"disk" json:"disk" xml:"disk"`
+	// Memory Usage
+	Memory *AerospikeAmcResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
+	// Namespace Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Namespace statistics
+	Stats map[string]interface{} `form:"stats" json:"stats" xml:"stats"`
+	// Node status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcNamespaceResponse media type instance.
+func (mt *AerospikeAmcNamespaceResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Memory == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "memory"))
+	}
+	if mt.Disk == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "disk"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Stats == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "stats"))
+	}
+	return
+}
+
 // Node End Point (default view)
 //
 // Identifier: application/vnd.aerospike.amc.node.response+json; view=default

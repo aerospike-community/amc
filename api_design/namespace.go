@@ -14,16 +14,16 @@ var _ = Resource("namespace", func() {
 		Scope("api:general")
 	})
 
-	// Action("query", func() {
-	// 	Description("Query a cluster's namespaces")
-	// 	Routing(GET(""))
+	Action("query", func() {
+		Description("Query a node's namespaces")
+		Routing(GET(""))
 
-	// 	Response(OK, ArrayOf(ConnectionNamespaceResponseMedia))
-	// 	Response(BadRequest, String)
-	// 	Response(Forbidden)
-	// 	Response(Unauthorized)
-	// 	Response(InternalServerError)
-	// })
+		Response(OK, HashOf(String, NamespaceResponseMedia))
+		Response(BadRequest, String)
+		Response(Forbidden)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 
 	Action("show", func() {
 		Description("Get a cluster's namespace")
@@ -34,7 +34,9 @@ var _ = Resource("namespace", func() {
 			Required("namespace")
 		})
 
+		Response(OK, NamespaceResponseMedia)
 		Response(BadRequest, String)
+		Response(Forbidden)
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})

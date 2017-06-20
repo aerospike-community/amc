@@ -46,14 +46,45 @@ func (c *NamespaceController) Latency(ctx *app.LatencyNamespaceContext) error {
 	return ctx.OK(res)
 }
 
+// Query runs the query action.
+func (c *NamespaceController) Query(ctx *app.QueryNamespaceContext) error {
+	// NamespaceController_Query: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	namespaces := node.NamespaceList()
+	res := node.NamespaceInfo(namespaces)
+
+	// NamespaceController_Query: end_implement
+	return ctx.OK(res)
+}
+
 // Show runs the show action.
 func (c *NamespaceController) Show(ctx *app.ShowNamespaceContext) error {
 	// NamespaceController_Show: start_implement
 
-	// Put your logic here
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	res := node.NamespaceInfo([]string{ctx.Namespace})
 
 	// NamespaceController_Show: end_implement
-	return nil
+	return ctx.OK(res[ctx.Namespace])
 }
 
 // Throughput runs the throughput action.

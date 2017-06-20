@@ -1106,3 +1106,27 @@ func (n *Node) updateNotifications() error {
 func (n *Node) alerts() *common.AlertBucket {
 	return n.cluster.alerts
 }
+
+func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNamespaceResponse {
+	res := make(map[string]*app.AerospikeAmcNamespaceResponse, len(namespaces))
+	for _, nsName := range namespaces {
+		ns := n.NamespaceByName(nsName)
+		if ns == nil {
+			continue
+		}
+
+		stats := ns.Stats()
+		stats["master-objects-tombstones"] = fmt.Sprintf("%v / %v", common.Comma(stats.TryInt("master-objects", 0), ","), common.Comma(stats.TryInt("master_tombstones", 0), ","))
+		stats["prole-objects-tombstones"] = fmt.Sprintf("%v / %v", common.Comma(stats.TryInt("prole-objects", 0), ","), common.Comma(stats.TryInt("prole_tombstones", 0), ","))
+
+		res[nsName] = &app.AerospikeAmcNamespaceResponse{
+			Name:   ns.name,
+			Memory: ns.Memory(),
+			Disk:   ns.Disk(),
+			Stats:  stats,
+			Status: string(n.Status()),
+		}
+	}
+
+	return res
+}

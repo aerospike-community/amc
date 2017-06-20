@@ -12,6 +12,7 @@ import (
 
 	ast "github.com/aerospike/aerospike-client-go/types"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/rrd"
 )
@@ -154,13 +155,23 @@ func (ns *Namespace) aggStats(agg, calcAgg common.Stats) {
 	ns.calcStats.AggregateStatsTo(calcAgg)
 }
 
-func (ns *Namespace) Disk() common.Stats {
-	return common.Stats{
-		"used-bytes-disk":  ns.calcStats.TryInt("used-bytes-disk", 0),
-		"free-bytes-disk":  ns.calcStats.TryInt("free-bytes-disk", 0),
-		"total-bytes-disk": ns.calcStats.TryInt("total-bytes-disk", 0),
+func (ns *Namespace) Disk() *app.AerospikeAmcResourceUsageResponse {
+	result := &app.AerospikeAmcResourceUsageResponse{
+		UsedBytes: int(ns.calcStats.TryInt("used-bytes-disk", 0)),
+		FreeBytes: int(ns.calcStats.TryInt("free-bytes-disk", 0)),
 	}
+
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+	return result
 }
+
+// func (ns *Namespace) Disk() common.Stats {
+// 	return common.Stats{
+// 		"used-bytes-disk":  ns.calcStats.TryInt("used-bytes-disk", 0),
+// 		"free-bytes-disk":  ns.calcStats.TryInt("free-bytes-disk", 0),
+// 		"total-bytes-disk": ns.calcStats.TryInt("total-bytes-disk", 0),
+// 	}
+// }
 
 func (ns *Namespace) DiskPercent() common.Stats {
 	return common.Stats{
@@ -169,13 +180,23 @@ func (ns *Namespace) DiskPercent() common.Stats {
 	}
 }
 
-func (ns *Namespace) Memory() common.Stats {
-	return common.Stats{
-		"used-bytes-memory":  ns.calcStats.TryInt("used-bytes-memory", 0),
-		"free-bytes-memory":  ns.calcStats.TryInt("free-bytes-memory", 0),
-		"total-bytes-memory": ns.calcStats.TryInt("total-bytes-memory", 0),
+func (ns *Namespace) Memory() *app.AerospikeAmcResourceUsageResponse {
+	result := &app.AerospikeAmcResourceUsageResponse{
+		UsedBytes: int(ns.calcStats.TryInt("used-bytes-memory", 0)),
+		FreeBytes: int(ns.calcStats.TryInt("free-bytes-memory", 0)),
 	}
+
+	result.TotalBytes = result.UsedBytes + result.FreeBytes
+	return result
 }
+
+// func (ns *Namespace) Memory() common.Stats {
+// 	return common.Stats{
+// 		"used-bytes-memory":  ns.calcStats.TryInt("used-bytes-memory", 0),
+// 		"free-bytes-memory":  ns.calcStats.TryInt("free-bytes-memory", 0),
+// 		"total-bytes-memory": ns.calcStats.TryInt("total-bytes-memory", 0),
+// 	}
+// }
 
 func (ns *Namespace) MemoryPercent() common.Stats {
 	return common.Stats{

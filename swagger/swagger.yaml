@@ -1758,7 +1758,7 @@ definitions:
       indexes:
         Dignissimos et.:
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
+            Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
           bin: Non cupiditate a.
           binType: In hic doloremque facere perspiciatis ab et.
           name: Nulla laborum.
@@ -1766,7 +1766,7 @@ definitions:
           set: Quia est praesentium tenetur modi facilis.
           syncOnAllNodes: Natus dolor autem aut vitae.
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
+            Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
           bin: Non cupiditate a.
           binType: In hic doloremque facere perspiciatis ab et.
           name: Nulla laborum.
@@ -1781,7 +1781,7 @@ definitions:
         example:
           Dignissimos et.:
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
+              Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
             bin: Non cupiditate a.
             binType: In hic doloremque facere perspiciatis ab et.
             name: Nulla laborum.
@@ -1789,7 +1789,7 @@ definitions:
             set: Quia est praesentium tenetur modi facilis.
             syncOnAllNodes: Natus dolor autem aut vitae.
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: c3b952e3-e950-4913-bd9f-f3e495663143
+              Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
             bin: Non cupiditate a.
             binType: In hic doloremque facere perspiciatis ab et.
             name: Nulla laborum.
@@ -1805,6 +1805,78 @@ definitions:
     - status
     - indexes
     title: 'Mediatype identifier: application/vnd.aerospike.amc.index.wrapper.response+json;
+      view=default'
+    type: object
+  AerospikeAmcNamespaceResponse:
+    description: Namespace End Point (default view)
+    example:
+      disk:
+        free-bytes: 2.7360823e+17
+        total-bytes: 6.728183e+18
+        used-bytes: 8.787339e+18
+      memory:
+        free-bytes: 2.7360823e+17
+        total-bytes: 6.728183e+18
+        used-bytes: 8.787339e+18
+      name: Est sit iusto.
+      stats:
+        Facere dolorum itaque.: false
+      status: Enim sit ducimus tenetur.
+    properties:
+      disk:
+        $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
+      memory:
+        $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
+      name:
+        description: Namespace Name
+        example: Est sit iusto.
+        type: string
+      stats:
+        additionalProperties: true
+        description: Namespace statistics
+        example:
+          Facere dolorum itaque.: false
+        type: object
+      status:
+        description: Node status
+        example: Enim sit ducimus tenetur.
+        type: string
+    required:
+    - name
+    - memory
+    - disk
+    - status
+    - stats
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.namespace.response+json;
+      view=default'
+    type: object
+  AerospikeAmcResourceUsageResponse:
+    description: Resource Usage (default view)
+    example:
+      free-bytes: 2.7360823e+17
+      total-bytes: 6.728183e+18
+      used-bytes: 8.787339e+18
+    properties:
+      free-bytes:
+        description: Free Bytes
+        example: 2.7360823e+17
+        format: int64
+        type: integer
+      total-bytes:
+        description: Total Bytes
+        example: 6.728183e+18
+        format: int64
+        type: integer
+      used-bytes:
+        description: Used Bytes
+        example: 8.787339e+18
+        format: int64
+        type: integer
+    required:
+    - used-bytes
+    - free-bytes
+    - total-bytes
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.resource.usage.response+json;
       view=default'
     type: object
   AerospikeAmcSystemResponse:
@@ -1824,11 +1896,14 @@ definitions:
     example:
       status: "on"
       throughput:
-        Sit doloremque asperiores eligendi non nesciunt aut.:
-          Fuga sunt et.:
-          - failed: 0.5223272
-            successful: 0.8121206
-            timestamp: 6.639922e+18
+        Et ea molestiae veritatis.:
+          Ab omnis praesentium voluptates.:
+          - failed: 0.8378226
+            successful: 0.29732773
+            timestamp: 6.2905375e+18
+          - failed: 0.8378226
+            successful: 0.29732773
+            timestamp: 6.2905375e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1838,11 +1913,14 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Sit doloremque asperiores eligendi non nesciunt aut.:
-            Fuga sunt et.:
-            - failed: 0.5223272
-              successful: 0.8121206
-              timestamp: 6.639922e+18
+          Et ea molestiae veritatis.:
+            Ab omnis praesentium voluptates.:
+            - failed: 0.8378226
+              successful: 0.29732773
+              timestamp: 6.2905375e+18
+            - failed: 0.8378226
+              successful: 0.29732773
+              timestamp: 6.2905375e+18
         type: object
     required:
     - status
@@ -1879,7 +1957,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Repellendus sed numquam nostrum asperiores laudantium id.
+          example: Minima ipsum ut voluptas.
           type: string
         type: array
       username:
@@ -1987,7 +2065,7 @@ definitions:
       port:
         description: Node's port
         example: 3000
-        maximum: 32767
+        maximum: 65535
         minimum: 0
         type: integer
       tlsName:
@@ -2005,6 +2083,9 @@ definitions:
       connectOnLogin: false
       name: Payments Cluster
       seeds:
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
@@ -2034,6 +2115,9 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -2044,15 +2128,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Praesentium voluptates et.
+      binName: Earum veniam tempora rerum quis odit dignissimos.
       indexName: idxAccounts
-      namespace: Et unde reprehenderit.
-      setName: Nobis pariatur ut earum veniam tempora.
+      namespace: Ducimus et deleniti repellendus sed numquam nostrum.
+      setName: Laudantium id iusto quo et cumque.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Praesentium voluptates et.
+        example: Earum veniam tempora rerum quis odit dignissimos.
         type: string
       indexName:
         description: Index's Name
@@ -2060,11 +2144,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Et unde reprehenderit.
+        example: Ducimus et deleniti repellendus sed numquam nostrum.
         type: string
       setName:
         description: Index's Set name
-        example: Nobis pariatur ut earum veniam tempora.
+        example: Laudantium id iusto quo et cumque.
         type: string
       type:
         description: Index's type
@@ -2082,7 +2166,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Quis odit dignissimos sequi ducimus et.
+      source: Dignissimos sit.
       type: LUA
     properties:
       name:
@@ -2091,7 +2175,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Quis odit dignissimos sequi ducimus et.
+        example: Dignissimos sit.
         type: string
       type:
         description: Module's type
@@ -2137,7 +2221,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quo et cumque nihil dignissimos.
+          example: Vitae voluptas repudiandae velit.
           type: string
         type: array
       username:
@@ -2847,6 +2931,48 @@ paths:
       summary: latency node
       tags:
       - node
+  /api/v1/connections/{connId}/nodes/{node}/namespaces:
+    get:
+      description: |-
+        Query a node's namespaces
+
+        Required security scopes:
+          * `api:general`
+      operationId: namespace#query
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Addresses
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: query namespace
+      tags:
+      - namespace
   /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}:
     get:
       description: |-
@@ -2872,11 +2998,19 @@ paths:
         name: node
         required: true
         type: string
+      produces:
+      - application/vnd.aerospike.amc.namespace.response+json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNamespaceResponse'
         "400":
           description: Bad Request
         "401":
           description: Unauthorized
+        "403":
+          description: Forbidden
         "500":
           description: Internal Server Error
       schemes:

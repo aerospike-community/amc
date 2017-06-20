@@ -643,6 +643,7 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 type NamespaceController interface {
 	goa.Muxer
 	Latency(*LatencyNamespaceContext) error
+	Query(*QueryNamespaceContext) error
 	Show(*ShowNamespaceContext) error
 	Throughput(*ThroughputNamespaceContext) error
 }
@@ -652,6 +653,7 @@ func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 
@@ -671,6 +673,23 @@ func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
 	h = handleNamespaceOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", ctrl.MuxHandler("latency", h, nil))
 	service.LogInfo("mount", "ctrl", "Namespace", "action", "Latency", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQueryNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/namespaces", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Namespace", "action", "Query", "route", "GET /api/v1/connections/:connId/nodes/:node/namespaces", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

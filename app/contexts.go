@@ -1394,6 +1394,70 @@ func (ctx *LatencyNamespaceContext) NotImplemented(r string) error {
 	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
 }
 
+// QueryNamespaceContext provides the namespace query action context.
+type QueryNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Node   string
+}
+
+// NewQueryNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller query action.
+func NewQueryNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryNamespaceContext) OK(r map[string]*AerospikeAmcNamespaceResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *QueryNamespaceContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ShowNamespaceContext provides the namespace show action context.
 type ShowNamespaceContext struct {
 	context.Context
@@ -1434,6 +1498,12 @@ func NewShowNamespaceContext(ctx context.Context, r *http.Request, service *goa.
 	return &rctx, err
 }
 
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowNamespaceContext) OK(r *AerospikeAmcNamespaceResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.namespace.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
 // BadRequest sends a HTTP response with status code 400.
 func (ctx *ShowNamespaceContext) BadRequest(r string) error {
 	ctx.ResponseData.Header().Set("Content-Type", "")
@@ -1443,6 +1513,12 @@ func (ctx *ShowNamespaceContext) BadRequest(r string) error {
 // Unauthorized sends a HTTP response with status code 401.
 func (ctx *ShowNamespaceContext) Unauthorized() error {
 	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *ShowNamespaceContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
 	return nil
 }
 
