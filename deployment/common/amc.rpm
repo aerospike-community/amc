@@ -72,7 +72,7 @@ start() {
 stop() {
     echo -n $"Shutting down $prog: "
     ## graceful shutdown with SIGINT
-    killproc -p $pidfile $exec -INT
+    killproc -p $pidfile -b $exec -INT
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && rm -f $lockfile
@@ -86,7 +86,7 @@ restart() {
 
 reload() {
     echo -n $"Reloading $prog: "
-    killproc -p $pidfile $exec -HUP
+    killproc -p $pidfile -b $exec -HUP
     echo
 }
 
