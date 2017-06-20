@@ -48,7 +48,7 @@ class LatencyChart {
     nv.addGraph(() => {
       let chart = nv.models.stackedAreaChart()
           .x((d) => d[time])
-          .y((d) => d[value])
+          .y((d) => +d[value].toFixed(0))
           .useInteractiveGuideline(true)
           .showLegend(true)
           .showControls(false)
