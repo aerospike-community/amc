@@ -5,18 +5,55 @@ import PropTypes from 'prop-types';
 import Tabs from 'components/Tabs';
 import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
 import NamespaceLatency from 'components/namespace/NamespaceLatency';
+import NamespacesTable from 'components/namespace/NamespacesTable';
+import { getStatistics } from 'api/namespace';
 
 class NamespaceDashboard extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      namespaces: []
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    let isSame = true;
+    ['clusterID', 'nodeHost', 'namespaceName'].forEach((k) => {
+      if (this.props[k] !== nextProps[k])
+        isSame = false;
+    });
+
+    if (!isSame)
+      this.fetchNamespaces();
+  }
+
+  componentDidMount() {
+    this.fetchNamespaces();
+  }
+
+  fetchNamespaces() {
+    const { clusterID, nodeHost, namespaceName } = this.props;
+
+    getStatistics(clusterID, nodeHost, namespaceName)
+      .then((stat) => {
+        this.setState({
+          namespaces: [stat]
+        });
+      })
+      .catch((message) => {
+        console.error(message);
+      });
   }
 
   render() {
     const {clusterID, nodeHost, namespaceName, onViewSelect} = this.props;
     const view = this.props.view || 'Machine';
+    const { namespaces } = this.state;
     return (
       <div>
         <div>
+          <NamespacesTable namespaces={namespaces} />
           <NamespaceThroughput clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
           <NamespaceLatency clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         </div>
