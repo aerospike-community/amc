@@ -34,7 +34,7 @@ class ClusterToolbar extends React.Component {
 ClusterToolbar.PropTypes = {
   // callback on clicking a tool on the toolbar
   // onToolClick('toolName')
-  onToolClick: PropTypes.func.required
+  onToolClick: PropTypes.func.isRequired
 };
 
 export default ClusterToolbar;

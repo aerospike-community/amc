@@ -4,13 +4,22 @@ import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
 import NodeThroughput from 'components/node/NodeThroughput';
+import NodeLatency from 'components/node/NodeLatency';
 import NodesSummary from 'components/node/NodesSummary';
+
+import moment from 'moment';
+import { getLatency } from 'api/node';
 
 class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
     this.views = ['Machine', 'Storage', 'Performance'];
+  }
+
+  componentDidMount() {
+    const {clusterID, nodeHost, onViewSelect} = this.props;
+    getLatency(clusterID, nodeHost, moment().subtract(10, 'minutes').unix(), moment().unix());
   }
 
   render() {
@@ -22,6 +31,7 @@ class NodeDashboard extends React.Component {
         <div>
           <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} />
           <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
+          <NodeLatency clusterID={clusterID} nodeHost={nodeHost} />
         </div>
       </div>
       );

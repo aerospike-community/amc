@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ClusterToolbar from 'components/ClusterToolbar';
+import ClusterToolbar from 'components/cluster/ClusterToolbar';
 import { displayAddClusterConnection } from 'actions/clusters';
 import { hideLeftPane } from 'actions/currentView';
 

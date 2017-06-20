@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import $ from 'jquery';
 
 import VisibleAuthenticateModal from 'containers/VisibleAuthenticateModal';
-import VisibleClusterConnections from 'containers/VisibleClusterConnections';
+import VisibleClusterConnections from 'containers/cluster/VisibleClusterConnections';
 import VisibleMainDashboard from 'containers/VisibleMainDashboard';
 import VisibleHeader from 'containers/VisibleHeader';
 import Footer from 'components/Footer';

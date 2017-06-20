@@ -3,6 +3,7 @@ import { DISPLAY_ADD_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
 import { UPDATE_CLUSTER_CONNECTION, CLUSTER_CONNECTION_FETCHED } from 'actions/clusters';
+import { DISPLAY_DELETE_CLUSTER_CONNECTION, DELETE_CLUSTER_CONNECTION } from 'actions/clusters';
 import { ADD_UDF } from 'actions/clusters';
 import { ENTITY_TYPE } from 'classes/constants';
 
@@ -11,6 +12,11 @@ export default function(state = {
     // adding a new connection
     newConnection: {
       inProgress: false, // in the process of adding a new connection
+    },
+
+    // deleting a connection
+    deleteConnection: {
+      inProgress: false,
     },
 
     // authenticating a cluster connection
@@ -33,6 +39,7 @@ export default function(state = {
   updated = updateClusterConnection(updated, action);
   updated = updateClusterEntities(updated, action);
   updated = newConnection(updated, action);
+  updated = deleteConnection(updated, action);
   updated = authConnection(updated, action);
   return updated;
 }
@@ -78,6 +85,14 @@ function clusters(state, action) {
         [ENTITY_TYPE.UDF]: [],
         [ENTITY_TYPE.NODES]: [],
         isAuthenticated: false,
+      });
+    case DELETE_CLUSTER_CONNECTION: 
+      id = action.clusterID;
+      const clusters = state.items.slice(); // copy
+      const i = clusters.findIndex((c) => c.id === id);
+      clusters.splice(i, 1);
+      return Object.assign({}, state, {
+        items: clusters
       });
     default:
       return state;
@@ -147,6 +162,22 @@ function newConnection(state, action) {
   }
   return Object.assign({}, state, {
     newConnection: newConnection
+  });
+}
+
+function deleteConnection(state, action) {
+  let dconn;
+  switch (action.type) {
+    case DISPLAY_DELETE_CLUSTER_CONNECTION:
+      dconn = Object.assign({}, state.deleteConnection, {
+        inProgress: action.display
+      });
+      break;
+    default:
+      return state;
+  }
+  return Object.assign({}, state, {
+    deleteConnection: dconn
   });
 }
 

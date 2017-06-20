@@ -4,33 +4,32 @@ import bytes from 'bytes';
 
 import { watchElementSizeChange } from 'charts/util';
 
-// ThroughputChart draws a chart for the throughput
+// LatencyChart draws a chart for the latency
 //
 // selector - selects an svg element
-// throughput - [
+// latency - [
 //  { // each of the charts
-//    key: '127.0.0.1:3000', // label name
+//    key: '<1ms', // label name
 //    values: [
 //      { // each of the individual values
-//        successful: 12345,
-//        failed: 435,
+//        value: 12345,
 //        timestamp: 1496807162727,
 //      }, ...]
 //  }, ...]
-class ThroughputChart {
-  constructor(selector, throughput) {
+class LatencyChart {
+  constructor(selector, latency) {
     this.selector = selector; // element selector on which the chart will be drawn
-    this.throughput = throughput; // the throughput
+    this.latency = latency; // the latency
 
     this.chart = null; // nvd3 chart
     this.chartData = null;  // d3 chart data on element
   }
   
   // update the chart with new data
-  update(throughput) {
-    this.throughput = throughput;
+  update(latency) {
+    this.latency = latency;
     this.chartData
-      .datum(throughput)
+      .datum(latency)
       .transition()
       .duration(250)
       .call(this.chart);
@@ -43,16 +42,15 @@ class ThroughputChart {
 
   draw() {
     const marginTop = 40;
-    const nsuccess = 'successful';
-    const nfailed = 'failed';
+    const value = 'value';
     const time = 'timestamp';
 
     nv.addGraph(() => {
       let chart = nv.models.stackedAreaChart()
           .x((d) => d[time])
-          .y((d) => d[nsuccess])
+          .y((d) => d[value])
           .useInteractiveGuideline(true)
-          .showLegend(false)
+          .showLegend(true)
           .showControls(false)
           .margin({top: marginTop});
 
@@ -66,7 +64,7 @@ class ThroughputChart {
       chart.forceY([0, 1000]);
 
       // draw chart
-      const data = this.throughput;
+      const data = this.latency;
       const svg = d3.select(this.selector);
       this.chartData = svg.datum(data);
       this.chartData.call(chart);
@@ -80,5 +78,6 @@ class ThroughputChart {
   }
 }
 
-export default ThroughputChart;
+export default LatencyChart;
+
 

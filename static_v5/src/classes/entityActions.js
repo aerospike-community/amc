@@ -27,23 +27,21 @@ const clusterActions = {
       isAuthenticated: false
     }
   },
+  Overview: {
+    isDefault: true,
+    state: {
+      isAuthenticated: true
+    },
+    isEndOfGrouping: true,
+  },
   Disconnect: {
     state: {
       isAuthenticated: true
     },
     isEndOfGrouping: true,
   },
-  Edit: {
-    state: {
-      isAuthenticated: true
-    }
-  },
-  Overview: {
-    isDefault: true,
-    state: {
-      isAuthenticated: true
-    }
-  },
+  Edit: {},
+  Delete: {},
 };
 export const CLUSTER_ACTIONS = extractActions(clusterActions);
 

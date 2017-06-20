@@ -2,6 +2,7 @@ import {  authConnection as authConnectionAPI, listConnections, getClusterEntity
 
 import { expandEntityNode } from 'actions/entityTree';
 import { toClusterPath } from 'classes/entityTree';
+import { selectClusterOnStartup } from 'actions/currentView';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -20,6 +21,24 @@ export function updateConnection(clusterID, connection) {
     type: UPDATE_CLUSTER_CONNECTION,
     seeds: connection.seeds,
     name: connection.name,
+    clusterID: clusterID,
+  };
+}
+
+// -----------------------------
+// Deleting a cluster connection
+export const DISPLAY_DELETE_CLUSTER_CONNECTION = 'DISPLAY_DELETE_CLUSTER_CONNECTION';
+export function displayDeleteClusterConnection(display) {
+  return {
+    type: DISPLAY_DELETE_CLUSTER_CONNECTION,
+    display: display,
+  };
+}
+
+export const DELETE_CLUSTER_CONNECTION = 'DELETE_CLUSTER_CONNECTION';
+export function deleteClusterConnection(clusterID) {
+  return {
+    type: DELETE_CLUSTER_CONNECTION,
     clusterID: clusterID,
   };
 }
@@ -49,12 +68,24 @@ export function initClusters() {
     listConnections()
       .then((connections) => {
         dispatch(receiveClusters(connections));
+
+        // connect to clusters
         connections.forEach((conn) => {
           if (conn.connected) 
             dispatch(getClusterEntityTree(conn.id));
           else if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
             authenticateClusterConnection(conn.id, '', '');
         });
+
+        // select a cluster for overview
+        for (let i = 0; i < connections.length; i++) {
+          const c = connections[i];
+          if (c.connected || c.connectOnLogin) {
+            const clusterID = c.id;
+            dispatch(selectClusterOnStartup(clusterID));
+            break;
+          }
+        }
       })
       .catch((message) => {
         // TODO 

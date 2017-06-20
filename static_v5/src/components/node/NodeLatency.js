@@ -2,11 +2,11 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { getThroughput as getThroughputAPI } from 'api/node';
-import ThroughputCharts from 'components/ThroughputCharts';
+import { getLatency as getLatencyAPI } from 'api/node';
+import LatencyCharts from 'components/LatencyCharts';
 
-// NodeThroughput provides an overview of the node throughput
-class NodeThroughput extends React.Component {
+// NodeLatency provides an overview of the node latency
+class NodeLatency extends React.Component {
   constructor(props) {
     super(props);
 
@@ -15,7 +15,7 @@ class NodeThroughput extends React.Component {
       showChart: true,
     };
 
-    this.getThroughput = this.getThroughput.bind(this);
+    this.getLatency = this.getLatency.bind(this);
   }
 
   redrawCharts() {
@@ -35,30 +35,33 @@ class NodeThroughput extends React.Component {
     this.redrawCharts();
   }
 
-  getThroughput(from, to) {
+  getLatency(from, to) {
     const { clusterID, nodeHost } = this.props;
-    return getThroughputAPI(clusterID, nodeHost, from, to);
+    const p = getLatencyAPI(clusterID, nodeHost, from, to)
+                .then((r) => r[nodeHost].latency);
+    return p;
   }
   
   render() {
     const { throughput, showChart } = this.state;
     const { nodeHost } = this.props;
-    const title = `Node - ${nodeHost} Throughput`;
+    const title = `Node - ${nodeHost} Latency`;
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} title={title} />;
+      charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
 
     return charts;
   }
 }
 
-NodeThroughput.PropTypes = {
+NodeLatency.PropTypes = {
   clusterID: PropTypes.string.isRequired,
   nodeHost: PropTypes.string.isRequired,
 };
 
-export default NodeThroughput;
+export default NodeLatency;
+
 
 
 

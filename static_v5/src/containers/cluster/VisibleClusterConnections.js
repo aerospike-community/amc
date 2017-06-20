@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ClusterConnections from 'components/ClusterConnections';
+import ClusterConnections from 'components/cluster/ClusterConnections';
 import { initClusters as initializeClusters } from 'actions/clusters';
 
 const mapStateToProps = (state) => {

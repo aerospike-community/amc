@@ -76,7 +76,7 @@ class ClusterSummary extends React.Component {
 
 ClusterSummary.PropTypes = {
   // the cluster overview
-  clusterOverview: PropTypes.object.required,
+  clusterOverview: PropTypes.object.isRequired,
 };
 
 export default ClusterSummary;

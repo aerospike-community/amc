@@ -109,9 +109,9 @@ class NodesSummary extends React.Component {
 }
 
 NodesSummary.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
   // the member nodes of the cluster
-  nodeHosts: PropTypes.arrayOf(PropTypes.string).required,
+  nodeHosts: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default NodesSummary;

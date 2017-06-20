@@ -2,10 +2,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import VisibleEntityTree from 'containers/VisibleEntityTree';
-import VisibleClusterToolbar from 'containers/VisibleClusterToolbar';
-import VisibleAddClusterModal from 'containers/VisibleAddClusterModal';
-import VisibleClusterConnectionModal from 'containers/VisibleClusterConnectionModal';
+import VisibleEntityTree from 'containers/cluster/VisibleEntityTree';
+import VisibleClusterToolbar from 'containers/cluster/VisibleClusterToolbar';
+import VisibleAddClusterModal from 'containers/cluster/VisibleAddClusterModal';
+import VisibleClusterConnectionModal from 'containers/cluster/VisibleClusterConnectionModal';
 import Spinner from 'components/Spinner';
 
 class ClusterConnections extends React.Component {

@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import VisibleDeleteConnectionModal from 'containers/cluster/VisibleDeleteConnectionModal';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
@@ -27,9 +28,10 @@ class ClusterDashboard extends React.Component {
   render() {
     const { clusterID, view, onUpdateConnectionSuccess }  = this.props;
     const { name, seeds } = this.props.cluster;
+    const isDelete = view === CLUSTER_ACTIONS.Delete;
 
     let dashboard;
-    if (view === CLUSTER_ACTIONS.Overview) {
+    if (view === CLUSTER_ACTIONS.Overview || isDelete) {
       dashboard = <ClusterOverview clusterID={clusterID} />;
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
@@ -39,13 +41,16 @@ class ClusterDashboard extends React.Component {
     return (
       <div>
         {dashboard}
+        {isDelete &&
+          <VisibleDeleteConnectionModal />
+        }
       </div>
     );
   }
 }
 
 ClusterDashboard.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
   // the selected cluster
   cluster: PropTypes.object, 
   // the view of the cluster

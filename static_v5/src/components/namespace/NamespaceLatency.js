@@ -2,19 +2,19 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { getThroughput as getThroughputAPI } from 'api/namespace';
-import ThroughputCharts from 'components/ThroughputCharts';
+import { getLatency as getLatencyAPI } from 'api/namespace';
+import LatencyCharts from 'components/LatencyCharts';
 
-// NamespaceThroughput provides an overview of the namespace throughput
-class NamespaceThroughput extends React.Component {
+// NamespaceLatency provides an overview of the namespace latency
+class NamespaceLatency extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      showChart: true
+      showChart: true,
     };
 
-    this.getThroughput = this.getThroughput.bind(this);
+    this.getLatency = this.getLatency.bind(this);
   }
 
   redrawCharts() {
@@ -29,37 +29,41 @@ class NamespaceThroughput extends React.Component {
     const { clusterID, nodeHost, namespaceName } = nextProps;
 
     if (this.props.clusterID === clusterID && this.props.nodeHost === nodeHost 
-        && this.props.namespaceName === namespaceName)
+        && this.props.namespaceName === namespaceName) {
       return;
+    }
 
     this.redrawCharts();
   }
 
-  getThroughput(from, to) {
+  getLatency(from, to) {
     const { clusterID, nodeHost, namespaceName } = this.props;
-    return getThroughputAPI(clusterID, nodeHost, namespaceName, from, to);
+    const p = getLatencyAPI(clusterID, nodeHost, namespaceName, from, to)
+                .then((r) => r[namespaceName].latency || []);
+    return p;
   }
   
   render() {
     const { showChart } = this.state;
     const { namespaceName } = this.props;
-    const title = `Namespace - ${namespaceName} Throughput`;
+    const title = `Namespace - ${namespaceName} Latency`;
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} title={title} />;
+      charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
 
     return charts;
   }
 }
 
-NamespaceThroughput.PropTypes = {
+NamespaceLatency.PropTypes = {
   clusterID: PropTypes.string.isRequired,
   nodeHost: PropTypes.string.isRequired,
   namespaceName: PropTypes.string.isRequired,
 };
 
-export default NamespaceThroughput;
+export default NamespaceLatency;
+
 
 
 

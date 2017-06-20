@@ -4,13 +4,14 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
-import VisibleClusterDashboard from 'containers/VisibleClusterDashboard';
+import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import IndexesOverview from 'components/cluster/IndexesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import Welcome from 'components/Welcome';
 import { VIEW_TYPE } from 'classes/constants';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 class MainDashboard extends React.Component {
   constructor(props) {
@@ -34,24 +35,28 @@ class MainDashboard extends React.Component {
 
     let dashboard;
 
-    if (clusterID && !isClusterConnected)
-      dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} to continue </h4>;
-    else if (viewType === VIEW_TYPE.NODE_OVERVIEW)
+    if (clusterID && !isClusterConnected) {
+      if (viewType === VIEW_TYPE.CLUSTER && view === CLUSTER_ACTIONS.Edit)
+        dashboard = <VisibleClusterDashboard />
+      else
+        dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} to continue </h4>;
+    } else if (viewType === VIEW_TYPE.NODE_OVERVIEW) {
       dashboard = <NodesOverview clusterID={clusterID} />
-    else if (viewType === VIEW_TYPE.NODE)
+    } else if (viewType === VIEW_TYPE.NODE) {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
-    else if (viewType === VIEW_TYPE.NAMESPACE)
+    } else if (viewType === VIEW_TYPE.NAMESPACE) {
       dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
-    else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW)
+    } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
       dashboard = <IndexesOverview clusterID={clusterID} />
-    else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW)
+    } else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW) {
       dashboard = <VisibleUDFDashboard />
-    else if (viewType === VIEW_TYPE.CLUSTER)
+    } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
-    else if (view === null && viewType === null)
+    } else if (view === null && viewType === null) {
       dashboard = <Welcome />;
-    else
+    } else {
       dashboard = <div className="as-centerpane-header"> {(view ? view : '') + ' ' + viewType} </div>;
+    }
 
     return (
       <div>

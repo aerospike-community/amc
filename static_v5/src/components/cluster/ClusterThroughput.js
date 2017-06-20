@@ -31,7 +31,7 @@ class ClusterThroughput extends React.Component {
 }
 
 ClusterThroughput.PropTypes = {
-  clusterID: PropTypes.string.required,
+  clusterID: PropTypes.string.isRequired,
 };
 
 export default ClusterThroughput;
