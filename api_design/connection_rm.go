@@ -13,7 +13,7 @@ var NodeSeed = Type("NodeSeed", func() {
 	Member("tlsName", String, "Node's TLS name", func() { Example("") })
 	Member("port", Integer, "Node's port", func() {
 		Minimum(0)
-		Maximum(math.MaxInt16)
+		Maximum(math.MaxUint16)
 		Example(3000)
 	})
 	Required("host", "port")
