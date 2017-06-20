@@ -29,3 +29,10 @@ export function getLatency(clusterID, nodeHost, namespaceName, from, to) {
   return get(url);
 }
 
+// getStatistics returns the statistics for the namespace in
+// the node
+export function getStatistics(clusterID, nodeHost, namespaceName) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/namespaces/' + namespaceName);
+  return get(url);
+}
+
