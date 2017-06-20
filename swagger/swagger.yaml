@@ -4,37 +4,37 @@ definitions:
   AerospikeAmcClusterResourceUsageResponse:
     description: Cluster Resource Usage (default view)
     example:
-      free-bytes: 5.1929137e+18
+      free-bytes: 4.5896422e+18
       nodeDetails:
-        Perferendis ab.:
-          free-bytes: 2.7360823e+17
-          total-bytes: 6.728183e+18
-          used-bytes: 8.787339e+18
-      total-bytes: 5.936449e+18
-      used-bytes: 4.5030004e+18
+        Enim modi placeat quia sint est praesentium.:
+          free-bytes: 5.1929137e+18
+          total-bytes: 5.9448296e+18
+          used-bytes: 4.00024e+18
+      total-bytes: 8.2502163e+18
+      used-bytes: 4.0863476e+18
     properties:
       free-bytes:
         description: Free Bytes
-        example: 5.1929137e+18
+        example: 4.5896422e+18
         format: int64
         type: integer
       nodeDetails:
         additionalProperties: true
         description: Resource usage details.
         example:
-          Perferendis ab.:
-            free-bytes: 2.7360823e+17
-            total-bytes: 6.728183e+18
-            used-bytes: 8.787339e+18
+          Enim modi placeat quia sint est praesentium.:
+            free-bytes: 5.1929137e+18
+            total-bytes: 5.9448296e+18
+            used-bytes: 4.00024e+18
         type: object
       total-bytes:
         description: Total Bytes
-        example: 5.936449e+18
+        example: 8.2502163e+18
         format: int64
         type: integer
       used-bytes:
         description: Used Bytes
-        example: 4.5030004e+18
+        example: 4.0863476e+18
         format: int64
         type: integer
     required:
@@ -47,21 +47,21 @@ definitions:
   AerospikeAmcConnectionModulesResponseFull:
     description: Cluster Modules (full view)
     example:
-      name: Tempora similique.
-      source: Quia sint est praesentium soluta.
-      type: Nihil vel.
+      name: Consequatur ut laborum cupiditate modi dolorum hic.
+      source: Voluptatem esse officia voluptatum aut amet qui.
+      type: Unde laudantium.
     properties:
       name:
         description: Module's Name
-        example: Tempora similique.
+        example: Consequatur ut laborum cupiditate modi dolorum hic.
         type: string
       source:
         description: Module's Source Code
-        example: Quia sint est praesentium soluta.
+        example: Voluptatem esse officia voluptatum aut amet qui.
         type: string
       type:
         description: Module's Source Type
-        example: Nihil vel.
+        example: Unde laudantium.
         type: string
     title: 'Mediatype identifier: application/vnd.aerospike.amc.connection.modules.response+json;
       view=full'
@@ -69,47 +69,45 @@ definitions:
   AerospikeAmcConnectionResponse:
     description: User Connection (default view)
     example:
-      activeRedAlertCount: 6.3274783e+18
+      activeRedAlertCount: 9.850432e+17
       clusterBuilds:
-        latestVersion: Modi dolorum hic.
+        latestVersion: Rerum autem perspiciatis ut eaque sunt eum.
         versionList:
-          Nihil minima maiores.:
-          - Ad et ut sed hic assumenda.
-          - Ad et ut sed hic assumenda.
-          - Ad et ut sed hic assumenda.
+          Magni ducimus quam eaque ullam maiores.:
+          - Similique error rerum.
+          - Similique error rerum.
+          - Similique error rerum.
       connectOnLogin: true
-      connected: false
+      connected: true
       disk:
-        free-bytes: 5.1929137e+18
+        free-bytes: 4.5896422e+18
         nodeDetails:
-          Perferendis ab.:
-            free-bytes: 2.7360823e+17
-            total-bytes: 6.728183e+18
-            used-bytes: 8.787339e+18
-        total-bytes: 5.936449e+18
-        used-bytes: 4.5030004e+18
+          Enim modi placeat quia sint est praesentium.:
+            free-bytes: 5.1929137e+18
+            total-bytes: 5.9448296e+18
+            used-bytes: 4.00024e+18
+        total-bytes: 8.2502163e+18
+        used-bytes: 4.0863476e+18
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
       memory:
-        free-bytes: 5.1929137e+18
+        free-bytes: 4.5896422e+18
         nodeDetails:
-          Perferendis ab.:
-            free-bytes: 2.7360823e+17
-            total-bytes: 6.728183e+18
-            used-bytes: 8.787339e+18
-        total-bytes: 5.936449e+18
-        used-bytes: 4.5030004e+18
+          Enim modi placeat quia sint est praesentium.:
+            free-bytes: 5.1929137e+18
+            total-bytes: 5.9448296e+18
+            used-bytes: 4.00024e+18
+        total-bytes: 8.2502163e+18
+        used-bytes: 4.0863476e+18
       name: Payments Cluster
       namespaces:
-      - Voluptatum aut amet qui consequatur doloribus unde.
-      - Voluptatum aut amet qui consequatur doloribus unde.
+      - Sunt ullam facere omnis qui.
+      - Sunt ullam facere omnis qui.
+      - Sunt ullam facere omnis qui.
       nodes:
-      - Cum minima minima et rerum autem.
-      - Cum minima minima et rerum autem.
-      nodesCompatibility: Ut eaque.
+      - Molestiae dolorum dolores quos sit ut.
+      nodesCompatibility: Iste deserunt.
       offNodes:
-      - Fugit dolore magni ducimus.
-      - Fugit dolore magni ducimus.
-      - Fugit dolore magni ducimus.
+      - Ea nostrum natus.
       seeds:
       - host: 127.0.0.1
         port: 3000
@@ -120,15 +118,16 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
-      status: Ullam maiores aut voluptatum similique.
-      updateInterval: 6.5847915e+18
+      status: Rem quia ducimus est.
+      updateInterval: 1.947561e+18
       users:
-      - Dolor voluptatibus occaecati sunt.
-      - Dolor voluptatibus occaecati sunt.
+      - Quod laboriosam doloribus ut eius.
+      - Quod laboriosam doloribus ut eius.
+      - Quod laboriosam doloribus ut eius.
     properties:
       activeRedAlertCount:
         description: Ative red alert count.
-        example: 6.3274783e+18
+        example: 9.850432e+17
         format: int64
         type: integer
       clusterBuilds:
@@ -140,7 +139,7 @@ definitions:
         type: boolean
       connected:
         description: If AMC is already connected to this cluster for the current user.
-        example: false
+        example: true
         type: boolean
       disk:
         $ref: '#/definitions/AerospikeAmcClusterResourceUsageResponse'
@@ -158,33 +157,31 @@ definitions:
       namespaces:
         description: List of namespaces.
         example:
-        - Voluptatum aut amet qui consequatur doloribus unde.
-        - Voluptatum aut amet qui consequatur doloribus unde.
+        - Sunt ullam facere omnis qui.
+        - Sunt ullam facere omnis qui.
+        - Sunt ullam facere omnis qui.
         items:
-          example: Voluptatum aut amet qui consequatur doloribus unde.
+          example: Sunt ullam facere omnis qui.
           type: string
         type: array
       nodes:
         description: List of cluster nodes which have been discovered.
         example:
-        - Cum minima minima et rerum autem.
-        - Cum minima minima et rerum autem.
+        - Molestiae dolorum dolores quos sit ut.
         items:
-          example: Cum minima minima et rerum autem.
+          example: Molestiae dolorum dolores quos sit ut.
           type: string
         type: array
       nodesCompatibility:
         description: 'If nodes are all from the same version: Values: homogenious/compatible'
-        example: Ut eaque.
+        example: Iste deserunt.
         type: string
       offNodes:
         description: Inactive/Lost/Inaccessible nodes.
         example:
-        - Fugit dolore magni ducimus.
-        - Fugit dolore magni ducimus.
-        - Fugit dolore magni ducimus.
+        - Ea nostrum natus.
         items:
-          example: Fugit dolore magni ducimus.
+          example: Ea nostrum natus.
           type: string
         type: array
       seeds:
@@ -204,20 +201,21 @@ definitions:
         type: array
       status:
         description: 'If cluster is connected: Values: on/off'
-        example: Ullam maiores aut voluptatum similique.
+        example: Rem quia ducimus est.
         type: string
       updateInterval:
         description: Interval with which AMC fetches data from the database.
-        example: 6.5847915e+18
+        example: 1.947561e+18
         format: int64
         type: integer
       users:
         description: Cluster users list.
         example:
-        - Dolor voluptatibus occaecati sunt.
-        - Dolor voluptatibus occaecati sunt.
+        - Quod laboriosam doloribus ut eius.
+        - Quod laboriosam doloribus ut eius.
+        - Quod laboriosam doloribus ut eius.
         items:
-          example: Dolor voluptatibus occaecati sunt.
+          example: Quod laboriosam doloribus ut eius.
           type: string
         type: array
     required:
@@ -239,402 +237,293 @@ definitions:
   AerospikeAmcConnectionTreeResponse:
     description: User Connection Entity Tree (default view)
     example:
-      entityType: Facere omnis qui velit.
+      entityType: In omnis occaecati exercitationem est quis ratione.
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      lastUpdate: 3.293112e+18
+      lastUpdate: 5.299038e+18
       modules:
-      - entityType: Dolores quos sit.
+      - entityType: Autem quia magnam quo.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 8.572864e+18
+        lastUpdate: 8.2315675e+18
         name: map_reduce.lua
         type: lua
-      - entityType: Dolores quos sit.
+      - entityType: Autem quia magnam quo.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 8.572864e+18
+        lastUpdate: 8.2315675e+18
+        name: map_reduce.lua
+        type: lua
+      - entityType: Autem quia magnam quo.
+        hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+        lastUpdate: 8.2315675e+18
         name: map_reduce.lua
         type: lua
       nodes:
-      - entityType: Deserunt ut quod ea nostrum.
+      - entityType: Cum quam ut dignissimos explicabo.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        lastUpdate: 8.833635e+18
+        lastUpdate: 3.720131e+18
         namespaces:
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-      - entityType: Deserunt ut quod ea nostrum.
+      - entityType: Cum quam ut dignissimos explicabo.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        lastUpdate: 8.833635e+18
+        lastUpdate: 3.720131e+18
         namespaces:
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-      status: Quia magnam.
+      status: Et facere vel.
     properties:
       entityType:
         description: Entity Type
-        example: Facere omnis qui velit.
+        example: In omnis occaecati exercitationem est quis ratione.
         type: string
       id:
         description: Connection Id
@@ -643,20 +532,25 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 3.293112e+18
+        example: 5.299038e+18
         format: int64
         type: integer
       modules:
         description: modules
         example:
-        - entityType: Dolores quos sit.
+        - entityType: Autem quia magnam quo.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 8.572864e+18
+          lastUpdate: 8.2315675e+18
           name: map_reduce.lua
           type: lua
-        - entityType: Dolores quos sit.
+        - entityType: Autem quia magnam quo.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 8.572864e+18
+          lastUpdate: 8.2315675e+18
+          name: map_reduce.lua
+          type: lua
+        - entityType: Autem quia magnam quo.
+          hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
+          lastUpdate: 8.2315675e+18
           name: map_reduce.lua
           type: lua
         items:
@@ -665,388 +559,274 @@ definitions:
       nodes:
         description: Nodes
         example:
-        - entityType: Deserunt ut quod ea nostrum.
+        - entityType: Cum quam ut dignissimos explicabo.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          lastUpdate: 8.833635e+18
+          lastUpdate: 3.720131e+18
           namespaces:
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-        - entityType: Deserunt ut quod ea nostrum.
+        - entityType: Cum quam ut dignissimos explicabo.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          lastUpdate: 8.833635e+18
+          lastUpdate: 3.720131e+18
           namespaces:
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-          - entityType: Rem quia ducimus est.
-            lastUpdate: 1.947561e+18
+          - entityType: Odit laborum aliquid voluptates.
+            lastUpdate: 7.6870877e+18
             name: Test
             sets:
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
+            - entityType: Omnis magnam.
               indexes:
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
               - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
+                entityType: Qui tempora consequatur et dolorem.
+                lastUpdate: 8.6996735e+18
                 name: idx_test_customers_id
                 type: NUMERIC
-              lastUpdate: 7.6579385e+18
-              name: Customers
-            - entityType: Quod laboriosam doloribus ut eius.
-              indexes:
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-                lastUpdate: 7.2132834e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 7.6579385e+18
+              lastUpdate: 9.1746587e+18
               name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
         type: array
       status:
         description: Cureent connection status.
-        example: Quia magnam.
+        example: Et facere vel.
         type: string
     required:
     - id
@@ -1060,8 +840,8 @@ definitions:
     description: Index Entity (default view)
     example:
       binName: id
-      entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-      lastUpdate: 7.2132834e+18
+      entityType: Qui tempora consequatur et dolorem.
+      lastUpdate: 8.6996735e+18
       name: idx_test_customers_id
       type: NUMERIC
     properties:
@@ -1071,11 +851,11 @@ definitions:
         type: string
       entityType:
         description: Type
-        example: Omnis occaecati exercitationem est quis ratione ducimus.
+        example: Qui tempora consequatur et dolorem.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 7.2132834e+18
+        example: 8.6996735e+18
         format: int64
         type: integer
       name:
@@ -1098,15 +878,15 @@ definitions:
   AerospikeAmcEntityModuleResponse:
     description: Module Entity (default view)
     example:
-      entityType: Dolores quos sit.
+      entityType: Autem quia magnam quo.
       hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-      lastUpdate: 8.572864e+18
+      lastUpdate: 8.2315675e+18
       name: map_reduce.lua
       type: lua
     properties:
       entityType:
         description: Type
-        example: Dolores quos sit.
+        example: Autem quia magnam quo.
         type: string
       hash:
         description: Module Hash
@@ -1114,7 +894,7 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 8.572864e+18
+        example: 8.2315675e+18
         format: int64
         type: integer
       name:
@@ -1137,75 +917,56 @@ definitions:
   AerospikeAmcEntityNamespaceResponse:
     description: Namespace Entity (default view)
     example:
-      entityType: Rem quia ducimus est.
-      lastUpdate: 1.947561e+18
+      entityType: Odit laborum aliquid voluptates.
+      lastUpdate: 7.6870877e+18
       name: Test
       sets:
-      - entityType: Quod laboriosam doloribus ut eius.
+      - entityType: Omnis magnam.
         indexes:
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
-        lastUpdate: 7.6579385e+18
+        lastUpdate: 9.1746587e+18
         name: Customers
-      - entityType: Quod laboriosam doloribus ut eius.
+      - entityType: Omnis magnam.
         indexes:
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
-        lastUpdate: 7.6579385e+18
-        name: Customers
-      - entityType: Quod laboriosam doloribus ut eius.
-        indexes:
-        - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        lastUpdate: 7.6579385e+18
+        lastUpdate: 9.1746587e+18
         name: Customers
     properties:
       entityType:
         description: Type
-        example: Rem quia ducimus est.
+        example: Odit laborum aliquid voluptates.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 1.947561e+18
+        example: 7.6870877e+18
         format: int64
         type: integer
       name:
@@ -1215,62 +976,43 @@ definitions:
       sets:
         description: Namespaces
         example:
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
-          name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
-          indexes:
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntitySetResponse'
@@ -1285,198 +1027,141 @@ definitions:
   AerospikeAmcEntityNodeResponse:
     description: Node Entity (default view)
     example:
-      entityType: Deserunt ut quod ea nostrum.
+      entityType: Cum quam ut dignissimos explicabo.
       host: 127.0.0.1:3000
       id: BB9EB6C71290C00
-      lastUpdate: 8.833635e+18
+      lastUpdate: 3.720131e+18
       namespaces:
-      - entityType: Rem quia ducimus est.
-        lastUpdate: 1.947561e+18
+      - entityType: Odit laborum aliquid voluptates.
+        lastUpdate: 7.6870877e+18
         name: Test
         sets:
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
-          indexes:
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.6579385e+18
-          name: Customers
-      - entityType: Rem quia ducimus est.
-        lastUpdate: 1.947561e+18
+      - entityType: Odit laborum aliquid voluptates.
+        lastUpdate: 7.6870877e+18
         name: Test
         sets:
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
-          indexes:
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.6579385e+18
-          name: Customers
-      - entityType: Rem quia ducimus est.
-        lastUpdate: 1.947561e+18
+      - entityType: Odit laborum aliquid voluptates.
+        lastUpdate: 7.6870877e+18
         name: Test
         sets:
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
+        - entityType: Omnis magnam.
           indexes:
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
           - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
+            entityType: Qui tempora consequatur et dolorem.
+            lastUpdate: 8.6996735e+18
             name: idx_test_customers_id
             type: NUMERIC
-          lastUpdate: 7.6579385e+18
-          name: Customers
-        - entityType: Quod laboriosam doloribus ut eius.
-          indexes:
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-            lastUpdate: 7.2132834e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.6579385e+18
+          lastUpdate: 9.1746587e+18
           name: Customers
     properties:
       entityType:
         description: Type
-        example: Deserunt ut quod ea nostrum.
+        example: Cum quam ut dignissimos explicabo.
         type: string
       host:
         description: Network Host Address
@@ -1488,194 +1173,137 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 8.833635e+18
+        example: 3.720131e+18
         format: int64
         type: integer
       namespaces:
         description: Namespaces
         example:
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-        - entityType: Rem quia ducimus est.
-          lastUpdate: 1.947561e+18
+        - entityType: Odit laborum aliquid voluptates.
+          lastUpdate: 7.6870877e+18
           name: Test
           sets:
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
+          - entityType: Omnis magnam.
             indexes:
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
             - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
+              entityType: Qui tempora consequatur et dolorem.
+              lastUpdate: 8.6996735e+18
               name: idx_test_customers_id
               type: NUMERIC
-            lastUpdate: 7.6579385e+18
-            name: Customers
-          - entityType: Quod laboriosam doloribus ut eius.
-            indexes:
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-              lastUpdate: 7.2132834e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 7.6579385e+18
+            lastUpdate: 9.1746587e+18
             name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
@@ -1691,46 +1319,46 @@ definitions:
   AerospikeAmcEntitySetResponse:
     description: Set Entity (default view)
     example:
-      entityType: Quod laboriosam doloribus ut eius.
+      entityType: Omnis magnam.
       indexes:
       - binName: id
-        entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-        lastUpdate: 7.2132834e+18
+        entityType: Qui tempora consequatur et dolorem.
+        lastUpdate: 8.6996735e+18
         name: idx_test_customers_id
         type: NUMERIC
       - binName: id
-        entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-        lastUpdate: 7.2132834e+18
+        entityType: Qui tempora consequatur et dolorem.
+        lastUpdate: 8.6996735e+18
         name: idx_test_customers_id
         type: NUMERIC
       - binName: id
-        entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-        lastUpdate: 7.2132834e+18
+        entityType: Qui tempora consequatur et dolorem.
+        lastUpdate: 8.6996735e+18
         name: idx_test_customers_id
         type: NUMERIC
-      lastUpdate: 7.6579385e+18
+      lastUpdate: 9.1746587e+18
       name: Customers
     properties:
       entityType:
         description: Type
-        example: Quod laboriosam doloribus ut eius.
+        example: Omnis magnam.
         type: string
       indexes:
         description: Indexes
         example:
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         - binName: id
-          entityType: Omnis occaecati exercitationem est quis ratione ducimus.
-          lastUpdate: 7.2132834e+18
+          entityType: Qui tempora consequatur et dolorem.
+          lastUpdate: 8.6996735e+18
           name: idx_test_customers_id
           type: NUMERIC
         items:
@@ -1738,7 +1366,7 @@ definitions:
         type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 7.6579385e+18
+        example: 9.1746587e+18
         format: int64
         type: integer
       name:
@@ -1756,46 +1384,46 @@ definitions:
     description: AMC Index Response Wrapper (default view)
     example:
       indexes:
-        Dignissimos et.:
+        Aliquam deleniti porro itaque sit doloremque asperiores.:
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
-          bin: Non cupiditate a.
-          binType: In hic doloremque facere perspiciatis ab et.
-          name: Nulla laborum.
-          namespace: Est laudantium.
-          set: Quia est praesentium tenetur modi facilis.
-          syncOnAllNodes: Natus dolor autem aut vitae.
+            Autem aut vitae quam et dignissimos et.: false
+          bin: Aut deserunt nulla saepe rerum harum.
+          binType: Modi est sit.
+          name: Nam voluptas.
+          namespace: Dolorum itaque sunt.
+          set: Totam enim sit ducimus tenetur.
+          syncOnAllNodes: Repudiandae ea dolores aut.
         - Stats:
-            Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
-          bin: Non cupiditate a.
-          binType: In hic doloremque facere perspiciatis ab et.
-          name: Nulla laborum.
-          namespace: Est laudantium.
-          set: Quia est praesentium tenetur modi facilis.
-          syncOnAllNodes: Natus dolor autem aut vitae.
+            Autem aut vitae quam et dignissimos et.: false
+          bin: Aut deserunt nulla saepe rerum harum.
+          binType: Modi est sit.
+          name: Nam voluptas.
+          namespace: Dolorum itaque sunt.
+          set: Totam enim sit ducimus tenetur.
+          syncOnAllNodes: Repudiandae ea dolores aut.
       status: "on"
     properties:
       indexes:
         additionalProperties: true
         description: Index Data
         example:
-          Dignissimos et.:
+          Aliquam deleniti porro itaque sit doloremque asperiores.:
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
-            bin: Non cupiditate a.
-            binType: In hic doloremque facere perspiciatis ab et.
-            name: Nulla laborum.
-            namespace: Est laudantium.
-            set: Quia est praesentium tenetur modi facilis.
-            syncOnAllNodes: Natus dolor autem aut vitae.
+              Autem aut vitae quam et dignissimos et.: false
+            bin: Aut deserunt nulla saepe rerum harum.
+            binType: Modi est sit.
+            name: Nam voluptas.
+            namespace: Dolorum itaque sunt.
+            set: Totam enim sit ducimus tenetur.
+            syncOnAllNodes: Repudiandae ea dolores aut.
           - Stats:
-              Consequuntur saepe ut deserunt impedit.: 64f52aab-44cb-4acb-adff-17c8bb610920
-            bin: Non cupiditate a.
-            binType: In hic doloremque facere perspiciatis ab et.
-            name: Nulla laborum.
-            namespace: Est laudantium.
-            set: Quia est praesentium tenetur modi facilis.
-            syncOnAllNodes: Natus dolor autem aut vitae.
+              Autem aut vitae quam et dignissimos et.: false
+            bin: Aut deserunt nulla saepe rerum harum.
+            binType: Modi est sit.
+            name: Nam voluptas.
+            namespace: Dolorum itaque sunt.
+            set: Totam enim sit ducimus tenetur.
+            syncOnAllNodes: Repudiandae ea dolores aut.
         type: object
       status:
         description: Cluster/Node Status
@@ -1811,17 +1439,17 @@ definitions:
     description: Namespace End Point (default view)
     example:
       disk:
-        free-bytes: 2.7360823e+17
-        total-bytes: 6.728183e+18
-        used-bytes: 8.787339e+18
+        free-bytes: 5.1929137e+18
+        total-bytes: 5.9448296e+18
+        used-bytes: 4.00024e+18
       memory:
-        free-bytes: 2.7360823e+17
-        total-bytes: 6.728183e+18
-        used-bytes: 8.787339e+18
-      name: Est sit iusto.
+        free-bytes: 5.1929137e+18
+        total-bytes: 5.9448296e+18
+        used-bytes: 4.00024e+18
+      name: Qui debitis.
       stats:
-        Facere dolorum itaque.: false
-      status: Enim sit ducimus tenetur.
+        Ea molestiae veritatis aliquam.: 73fc4605-edbf-4fa3-8ea8-1bc62a4b4fbd
+      status: Omnis praesentium.
     properties:
       disk:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
@@ -1829,17 +1457,17 @@ definitions:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
       name:
         description: Namespace Name
-        example: Est sit iusto.
+        example: Qui debitis.
         type: string
       stats:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Facere dolorum itaque.: false
+          Ea molestiae veritatis aliquam.: 73fc4605-edbf-4fa3-8ea8-1bc62a4b4fbd
         type: object
       status:
-        description: Node status
-        example: Enim sit ducimus tenetur.
+        description: Cluster/Node status
+        example: Omnis praesentium.
         type: string
     required:
     - name
@@ -1853,23 +1481,23 @@ definitions:
   AerospikeAmcResourceUsageResponse:
     description: Resource Usage (default view)
     example:
-      free-bytes: 2.7360823e+17
-      total-bytes: 6.728183e+18
-      used-bytes: 8.787339e+18
+      free-bytes: 5.1929137e+18
+      total-bytes: 5.9448296e+18
+      used-bytes: 4.00024e+18
     properties:
       free-bytes:
         description: Free Bytes
-        example: 2.7360823e+17
+        example: 5.1929137e+18
         format: int64
         type: integer
       total-bytes:
         description: Total Bytes
-        example: 6.728183e+18
+        example: 5.9448296e+18
         format: int64
         type: integer
       used-bytes:
         description: Used Bytes
-        example: 8.787339e+18
+        example: 4.00024e+18
         format: int64
         type: integer
     required:
@@ -1896,14 +1524,11 @@ definitions:
     example:
       status: "on"
       throughput:
-        Et ea molestiae veritatis.:
-          Ab omnis praesentium voluptates.:
-          - failed: 0.8378226
-            successful: 0.29732773
-            timestamp: 6.2905375e+18
-          - failed: 0.8378226
-            successful: 0.29732773
-            timestamp: 6.2905375e+18
+        Cumque nihil dignissimos sit quas.:
+          Ut voluptas.:
+          - failed: 0.83985823
+            successful: 0.27065128
+            timestamp: 8.2189924e+17
     properties:
       status:
         description: Cluster/Node Status
@@ -1913,14 +1538,11 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Et ea molestiae veritatis.:
-            Ab omnis praesentium voluptates.:
-            - failed: 0.8378226
-              successful: 0.29732773
-              timestamp: 6.2905375e+18
-            - failed: 0.8378226
-              successful: 0.29732773
-              timestamp: 6.2905375e+18
+          Cumque nihil dignissimos sit quas.:
+            Ut voluptas.:
+            - failed: 0.83985823
+              successful: 0.27065128
+              timestamp: 8.2189924e+17
         type: object
     required:
     - status
@@ -1957,7 +1579,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Minima ipsum ut voluptas.
+          example: Quam dicta natus.
           type: string
         type: array
       username:
@@ -1972,25 +1594,25 @@ definitions:
   AerospikeAmcVersionInfoResponse:
     description: Resource Usage (default view)
     example:
-      latestVersion: Modi dolorum hic.
+      latestVersion: Rerum autem perspiciatis ut eaque sunt eum.
       versionList:
-        Nihil minima maiores.:
-        - Ad et ut sed hic assumenda.
-        - Ad et ut sed hic assumenda.
-        - Ad et ut sed hic assumenda.
+        Magni ducimus quam eaque ullam maiores.:
+        - Similique error rerum.
+        - Similique error rerum.
+        - Similique error rerum.
     properties:
       latestVersion:
         description: Latest server version used in the cluster
-        example: Modi dolorum hic.
+        example: Rerum autem perspiciatis ut eaque sunt eum.
         type: string
       versionList:
         additionalProperties: true
         description: Map of server versions to nodes
         example:
-          Nihil minima maiores.:
-          - Ad et ut sed hic assumenda.
-          - Ad et ut sed hic assumenda.
-          - Ad et ut sed hic assumenda.
+          Magni ducimus quam eaque ullam maiores.:
+          - Similique error rerum.
+          - Similique error rerum.
+          - Similique error rerum.
         type: object
     required:
     - versionList
@@ -2086,12 +1708,6 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
     properties:
       connId:
         description: Connection Id
@@ -2112,12 +1728,6 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -2128,15 +1738,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Earum veniam tempora rerum quis odit dignissimos.
+      binName: Et voluptate et rerum molestiae enim.
       indexName: idxAccounts
-      namespace: Ducimus et deleniti repellendus sed numquam nostrum.
-      setName: Laudantium id iusto quo et cumque.
+      namespace: Ut inventore.
+      setName: Repudiandae distinctio magnam accusantium voluptas et.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Earum veniam tempora rerum quis odit dignissimos.
+        example: Et voluptate et rerum molestiae enim.
         type: string
       indexName:
         description: Index's Name
@@ -2144,11 +1754,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Ducimus et deleniti repellendus sed numquam nostrum.
+        example: Ut inventore.
         type: string
       setName:
         description: Index's Set name
-        example: Laudantium id iusto quo et cumque.
+        example: Repudiandae distinctio magnam accusantium voluptas et.
         type: string
       type:
         description: Index's type
@@ -2166,7 +1776,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Dignissimos sit.
+      source: Sit porro natus eveniet velit ducimus laboriosam.
       type: LUA
     properties:
       name:
@@ -2175,7 +1785,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Dignissimos sit.
+        example: Sit porro natus eveniet velit ducimus laboriosam.
         type: string
       type:
         description: Module's type
@@ -2221,7 +1831,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Vitae voluptas repudiandae velit.
+          example: Et et odit doloremque et.
           type: string
         type: array
       username:
@@ -2839,6 +2449,43 @@ paths:
       summary: show module
       tags:
       - module
+  /api/v1/connections/{connId}/namespaces:
+    get:
+      description: |-
+        Query cluster's namespaces
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#namespaces
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: namespaces connection
+      tags:
+      - connection
   /api/v1/connections/{connId}/nodes/{node}:
     get:
       description: |-

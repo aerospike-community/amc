@@ -166,6 +166,7 @@ type ConnectionController interface {
 	goa.Muxer
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
+	Namespaces(*NamespacesConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
 	Show(*ShowConnectionContext) error
@@ -177,6 +178,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
@@ -219,6 +221,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("DELETE", "/api/v1/connections/:connId", ctrl.MuxHandler("delete", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:connId", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewNamespacesConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Namespaces(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("namespaces", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Namespaces", "route", "GET /api/v1/connections/:connId/namespaces", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

@@ -58,6 +58,21 @@ func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 	return ctx.NoContent()
 }
 
+// Namespaces runs the namespaces action.
+func (c *ConnectionController) Namespaces(ctx *app.NamespacesConnectionContext) error {
+	// ConnectionController_Namespaces: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	res := cluster.NamespaceInfo(cluster.NamespaceList())
+
+	// ConnectionController_Namespaces: end_implement
+	return ctx.OK(res)
+}
+
 // Query runs the query action.
 func (c *ConnectionController) Query(ctx *app.QueryConnectionContext) error {
 	// ConnectionController_Query: start_implement

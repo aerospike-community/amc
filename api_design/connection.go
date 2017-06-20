@@ -126,4 +126,23 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("namespaces", func() {
+		Description("Query cluster's namespaces")
+		Routing(GET(":connId/namespaces"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+
+		Response(OK, HashOf(String, ClusterNamespaceResponseMedia))
+		Response(BadRequest, String)
+		Response(Forbidden)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 })

@@ -14,6 +14,47 @@ import (
 	"github.com/goadesign/goa"
 )
 
+// Namespace End Point (default view)
+//
+// Identifier: application/vnd.aerospike.amc.cluster.namespace.response+json; view=default
+type AerospikeAmcClusterNamespaceResponse struct {
+	// Disk Usage
+	Disk *AerospikeAmcResourceUsageResponse `form:"disk" json:"disk" xml:"disk"`
+	// Overall least resources available across all nodes
+	LeastAvailablePct map[string]interface{} `form:"leastAvailablePct" json:"leastAvailablePct" xml:"leastAvailablePct"`
+	// Memory Usage
+	Memory *AerospikeAmcResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
+	// Namespace Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Namespace statistics
+	Stats map[string]interface{} `form:"stats" json:"stats" xml:"stats"`
+	// Cluster/Node status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcClusterNamespaceResponse media type instance.
+func (mt *AerospikeAmcClusterNamespaceResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Memory == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "memory"))
+	}
+	if mt.Disk == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "disk"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Stats == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "stats"))
+	}
+	if mt.LeastAvailablePct == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "leastAvailablePct"))
+	}
+	return
+}
+
 // Cluster Resource Usage (default view)
 //
 // Identifier: application/vnd.aerospike.amc.cluster.resource.usage.response+json; view=default
@@ -508,7 +549,7 @@ type AerospikeAmcNamespaceResponse struct {
 	Name string `form:"name" json:"name" xml:"name"`
 	// Namespace statistics
 	Stats map[string]interface{} `form:"stats" json:"stats" xml:"stats"`
-	// Node status
+	// Cluster/Node status
 	Status string `form:"status" json:"status" xml:"status"`
 }
 

@@ -1121,8 +1121,8 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 
 		res[nsName] = &app.AerospikeAmcNamespaceResponse{
 			Name:   ns.name,
-			Memory: ns.Memory(),
-			Disk:   ns.Disk(),
+			Memory: toSystemResource(ns.Memory(), "memory"),
+			Disk:   toSystemResource(ns.Disk(), "disk"),
 			Stats:  stats,
 			Status: string(n.Status()),
 		}
