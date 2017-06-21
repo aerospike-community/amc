@@ -100,10 +100,7 @@ class ConfigEditor extends React.Component {
     const columnDefs = [{
       headerName: 'Config',
       field: 'name',
-      checkboxSelection: (row) => {
-        // TODO
-        return true || row.data.isEditable;
-      }
+      checkboxSelection: (row) => row.data.isEditable
     }, {
       headerName: 'Value',
       field: 'value'
