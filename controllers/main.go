@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -309,8 +308,6 @@ func GoaServer(config *common.Config) {
 		service.Use(NewBasicAuthMiddleware(basicAuthUser, basicAuthPassword))
 	}
 
-	service.Use(NewDownloadMiddleware())
-
 	if registerEnterpriseAPI != nil {
 		goaRegisterEnterprise(service)
 	}
@@ -356,24 +353,6 @@ func NewBasicAuthMiddleware(amcUser, amcPass string) goa.Middleware {
 				return errors.New("missing auth header.")
 			}
 
-			return h(ctx, rw, req)
-		}
-	}
-}
-
-// NewDownloadMiddleware creates a middleware that checks for download file.
-func NewDownloadMiddleware() goa.Middleware {
-	return func(h goa.Handler) goa.Handler {
-		return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-			p := req.URL.Path
-			logrus.Infof("New download path :: " + p)
-			// check if req.URL.path contains "resource"
-			if strings.HasPrefix(req.URL.Path, "/resources") {
-				name := strings.TrimLeft(p, "/resources/")
-				h := rw.Header()
-				h.Set("Content-Disposition", "attachment; filename="+name)
-				h.Set("Content-Type", req.Header.Get("Content-Type"))
-			}
 			return h(ctx, rw, req)
 		}
 	}
