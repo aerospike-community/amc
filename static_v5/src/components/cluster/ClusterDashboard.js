@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import VisibleDeleteConnectionModal from 'containers/cluster/VisibleDeleteConnectionModal';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
+import ManageClusterConnection from 'components/cluster/ManageClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 // ClusterDashboard handles all the views for the cluster.
@@ -37,7 +38,12 @@ class ClusterDashboard extends React.Component {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
                       onUpdateConnectionSuccess={onUpdateConnectionSuccess}
                       onCancel={() => this.onViewClusterOverview()} />
+    } else if (view === CLUSTER_ACTIONS.Manage) {
+      dashboard = <ManageClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
+                      onUpdateConnectionSuccess={onUpdateConnectionSuccess}
+                      onCancel={() => this.onViewClusterOverview()} />;
     }
+
     return (
       <div>
         {dashboard}

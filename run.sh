@@ -16,4 +16,4 @@ version_build="$edition-$version"
 # build binary
 go build -race -a -o amc -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ"
 
-./amc -config-file=$GOPATH/src/github.com/citrusleaf/amc/amc.dev.conf
+# ./amc -config-file=$GOPATH/src/github.com/citrusleaf/amc/amc.dev.conf

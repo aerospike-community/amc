@@ -25,7 +25,7 @@ const clusterActions = {
     isDefault: true,
     state: {
       isAuthenticated: false
-    }
+    },
   },
   Overview: {
     isDefault: true,
@@ -40,6 +40,7 @@ const clusterActions = {
     },
     isEndOfGrouping: true,
   },
+  Manage: {},
   Edit: {},
   Delete: {},
 };

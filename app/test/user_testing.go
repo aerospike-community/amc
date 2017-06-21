@@ -5,7 +5,7 @@
 // Command:
 // $ goagen
 // --design=github.com/citrusleaf/amc/api_design
-// --out=$(GOPATH)/src/github.com/citrusleaf/amc/temp
+// --out=$(GOPATH)/src/github.com/citrusleaf/amc
 // --version=v1.2.0-dirty
 
 package test
@@ -14,7 +14,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/citrusleaf/amc/temp/app"
+	"github.com/citrusleaf/amc/app"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/goatest"
 	"io"

@@ -75,7 +75,6 @@
     "karma-chrome-launcher": "^2.0.0",
     "less": "^2.7.2",
     "less-loader": "^4.0.4",
-    "protractor": "^5.1.1",
     "webpack-bundle-analyzer": "^2.8.2"
   }
 }

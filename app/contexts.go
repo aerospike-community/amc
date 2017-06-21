@@ -5,7 +5,7 @@
 // Command:
 // $ goagen
 // --design=github.com/citrusleaf/amc/api_design
-// --out=$(GOPATH)/src/github.com/citrusleaf/amc/temp
+// --out=$(GOPATH)/src/github.com/citrusleaf/amc
 // --version=v1.2.0-dirty
 
 package app
