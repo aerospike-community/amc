@@ -8,10 +8,29 @@ import { Nav, NavItem, NavLink } from 'reactstrap';
 class Tabs extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      selected: props.default
+    };
+
+    this.onSelect= this.onSelect.bind(this);
+  }
+
+  onSelect(name) {
+    this.setState({
+      selected: name
+    });
+
+    this.props.onSelect(name);
   }
 
   render() {
-    const {names, selected} = this.props;
+    const {names} = this.props;
+    let {selected} = this.state;
+    if (!selected) {
+      selected = this.props.default;
+    }
+
     return (
       <div>
         <Nav tabs>
@@ -23,7 +42,7 @@ class Tabs extends React.Component {
               nav = <NavLink > {name} </NavLink>;
 
             return (
-                <NavItem key={name}> 
+                <NavItem onClick={() => this.onSelect(name)} key={name}> 
                   {nav}
                 </NavItem>
             );
@@ -35,8 +54,13 @@ class Tabs extends React.Component {
 }
 
 Tabs.PropTypes = {
+  // names of the tabs
   names: PropTypes.arrayOf(PropTypes.string),
-  selected: PropTypes.string
+  // the default selected tab
+  default: PropTypes.string,
+  // calbback when the view is selected
+  // onSelect(name)
+  onSelect: PropTypes.func,
 };
 
 export default Tabs;

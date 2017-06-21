@@ -2,7 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import Tabs from 'components/Tabs';
 import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
 import NamespaceLatency from 'components/namespace/NamespaceLatency';
 import NamespacesTable from 'components/namespace/NamespacesTable';

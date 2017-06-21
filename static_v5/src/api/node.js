@@ -1,5 +1,5 @@
 import { toURLConverter } from 'api/url';
-import { get } from 'api/http';
+import { get, postJSON } from 'api/http';
 
 const toURLPath = toURLConverter('connections');
 
@@ -37,5 +37,19 @@ export function getNodesSummary(clusterID, nodeHosts) {
   const nodes = nodeHosts.join(',');
   const url = toURLPath(clusterID + '/nodes/' + nodes);
   return get(url);
+}
+
+// getConfig fetches the config of the node
+export function getConfig(clusterID, nodeHost) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/config');
+  return get(url);
+}
+
+// setConfig sets the configs
+export function setConfig(clusterID, nodeHost, config) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/config');
+  return postJSON(url, {
+    newConfig: config
+  });
 }
 
