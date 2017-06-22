@@ -3,6 +3,7 @@ import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
 import { toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
+import { toEntityPath } from 'classes/urlAndViewSynchronizer';
 
 export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
 export function showLeftPane() {
@@ -164,6 +165,15 @@ export function selectStartView() {
   };
 }
 
+export const SELECT_DEPLOY_CLUSTER = 'SELECT_DEPLOY_CLUSTER';
+export function selectDeployCluster() {
+  const path = toEntityPath(VIEW_TYPE.DEPLOY_CLUSTER);
+  return {
+    entityPath: path,
+    type: SELECT_DEPLOY_CLUSTER,
+  };
+}
+
 export function selectPath(entityPath, view) {
   const e = matchAndExtractEntityPathVariabes(entityPath);
   const { clusterID, udfName, namespaceName, setName, nodeHost } = e;
@@ -199,6 +209,9 @@ export function selectPath(entityPath, view) {
 
   case VIEW_TYPE.SET_OVERVIEW:
     return selectSetOverview(clusterID, nodeHost, namespaceName, view);
+
+  case VIEW_TYPE.DEPLOY_CLUSTER:
+    return selectDeployCluster();
 
   default:
     return selectStartView();

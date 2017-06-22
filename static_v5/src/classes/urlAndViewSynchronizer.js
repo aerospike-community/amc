@@ -73,12 +73,12 @@ export function updateURL(selectedEntityPath, view) {
 // to convert a url to an entity path and vice versa.
 //
 
-const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
+const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE, DEPLOY_CLUSTER } = VIEW_TYPE;
 const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEXES_OVERVIEW } = VIEW_TYPE;
 const pathDefinitions = [{
-  url: '',
-  entityPath: '',
-  viewType: START_VIEW
+  url: 'deploy-cluster',
+  entityPath: 'deploy-cluster',
+  viewType: DEPLOY_CLUSTER,
 }, {
   url: 'physical-tree/cluster/:clusterID/:view',
   entityPath: 'physical-tree/:clusterID',

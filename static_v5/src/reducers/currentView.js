@@ -2,7 +2,7 @@ import { SELECT_NODE_VIEW, SELECT_CLUSTER_VIEW, INITIALIZE_VIEW } from 'actions/
 import { SELECT_START_VIEW, SELECT_NAMESPACE_VIEW, SELECT_SET_VIEW } from 'actions/currentView';
 import { SELECT_NODE_OVERVIEW, SELECT_NAMESPACE_OVERVIEW, SELECT_SET_OVERVIEW } from 'actions/currentView';
 import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } from 'actions/currentView';
-import { SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP } from 'actions/currentView';
+import { SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP, SELECT_DEPLOY_CLUSTER } from 'actions/currentView';
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
 
@@ -173,6 +173,14 @@ export default function currentView(state = InitState, action) {
     case SELECT_START_VIEW:
       updated = Object.assign({}, InitState, {
         viewType: VIEW_TYPE.START_VIEW
+      });
+      break;
+
+    case SELECT_DEPLOY_CLUSTER:
+      updated = Object.assign({}, InitState, {
+        isInitialized: true,
+        viewType: VIEW_TYPE.DEPLOY_CLUSTER,
+        selectedEntityPath: action.entityPath,
       });
       break;
 

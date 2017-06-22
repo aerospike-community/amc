@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ClusterToolbar from 'components/cluster/ClusterToolbar';
 import { displayAddClusterConnection } from 'actions/clusters';
-import { hideLeftPane } from 'actions/currentView';
+import { hideLeftPane, selectDeployCluster } from 'actions/currentView';
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -12,7 +12,8 @@ const mapDispatchToProps = (dispatch) => {
         dispatch(displayAddClusterConnection(true));
       else if (item === 'hideEntityTree')
         dispatch(hideLeftPane());
-      
+      else if (item === 'deployCluster')
+        dispatch(selectDeployCluster());
     },
   };
 };
