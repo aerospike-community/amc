@@ -7,6 +7,7 @@ import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import EditConfigModal from 'components/EditConfigModal';
 import Tabs from 'components/Tabs';
+import { nextNumber, distanceToBottom } from 'classes/util';
 
 // ConfigEditor provides a view to edit configuration
 // of a node, cluster
@@ -18,6 +19,7 @@ class ConfigEditor extends React.Component {
       selectedContext: null,
       selectedConfigs: [],
 
+      height: 200,
       showEdit: false,
       edit: {
         inProgress: false,
@@ -25,6 +27,8 @@ class ConfigEditor extends React.Component {
         success: false,
       }
     };
+
+    this.id = 'config_editor_' + nextNumber();
 
     this.onContextTabSelect = this.onContextTabSelect.bind(this);
     this.onRowSelected = this.onRowSelected.bind(this);
@@ -96,6 +100,14 @@ class ConfigEditor extends React.Component {
     });
   }
 
+  componentDidMount() {
+    const elm = document.getElementById(this.id);
+    const h = distanceToBottom(elm);
+    this.setState({
+      height: h-100 // space for buttons
+    });
+  }
+
   render() {
     const columnDefs = [{
       headerName: 'Config',
@@ -110,7 +122,7 @@ class ConfigEditor extends React.Component {
     const contexts = Object.keys(config);
     const selected = this.state.selectedContext || contexts[0];
     const rowData = config[selected] || [];
-    const {showEdit, edit, selectedConfigs} = this.state;
+    const {showEdit, edit, selectedConfigs, height} = this.state;
 
     return (
       <div>
@@ -118,7 +130,7 @@ class ConfigEditor extends React.Component {
         <Tabs names={contexts} default={selected} onSelect={this.onContextTabSelect}/>
         }
 
-        <div className="ag-bootstrap" style={{height: 400}}>
+        <div className="ag-bootstrap" id={this.id} style={{height: height}}>
           <AgGridReact columnDefs={columnDefs} rowData={rowData} 
             onRowSelected={this.onRowSelected} rowSelection="multiple" />
 

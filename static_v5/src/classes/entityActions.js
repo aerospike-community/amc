@@ -68,7 +68,8 @@ export const UDF_OVERVIEW_ACTIONS = extractActions(udfOverviewActions);
 const nodeActions = {
   View: {
     isDefault: true
-  }
+  },
+  Configuration: {}
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

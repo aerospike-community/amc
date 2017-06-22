@@ -16,6 +16,14 @@ class Tabs extends React.Component {
     this.onSelect= this.onSelect.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.default !== this.props.default) {
+      this.setState({
+        selected: nextProps.default
+      });
+    }
+  }
+
   onSelect(name) {
     this.setState({
       selected: name
