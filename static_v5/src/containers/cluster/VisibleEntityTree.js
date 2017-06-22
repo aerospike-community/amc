@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import EntityTree from 'components/cluster/EntityTree';
 import { selectPath } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
@@ -7,6 +8,7 @@ import { displayAuthClusterConnection, disconnectCluster } from 'actions/cluster
 import { toPhysicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import { matchAndExtractEntityPathVariabes } from 'classes/urlAndViewSynchronizer';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
@@ -32,10 +34,12 @@ const mapDispatchToProps = (dispatch) => {
     },
 
     onEntityAction: (entity, action) => {
+      const {clusterID} = matchAndExtractEntityPathVariabes(entity.path);
+
       if (action === CLUSTER_ACTIONS.Connect) 
-        dispatch(displayAuthClusterConnection(true, entity.path));
+        dispatch(displayAuthClusterConnection(true, clusterID));
       else if (action === CLUSTER_ACTIONS.Disconnect)
-        dispatch(disconnectCluster(entity.path));
+        dispatch(disconnectCluster(clusterID));
       else // TODO
         dispatch(selectPath(entity.path, action));
     },
