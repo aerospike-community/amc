@@ -69,7 +69,8 @@ const nodeActions = {
   View: {
     isDefault: true
   },
-  Configuration: {}
+  Configuration: {},
+  Latency: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

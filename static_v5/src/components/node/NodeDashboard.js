@@ -14,7 +14,7 @@ class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Configuration];
+    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration];
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 
@@ -34,16 +34,20 @@ class NodeDashboard extends React.Component {
       <div>
         <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
 
+
         {view === NODE_ACTIONS.View && 
         <div>
           <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} />
           <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
-          <NodeLatency clusterID={clusterID} nodeHost={nodeHost} />
         </div>
         }
 
         {view === NODE_ACTIONS.Configuration &&
         <NodeConfigEditor clusterID={clusterID} nodeHost={nodeHost} />
+        }
+
+        {view === NODE_ACTIONS.Latency &&
+        <NodeLatency clusterID={clusterID} nodeHost={nodeHost} />
         }
       </div>
     );
