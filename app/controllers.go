@@ -164,10 +164,13 @@ func unmarshalAuthenticateAuthPayload(ctx context.Context, service *goa.Service,
 // ConnectionController is the controller interface for the Connection actions.
 type ConnectionController interface {
 	goa.Muxer
+	Config(*ConfigConnectionContext) error
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
+	Namespaces(*NamespacesConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
+	SetConfig(*SetConfigConnectionContext) error
 	Show(*ShowConnectionContext) error
 	Throughput(*ThroughputConnectionContext) error
 }
@@ -176,9 +179,28 @@ type ConnectionController interface {
 func MountConnectionController(service *goa.Service, ctrl ConnectionController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/config", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewConfigConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Config(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/config", ctrl.MuxHandler("config", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Config", "route", "GET /api/v1/connections/:connId/config", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -226,6 +248,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 			return err
 		}
 		// Build the context
+		rctx, err := NewNamespacesConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Namespaces(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("namespaces", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Namespaces", "route", "GET /api/v1/connections/:connId/namespaces", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
 		rctx, err := NewQueryConnectionContext(ctx, req, service)
 		if err != nil {
 			return err
@@ -259,6 +298,29 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("POST", "/api/v1/connections", ctrl.MuxHandler("save", h, unmarshalSaveConnectionPayload))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Save", "route", "POST /api/v1/connections", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSetConfigConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*SetConfigConnectionPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.SetConfig(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/config", ctrl.MuxHandler("set config", h, unmarshalSetConfigConnectionPayload))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "SetConfig", "route", "POST /api/v1/connections/:connId/config", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -340,6 +402,21 @@ func unmarshalConnectConnectionPayload(ctx context.Context, service *goa.Service
 // unmarshalSaveConnectionPayload unmarshals the request body into the context request data Payload field.
 func unmarshalSaveConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &saveConnectionPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalSetConfigConnectionPayload unmarshals the request body into the context request data Payload field.
+func unmarshalSetConfigConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &setConfigConnectionPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}
@@ -756,7 +833,9 @@ func handleNamespaceOrigin(h goa.Handler) goa.Handler {
 // NodeController is the controller interface for the Node actions.
 type NodeController interface {
 	goa.Muxer
+	Config(*ConfigNodeContext) error
 	Latency(*LatencyNodeContext) error
+	SetConfig(*SetConfigNodeContext) error
 	Show(*ShowNodeContext) error
 	Throughput(*ThroughputNodeContext) error
 }
@@ -765,9 +844,27 @@ type NodeController interface {
 func MountNodeController(service *goa.Service, ctrl NodeController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewConfigNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Config(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("config", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Config", "route", "GET /api/v1/connections/:connId/nodes/:node/config", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -785,6 +882,29 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	h = handleNodeOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("latency", h, nil))
 	service.LogInfo("mount", "ctrl", "Node", "action", "Latency", "route", "GET /api/v1/connections/:connId/nodes/:node/latency", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSetConfigNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*SetConfigNodePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.SetConfig(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("set config", h, unmarshalSetConfigNodePayload))
+	service.LogInfo("mount", "ctrl", "Node", "action", "SetConfig", "route", "POST /api/v1/connections/:connId/nodes/:node/config", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -846,6 +966,21 @@ func handleNodeOrigin(h goa.Handler) goa.Handler {
 
 		return h(ctx, rw, req)
 	}
+}
+
+// unmarshalSetConfigNodePayload unmarshals the request body into the context request data Payload field.
+func unmarshalSetConfigNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &setConfigNodePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
 }
 
 // PublicController is the controller interface for the Public actions.

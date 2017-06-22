@@ -59,26 +59,22 @@ package design
 // e.GET("/aerospike/service/debug", getDebug)
 // e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
 
-// e.GET("/get_current_monitoring_clusters", sessionValidator(getCurrentMonitoringClusters))
-
 // e.POST("/set-update-interval/:clusterUuid", sessionValidator(setClusterUpdateInterval))
-// e.GET("/aerospike/service/clusters/:clusterUuid", sessionValidator(getCluster))
-// e.POST("/aerospike/service/clusters/:clusterUuid/logout", postRemoveClusterFromSession)
 
-// e.GET("/aerospike/service/clusters/:clusterUuid/throughput", sessionValidator(getClusterThroughput))
-// e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", sessionValidator(getClusterThroughputHistory))
 // e.GET("/aerospike/service/clusters/:clusterUuid/basic", sessionValidator(getClusterBasic))
 // e.POST("/aerospike/service/clusters/:clusterUuid/add_node", sessionValidator(postAddClusterNodes))
-// e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", sessionValidator(getClusterNodes))
-// e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", sessionValidator(getClusterNodeAllConfig))
+
+// e.GET ("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", sessionValidator(getClusterNodes))
+// e.GET ("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", sessionValidator(getClusterNodeAllConfig))
 // e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", sessionValidator(setClusterNodesConfig))
 // e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_off", sessionValidator(postSwitchNodeOff))
+// e.GET ("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", sessionValidator(getClusterNodeAllStats))
+
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", sessionValidator(getClusterNamespaces))
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", sessionValidator(getClusterNamespaceNodes))
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", sessionValidator(getClusterNamespaceAllConfig))
 // e.POST("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/setconfig", sessionValidator(setClusterNamespaceConfig))
 
-// e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", sessionValidator(getClusterNodeAllStats))
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", sessionValidator(getClusterNamespaceNodeAllStats))
 // e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:port/nodes/:node/allstats", sessionValidator(getClusterXdrNodeAllStats))
 
@@ -87,5 +83,3 @@ package design
 // e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/storage", sessionValidator(getClusterNamespaceStorage))
 // e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/jobs", getClusterNodesJobs)
 // e.GET("/aerospike/service/clusters/:clusterUuid/jobs/nodes/:node", getClusterJobsNode)
-
-// e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)

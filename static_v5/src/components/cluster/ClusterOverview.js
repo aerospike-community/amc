@@ -31,8 +31,9 @@ class ClusterOverview extends React.Component {
           clusterOverview: details
         });
       })
-      .catch(() => {
+      .catch((message) => {
         // TODO
+        console.error(message);
       });
   }
 

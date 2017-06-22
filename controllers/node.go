@@ -18,6 +18,30 @@ func NewNodeController(service *goa.Service) *NodeController {
 	return &NodeController{Controller: service.NewController("NodeController")}
 }
 
+// Config runs the config action.
+func (c *NodeController) Config(ctx *app.ConfigNodeContext) error {
+	// NodeController_Config: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	res := &app.AerospikeAmcNodeConfigResponse{
+		Address: node.Address(),
+		Status:  string(node.Status()),
+		Config:  node.ConfigAttrs(),
+	}
+
+	// NodeController_Config: end_implement
+	return ctx.OK(res)
+}
+
 // Latency runs the latency action.
 func (c *NodeController) Latency(ctx *app.LatencyNodeContext) error {
 	// NodeController_Latency: start_implement
@@ -73,6 +97,43 @@ func (c *NodeController) Show(ctx *app.ShowNodeContext) error {
 	}
 
 	// NodeController_Show: end_implement
+	return ctx.OK(res)
+}
+
+// SetConfig runs the set config action.
+func (c *NodeController) SetConfig(ctx *app.SetConfigNodeContext) error {
+	// NodeController_SetConfig: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	config := make(map[string]string, len(ctx.Payload.NewConfig))
+	for k, v := range ctx.Payload.NewConfig {
+		config[k] = ""
+		if len(v) > 0 {
+			config[k] = v
+		}
+	}
+
+	err = node.SetServerConfig("service", config)
+	if err != nil {
+		return ctx.NotAcceptable(err.Error())
+	}
+
+	// NodeController_SetConfig: end_implement
+	res := &app.AerospikeAmcNodeConfigResponse{
+		Address: node.Address(),
+		Status:  string(node.Status()),
+		Config:  node.ConfigAttrs(),
+	}
+
 	return ctx.OK(res)
 }
 

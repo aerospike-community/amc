@@ -31,7 +31,6 @@ class EditClusterConnection extends React.Component {
     const { clusterID } = this.props;
     updateConnectionAPI(clusterID, connection)
       .then((response) => {
-        // FIXME the response should have the newly added connection
         this.props.onUpdateConnectionSuccess(clusterID, connection);
       })
       .catch((response) => {

@@ -75,6 +75,55 @@ var _ = Resource("node", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the config of the node.")
+		Routing(GET(":node/config"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Required("node")
+		})
+
+		Response(OK, NodeConfigResponseMedia)
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("set config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Changes the config of the node.")
+		Routing(POST(":node/config"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Required("node")
+		})
+
+		Payload(func() {
+			Member("newConfig", HashOf(String, String), "New config parameters", func() { Example(map[string]interface{}{"some-config": "some-value"}) })
+			Required("newConfig")
+		})
+
+		Response(OK, NodeConfigResponseMedia)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 })
 
 var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+json", func() {
@@ -101,4 +150,27 @@ var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+j
 
 		Required("memory", "disk", "clusterVisibility", "sameCluster", "status", "stats")
 	})
+})
+
+var NodeConfigResponseMedia = MediaType("application/vnd.aerospike.amc.node.config.response+json", func() {
+	Description("Node Config")
+
+	Attributes(func() {
+		Attribute("address", String, "Node Address")
+		Attribute("status", String, "Node status")
+		Attribute("config", HashOf(String, Any), "Node config")
+		Attribute("error", String, "Error message")
+
+		Required("address", "status", "config")
+	})
+
+	View("default", func() {
+		Attribute("address")
+		Attribute("status")
+		Attribute("config")
+		Attribute("error")
+
+		Required("address", "status", "config")
+	})
+
 })

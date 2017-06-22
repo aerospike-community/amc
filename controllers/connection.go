@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"sync"
+
 	"github.com/goadesign/goa"
 
 	ast "github.com/aerospike/aerospike-client-go/types"
@@ -18,6 +20,29 @@ type ConnectionController struct {
 // NewConnectionController creates a connection controller.
 func NewConnectionController(service *goa.Service) *ConnectionController {
 	return &ConnectionController{Controller: service.NewController("ConnectionController")}
+}
+
+// Config runs the config action.
+func (c *ConnectionController) Config(ctx *app.ConfigConnectionContext) error {
+	// ConnectionController_Config: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	nodes := cluster.Nodes()
+	res := make(map[string]*app.AerospikeAmcNodeConfigResponse, len(nodes))
+	for _, node := range nodes {
+		res[node.Address()] = &app.AerospikeAmcNodeConfigResponse{
+			Address: node.Address(),
+			Status:  string(node.Status()),
+			Config:  node.ConfigAttrs(),
+		}
+	}
+
+	// ConnectionController_Config: end_implement
+	return ctx.OK(res)
 }
 
 // Connect runs the connect action.
@@ -56,6 +81,21 @@ func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 
 	// ConnectionController_Delete: end_implement
 	return ctx.NoContent()
+}
+
+// Namespaces runs the namespaces action.
+func (c *ConnectionController) Namespaces(ctx *app.NamespacesConnectionContext) error {
+	// ConnectionController_Namespaces: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	res := cluster.NamespaceInfo(cluster.NamespaceList())
+
+	// ConnectionController_Namespaces: end_implement
+	return ctx.OK(res)
 }
 
 // Query runs the query action.
@@ -137,6 +177,64 @@ func (c *ConnectionController) Show(ctx *app.ShowConnectionContext) error {
 	}
 
 	// ConnectionController_Show: end_implement
+	return ctx.OK(res)
+}
+
+// SetConfig runs the set config action.
+func (c *ConnectionController) SetConfig(ctx *app.SetConfigConnectionContext) error {
+	// ConnectionController_SetConfig: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	config := make(map[string]string, len(ctx.Payload.NewConfig))
+	for k, v := range ctx.Payload.NewConfig {
+		config[k] = ""
+		if len(v) > 0 {
+			config[k] = v
+		}
+	}
+
+	nodes := cluster.Nodes()
+	wg := new(sync.WaitGroup)
+	wg.Add(len(nodes))
+	resChan := make(chan *NodeResult, len(nodes))
+
+	for _, node := range nodes {
+		go func(node *models.Node) {
+			defer wg.Done()
+
+			err := node.SetServerConfig("service", config)
+			resChan <- &NodeResult{Name: node.Address(), Err: err}
+		}(node)
+	}
+
+	wg.Wait()
+	close(resChan)
+
+	res := make(map[string]*app.AerospikeAmcNodeConfigResponse)
+	for nr := range resChan {
+		if nr.Err != nil {
+			s := nr.Err.Error()
+			res[nr.Name] = &app.AerospikeAmcNodeConfigResponse{
+				Error: &s,
+			}
+		} else {
+			node := cluster.FindNodeByAddress(nr.Name)
+			if node == nil {
+				continue
+			}
+			res[nr.Name] = &app.AerospikeAmcNodeConfigResponse{
+				Address: node.Address(),
+				Status:  string(node.Status()),
+				Config:  node.ConfigAttrs(),
+			}
+		}
+	}
+
+	// ConnectionController_SetConfig: end_implement
 	return ctx.OK(res)
 }
 

@@ -67,3 +67,9 @@ export function getThroughput(clusterID, from, to) {
 
   return get(url);
 }
+
+// getNamespaces returns the namespace statistics of the cluster
+export function getNamespaces(clusterID)  {
+  const url = toURLPath(clusterID + '/namespaces');
+  return get(url);
+}

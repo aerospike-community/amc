@@ -3,64 +3,44 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
 
+import NamespacesTable from 'components/namespace/NamespacesTable';
+import { getNamespaces } from 'api/clusterConnections';
+
 // ClusterNamespaces provides an overview of the cluster namespaces
 class ClusterNamespaces extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      namespaces: []
+    };
   }
 
-  // get the namespaces data
-  // FIXME get real data
-  namespaces() {
-    const namespaces = ['test', 'exam'];
-    const data = [];
-    namespaces.forEach((n) => {
-      const d = (
-          <tr key={n}>
-            <td> {n} </td>
-            <td> 12 </td>
-            <td> 12 </td>
-            <td> 1GB </td>
-            <td> 2GB </td>
-            <td> 11 </td>
-          </tr>
-      );
-      data.push(d);
-    });
+  componentDidMount() {
+    this.fetchNamespaces();
+  }
 
-    return data;
+  fetchNamespaces() {
+    const { clusterID } = this.props;
+
+    getNamespaces(clusterID)
+      .then((namespaces) => {
+        let arr = [];
+        for (let k in namespaces)
+          arr.push(namespaces[k]);
+
+        this.setState({
+          namespaces: arr
+        });
+      })
+      .catch((message) => {
+        console.error(message);
+      });
   }
 
   render() {
-    const namespaces = this.namespaces();
-    return (
-      <div>
-        <div className="row">
-          <div className="col-xl-12 as-section-header">
-            Namespaces
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-xl-12"> 
-            <Table size="sm" bordered>
-              <thead>
-                <tr>
-                  <th> Host</th>
-                  <th> Master </th>
-                  <th> Replica </th>
-                  <th> Disk </th>
-                  <th> RAM </th>
-                  <th> Expired Objects </th>
-                </tr>
-              </thead>
-              <tbody>
-                {namespaces}
-              </tbody>
-            </Table>
-          </div>
-        </div>
-      </div>
-    );
+    const { namespaces } = this.state;
+    return <NamespacesTable namespaces={namespaces} />;
   }
 }
 

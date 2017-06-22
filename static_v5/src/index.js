@@ -12,10 +12,11 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.css';
 import 'nvd3/build/nv.d3.css';
 import 'react-widgets/lib/less/react-widgets.less';
+import 'ag-grid/dist/styles/ag-grid.css';
+import 'ag-grid/dist/styles/theme-bootstrap.css';
 
 import './styles/index.scss';
 
-// some initialization
 // see http://jquense.github.io/react-widgets/docs/#/i18n?_k=gqx37t
 import moment from 'moment';
 import momentLocalizer from 'react-widgets/lib/localizers/moment';
