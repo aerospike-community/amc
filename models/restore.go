@@ -13,6 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 )
 
@@ -24,6 +25,33 @@ type Restore struct {
 	IgnoreGenerationNum bool
 
 	cluster *Cluster
+}
+
+func (r *Restore) ToMedia() *app.AerospikeAmcRestoreResponse {
+	var fd *int
+	if r.Finished.Valid() {
+		tmp := (int(*r.Finished.UnixNano()) / 1000)
+		fd = &tmp
+	}
+
+	return &app.AerospikeAmcRestoreResponse{
+		ID:            r.Id,
+		ClusterID:     r.ClusterId,
+		Namespace:     r.Namespace,
+		SourceAddress: r.DestinationAddress,
+		SourcePath:    r.DestinationPath,
+
+		Threads:                r.Threads,
+		MissingRecordsOnly:     r.MissingRecordsOnly,
+		IgnoreGenerationNumber: r.IgnoreGenerationNum,
+
+		CreateDate: int(r.Created.UnixNano() / 1000),
+		FinishDate: fd,
+
+		Status:   string(r.Status),
+		Progress: r.Progress,
+		Error:    &r.Error,
+	}
 }
 
 func (r *Restore) Execute() error {

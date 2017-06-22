@@ -15,6 +15,13 @@ import (
 	"strings"
 )
 
+// BackupHref returns the resource href.
+func BackupHref(connID, backupID interface{}) string {
+	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })
+	parambackupID := strings.TrimLeftFunc(fmt.Sprintf("%v", backupID), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/connections/%v/backups/%v", paramconnID, parambackupID)
+}
+
 // ConnectionHref returns the resource href.
 func ConnectionHref(connID interface{}) string {
 	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })

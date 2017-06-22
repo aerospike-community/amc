@@ -99,7 +99,7 @@ func getSuccessfulBackups(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 
-	backupList, err := common.SuccessfulBackups()
+	backupList, err := common.SuccessfulBackups(clusterUuid)
 	if err != nil {
 		return c.JSON(http.StatusOK, errorMap("Error reading backup list from the database: "+err.Error()))
 	}
@@ -134,7 +134,7 @@ func getAvailableBackups(c echo.Context) error {
 
 	c.Bind(&form)
 
-	backupList, err := common.SuccessfulBackups()
+	backupList, err := common.SuccessfulBackups(clusterUuid)
 	if err != nil {
 		return c.JSON(http.StatusOK, errorMap("Error reading backup list from the database: "+err.Error()))
 	}
