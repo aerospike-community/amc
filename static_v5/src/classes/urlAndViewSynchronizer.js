@@ -80,44 +80,44 @@ const pathDefinitions = [{
   entityPath: '',
   viewType: START_VIEW
 }, {
-  url: 'cluster/:clusterID/:view',
-  entityPath: ':clusterID',
+  url: 'physical-tree/cluster/:clusterID/:view',
+  entityPath: 'physical-tree/:clusterID',
   viewType: CLUSTER,
 }, {
-  url: 'udf-overview/:clusterID/:view',
-  entityPath: ':clusterID/' + UDF,
+  url: 'physical-tree/udf-overview/:clusterID/:view',
+  entityPath: 'physical-tree/:clusterID/' + UDF,
   viewType: UDF_OVERVIEW,
 }, {
-  url: 'udf/:clusterID/:udfName/:view',
-  entityPath: ':clusterID/' + UDF + '/:udfName',
+  url: 'physical-tree/udf/:clusterID/:udfName/:view',
+  entityPath: 'physical-tree/:clusterID/' + UDF + '/:udfName',
   viewType: UDF,
 }, {
-  url: 'indexes-overview/:clusterID',
-  entityPath: ':clusterID/indexes',
+  url: 'physical-tree/indexes-overview/:clusterID',
+  entityPath: 'physical-tree/:clusterID/indexes',
   viewType: INDEXES_OVERVIEW,
 }, {
-  url: 'node/:clusterID/:nodeHost/:view',
-  entityPath: ':clusterID/' + NODE + '/:nodeHost',
+  url: 'physical-tree/node/:clusterID/:nodeHost/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost',
   viewType: NODE,
 }, {
-  url: 'namespace/:clusterID/:nodeHost/:namespaceName/:view',
-  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName',
+  url: 'physical-tree/namespace/:clusterID/:nodeHost/:namespaceName/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName',
   viewType: NAMESPACE, 
 }, {
-  url: 'set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
-  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET + '/:setName',
+  url: 'physical-tree/set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET + '/:setName',
   viewType: SET, 
 }, {
-  url: 'node-overview/:clusterID/:view',
-  entityPath: ':clusterID/' + NODE,
+  url: 'physical-tree/node-overview/:clusterID/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE,
   viewType: NODE_OVERVIEW, 
 }, {
-  url: 'namespace-overview/:clusterID/:nodeHost/:view',
-  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE,
+  url: 'physical-tree/namespace-overview/:clusterID/:nodeHost/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE,
   viewType: NAMESPACE_OVERVIEW, 
 }, {
-  url: 'set-overview/:clusterID/:nodeHost/:namespaceName/:view',
-  entityPath: ':clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET,
+  url: 'physical-tree/set-overview/:clusterID/:nodeHost/:namespaceName/:view',
+  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET,
   viewType: SET_OVERVIEW, 
 }];
 
