@@ -167,6 +167,7 @@ type ConnectionController interface {
 	Config(*ConfigConnectionContext) error
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
+	Latency(*LatencyConnectionContext) error
 	Namespaces(*NamespacesConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
@@ -181,6 +182,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/config", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
@@ -241,6 +243,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("DELETE", "/api/v1/connections/:connId", ctrl.MuxHandler("delete", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:connId", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLatencyConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Latency(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("latency", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Latency", "route", "GET /api/v1/connections/:connId/latency", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

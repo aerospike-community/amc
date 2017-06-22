@@ -1448,7 +1448,7 @@ definitions:
         used-bytes: 4.00024e+18
       name: Qui debitis.
       stats:
-        Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
+        Ea molestiae veritatis aliquam.: 1164e6c2-6385-4659-8d73-7676c6a84166
       status: Omnis praesentium.
     properties:
       disk:
@@ -1463,7 +1463,7 @@ definitions:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
+          Ea molestiae veritatis aliquam.: 1164e6c2-6385-4659-8d73-7676c6a84166
         type: object
       status:
         description: Cluster/Node status
@@ -2445,6 +2445,53 @@ paths:
       summary: show index
       tags:
       - index
+  /api/v1/connections/{connId}/latency:
+    get:
+      description: |-
+        Returns the aggregate latency of the cluster namespaces for a given window of time. If From/To are not specified, the latest throughput will be returned.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: connection#latency
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: From time in unix seconds
+        in: query
+        name: from
+        required: false
+        type: integer
+      - description: Until time in unix seconds
+        in: query
+        name: until
+        required: false
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: latency connection
+      tags:
+      - connection
   /api/v1/connections/{connId}/modules:
     get:
       description: |-

@@ -145,6 +145,31 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("latency", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the aggregate latency of the cluster namespaces for a given window of time. If From/To are not specified, the latest throughput will be returned.")
+		Routing(GET(":connId/latency"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("connId")
+		})
+
+		Response(OK, HashOf(String, LatencyResponseMedia))
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("config", func() {
 		Security(JWT, func() {
 			Scope("api:enterprise")

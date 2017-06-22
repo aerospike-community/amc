@@ -83,6 +83,28 @@ func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 	return ctx.NoContent()
 }
 
+// Latency runs the latency action.
+func (c *ConnectionController) Latency(ctx *app.LatencyConnectionContext) error {
+	// ConnectionController_Latency: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	nodes := cluster.Nodes()
+	res := make(map[string]*app.AerospikeAmcLatencyResponse, len(nodes))
+	for _, node := range nodes {
+		res[node.Address()] = &app.AerospikeAmcLatencyResponse{
+			Status:  string(node.Status()),
+			Latency: latency(node, ctx.From, ctx.Until),
+		}
+	}
+
+	// ConnectionController_Latency: end_implement
+	return ctx.OK(res)
+}
+
 // Namespaces runs the namespaces action.
 func (c *ConnectionController) Namespaces(ctx *app.NamespacesConnectionContext) error {
 	// ConnectionController_Namespaces: start_implement

@@ -895,6 +895,381 @@ func DeleteConnectionUnauthorized(t goatest.TInterface, ctx context.Context, ser
 	return rw
 }
 
+// LatencyConnectionBadRequest runs the method Latency of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func LatencyConnectionBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string, from *int, until *int) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		query["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		query["until"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/latency", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		prms["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		prms["until"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	latencyCtx, _err := app.NewLatencyConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Latency(latencyCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// LatencyConnectionInternalServerError runs the method Latency of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func LatencyConnectionInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string, from *int, until *int) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		query["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		query["until"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/latency", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		prms["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		prms["until"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	latencyCtx, _err := app.NewLatencyConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Latency(latencyCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// LatencyConnectionNotImplemented runs the method Latency of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func LatencyConnectionNotImplemented(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string, from *int, until *int) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		query["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		query["until"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/latency", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		prms["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		prms["until"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	latencyCtx, _err := app.NewLatencyConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Latency(latencyCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 501 {
+		t.Errorf("invalid response status code: got %+v, expected 501", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// LatencyConnectionOK runs the method Latency of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func LatencyConnectionOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string, from *int, until *int) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		query["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		query["until"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/latency", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		prms["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		prms["until"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	latencyCtx, _err := app.NewLatencyConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Latency(latencyCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// LatencyConnectionUnauthorized runs the method Latency of the given controller with the given parameters.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func LatencyConnectionUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.ConnectionController, connID string, from *int, until *int) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		query["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		query["until"] = sliceVal
+	}
+	u := &url.URL{
+		Path:     fmt.Sprintf("/api/v1/connections/%v/latency", connID),
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		panic("invalid test " + err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if from != nil {
+		sliceVal := []string{strconv.Itoa(*from)}
+		prms["from"] = sliceVal
+	}
+	if until != nil {
+		sliceVal := []string{strconv.Itoa(*until)}
+		prms["until"] = sliceVal
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "ConnectionTest"), rw, req, prms)
+	latencyCtx, _err := app.NewLatencyConnectionContext(goaCtx, req, service)
+	if _err != nil {
+		panic("invalid test data " + _err.Error()) // bug
+	}
+
+	// Perform action
+	_err = ctrl.Latency(latencyCtx)
+
+	// Validate response
+	if _err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
 // NamespacesConnectionBadRequest runs the method Namespaces of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
