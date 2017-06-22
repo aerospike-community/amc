@@ -42,6 +42,7 @@ const clusterActions = {
   },
   Edit: {},
   Delete: {},
+  Latency: {},
 };
 export const CLUSTER_ACTIONS = extractActions(clusterActions);
 
@@ -68,7 +69,9 @@ export const UDF_OVERVIEW_ACTIONS = extractActions(udfOverviewActions);
 const nodeActions = {
   View: {
     isDefault: true
-  }
+  },
+  Configuration: {},
+  Latency: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

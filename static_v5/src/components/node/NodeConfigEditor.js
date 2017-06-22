@@ -19,13 +19,14 @@ class NodeConfigEditor extends React.Component {
 
   fetchConfig(clusterID, nodeHost) {
     // TODO process config according to context
-    // TODO set the isEdit flag
     const processConfig = (config) => {
       let all = [];
       for (let k in config) {
         all.push({
           name: k,
-          value: config[k]
+          value: config[k],
+          // TODO set if dynamic config
+          isEditable: true,
         });
       }
       return all;

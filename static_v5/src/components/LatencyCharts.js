@@ -23,7 +23,6 @@ class LatencyCharts extends React.Component {
 
     this.state = {
       showDateTimePicker: false,
-      latencyWindows: [], // an array of latency windows <1ms, >1ms && <8ms, ...
 
       // [from, to] time window for which
       // the latency is shown

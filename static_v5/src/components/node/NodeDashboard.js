@@ -6,35 +6,51 @@ import Tabs from 'components/Tabs';
 import NodeThroughput from 'components/node/NodeThroughput';
 import NodeLatency from 'components/node/NodeLatency';
 import NodesSummary from 'components/node/NodesSummary';
+import NodeConfigEditor from 'components/node/NodeConfigEditor';
+import { NODE_ACTIONS } from 'classes/entityActions';
 
-import moment from 'moment';
-import { getLatency } from 'api/node';
-
+// NodeDashboard diplays all views of a node
 class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = ['Machine', 'Storage', 'Performance'];
+    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration];
+    this.onViewSelect = this.onViewSelect.bind(this);
   }
 
   componentDidMount() {
     const {clusterID, nodeHost, onViewSelect} = this.props;
-    getLatency(clusterID, nodeHost, moment().subtract(10, 'minutes').unix(), moment().unix());
+  }
+
+  onViewSelect(view) {
+    this.props.onViewSelect(view);
   }
 
   render() {
     const {clusterID, nodeHost, onViewSelect} = this.props;
-    const view = this.props.view || 'Machine';
+    const view = this.props.view || NODE_ACTIONS.View;
+
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={onViewSelect}/>
+        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+
+
+        {view === NODE_ACTIONS.View && 
         <div>
           <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} />
           <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
-          <NodeLatency clusterID={clusterID} nodeHost={nodeHost} />
         </div>
+        }
+
+        {view === NODE_ACTIONS.Configuration &&
+        <NodeConfigEditor clusterID={clusterID} nodeHost={nodeHost} />
+        }
+
+        {view === NODE_ACTIONS.Latency &&
+        <NodeLatency clusterID={clusterID} nodeHost={nodeHost} />
+        }
       </div>
-      );
+    );
   }
 }
 

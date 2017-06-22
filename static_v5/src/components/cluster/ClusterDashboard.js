@@ -6,6 +6,8 @@ import VisibleDeleteConnectionModal from 'containers/cluster/VisibleDeleteConnec
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import Tabs from 'components/Tabs';
+import ClusterLatency from 'components/cluster/ClusterLatency';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -17,12 +19,18 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onViewClusterOverview.bind(this);
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Delete];
+    this.onViewSelect = this.onViewSelect.bind(this);
+    this.onViewClusterOverview = this.onViewClusterOverview.bind(this);
+  }
+
+  onViewSelect(view) {
+    const { clusterID } = this.props;
+    this.props.onViewSelect(clusterID, view);
   }
 
   onViewClusterOverview() {
-    const { clusterID } = this.props;
-    this.props.onViewClusterOverview(clusterID);
+    this.onViewSelect(CLUSTER_ACTIONS.Overview);
   }
 
   render() {
@@ -37,9 +45,14 @@ class ClusterDashboard extends React.Component {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
                       onUpdateConnectionSuccess={onUpdateConnectionSuccess}
                       onCancel={() => this.onViewClusterOverview()} />
+    } else if (view === CLUSTER_ACTIONS.Latency) {
+      dashboard = <ClusterLatency clusterID={clusterID} />
     }
+
     return (
       <div>
+        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+
         {dashboard}
         {isDelete &&
           <VisibleDeleteConnectionModal />

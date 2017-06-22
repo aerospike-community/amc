@@ -1,15 +1,18 @@
 import { connect } from 'react-redux';
 import DeleteConnectionModal from 'components/cluster/DeleteConnectionModal';
-import { deleteClusterConnection, displayDeleteClusterConnection } from 'actions/clusters';
+import { deleteClusterConnection } from 'actions/clusters';
 import { selectStartView, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 let Clusters; // the clusters
+let CurrentClusterID;
 
 const mapStateToProps = (state) => {
   Clusters = state.clusters.items;
 
   const { clusterID } = state.currentView;
+  CurrentClusterID = clusterID;
+
   const cluster = state.clusters.items.find((i) => i.id === clusterID);
   return {
     connection: cluster,
@@ -20,7 +23,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onConnectionDeleteSuccess: (connection) => {
       // close modal
-      dispatch(displayDeleteClusterConnection(false));
+      dispatch(selectCluster(CurrentClusterID, CLUSTER_ACTIONS.Overview));
       // delete connection
       dispatch(deleteClusterConnection(connection));
 
@@ -38,7 +41,7 @@ const mapDispatchToProps = (dispatch) => {
 
     // cancel the view
     onCancel: () => {
-      dispatch(displayDeleteClusterConnection(false));
+      dispatch(selectCluster(CurrentClusterID, CLUSTER_ACTIONS.Overview));
     }
   };
 }

@@ -10,10 +10,18 @@ class Tabs extends React.Component {
     super(props);
 
     this.state = {
-      selected: props.default
+      selected: props.selected
     };
 
     this.onSelect= this.onSelect.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.selected !== this.props.selected) {
+      this.setState({
+        selected: nextProps.selected
+      });
+    }
   }
 
   onSelect(name) {
@@ -28,7 +36,7 @@ class Tabs extends React.Component {
     const {names} = this.props;
     let {selected} = this.state;
     if (!selected) {
-      selected = this.props.default;
+      selected = this.props.selected;
     }
 
     return (
@@ -37,9 +45,9 @@ class Tabs extends React.Component {
           {names.map((name) => {
             let nav;
             if (name === selected)
-              nav = <NavLink active> {name} </NavLink>;
+              nav = <NavLink href="#" active> {name} </NavLink>;
             else
-              nav = <NavLink > {name} </NavLink>;
+              nav = <NavLink href="#" > {name} </NavLink>;
 
             return (
                 <NavItem onClick={() => this.onSelect(name)} key={name}> 
@@ -56,8 +64,8 @@ class Tabs extends React.Component {
 Tabs.PropTypes = {
   // names of the tabs
   names: PropTypes.arrayOf(PropTypes.string),
-  // the default selected tab
-  default: PropTypes.string,
+  // the selected tab
+  selected: PropTypes.string,
   // calbback when the view is selected
   // onSelect(name)
   onSelect: PropTypes.func,

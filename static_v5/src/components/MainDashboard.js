@@ -17,10 +17,10 @@ class MainDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.changeView = this.changeView.bind(this);
+    this.onChangeView = this.onChangeView.bind(this);
   }
 
-  changeView(toView) {
+  onChangeView(toView) {
     const { selectedEntityPath, view } = this.props.currentView;
     if (toView === view)
       return;
@@ -40,22 +40,31 @@ class MainDashboard extends React.Component {
         dashboard = <VisibleClusterDashboard />
       else
         dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} to continue </h4>;
+
     } else if (viewType === VIEW_TYPE.NODE_OVERVIEW) {
       dashboard = <NodesOverview clusterID={clusterID} />
+
     } else if (viewType === VIEW_TYPE.NODE) {
-      dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} />
+      dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} view={view} onViewSelect={this.onChangeView}/>
+
     } else if (viewType === VIEW_TYPE.NAMESPACE) {
       dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
+
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
       dashboard = <IndexesOverview clusterID={clusterID} />
+        
     } else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW) {
       dashboard = <VisibleUDFDashboard />
+
     } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
+
     } else if (view === null && viewType === null) {
       dashboard = <Welcome />;
+
     } else {
       dashboard = <div className="as-centerpane-header"> {(view ? view : '') + ' ' + viewType} </div>;
+
     }
 
     return (

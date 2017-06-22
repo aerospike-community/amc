@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import EntityTree from 'components/cluster/EntityTree';
 import { selectPath } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
@@ -7,6 +8,7 @@ import { displayAuthClusterConnection, disconnectCluster } from 'actions/cluster
 import { toPhysicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import { matchAndExtractEntityPathVariabes } from 'classes/urlAndViewSynchronizer';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
@@ -32,12 +34,21 @@ const mapDispatchToProps = (dispatch) => {
     },
 
     onEntityAction: (entity, action) => {
-      if (action === CLUSTER_ACTIONS.Connect) 
-        dispatch(displayAuthClusterConnection(true, entity.path));
-      else if (action === CLUSTER_ACTIONS.Disconnect)
-        dispatch(disconnectCluster(entity.path));
-      else // TODO
-        dispatch(selectPath(entity.path, action));
+      const {clusterID} = matchAndExtractEntityPathVariabes(entity.path);
+
+      if (entity.viewType === VIEW_TYPE.CLUSTER) {
+        if (action === CLUSTER_ACTIONS.Connect) {
+          dispatch(displayAuthClusterConnection(true, clusterID));
+          return;
+        } 
+        if (action === CLUSTER_ACTIONS.Disconnect) {
+          dispatch(disconnectCluster(clusterID));
+          return;
+        }
+      } 
+
+      dispatch(selectPath(entity.path, action));
+
     },
 
     onNodeExpand: (node) => {
