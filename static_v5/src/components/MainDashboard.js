@@ -48,7 +48,8 @@ class MainDashboard extends React.Component {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} view={view} onViewSelect={this.onChangeView}/>
 
     } else if (viewType === VIEW_TYPE.NAMESPACE) {
-      dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
+      dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}
+                    view={view} onViewSelect={this.onChangeView}/>
 
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
       dashboard = <IndexesOverview clusterID={clusterID} />

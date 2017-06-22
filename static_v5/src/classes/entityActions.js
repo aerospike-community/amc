@@ -87,7 +87,8 @@ export const NODE_OVERVIEW_ACTIONS = extractActions(nodeOverviewActions);
 const namespaceActions = {
   View: {
     isDefault: true
-  }
+  },
+  Latency: {},
 };
 export const NAMESPACE_ACTIONS = extractActions(namespaceActions);
 
@@ -195,7 +196,7 @@ function viewTypeAction(viewType) {
     return nodeOverviewActions;
 
   if (viewType === VIEW_TYPE.NAMESPACE) 
-    return nodeOverviewActions;
+    return namespaceActions;
 
   if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) 
     return namespaceOverviewActions;
