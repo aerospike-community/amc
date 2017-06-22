@@ -2,6 +2,7 @@ import nv from 'nvd3';
 import d3 from 'd3';
 import bytes from 'bytes';
 
+import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
 import { watchElementSizeChange } from 'charts/util';
 
 // ThroughputChart draws a chart for the throughput
@@ -17,66 +18,19 @@ import { watchElementSizeChange } from 'charts/util';
 //        timestamp: 1496807162727,
 //      }, ...]
 //  }, ...]
-class ThroughputChart {
+class ThroughputChart extends AbstractStackedAreaChart {
   constructor(selector, throughput) {
-    this.selector = selector; // element selector on which the chart will be drawn
-    this.throughput = throughput; // the throughput
-
-    this.chart = null; // nvd3 chart
-    this.chartData = null;  // d3 chart data on element
+    super(selector, throughput, true);
   }
   
-  // update the chart with new data
-  update(throughput) {
-    this.throughput = throughput;
-    this.chartData
-      .datum(throughput)
-      .transition()
-      .duration(250)
-      .call(this.chart);
+  // x value of data point
+  x(d) {
+    return d.timestamp;
   }
 
-  // redraw the chart
-  redraw() {
-    this.chart.redraw();
-  }
-
-  draw() {
-    const marginTop = 40;
-    const nsuccess = 'successful';
-    const nfailed = 'failed';
-    const time = 'timestamp';
-
-    nv.addGraph(() => {
-      let chart = nv.models.stackedAreaChart()
-          .x((d) => d[time])
-          .y((d) => d[nsuccess])
-          .useInteractiveGuideline(true)
-          .showLegend(false)
-          .showControls(false)
-          .margin({top: marginTop});
-
-      // Hour:Minutes:Seconds
-      const f = d3.time.format('%X');
-      chart.xAxis
-          .tickFormat((t) => f(new Date(t)));
-
-      // if all values are zero, nvd3 sets range of y axis to [-1, 1].
-      // this sets the minimum range of y axis to be zero.
-      chart.forceY([0, 1000]);
-
-      // draw chart
-      const data = this.throughput;
-      const svg = d3.select(this.selector);
-      this.chartData = svg.datum(data);
-      this.chartData.call(chart);
-
-      // redraw on element size change
-      watchElementSizeChange(this.selector, () => chart.update());
-
-      this.chart = chart;
-      return chart;
-    });
+  // y value of data point
+  y(d) {
+    return d.successful;
   }
 }
 
