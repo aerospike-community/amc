@@ -18,10 +18,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    // change view to the cluster overview
-    onViewClusterOverview: (clusterID) => {
+    onViewSelect: (clusterID, view) => {
       const path = toClusterPath(clusterID);
-      dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));
+      dispatch(selectPath(path, view));
     },
 
     // update connection is a success

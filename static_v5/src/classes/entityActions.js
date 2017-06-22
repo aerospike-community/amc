@@ -42,6 +42,7 @@ const clusterActions = {
   },
   Edit: {},
   Delete: {},
+  Latency: {},
 };
 export const CLUSTER_ACTIONS = extractActions(clusterActions);
 

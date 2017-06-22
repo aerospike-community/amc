@@ -36,12 +36,19 @@ const mapDispatchToProps = (dispatch) => {
     onEntityAction: (entity, action) => {
       const {clusterID} = matchAndExtractEntityPathVariabes(entity.path);
 
-      if (action === CLUSTER_ACTIONS.Connect) 
-        dispatch(displayAuthClusterConnection(true, clusterID));
-      else if (action === CLUSTER_ACTIONS.Disconnect)
-        dispatch(disconnectCluster(clusterID));
-      else // TODO
-        dispatch(selectPath(entity.path, action));
+      if (entity.viewType === VIEW_TYPE.CLUSTER) {
+        if (action === CLUSTER_ACTIONS.Connect) {
+          dispatch(displayAuthClusterConnection(true, clusterID));
+          return;
+        } 
+        if (action === CLUSTER_ACTIONS.Disconnect) {
+          dispatch(disconnectCluster(clusterID));
+          return;
+        }
+      } 
+
+      dispatch(selectPath(entity.path, action));
+
     },
 
     onNodeExpand: (node) => {
