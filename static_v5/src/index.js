@@ -17,6 +17,10 @@ import 'ag-grid/dist/styles/theme-bootstrap.css';
 
 import './styles/index.scss';
 
+// For deploy_cluster
+import 'react-tabs/style/react-tabs.scss';
+
+// some initialization
 // see http://jquense.github.io/react-widgets/docs/#/i18n?_k=gqx37t
 import moment from 'moment';
 import momentLocalizer from 'react-widgets/lib/localizers/moment';

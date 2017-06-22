@@ -6,6 +6,7 @@ import classNames from 'classnames';
 
 import UpgradeCluster from 'components/cluster/UpgradeCluster';
 import AddNode from 'components/cluster/AddNode';
+import DeployClusterDashboard from 'components/cluster/DeployClusterDashboard';
 import Spinner from 'components/Spinner';
 import { getNodesSummary } from 'api/node';
 import bytes from 'bytes';
@@ -209,6 +210,7 @@ class ChangeClusterConnection extends React.Component {
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("upgrade")}>Upgrade</Button>
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("addNode")}>Add Node</Button>
           <Button disabled={inProgress} color="primary" href="resources/deployment.json" download="deployment.json" style={{marginLeft:"10px"}}>Download Deployment File</Button>
+          <Button disabled={inProgress} color="primary" onClick={() => this.changeView("deployCluster")}>Deploy Cluster</Button>
         </div>
         
       </div>  

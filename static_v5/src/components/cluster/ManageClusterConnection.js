@@ -70,7 +70,7 @@ class ManageClusterConnection extends React.Component {
     return (
       <div>
         <div className="as-centerpane-header">
-          Manage Cluster Connection {nodeHosts}
+          Manage Cluster Connection
         </div>
         <ChangeClusterConnection clusterID={clusterID} clusterName={clusterName} inProgress={this.state.inProgress}
           onSaveErrorMessage={this.state.onSaveErrorMessage} onCancel={this.onCancel} nodeHosts={nodeHosts}  />

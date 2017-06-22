@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
+import VisibleDeployClusterDashboard from 'containers/cluster/VisibleDeployClusterDashboard';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import IndexesOverview from 'components/cluster/IndexesOverview';
@@ -52,6 +53,8 @@ class MainDashboard extends React.Component {
       dashboard = <VisibleUDFDashboard />
     } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
+    } else if (viewType === VIEW_TYPE.DEPLOY_CLUSTER) {
+      dashboard = <VisibleDeployClusterDashboard />
     } else if (view === null && viewType === null) {
       dashboard = <Welcome />;
     } else {
