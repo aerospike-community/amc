@@ -63,8 +63,20 @@ export function getThroughput(clusterID, from, to) {
     query.from = from;
   if (to)
     query.until = to;
-  const url = toURLPath(clusterID + '/throughput', query);
 
+  const url = toURLPath(clusterID + '/throughput', query);
+  return get(url);
+}
+
+// getLatency returns the latency for the whole cluster
+export function getLatency(clusterID, from, to) {
+  let query = {}
+  if (from)
+    query.from = from;
+  if (to)
+    query.until = to;
+
+  const url = toURLPath(clusterID + '/latency', query);
   return get(url);
 }
 

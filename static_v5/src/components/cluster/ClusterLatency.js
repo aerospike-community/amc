@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import LatencyCharts from 'components/LatencyCharts';
+import { getLatency as getLatencyAPI } from 'api/clusterConnections';
 
 // ClusterLatency provides an overview of the cluster latency
 class ClusterLatency extends React.Component {
@@ -37,20 +38,22 @@ class ClusterLatency extends React.Component {
   getLatency(from, to) {
     const { clusterID } = this.props;
     const p = getLatencyAPI(clusterID, from, to)
-                .then((r) => r.latency);
+                .then((r) => {
+                  // FIXME when the API changes
+                  // right now showing any node's latency
+                  let nodes = Object.keys(r);
+                  if (nodes.length > 0)
+                    return r[nodes[0]].latency
+                  return {};
+                });
     return p;
   }
   
   render() {
-    return (
-        <h4> Latency </h4>
-    );
-
-    const { throughput, showChart } = this.state;
     const title = `Cluster Latency`;
 
     let charts = null;
-    if (showChart)
+    if (this.state.showChart)
       charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
 
     return charts;
