@@ -18,6 +18,16 @@ const Types = {
   udf_tps: 'UDF',
 };
 
+// default config for chart placements
+const ChartPlacements = [{
+  types: ['read_tps', 'write_tps'],
+  height: 350,
+}, {
+  height: 200,
+  types: ['batch_read_tps', 'query_tps', 'scan_tps', 'udf_tps']
+}];
+
+
 // ThroughputCharts displays the throughput charts for all types
 // in the given data
 class ThroughputCharts extends React.Component {
@@ -32,6 +42,7 @@ class ThroughputCharts extends React.Component {
       to: moment(),
     };
 
+    this.chartPlacements = props.chartPlacements || ChartPlacements;
     this.sequenceNumber = nextNumber();
 
     // polling values
@@ -245,13 +256,41 @@ class ThroughputCharts extends React.Component {
     });
   }
 
+  renderCharts() {
+    let rows = [];
+
+    this.chartPlacements.forEach((row, i) => {
+      let charts = [];
+      const { types, height } = row;
+
+      const ncols = Math.floor(12/types.length); // bootstrap columns
+      const className = `col-xl-${ncols}`;
+
+      types.forEach((type) => {
+        const name = Types[type];
+        const id = this.id(name);
+
+        charts.push(
+          <div className={className} key={name}>
+            <div className="row as-chart-title"> {name} </div>
+            <div className="row">
+              <svg style={{height: height}} id={id}> </svg>
+            </div>
+          </div>
+        );
+      });
+
+      rows.push(
+        <div className="row" key={i}>
+          {charts}
+        </div>
+      );
+    });
+
+    return rows;
+  }
+
   render() {
-    const bigStyle = { 
-      height: 350
-    };
-    const smStyle = {
-      height: 200
-    };
     const { showDateTimePicker, from, to } = this.state;
     const { disableTimeWindowSelection } = this.props;
     const title = this.props.title || 'Throughput';
@@ -268,51 +307,13 @@ class ThroughputCharts extends React.Component {
           <div className="col-xl-12 as-section-header">
             {title}
             {!disableTimeWindowSelection && 
-            <div style={{cursor: 'pointer', marginRight: '10px'}} className="float-right" onClick={this.onShowDateTimePicker}>
+            <div className="float-right as-chart-timewindow" onClick={this.onShowDateTimePicker}>
               {timeWindow}
             </div>}
           </div>
         </div>
-        <div className="row">
-          <div className="col-xl-6">
-            <div className="row as-chart-title"> {Types.read_tps} </div>
-            <div className="row">
-              <svg style={bigStyle} id={this.id(Types.read_tps)}> </svg>
-            </div>
-          </div>
-          <div className="col-xl-6">
-            <div className="row as-chart-title"> {Types.write_tps} </div>
-            <div className="row">
-              <svg style={bigStyle} id={this.id(Types.write_tps)}> </svg>
-            </div>
-          </div>
-        </div>
-        <div className="row" style={{marginTop: 10}}>
-          <div className="col-xl-3">
-            <div className="row as-chart-title"> {Types.query_tps} </div>
-            <div className="row">
-              <svg style={smStyle} id={this.id(Types.query_tps)}> </svg>
-            </div>
-          </div>
-          <div className="col-xl-3">
-            <div className="row as-chart-title"> {Types.batch_read_tps} </div>
-            <div className="row">
-              <svg style={smStyle} id={this.id(Types.batch_read_tps)}> </svg>
-            </div>
-          </div>
-          <div className="col-xl-3">
-            <div className="row as-chart-title"> {Types.scan_tps} </div>
-            <div className="row">
-              <svg style={smStyle} id={this.id(Types.scan_tps)}> </svg>
-            </div>
-          </div>
-          <div className="col-xl-3">
-            <div className="row as-chart-title"> {Types.udf_tps} </div>
-            <div className="row">
-              <svg style={smStyle} id={this.id(Types.udf_tps)}> </svg>
-            </div>
-          </div>
-        </div>
+
+        {this.renderCharts()}
       </div>
     );
   }
@@ -331,6 +332,10 @@ ThroughputCharts.PropTypes = {
   // set this value if you do not want the chart
   // to keep itself in sync with the current time
   doNotSyncWithCurrentTime: PropTypes.bool,
+  // configuration for the chart placements
+  // only charts defined here will be rendered
+  // see ChartPlacements
+  chartPlacements: PropTypes.object,
 };
 
 export default ThroughputCharts;

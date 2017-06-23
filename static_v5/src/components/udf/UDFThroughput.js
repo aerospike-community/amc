@@ -5,8 +5,14 @@ import PropTypes from 'prop-types';
 import { getThroughput as getThroughputAPI } from 'api/clusterConnections';
 import ThroughputCharts from 'components/ThroughputCharts';
 
-// ClusterThroughput provides an overview of the cluster performance
-class ClusterThroughput extends React.Component {
+const ChartPlacements = [{
+  types: ['udf_tps'],
+  height: 350,
+}];
+
+// UDFThroughput shows the throughput for the UDF operations 
+// in a cluster
+class UDFThroughput extends React.Component {
   constructor(props) {
     super(props);
 
@@ -19,16 +25,17 @@ class ClusterThroughput extends React.Component {
   }
   
   render() {
+    const title = 'UDF Throughput';
     return (
-        <ThroughputCharts getThroughput={this.getThroughput} title="Throughput" />
+        <ThroughputCharts getThroughput={this.getThroughput} title={title} chartPlacements={ChartPlacements}/>
     );
   }
 }
 
-ClusterThroughput.PropTypes = {
+UDFThroughput.PropTypes = {
   clusterID: PropTypes.string.isRequired,
 };
 
-export default ClusterThroughput;
+export default UDFThroughput;
 
 

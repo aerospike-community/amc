@@ -20,3 +20,13 @@
   margin-left: 10px;
   text-align: center;
 }
+
+.as-chart-timewindow {
+  color: white;
+  cursor: pointer;
+  margin-right: 10px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

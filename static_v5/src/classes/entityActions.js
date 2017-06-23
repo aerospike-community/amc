@@ -62,7 +62,7 @@ export const UDF_ACTIONS = extractActions(udfActions);
 
 // udf overview
 const udfOverviewActions = {
-  View: {
+  Overview: {
     isDefault: true,
   },
   Create: {}

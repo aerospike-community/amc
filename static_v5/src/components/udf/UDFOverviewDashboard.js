@@ -4,13 +4,14 @@ import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
 import UDFCreate from 'components/udf/UDFCreate';
+import UDFOverview from 'components/udf/UDFOverview';
 import { UDF_OVERVIEW_ACTIONS } from 'classes/entityActions';
 
 class UDFOverviewDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [UDF_OVERVIEW_ACTIONS.View, UDF_OVERVIEW_ACTIONS.Create];
+    this.views = [UDF_OVERVIEW_ACTIONS.Overview, UDF_OVERVIEW_ACTIONS.Create];
 
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onCreateSuccess = this.onCreateSuccess.bind(this);
@@ -34,7 +35,7 @@ class UDFOverviewDashboard extends React.Component {
         <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
 
         {view === UDF_OVERVIEW_ACTIONS.Overview &&
-        <div className="as-centerpane-header"> UDF Overview </div>
+        <UDFOverview clusterID={clusterID} />
         }
 
         {view === UDF_OVERVIEW_ACTIONS.Create &&

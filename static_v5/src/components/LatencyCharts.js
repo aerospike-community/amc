@@ -262,7 +262,7 @@ class LatencyCharts extends React.Component {
           <div className="col-xl-12 as-section-header">
             {title}
             {!disableTimeWindowSelection && 
-            <div style={{cursor: 'pointer', marginRight: '10px'}} className="float-right" onClick={this.onShowDateTimePicker}>
+            <div className="float-right as-chart-timewindow" onClick={this.onShowDateTimePicker}>
               {timeWindow}
             </div>}
           </div>
