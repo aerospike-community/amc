@@ -6,9 +6,9 @@ import classNames from 'classnames';
 
 import UpgradeCluster from 'components/cluster/UpgradeCluster';
 import AddNode from 'components/cluster/AddNode';
-import DeployClusterDashboard from 'components/cluster/DeployClusterDashboard';
 import Spinner from 'components/Spinner';
 import { getNodesSummary } from 'api/node';
+import { getHostname } from 'api/deploy';
 import bytes from 'bytes';
 
 // ChangeClusterConnection is a "view only" component to change
@@ -83,7 +83,19 @@ class ChangeClusterConnection extends React.Component {
   }
 
   addNode(newNodeInfo){
-    this.changeView("home")
+    const node = newNodeInfo["nodeIP"]
+    this.changeView("inprogress")
+    getHostname(node)
+      .then((hostname) => {
+        alert(hostname[node]["hostname"])
+        this.changeView("home")
+      })
+      .catch((message) => {
+        // TODO
+        alert("error" + message)
+        this.changeView("home")
+      });
+    
   }
 
   downloadDeployment(){
@@ -162,7 +174,9 @@ class ChangeClusterConnection extends React.Component {
                     inProgress={inProgress} showWarnings={showWarnings} onAddNode={this.addNode}
                     onBack={() => this.changeView("home")}
                   />;
-    } 
+    } else if (view == "inprogress") {
+      dashboard = <h5> <Spinner /> Connecting ... </h5>;
+    }
     else{
       dashboard =   <div>
         <form>
@@ -210,7 +224,6 @@ class ChangeClusterConnection extends React.Component {
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("upgrade")}>Upgrade</Button>
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("addNode")}>Add Node</Button>
           <Button disabled={inProgress} color="primary" href="resources/deployment.json" download="deployment.json" style={{marginLeft:"10px"}}>Download Deployment File</Button>
-          <Button disabled={inProgress} color="primary" onClick={() => this.changeView("deployCluster")}>Deploy Cluster</Button>
         </div>
         
       </div>  

@@ -429,6 +429,63 @@ func unmarshalSetConfigConnectionPayload(ctx context.Context, service *goa.Servi
 	return nil
 }
 
+// DeployController is the controller interface for the Deploy actions.
+type DeployController interface {
+	goa.Muxer
+	Show(*ShowDeployContext) error
+}
+
+// MountDeployController "mounts" a Deploy resource controller on the given service.
+func MountDeployController(service *goa.Service, ctrl DeployController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/deployments/:node", ctrl.MuxHandler("preflight", handleDeployOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowDeployContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleDeployOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/deployments/:node", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Deploy", "action", "Show", "route", "GET /api/v1/deployments/:node", "security", "jwt")
+}
+
+// handleDeployOrigin applies the CORS response headers corresponding to the origin.
+func handleDeployOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
 // IndexController is the controller interface for the Index actions.
 type IndexController interface {
 	goa.Muxer

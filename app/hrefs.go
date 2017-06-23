@@ -21,6 +21,12 @@ func ConnectionHref(connID interface{}) string {
 	return fmt.Sprintf("/api/v1/connections/%v", paramconnID)
 }
 
+// DeployHref returns the resource href.
+func DeployHref(node interface{}) string {
+	paramnode := strings.TrimLeftFunc(fmt.Sprintf("%v", node), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/deployments/%v", paramnode)
+}
+
 // IndexHref returns the resource href.
 func IndexHref(connID, name interface{}) string {
 	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })

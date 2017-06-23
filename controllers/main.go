@@ -279,6 +279,7 @@ func GoaServer(config *common.Config) {
 	app.MountSetController(service, NewSetController(service))
 	app.MountModuleController(service, NewModuleController(service))
 	app.MountIndexController(service, NewIndexController(service))
+	app.MountDeployController(service, NewDeployController(service))
 	// app.MountClusterController(service, NewClusterController(service))
 
 	if config.AMC.StaticPath == "" {

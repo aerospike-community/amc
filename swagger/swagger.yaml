@@ -1448,7 +1448,7 @@ definitions:
         used-bytes: 4.00024e+18
       name: Qui debitis.
       stats:
-        Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
+        Ea molestiae veritatis aliquam.: 2e17d5b3-2180-47ee-8076-a2ba73159bab
       status: Omnis praesentium.
     properties:
       disk:
@@ -1463,7 +1463,7 @@ definitions:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Ea molestiae veritatis aliquam.: fa18c2d9-b3e2-46d3-aa66-19b86e27862f
+          Ea molestiae veritatis aliquam.: 2e17d5b3-2180-47ee-8076-a2ba73159bab
         type: object
       status:
         description: Cluster/Node status
@@ -1558,14 +1558,17 @@ definitions:
     example:
       status: "on"
       throughput:
-        Et rerum molestiae enim.:
-          Inventore modi repudiandae distinctio.:
-          - failed: 0.64899236
-            successful: 0.024429869
-            timestamp: 6.54588e+18
-          - failed: 0.64899236
-            successful: 0.024429869
-            timestamp: 6.54588e+18
+        Voluptas et.:
+          Porro natus.:
+          - failed: 0.78581536
+            successful: 0.06002145
+            timestamp: 1.268892e+18
+          - failed: 0.78581536
+            successful: 0.06002145
+            timestamp: 1.268892e+18
+          - failed: 0.78581536
+            successful: 0.06002145
+            timestamp: 1.268892e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1575,14 +1578,17 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Et rerum molestiae enim.:
-            Inventore modi repudiandae distinctio.:
-            - failed: 0.64899236
-              successful: 0.024429869
-              timestamp: 6.54588e+18
-            - failed: 0.64899236
-              successful: 0.024429869
-              timestamp: 6.54588e+18
+          Voluptas et.:
+            Porro natus.:
+            - failed: 0.78581536
+              successful: 0.06002145
+              timestamp: 1.268892e+18
+            - failed: 0.78581536
+              successful: 0.06002145
+              timestamp: 1.268892e+18
+            - failed: 0.78581536
+              successful: 0.06002145
+              timestamp: 1.268892e+18
         type: object
     required:
     - status
@@ -1619,7 +1625,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quibusdam ipsa rerum deserunt ipsum.
+          example: Autem voluptatem iusto et aut molestiae autem.
           type: string
         type: array
       username:
@@ -1742,12 +1748,9 @@ definitions:
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      connectOnLogin: false
+      connectOnLogin: true
       name: Payments Cluster
       seeds:
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
@@ -1759,7 +1762,7 @@ definitions:
         type: string
       connectOnLogin:
         description: Should AMC connect to this cluster automatically after user login?
-        example: false
+        example: true
         type: boolean
       name:
         description: Connection Name
@@ -1768,9 +1771,6 @@ definitions:
       seeds:
         description: Seeds
         example:
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
@@ -1784,15 +1784,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Eveniet velit ducimus laboriosam quod quam.
+      binName: Doloremque et est ipsa.
       indexName: idxAccounts
-      namespace: Natus saepe.
-      setName: Et odit doloremque.
+      namespace: Sit quibusdam ipsa rerum.
+      setName: Ipsum dolor ut exercitationem molestiae.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Eveniet velit ducimus laboriosam quod quam.
+        example: Doloremque et est ipsa.
         type: string
       indexName:
         description: Index's Name
@@ -1800,11 +1800,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Natus saepe.
+        example: Sit quibusdam ipsa rerum.
         type: string
       setName:
         description: Index's Set name
-        example: Et odit doloremque.
+        example: Ipsum dolor ut exercitationem molestiae.
         type: string
       type:
         description: Index's type
@@ -1822,7 +1822,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Est ipsa dolorem.
+      source: Inventore perferendis.
       type: LUA
     properties:
       name:
@@ -1831,7 +1831,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Est ipsa dolorem.
+        example: Inventore perferendis.
         type: string
       type:
         description: Module's type
@@ -1877,7 +1877,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Ut exercitationem molestiae ipsam inventore perferendis quia.
+          example: Qui quia repellat sint minima est numquam.
           type: string
         type: array
       username:
@@ -3272,6 +3272,40 @@ paths:
       summary: throughput connection
       tags:
       - connection
+  /api/v1/deployments/{node}:
+    get:
+      description: |-
+        Get a cluster's nodes
+
+        Required security scopes:
+          * `api:general`
+      operationId: deploy#show
+      parameters:
+      - description: Node Addresses
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: show deploy
+      tags:
+      - deploy
   /api/v1/users:
     get:
       description: |-

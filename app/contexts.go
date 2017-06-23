@@ -815,6 +815,55 @@ func (ctx *ThroughputConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// ShowDeployContext provides the deploy show action context.
+type ShowDeployContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Node string
+}
+
+// NewShowDeployContext parses the incoming request URL and body, performs validations and creates the
+// context used by the deploy controller show action.
+func NewShowDeployContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowDeployContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowDeployContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowDeployContext) OK(r map[string]*AerospikeAmcNodeSshstatResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowDeployContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowDeployContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowDeployContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // DropIndexContext provides the index drop action context.
 type DropIndexContext struct {
 	context.Context

@@ -640,6 +640,24 @@ func (mt *AerospikeAmcNodeResponse) Validate() (err error) {
 	return
 }
 
+// Node Config (default view)
+//
+// Identifier: application/vnd.aerospike.amc.node.sshstat.response+json; view=default
+type AerospikeAmcNodeSshstatResponse struct {
+	// Error message
+	Error *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Node Hostname
+	Hostname string `form:"hostname" json:"hostname" xml:"hostname"`
+}
+
+// Validate validates the AerospikeAmcNodeSshstatResponse media type instance.
+func (mt *AerospikeAmcNodeSshstatResponse) Validate() (err error) {
+	if mt.Hostname == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "hostname"))
+	}
+	return
+}
+
 // Resource Usage (default view)
 //
 // Identifier: application/vnd.aerospike.amc.resource.usage.response+json; view=default
