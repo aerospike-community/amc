@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Table } from 'reactstrap';
 import classNames from 'classnames';
+import fileDownload  from 'react-file-download';
 
 import UpgradeCluster from 'components/cluster/UpgradeCluster';
 import AddNode from 'components/cluster/AddNode';
@@ -31,6 +32,7 @@ class ChangeClusterConnection extends React.Component {
     this.upgradeCluster = this.upgradeCluster.bind(this)
     this.addNode = this.addNode.bind(this)
     this.downloadDeployment = this.downloadDeployment.bind(this)
+    this.onDownload = this.onDownload.bind(this);
   }
 
   fetchSummary(clusterID, nodeHosts) {
@@ -111,6 +113,9 @@ class ChangeClusterConnection extends React.Component {
       //window.open(response.file);
     }, 100);
   }
+  onDownload(){
+    fileDownload(JSON.stringify(this.state.nodesSummary, null, 2), 'filename.json')  
+  }
 
   changeView(newView){
     this.setState({
@@ -159,6 +164,7 @@ class ChangeClusterConnection extends React.Component {
     const nodes = this.nodes();
     const view = this.state.view;
     let dashboard;
+
     if (view == "upgrade"){
       const nodesSummary = this.state.nodesSummary;
       const nodeKey = Object.keys(nodesSummary)[0];
@@ -223,7 +229,7 @@ class ChangeClusterConnection extends React.Component {
           <Button disabled={inProgress} color="primary" onClick={this.onCancel}>Cancel</Button>
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("upgrade")}>Upgrade</Button>
           <Button disabled={inProgress} color="primary" onClick={() => this.changeView("addNode")}>Add Node</Button>
-          <Button disabled={inProgress} color="primary" href="resources/deployment.json" download="deployment.json" style={{marginLeft:"10px"}}>Download Deployment File</Button>
+          <Button disabled={inProgress} color="primary" download="deployment.json" onClick={this.onDownload} style={{marginLeft:"10px"}}>Download Deployment File</Button>
         </div>
         
       </div>  
