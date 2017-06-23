@@ -172,7 +172,8 @@ export default function currentView(state = InitState, action) {
 
     case SELECT_START_VIEW:
       updated = Object.assign({}, InitState, {
-        viewType: VIEW_TYPE.START_VIEW
+        viewType: VIEW_TYPE.START_VIEW,
+        selectedEntityPath: action.entityPath,
       });
       break;
 

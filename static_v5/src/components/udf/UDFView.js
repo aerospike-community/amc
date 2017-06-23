@@ -32,8 +32,7 @@ class UDFView extends React.Component {
 
     this.id = 'udf_editor' + nextNumber();
 
-    this.onEdit = this.onEdit.bind(this);
-    this.onCancel = this.onCancel.bind(this);
+    this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteUDF = this.onDeleteUDF.bind(this);
   }
@@ -74,18 +73,14 @@ class UDFView extends React.Component {
       });
   }
 
-  onEdit() {
-    this.props.onEditUDF();
-  }
-
   onShowConfirm() {
     this.setState({
       deleteShowConfirm: true,
     });
   }
 
-  onCancel() {
-    this.props.onCancel();
+  onDeleteSuccess() {
+    this.props.onDeleteSuccess();
   }
 
   onDeleteUDF() {
@@ -99,7 +94,7 @@ class UDFView extends React.Component {
           deleteInProgress: false,
           deleteSuccessfull: true
         });
-        window.setTimeout(() => this.onCancel(), 2000);
+        window.setTimeout(() => this.onDeleteSuccess(), 2000);
       })
       .catch((msg) => {
         this.setState({
@@ -152,7 +147,9 @@ class UDFView extends React.Component {
     if (this.state.isFetching) 
       return <div> <Spinner /> Loading ... </div>;
 
+    const isDelete = this.props.view === 'delete';
     const editorHeight = this.state.editorHeight + 'px';
+
     return (
       <div>
         {this.renderDeleteModal()}
@@ -163,11 +160,12 @@ class UDFView extends React.Component {
         <div className="as-ace-editor">
           <AceEditor width={'100%'} height={editorHeight} mode="lua" readOnly={true} theme="github" name={this.id} value={this.state.sourceCode} />
         </div>
+        
+        {isDelete &&
         <div>
-          <Button color="primary" size="sm" onClick={this.onEdit}> Edit </Button>
-          <Button style={{marginLeft: 10}} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
-          <Button style={{marginLeft: 10}} color="secondary" size="sm" onClick={this.onCancel}> Cancel </Button>
+          <Button color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
         </div>
+        }
       </div>
     );
   }
@@ -176,12 +174,11 @@ class UDFView extends React.Component {
 UDFView.PropTypes = {
   clusterID: PropTypes.string,
   udfName: PropTypes.string,
-  // callback to edit the currently viewing udf
-  // onEditUDF()
-  onEditUDF: PropTypes.func,
-  // callback to cancel the view
-  // onCancel()
-  onCancel: PropTypes.func,
+  // the view type, view or delete
+  view: PropTypes.string,
+  // callback on successfull delete
+  // onDeleteSuccess()
+  onDeleteSuccess: PropTypes.func,
 };
 
 export default UDFView;

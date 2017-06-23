@@ -57,9 +57,6 @@ class EntityTree extends React.Component {
 
     return (
       <div>
-        <div className="float-left">
-          <input type="checkbox" />
-        </div>
         <div style={{width: '90%', position: 'relative'}} 
             className={classNames('float-left', {
                                   'as-disconnected': isDisconnected, 

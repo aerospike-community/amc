@@ -4,7 +4,7 @@ import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } fr
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
 import { UPDATE_CLUSTER_CONNECTION, CLUSTER_CONNECTION_FETCHED } from 'actions/clusters';
 import { DELETE_CLUSTER_CONNECTION } from 'actions/clusters';
-import { ADD_UDF } from 'actions/clusters';
+import { ADD_UDF, DELETE_UDF } from 'actions/clusters';
 import { ENTITY_TYPE } from 'classes/constants';
 
 // all the cluster connections of the user
@@ -111,6 +111,23 @@ function addToClusterEntity(state, clusterID, entityType, entity) {
   });
 }
 
+// remove entity from array of cluster entity type
+function removeClusterEntity(state, clusterID, entityType, isEqual) {
+  const clusters = state.items.slice(); // copy
+  let i = clusters.findIndex((c) => c.id === clusterID);
+  let c = Object.assign({}, clusters[i]); // copy
+
+  let entities = c[entityType].slice(); // copy
+  i = entities.findIndex((e) => isEqual(e));
+  entities.splice(i, 1);
+
+  c[entityType] = entities;
+  clusters[i] = c;
+  return Object.assign({}, state, {
+    items: clusters
+  });
+}
+
 // add and remove entities from the cluster connections
 function updateClusterEntities(state, action) {
   let entity, id;
@@ -123,6 +140,11 @@ function updateClusterEntities(state, action) {
         entityType: ENTITY_TYPE.UDF,
       });
       return addToClusterEntity(state, id, ENTITY_TYPE.UDF, entity);
+
+    case DELETE_UDF:
+      const isEqual = (udf) => udf.name === action.udfName;
+      return removeClusterEntity(state, action.clusterID, ENTITY_TYPE.UDF, isEqual);
+      
     default:
       return state;
   }

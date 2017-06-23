@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import VisibleDeleteConnectionModal from 'containers/cluster/VisibleDeleteConnectionModal';
+import VisibleViewClusterConnection from 'containers/cluster/VisibleViewClusterConnection';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
@@ -19,7 +19,7 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Delete];
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.View, CLUSTER_ACTIONS.Delete, CLUSTER_ACTIONS.Edit];
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onViewClusterOverview = this.onViewClusterOverview.bind(this);
   }
@@ -36,17 +36,22 @@ class ClusterDashboard extends React.Component {
   render() {
     const { clusterID, view, onUpdateConnectionSuccess }  = this.props;
     const { name, seeds } = this.props.cluster;
-    const isDelete = view === CLUSTER_ACTIONS.Delete;
 
     let dashboard;
-    if (view === CLUSTER_ACTIONS.Overview || isDelete) {
+    if (view === CLUSTER_ACTIONS.Overview) {
       dashboard = <ClusterOverview clusterID={clusterID} />;
+
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
                       onUpdateConnectionSuccess={onUpdateConnectionSuccess}
                       onCancel={() => this.onViewClusterOverview()} />
+
     } else if (view === CLUSTER_ACTIONS.Latency) {
       dashboard = <ClusterLatency clusterID={clusterID} />
+
+    } else if (view === CLUSTER_ACTIONS.View || view === CLUSTER_ACTIONS.Delete) {
+      dashboard = <VisibleViewClusterConnection />
+
     }
 
     return (
@@ -54,9 +59,6 @@ class ClusterDashboard extends React.Component {
         <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
 
         {dashboard}
-        {isDelete &&
-          <VisibleDeleteConnectionModal />
-        }
       </div>
     );
   }

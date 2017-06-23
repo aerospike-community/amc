@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import Tabs from 'components/Tabs';
 import UDFView from 'components/udf/UDFView';
 import UDFEdit from 'components/udf/UDFEdit';
 import UDFCreate from 'components/udf/UDFCreate';
@@ -18,73 +19,40 @@ class UDFDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onEditUDF = this.onEditUDF.bind(this);
-    this.onViewUDF = this.onViewUDF.bind(this);
-    this.onCreateUDF = this.onCreateUDF.bind(this);
-    this.onViewUDFOverview = this.onViewUDFOverview.bind(this);
-    this.onNewUDF = this.onNewUDF.bind(this);
+    this.views = [UDF_ACTIONS.View, UDF_ACTIONS.Edit, UDF_ACTIONS.Delete];
+
+    this.onViewSelect = this.onViewSelect.bind(this);
+    this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
   }
 
-  isUDF() {
-    return this.props.viewType === VIEW_TYPE.UDF;
+  onDeleteSuccess() {
+    const { clusterID, udfName } = this.props;
+    this.props.onDeleteSuccess(clusterID, udfName);
   }
 
-  isUDFView() {
-    const { view } = this.props;
-    return this.isUDF() && (view === UDF_ACTIONS.View || view === UDF_ACTIONS.Delete);
-  }
-
-  isUDFEdit() {
-    return this.isUDF() && this.props.view === UDF_ACTIONS.Edit;
-  }
-
-  isUDFOverview() {
-    return this.props.viewType === VIEW_TYPE.UDF_OVERVIEW;
-  }
-
-  isUDFCreate() {
-    return this.isUDFOverview() && this.props.view === UDF_OVERVIEW_ACTIONS.Create;
-  }
-
-  onEditUDF() {
-    const {clusterID, udfName} = this.props;
-    this.props.onEditUDF(clusterID, udfName);
-  }
-
-  onViewUDF() {
-    const {clusterID, udfName} = this.props;
-    this.props.onViewUDF(clusterID, udfName);
-  }
-
-  onCreateUDF() {
-    const {clusterID} = this.props;
-    this.props.onCreateUDF(clusterID);
-  }
-
-  onViewUDFOverview() {
-    const {clusterID} = this.props;
-    this.props.onViewUDFOverview(clusterID);
-  }
-
-  onNewUDF(udfName, udfSource, udfType) {
-    const {clusterID} = this.props;
-    this.props.onCreateUDF(clusterID, udfName, udfType);
+  onViewSelect(view) {
+    const { clusterID, udfName } = this.props;
+    this.props.onViewSelect(clusterID, udfName, view);
   }
 
   render() {
-    let view;
-    if (this.isUDFView())
-      view = <UDFView clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} udfName={this.props.udfName} onEditUDF={this.onEditUDF} />;
-    else if (this.isUDFEdit())
-      view = <UDFEdit clusterID={this.props.clusterID} udfName={this.props.udfName} onViewUDF={this.onViewUDF} />;
-    else if (this.isUDFCreate())
-      view = <UDFCreate clusterID={this.props.clusterID} onCancel={this.onViewUDFOverview} onNewUDF={this.onNewUDF}/>;
-    else if (this.isUDFOverview())
-      view = <div className="as-centerpane-header"> UDF Overview </div>;
+    const { clusterID, udfName, view } = this.props;
 
     return (
       <div>
-        {view}
+        <Tabs names={this.views} selected={this.props.view} onSelect={this.onViewSelect}/>
+
+        {view === UDF_ACTIONS.View &&
+        <UDFView clusterID={clusterID} udfName={udfName} />
+        }
+
+        {view === UDF_ACTIONS.Delete &&
+        <UDFView clusterID={clusterID} udfName={udfName} view="delete" onDeleteSuccess={this.onDeleteSuccess}/>
+        }
+
+        {view === UDF_ACTIONS.Edit &&
+        <UDFEdit clusterID={clusterID} udfName={udfName} onViewUDF={() => this.onViewSelect(UDF_ACTIONS.View)}/>
+        }
       </div>
     );
   }
@@ -93,23 +61,16 @@ class UDFDashboard extends React.Component {
 UDFDashboard.PropTypes = {
   clusterID: PropTypes.string,
   udfName: PropTypes.string,
-  // view type of the udf
-  viewType: PropTypes.string,
-  // view of interest in the viewType
+  // view of interest 
   view: PropTypes.string,
 
-  // edit a UDF
-  // onEditUDF(clusterID, udfName)
-  onEditUDF: PropTypes.func,
-  // view a UDF
-  // onViewUDF(clusterID, udfName)
-  onViewUDF: PropTypes.func,
-  // create a UDF
-  // onCreateUDF(clusterID, udfName, udfSource, udfType)
-  onCreateUDF: PropTypes.func,
-  // view the UDF overview
-  // onViewUDFOverview(clusterID)
-  onViewUDFOverview: PropTypes.func,
+  // callback for when a view for the udf dashboard is selected
+  // onViewSelect(clusterID, udfName, 'view')
+  onViewSelect: PropTypes.func,
+
+  // callback on udf delete success
+  // onDeleteSuccess(clusterID, udfName)
+  onDeleteSuccess: PropTypes.func,
 };
 
 export default UDFDashboard;

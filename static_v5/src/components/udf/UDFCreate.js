@@ -11,6 +11,7 @@ import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 class UDFView extends React.Component {
   constructor(props) {
@@ -21,6 +22,7 @@ class UDFView extends React.Component {
       sourceCode: '',
       udfName: '',
       hasErrors: false, // does the source code have errors
+      success: false, // udf created successfully
 
       editorHeight: 500,
     };
@@ -29,14 +31,9 @@ class UDFView extends React.Component {
     this.editor; // the ace editor instance
 
     this.onNameChange = this.onNameChange.bind(this);
-    this.onCancel = this.onCancel.bind(this);
     this.onCreate = this.onCreate.bind(this);
     this.onEditorLoad = this.onEditorLoad.bind(this);
     this.onEditorChange = this.onEditorChange.bind(this);
-  }
-
-  onCancel() {
-    this.props.onCancel();
   }
 
   onEditorLoad(editor) {
@@ -71,9 +68,13 @@ class UDFView extends React.Component {
     saveUDF(clusterID, udfName, sourceCode)
       .then((udf) => {
         this.setState({
-          isUpdating: false
+          isUpdating: false,
+          success: true,
         });
-        this.props.onNewUDF(udf.name, udf.source, udf.type);
+
+        window.setTimeout(() => {
+          this.props.onCreateSuccess(udf.name, udf.source, udf.type);
+        }, 2000);
       })
       .catch((err) => {
         // TODO inject errors into the editor annotations
@@ -99,11 +100,18 @@ class UDFView extends React.Component {
   }
 
   render() {
-    const { hasErrors, isUpdating } = this.state;
+    const { hasErrors, isUpdating, success } = this.state;
     const editorHeight = this.state.editorHeight + 'px';
 
     return (
       <div>
+        {success && 
+          <Modal isOpen={true} toggle={() => {}}>
+            <ModalHeader> Success </ModalHeader>
+            <ModalBody> Successfully created {this.state.udfName} </ModalBody>
+          </Modal>
+        }
+
         <div className="as-centerpane-header"> 
           Create UDF
         </div>
@@ -122,7 +130,6 @@ class UDFView extends React.Component {
             {isUpdating && 
              <span> Updating ... </span>}
             <Button disabled={hasErrors} color="primary" size="sm" onClick={this.onCreate}> Add </Button>
-            <Button style={{marginLeft: 10}} size="sm" onClick={this.onCancel}> Cancel </Button>
           </div>
         </Form>
       </div>
@@ -133,12 +140,9 @@ class UDFView extends React.Component {
 UDFView.PropTypes = {
   clusterID: PropTypes.string,
   udfName: PropTypes.string,
-  // callback to cancel the creation
-  // onCancel()
-  onCancel: PropTypes.func,
-  // callback on creating a new udf
-  // onNewUDF(udfName, udfSource, udfType)
-  onNewUDF: PropTypes.func,
+  // callback when the udf is created successfully
+  // onUDFCreateSuccess(udfName, udfSource, udfType)
+  onUDFCreateSuccess: PropTypes.func,
 };
 
 export default UDFView;

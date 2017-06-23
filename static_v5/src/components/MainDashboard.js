@@ -3,13 +3,16 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import VisibleUDFDashboard from 'containers/VisibleUDFDashboard';
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
+import VisibleUDFDashboard from 'containers/udf/VisibleUDFDashboard';
+import VisibleUDFOverviewDashboard from 'containers/udf/VisibleUDFOverviewDashboard'
+
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import IndexesOverview from 'components/cluster/IndexesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import Welcome from 'components/Welcome';
+
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
@@ -54,13 +57,16 @@ class MainDashboard extends React.Component {
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
       dashboard = <IndexesOverview clusterID={clusterID} />
         
-    } else if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.UDF_OVERVIEW) {
+    } else if (viewType === VIEW_TYPE.UDF) {
       dashboard = <VisibleUDFDashboard />
+
+    } else if (viewType === VIEW_TYPE.UDF_OVERVIEW) {
+      dashboard = <VisibleUDFOverviewDashboard />
 
     } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
 
-    } else if (view === null && viewType === null) {
+    } else if (viewType === VIEW_TYPE.START_VIEW) {
       dashboard = <Welcome />;
 
     } else {

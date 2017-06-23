@@ -53,7 +53,7 @@ class EditClusterConnection extends React.Component {
           Update Cluster Connection
         </div>
         <SaveClusterConnection clusterName={clusterName} seeds={seeds} inProgress={this.state.inProgress}
-          onSaveErrorMessage={this.state.onSaveErrorMessage}
+          onSaveErrorMessage={this.state.onSaveErrorMessage} hideCancel={true}
           onSaveConnection={this.onUpdateConnection} onCancel={this.onCancel} />
       </div>
       );

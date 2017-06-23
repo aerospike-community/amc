@@ -2,7 +2,8 @@ import {  authConnection as authConnectionAPI, listConnections, getClusterEntity
 
 import { expandEntityNode } from 'actions/entityTree';
 import { toClusterPath } from 'classes/entityTree';
-import { selectClusterOnStartup } from 'actions/currentView';
+import { selectClusterOnStartup, selectCluster } from 'actions/currentView';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -69,15 +70,21 @@ export function initClusters() {
             authenticateClusterConnection(conn.id, '', '');
         });
 
+        if (connections.length === 0) {
+          dispatch(displayAddClusterConnection(true));
+          return;
+        }
+
         // select a cluster for overview
         for (let i = 0; i < connections.length; i++) {
           const c = connections[i];
           if (c.connected || c.connectOnLogin) {
             const clusterID = c.id;
             dispatch(selectClusterOnStartup(clusterID));
-            break;
+            return;
           }
         }
+
       })
       .catch((message) => {
         // TODO 
@@ -93,11 +100,24 @@ export function fetchClusters() {
     listConnections()
       .then((connections) => {
         dispatch(receiveClusters(connections));
+
       })
       .catch(() => {
         dispatch(receiveClusters([]))
       });
   }
+}
+
+// ---------------------------------------
+// Delete entities from cluster
+
+export const DELETE_UDF = 'DELETE_UDF';
+export function deleteUDF(clusterID, udfName) {
+  return {
+    type: DELETE_UDF,
+    clusterID: clusterID,
+    udfName: udfName,
+  };
 }
 
 // ---------------------------------------
@@ -196,6 +216,9 @@ export function authenticateClusterConnection(id, name, password) {
 
         // expand the cluster on authentication
         dispatch(expandClusterTree(cluster.id));
+
+        // select cluster overview
+        dispatch(selectCluster(id, CLUSTER_ACTIONS.Overview));
       })
       .catch((message) => {
         message = message || 'Failed to authenticate';

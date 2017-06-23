@@ -32,6 +32,13 @@ const clusterActions = {
     state: {
       isAuthenticated: true
     },
+  },
+  Latency: {
+    isEndOfGrouping: true,
+  },
+  View: {},
+  Edit: {},
+  Delete: {
     isEndOfGrouping: true,
   },
   Disconnect: {
@@ -40,9 +47,6 @@ const clusterActions = {
     },
     isEndOfGrouping: true,
   },
-  Edit: {},
-  Delete: {},
-  Latency: {},
 };
 export const CLUSTER_ACTIONS = extractActions(clusterActions);
 

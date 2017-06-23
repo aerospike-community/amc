@@ -31,7 +31,6 @@ class UDFView extends React.Component {
     this.id = 'udf_editor' + nextNumber();
     this.editor; // the ace editor instance
 
-    this.onView = this.onView.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
     this.onEditorLoad = this.onEditorLoad.bind(this);
     this.onEditorChange = this.onEditorChange.bind(this);
@@ -70,10 +69,6 @@ class UDFView extends React.Component {
           sourceCode: udf.source,
         });
       });
-  }
-
-  onView() {
-    this.props.onViewUDF();
   }
 
   onEditorLoad(editor) {
@@ -130,7 +125,7 @@ class UDFView extends React.Component {
     return (
       <div>
         <div className="as-centerpane-header"> 
-          Edit {this.props.udfName}
+          {this.props.udfName}
         </div>
         <div className="as-ace-editor">
           <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
@@ -140,7 +135,6 @@ class UDFView extends React.Component {
           {isUpdating && 
            <span> Updating ... </span>}
           <Button disabled={!hasChanged || hasErrors} color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
-          <Button style={{marginLeft: 10}} size="sm" onClick={this.onView}> Cancel </Button>
         </div>
       </div>
     );

@@ -170,6 +170,8 @@ class SaveClusterConnection extends React.Component {
     const showWarnings = this.state.showWarnings;
     const nameWarning = showWarnings && !this.state.clusterName;
     const seedsWarning = showWarnings && this.state.seeds.length === 0;
+    const { hideCancel } = this.props;
+
     return (
       <div>
         <form>
@@ -206,7 +208,10 @@ class SaveClusterConnection extends React.Component {
 
           <span> {this.props.onSaveErrorMessage} </span>
           <Button disabled={inProgress} color="primary" onClick={this.onSaveConnection}>Save</Button>
+          
+          {!hideCancel &&
           <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+          }
         </div>
       </div>
       );
@@ -228,6 +233,7 @@ SaveClusterConnection.PropTypes = {
   // callback to cancel 
   // onCancel()
   onCancel: PropTypes.func,
+  hideCancel: PropTypes.bool,
 };
 
 export default SaveClusterConnection;

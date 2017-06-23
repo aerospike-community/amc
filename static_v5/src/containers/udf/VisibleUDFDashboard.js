@@ -3,41 +3,36 @@ import { connect } from 'react-redux';
 
 import UDFDashboard from 'components/udf/UDFDashboard';
 import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
-import { VIEW_TYPE }  from 'classes/constants';
 import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
 import { selectPath } from 'actions/currentView';
-import { addUDF } from 'actions/clusters';
+import { addUDF, deleteUDF } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
-  const { clusterID, udfName, viewType, view } = state.currentView;
+  const { clusterID, udfName, view } = state.currentView;
   return {
     clusterID: clusterID,
     udfName: udfName,
-    viewType: viewType,
     view: view
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEditUDF: (clusterID, udfName) => {
+    onViewSelect: (clusterID, udfName, view) => {
       const path = toUDFPath(clusterID, udfName);
-      dispatch(selectPath(path, UDF_ACTIONS.Edit));
+      dispatch(selectPath(path, view));
     },
 
-    onViewUDF: (clusterID, udfName) => {
-      const path = toUDFPath(clusterID, udfName);
-      dispatch(selectPath(path, UDF_ACTIONS.View));
-    },
-
-    onCreateUDF: (clusterID, udfName, udfType) => {
+    onUDFCreated: (clusterID, udfName, udfType) => {
       dispatch(addUDF(clusterID, udfName, udfType));
 
       const path = toUDFPath(clusterID, udfName);
       dispatch(selectPath(path, UDF_ACTIONS.View));
     },
 
-    onViewUDFOverview: (clusterID) => {
+    onDeleteSuccess: (clusterID, udfName) => {
+      dispatch(deleteUDF(clusterID, udfName));
+
       const path = toUDFOverviewPath(clusterID);
       dispatch(selectPath(path, UDF_OVERVIEW_ACTIONS.View));
     }

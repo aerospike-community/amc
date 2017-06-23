@@ -160,7 +160,8 @@ export function selectIndexesOverview(clusterID, view) {
 export const SELECT_START_VIEW = 'SELECT_START_VIEW';
 export function selectStartView() {
   return {
-    type: SELECT_START_VIEW
+    type: SELECT_START_VIEW,
+    entityPath: '',
   };
 }
 
