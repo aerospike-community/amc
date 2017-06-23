@@ -195,10 +195,10 @@ export function toPhysicalEntityTree(cluster) {
     return root;
 
   let children = [];
-  if (Array.isArray(cluster.modules)) 
-    children.push(toUDF(cluster));
   if (Array.isArray(cluster.nodes)) 
     children.push(toNodes(cluster));
+  if (Array.isArray(cluster.modules)) 
+    children.push(toUDF(cluster));
 
   // TODO change with the API
   children.push(toIndexes(cluster));
