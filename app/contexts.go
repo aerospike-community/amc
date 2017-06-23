@@ -142,6 +142,363 @@ func (ctx *AuthenticateAuthContext) InternalServerError() error {
 	return nil
 }
 
+// CreateBackupContext provides the backup create action context.
+type CreateBackupContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *CreateBackupPayload
+}
+
+// NewCreateBackupContext parses the incoming request URL and body, performs validations and creates the
+// context used by the backup controller create action.
+func NewCreateBackupContext(ctx context.Context, r *http.Request, service *goa.Service) (*CreateBackupContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := CreateBackupContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// createBackupPayload is the backup create action payload.
+type createBackupPayload struct {
+	// SSH user's password
+	SSHPassword *string `form:"SSHPassword,omitempty" json:"SSHPassword,omitempty" xml:"SSHPassword,omitempty"`
+	// SSH User
+	SSHUser *string `form:"SSHUser,omitempty" json:"SSHUser,omitempty" xml:"SSHUser,omitempty"`
+	// Host on which the backup was created
+	DestinationAddress *string `form:"destinationAddress,omitempty" json:"destinationAddress,omitempty" xml:"destinationAddress,omitempty"`
+	// Directory where the backup was created
+	DestinationPath *string `form:"destinationPath,omitempty" json:"destinationPath,omitempty" xml:"destinationPath,omitempty"`
+	// Indicated whether the backup was created only for the metadata
+	MetadataOnly *bool `form:"metadataOnly,omitempty" json:"metadataOnly,omitempty" xml:"metadataOnly,omitempty"`
+	// Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Prioity of the scan reading the data for the backup. 0 (auto), 1 (low), 2 (medium), 3 (high).
+	ScanPriority *int `form:"scanPriority,omitempty" json:"scanPriority,omitempty" xml:"scanPriority,omitempty"`
+	// Sets from which backup was created
+	Sets *string `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+	// Indicates whether the backup was supposed to be terminated in case the cluster experienced a change in its nodes
+	TerminateOnClusterChange *bool `form:"terminateOnClusterChange,omitempty" json:"terminateOnClusterChange,omitempty" xml:"terminateOnClusterChange,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *createBackupPayload) Validate() (err error) {
+	if payload.Namespace == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.DestinationAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "destinationAddress"))
+	}
+	if payload.DestinationPath == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "destinationPath"))
+	}
+	if payload.Sets == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sets"))
+	}
+	if payload.MetadataOnly == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "metadataOnly"))
+	}
+	if payload.TerminateOnClusterChange == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "terminateOnClusterChange"))
+	}
+	if payload.ScanPriority == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "scanPriority"))
+	}
+	if payload.SSHUser == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHUser"))
+	}
+	if payload.SSHPassword == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHPassword"))
+	}
+	return
+}
+
+// Publicize creates CreateBackupPayload from createBackupPayload
+func (payload *createBackupPayload) Publicize() *CreateBackupPayload {
+	var pub CreateBackupPayload
+	if payload.SSHPassword != nil {
+		pub.SSHPassword = *payload.SSHPassword
+	}
+	if payload.SSHUser != nil {
+		pub.SSHUser = *payload.SSHUser
+	}
+	if payload.DestinationAddress != nil {
+		pub.DestinationAddress = *payload.DestinationAddress
+	}
+	if payload.DestinationPath != nil {
+		pub.DestinationPath = *payload.DestinationPath
+	}
+	if payload.MetadataOnly != nil {
+		pub.MetadataOnly = *payload.MetadataOnly
+	}
+	if payload.Namespace != nil {
+		pub.Namespace = *payload.Namespace
+	}
+	if payload.ScanPriority != nil {
+		pub.ScanPriority = *payload.ScanPriority
+	}
+	if payload.Sets != nil {
+		pub.Sets = *payload.Sets
+	}
+	if payload.TerminateOnClusterChange != nil {
+		pub.TerminateOnClusterChange = *payload.TerminateOnClusterChange
+	}
+	return &pub
+}
+
+// CreateBackupPayload is the backup create action payload.
+type CreateBackupPayload struct {
+	// SSH user's password
+	SSHPassword string `form:"SSHPassword" json:"SSHPassword" xml:"SSHPassword"`
+	// SSH User
+	SSHUser string `form:"SSHUser" json:"SSHUser" xml:"SSHUser"`
+	// Host on which the backup was created
+	DestinationAddress string `form:"destinationAddress" json:"destinationAddress" xml:"destinationAddress"`
+	// Directory where the backup was created
+	DestinationPath string `form:"destinationPath" json:"destinationPath" xml:"destinationPath"`
+	// Indicated whether the backup was created only for the metadata
+	MetadataOnly bool `form:"metadataOnly" json:"metadataOnly" xml:"metadataOnly"`
+	// Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Prioity of the scan reading the data for the backup. 0 (auto), 1 (low), 2 (medium), 3 (high).
+	ScanPriority int `form:"scanPriority" json:"scanPriority" xml:"scanPriority"`
+	// Sets from which backup was created
+	Sets string `form:"sets" json:"sets" xml:"sets"`
+	// Indicates whether the backup was supposed to be terminated in case the cluster experienced a change in its nodes
+	TerminateOnClusterChange bool `form:"terminateOnClusterChange" json:"terminateOnClusterChange" xml:"terminateOnClusterChange"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *CreateBackupPayload) Validate() (err error) {
+	if payload.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.DestinationAddress == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "destinationAddress"))
+	}
+	if payload.DestinationPath == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "destinationPath"))
+	}
+	if payload.Sets == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sets"))
+	}
+
+	if payload.SSHUser == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHUser"))
+	}
+	if payload.SSHPassword == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHPassword"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *CreateBackupContext) OK(r *AerospikeAmcBackupResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.backup.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *CreateBackupContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *CreateBackupContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *CreateBackupContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ProgressBackupContext provides the backup progress action context.
+type ProgressBackupContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewProgressBackupContext parses the incoming request URL and body, performs validations and creates the
+// context used by the backup controller progress action.
+func NewProgressBackupContext(ctx context.Context, r *http.Request, service *goa.Service) (*ProgressBackupContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ProgressBackupContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ProgressBackupContext) OK(r *AerospikeAmcBackupResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.backup.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ProgressBackupContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ProgressBackupContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ProgressBackupContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ProgressBackupContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryBackupContext provides the backup query action context.
+type QueryBackupContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewQueryBackupContext parses the incoming request URL and body, performs validations and creates the
+// context used by the backup controller query action.
+func NewQueryBackupContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryBackupContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryBackupContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryBackupContext) OK(r []*AerospikeAmcBackupResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryBackupContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryBackupContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryBackupContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowBackupContext provides the backup show action context.
+type ShowBackupContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	BackupID string
+	ConnID   string
+}
+
+// NewShowBackupContext parses the incoming request URL and body, performs validations and creates the
+// context used by the backup controller show action.
+func NewShowBackupContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowBackupContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowBackupContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramBackupID := req.Params["backupId"]
+	if len(paramBackupID) > 0 {
+		rawBackupID := paramBackupID[0]
+		rctx.BackupID = rawBackupID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.BackupID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`backupId`, rctx.BackupID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowBackupContext) OK(r *AerospikeAmcBackupResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.backup.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowBackupContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowBackupContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowBackupContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ConfigConnectionContext provides the connection config action context.
 type ConfigConnectionContext struct {
 	context.Context
@@ -357,6 +714,82 @@ func (ctx *DeleteConnectionContext) NotFound() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *DeleteConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// LatencyConnectionContext provides the connection latency action context.
+type LatencyConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	From   *int
+	Until  *int
+}
+
+// NewLatencyConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller latency action.
+func NewLatencyConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*LatencyConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := LatencyConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramFrom := req.Params["from"]
+	if len(paramFrom) > 0 {
+		rawFrom := paramFrom[0]
+		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
+			tmp2 := from
+			tmp1 := &tmp2
+			rctx.From = tmp1
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
+		}
+	}
+	paramUntil := req.Params["until"]
+	if len(paramUntil) > 0 {
+		rawUntil := paramUntil[0]
+		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
+			tmp4 := until
+			tmp3 := &tmp4
+			rctx.Until = tmp3
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *LatencyConnectionContext) OK(r map[string]*AerospikeAmcLatencyResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *LatencyConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *LatencyConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *LatencyConnectionContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -770,9 +1203,9 @@ func NewThroughputConnectionContext(ctx context.Context, r *http.Request, servic
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp2 := from
-			tmp1 := &tmp2
-			rctx.From = tmp1
+			tmp6 := from
+			tmp5 := &tmp6
+			rctx.From = tmp5
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -781,9 +1214,9 @@ func NewThroughputConnectionContext(ctx context.Context, r *http.Request, servic
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp4 := until
-			tmp3 := &tmp4
-			rctx.Until = tmp3
+			tmp8 := until
+			tmp7 := &tmp8
+			rctx.Until = tmp7
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -1545,9 +1978,9 @@ func NewLatencyNamespaceContext(ctx context.Context, r *http.Request, service *g
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp7 := from
-			tmp6 := &tmp7
-			rctx.From = tmp6
+			tmp11 := from
+			tmp10 := &tmp11
+			rctx.From = tmp10
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1566,9 +1999,9 @@ func NewLatencyNamespaceContext(ctx context.Context, r *http.Request, service *g
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp9 := until
-			tmp8 := &tmp9
-			rctx.Until = tmp8
+			tmp13 := until
+			tmp12 := &tmp13
+			rctx.Until = tmp12
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -1773,9 +2206,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp11 := from
-			tmp10 := &tmp11
-			rctx.From = tmp10
+			tmp15 := from
+			tmp14 := &tmp15
+			rctx.From = tmp14
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1794,9 +2227,9 @@ func NewThroughputNamespaceContext(ctx context.Context, r *http.Request, service
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp13 := until
-			tmp12 := &tmp13
-			rctx.Until = tmp12
+			tmp17 := until
+			tmp16 := &tmp17
+			rctx.Until = tmp16
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -1924,9 +2357,9 @@ func NewLatencyNodeContext(ctx context.Context, r *http.Request, service *goa.Se
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp15 := from
-			tmp14 := &tmp15
-			rctx.From = tmp14
+			tmp19 := from
+			tmp18 := &tmp19
+			rctx.From = tmp18
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -1940,9 +2373,9 @@ func NewLatencyNodeContext(ctx context.Context, r *http.Request, service *goa.Se
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp17 := until
-			tmp16 := &tmp17
-			rctx.Until = tmp16
+			tmp21 := until
+			tmp20 := &tmp21
+			rctx.Until = tmp20
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -2172,9 +2605,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp19 := from
-			tmp18 := &tmp19
-			rctx.From = tmp18
+			tmp23 := from
+			tmp22 := &tmp23
+			rctx.From = tmp22
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -2188,9 +2621,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp21 := until
-			tmp20 := &tmp21
-			rctx.Until = tmp20
+			tmp25 := until
+			tmp24 := &tmp25
+			rctx.Until = tmp24
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -2218,6 +2651,238 @@ func (ctx *ThroughputNodeContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *ThroughputNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// CreateRestoreContext provides the restore create action context.
+type CreateRestoreContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *CreateRestorePayload
+}
+
+// NewCreateRestoreContext parses the incoming request URL and body, performs validations and creates the
+// context used by the restore controller create action.
+func NewCreateRestoreContext(ctx context.Context, r *http.Request, service *goa.Service) (*CreateRestoreContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := CreateRestoreContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// createRestorePayload is the restore create action payload.
+type createRestorePayload struct {
+	// Indicates whether the restore should only update records with smaller generation number
+	IgnoreGenerationNumber *bool `form:"IgnoreGenerationNumber,omitempty" json:"IgnoreGenerationNumber,omitempty" xml:"IgnoreGenerationNumber,omitempty"`
+	// Indicates whether to restore records which do not exist on the cluster only
+	MissingRecordsOnly *bool `form:"MissingRecordsOnly,omitempty" json:"MissingRecordsOnly,omitempty" xml:"MissingRecordsOnly,omitempty"`
+	// SSH user's password
+	SSHPassword *string `form:"SSHPassword,omitempty" json:"SSHPassword,omitempty" xml:"SSHPassword,omitempty"`
+	// SSH User
+	SSHUser *string `form:"SSHUser,omitempty" json:"SSHUser,omitempty" xml:"SSHUser,omitempty"`
+	// Number of working threads.
+	Threads *int `form:"Threads,omitempty" json:"Threads,omitempty" xml:"Threads,omitempty"`
+	// Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Host on which the backup file is located
+	SourceAddress *string `form:"sourceAddress,omitempty" json:"sourceAddress,omitempty" xml:"sourceAddress,omitempty"`
+	// Host on which the backup file is located
+	SourcePath *string `form:"sourcePath,omitempty" json:"sourcePath,omitempty" xml:"sourcePath,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *createRestorePayload) Validate() (err error) {
+	if payload.Namespace == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.SourceAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sourceAddress"))
+	}
+	if payload.SourcePath == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sourcePath"))
+	}
+	if payload.Threads == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "Threads"))
+	}
+	if payload.SSHUser == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHUser"))
+	}
+	if payload.SSHPassword == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHPassword"))
+	}
+	if payload.MissingRecordsOnly == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "MissingRecordsOnly"))
+	}
+	if payload.IgnoreGenerationNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "IgnoreGenerationNumber"))
+	}
+	return
+}
+
+// Publicize creates CreateRestorePayload from createRestorePayload
+func (payload *createRestorePayload) Publicize() *CreateRestorePayload {
+	var pub CreateRestorePayload
+	if payload.IgnoreGenerationNumber != nil {
+		pub.IgnoreGenerationNumber = *payload.IgnoreGenerationNumber
+	}
+	if payload.MissingRecordsOnly != nil {
+		pub.MissingRecordsOnly = *payload.MissingRecordsOnly
+	}
+	if payload.SSHPassword != nil {
+		pub.SSHPassword = *payload.SSHPassword
+	}
+	if payload.SSHUser != nil {
+		pub.SSHUser = *payload.SSHUser
+	}
+	if payload.Threads != nil {
+		pub.Threads = *payload.Threads
+	}
+	if payload.Namespace != nil {
+		pub.Namespace = *payload.Namespace
+	}
+	if payload.SourceAddress != nil {
+		pub.SourceAddress = *payload.SourceAddress
+	}
+	if payload.SourcePath != nil {
+		pub.SourcePath = *payload.SourcePath
+	}
+	return &pub
+}
+
+// CreateRestorePayload is the restore create action payload.
+type CreateRestorePayload struct {
+	// Indicates whether the restore should only update records with smaller generation number
+	IgnoreGenerationNumber bool `form:"IgnoreGenerationNumber" json:"IgnoreGenerationNumber" xml:"IgnoreGenerationNumber"`
+	// Indicates whether to restore records which do not exist on the cluster only
+	MissingRecordsOnly bool `form:"MissingRecordsOnly" json:"MissingRecordsOnly" xml:"MissingRecordsOnly"`
+	// SSH user's password
+	SSHPassword string `form:"SSHPassword" json:"SSHPassword" xml:"SSHPassword"`
+	// SSH User
+	SSHUser string `form:"SSHUser" json:"SSHUser" xml:"SSHUser"`
+	// Number of working threads.
+	Threads int `form:"Threads" json:"Threads" xml:"Threads"`
+	// Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Host on which the backup file is located
+	SourceAddress string `form:"sourceAddress" json:"sourceAddress" xml:"sourceAddress"`
+	// Host on which the backup file is located
+	SourcePath string `form:"sourcePath" json:"sourcePath" xml:"sourcePath"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *CreateRestorePayload) Validate() (err error) {
+	if payload.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "namespace"))
+	}
+	if payload.SourceAddress == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sourceAddress"))
+	}
+	if payload.SourcePath == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "sourcePath"))
+	}
+
+	if payload.SSHUser == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHUser"))
+	}
+	if payload.SSHPassword == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "SSHPassword"))
+	}
+
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *CreateRestoreContext) OK(r *AerospikeAmcRestoreResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.restore.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *CreateRestoreContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *CreateRestoreContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *CreateRestoreContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ProgressRestoreContext provides the restore progress action context.
+type ProgressRestoreContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewProgressRestoreContext parses the incoming request URL and body, performs validations and creates the
+// context used by the restore controller progress action.
+func NewProgressRestoreContext(ctx context.Context, r *http.Request, service *goa.Service) (*ProgressRestoreContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ProgressRestoreContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ProgressRestoreContext) OK(r *AerospikeAmcRestoreResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.restore.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ProgressRestoreContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ProgressRestoreContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ProgressRestoreContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ProgressRestoreContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

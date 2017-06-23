@@ -48,3 +48,12 @@ func (nt NullTime) Value() (driver.Value, error) {
 	}
 	return nt.time, nil
 }
+
+// Value implements the driver Valuer interface.
+func (nt NullTime) UnixNano() *int64 {
+	if nt.valid {
+		res := nt.time.UnixNano()
+		return &res
+	}
+	return nil
+}

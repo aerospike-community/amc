@@ -14,6 +14,65 @@ import (
 	"github.com/goadesign/goa"
 )
 
+// Backup object (default view)
+//
+// Identifier: application/vnd.aerospike.amc.backup.response+json; view=default
+type AerospikeAmcBackupResponse struct {
+	// Cluster Id
+	ClusterID string `form:"clusterId" json:"clusterId" xml:"clusterId"`
+	// The date when the backup was created
+	CreateDate int `form:"createDate" json:"createDate" xml:"createDate"`
+	// Host on which the backup was created
+	DestinationAddress string `form:"destinationAddress" json:"destinationAddress" xml:"destinationAddress"`
+	// Directory where the backup was created
+	DestinationPath string `form:"destinationPath" json:"destinationPath" xml:"destinationPath"`
+	// Error message in case the backup was not successful
+	Error *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// The date when the backup was finished
+	FinishDate *int `form:"finishDate,omitempty" json:"finishDate,omitempty" xml:"finishDate,omitempty"`
+	// Backup Id
+	ID string `form:"id" json:"id" xml:"id"`
+	// Indicated whether the backup was created only for the metadata
+	MetadataOnly bool `form:"metadataOnly" json:"metadataOnly" xml:"metadataOnly"`
+	// Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Backup's progress in percent
+	Progress int `form:"progress" json:"progress" xml:"progress"`
+	// Prioity of the scan reading the data for the backup
+	ScanPriority int `form:"scanPriority" json:"scanPriority" xml:"scanPriority"`
+	// Sets from which backup was created
+	Sets *string `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+	// Backup's status
+	Status string `form:"status" json:"status" xml:"status"`
+	// Indicates whether the backup was supposed to be terminated in case the cluster experienced a change in its nodes
+	TerminateOnClusterChange bool `form:"terminateOnClusterChange" json:"terminateOnClusterChange" xml:"terminateOnClusterChange"`
+}
+
+// Validate validates the AerospikeAmcBackupResponse media type instance.
+func (mt *AerospikeAmcBackupResponse) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.ClusterID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "clusterId"))
+	}
+	if mt.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "namespace"))
+	}
+	if mt.DestinationAddress == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "destinationAddress"))
+	}
+	if mt.DestinationPath == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "destinationPath"))
+	}
+
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+
+	return
+}
+
 // Namespace End Point (default view)
 //
 // Identifier: application/vnd.aerospike.amc.cluster.namespace.response+json; view=default
@@ -654,6 +713,74 @@ type AerospikeAmcResourceUsageResponse struct {
 
 // Validate validates the AerospikeAmcResourceUsageResponse media type instance.
 func (mt *AerospikeAmcResourceUsageResponse) Validate() (err error) {
+
+	return
+}
+
+// Restore object (default view)
+//
+// Identifier: application/vnd.aerospike.amc.restore.response+json; view=default
+type AerospikeAmcRestoreResponse struct {
+	// Indicates whether the restore should only update records with smaller generation number
+	IgnoreGenerationNumber bool `form:"IgnoreGenerationNumber" json:"IgnoreGenerationNumber" xml:"IgnoreGenerationNumber"`
+	// Indicates whether to restore records which do not exist on the cluster only
+	MissingRecordsOnly bool `form:"MissingRecordsOnly" json:"MissingRecordsOnly" xml:"MissingRecordsOnly"`
+	// SSH user's password
+	SSHPassword string `form:"SSHPassword" json:"SSHPassword" xml:"SSHPassword"`
+	// SSH User
+	SSHUser string `form:"SSHUser" json:"SSHUser" xml:"SSHUser"`
+	// Number of working threads.
+	Threads int `form:"Threads" json:"Threads" xml:"Threads"`
+	// Cluster Id
+	ClusterID string `form:"clusterId" json:"clusterId" xml:"clusterId"`
+	// The date when the restore was created
+	CreateDate int `form:"createDate" json:"createDate" xml:"createDate"`
+	// Error message in case the restore was not successful
+	Error *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// The date when the restore was finished
+	FinishDate *int `form:"finishDate,omitempty" json:"finishDate,omitempty" xml:"finishDate,omitempty"`
+	// Restore Id
+	ID string `form:"id" json:"id" xml:"id"`
+	// Namespace
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Restore's progress in percent
+	Progress int `form:"progress" json:"progress" xml:"progress"`
+	// Host on which the backup file is located
+	SourceAddress string `form:"sourceAddress" json:"sourceAddress" xml:"sourceAddress"`
+	// Host on which the backup file is located
+	SourcePath string `form:"sourcePath" json:"sourcePath" xml:"sourcePath"`
+	// Restore's status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcRestoreResponse media type instance.
+func (mt *AerospikeAmcRestoreResponse) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.ClusterID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "clusterId"))
+	}
+	if mt.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "namespace"))
+	}
+	if mt.SourceAddress == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "sourceAddress"))
+	}
+	if mt.SourcePath == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "sourcePath"))
+	}
+
+	if mt.SSHUser == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "SSHUser"))
+	}
+	if mt.SSHPassword == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "SSHPassword"))
+	}
+
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
 
 	return
 }

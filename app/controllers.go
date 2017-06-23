@@ -161,12 +161,147 @@ func unmarshalAuthenticateAuthPayload(ctx context.Context, service *goa.Service,
 	return nil
 }
 
+// BackupController is the controller interface for the Backup actions.
+type BackupController interface {
+	goa.Muxer
+	Create(*CreateBackupContext) error
+	Progress(*ProgressBackupContext) error
+	Query(*QueryBackupContext) error
+	Show(*ShowBackupContext) error
+}
+
+// MountBackupController "mounts" a Backup resource controller on the given service.
+func MountBackupController(service *goa.Service, ctrl BackupController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/backups", ctrl.MuxHandler("preflight", handleBackupOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/backups/progress", ctrl.MuxHandler("preflight", handleBackupOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/backups/:backupId", ctrl.MuxHandler("preflight", handleBackupOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewCreateBackupContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*CreateBackupPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Create(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleBackupOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/backups", ctrl.MuxHandler("create", h, unmarshalCreateBackupPayload))
+	service.LogInfo("mount", "ctrl", "Backup", "action", "Create", "route", "POST /api/v1/connections/:connId/backups", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewProgressBackupContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Progress(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleBackupOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/backups/progress", ctrl.MuxHandler("progress", h, nil))
+	service.LogInfo("mount", "ctrl", "Backup", "action", "Progress", "route", "GET /api/v1/connections/:connId/backups/progress", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQueryBackupContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleBackupOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/backups", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Backup", "action", "Query", "route", "GET /api/v1/connections/:connId/backups", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowBackupContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleBackupOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/backups/:backupId", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Backup", "action", "Show", "route", "GET /api/v1/connections/:connId/backups/:backupId", "security", "jwt")
+}
+
+// handleBackupOrigin applies the CORS response headers corresponding to the origin.
+func handleBackupOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// unmarshalCreateBackupPayload unmarshals the request body into the context request data Payload field.
+func unmarshalCreateBackupPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &createBackupPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
 // ConnectionController is the controller interface for the Connection actions.
 type ConnectionController interface {
 	goa.Muxer
 	Config(*ConfigConnectionContext) error
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
+	Latency(*LatencyConnectionContext) error
 	Namespaces(*NamespacesConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
@@ -181,6 +316,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/config", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
@@ -241,6 +377,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("DELETE", "/api/v1/connections/:connId", ctrl.MuxHandler("delete", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:connId", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLatencyConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Latency(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("latency", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Latency", "route", "GET /api/v1/connections/:connId/latency", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -1039,6 +1192,103 @@ func handlePublicOrigin(h goa.Handler) goa.Handler {
 
 		return h(ctx, rw, req)
 	}
+}
+
+// RestoreController is the controller interface for the Restore actions.
+type RestoreController interface {
+	goa.Muxer
+	Create(*CreateRestoreContext) error
+	Progress(*ProgressRestoreContext) error
+}
+
+// MountRestoreController "mounts" a Restore resource controller on the given service.
+func MountRestoreController(service *goa.Service, ctrl RestoreController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/restores", ctrl.MuxHandler("preflight", handleRestoreOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/restores/progress", ctrl.MuxHandler("preflight", handleRestoreOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewCreateRestoreContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*CreateRestorePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Create(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleRestoreOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/restores", ctrl.MuxHandler("create", h, unmarshalCreateRestorePayload))
+	service.LogInfo("mount", "ctrl", "Restore", "action", "Create", "route", "POST /api/v1/connections/:connId/restores", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewProgressRestoreContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Progress(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleRestoreOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/restores/progress", ctrl.MuxHandler("progress", h, nil))
+	service.LogInfo("mount", "ctrl", "Restore", "action", "Progress", "route", "GET /api/v1/connections/:connId/restores/progress", "security", "jwt")
+}
+
+// handleRestoreOrigin applies the CORS response headers corresponding to the origin.
+func handleRestoreOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// unmarshalCreateRestorePayload unmarshals the request body into the context request data Payload field.
+func unmarshalCreateRestorePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &createRestorePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
 }
 
 // SetController is the controller interface for the Set actions.

@@ -236,17 +236,33 @@ func (br *BackupRestore) UpdateError(errorMsg string) error {
 	return nil
 }
 
-func SuccessfulBackups() ([]*BackupRestore, error) {
+func (br *BackupRestore) fromSQLRow(row *sql.Row) error {
+	return row.Scan(&br.Type, &br.Id, &br.ClusterId, &br.Namespace, &br.DestinationAddress, &br.Username, &br.DestinationPath, &br.Sets, &br.MetadataOnly, &br.TerminateOnClusterChange, &br.ScanPriority, &br.Created, &br.Finished, &br.Status)
+}
+
+func SuccessfulBackups(clusterId string) ([]*BackupRestore, error) {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
 
-	rows, err := db.Query(fmt.Sprintf("SELECT %s FROM backups where Type = ?1 AND Status = ?2 ORDER BY Created DESC", strings.Join(_backupFields[:], ", ")), BackupRestoreTypeBackup, BackupStatusFinished)
+	rows, err := db.Query(fmt.Sprintf("SELECT %s FROM backups where ClusterId = ?1 AND Type = ?2 AND Status = ?3 ORDER BY Created DESC", strings.Join(_backupFields[:], ", ")), clusterId, BackupRestoreTypeBackup, BackupStatusFinished)
 	if err != nil {
 		log.Errorf("Error Querying Backups in the DB: %s", err.Error())
 		return nil, err
 	}
 
 	return backupRestoreFromSQLRows(rows)
+}
+
+func GetBackupRestore(id, clusterId string, brType BackupRestoreType) (*BackupRestore, error) {
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
+
+	row := db.QueryRow(fmt.Sprintf("SELECT %s FROM backups where Id = ?1 AND Type = ?2 AND ClusterId = ?3", strings.Join(_backupFields[:], ", ")), id, BackupRestoreTypeBackup, clusterId)
+
+	br := new(BackupRestore)
+	err := br.fromSQLRow(row)
+
+	return br, err
 }
 
 // func (br *BackupRestore) fromSQLRow(row *sql.Row) error {

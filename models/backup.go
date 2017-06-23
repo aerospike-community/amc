@@ -11,6 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
+	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 )
 
@@ -18,6 +19,54 @@ type Backup struct {
 	*common.BackupRestore
 
 	cluster *Cluster
+}
+
+func GetBackup(id, clusterId string) (*Backup, error) {
+	br, err := common.GetBackupRestore(id, clusterId, common.BackupRestoreTypeBackup)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Backup{br, nil}, nil
+}
+
+func SuccessfulBackups(clusterId string) ([]*Backup, error) {
+	backups, err := common.SuccessfulBackups(clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*Backup, 0, len(backups))
+	for _, br := range backups {
+		res = append(res, &Backup{br, nil})
+	}
+
+	return res, nil
+}
+
+func (b *Backup) ToMedia() *app.AerospikeAmcBackupResponse {
+	var fd *int
+	if b.Finished.Valid() {
+		tmp := (int(*b.Finished.UnixNano()) / 1000)
+		fd = &tmp
+	}
+
+	return &app.AerospikeAmcBackupResponse{
+		ID:                       b.Id,
+		ClusterID:                b.ClusterId,
+		Namespace:                b.Namespace,
+		DestinationAddress:       b.DestinationAddress,
+		DestinationPath:          b.DestinationPath,
+		Sets:                     &b.Sets.String,
+		MetadataOnly:             b.MetadataOnly,
+		TerminateOnClusterChange: b.TerminateOnClusterChange,
+		ScanPriority:             b.ScanPriority,
+		CreateDate:               int(b.Created.UnixNano() / 1000),
+		FinishDate:               fd,
+		Status:                   string(b.Status),
+		Progress:                 b.Progress,
+		Error:                    &b.Error,
+	}
 }
 
 func (b *Backup) Execute() error {
