@@ -8,6 +8,7 @@ import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import Tabs from 'components/Tabs';
 import ClusterLatency from 'components/cluster/ClusterLatency';
+import ClusterNodesConfig from 'components/cluster/ClusterNodesConfig';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -19,7 +20,8 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.View, CLUSTER_ACTIONS.Delete, CLUSTER_ACTIONS.Edit];
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.View, 
+                  CLUSTER_ACTIONS.Delete, CLUSTER_ACTIONS.Edit];
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onViewClusterOverview = this.onViewClusterOverview.bind(this);
   }
@@ -52,6 +54,8 @@ class ClusterDashboard extends React.Component {
     } else if (view === CLUSTER_ACTIONS.View || view === CLUSTER_ACTIONS.Delete) {
       dashboard = <VisibleViewClusterConnection />
 
+    } else if (view === CLUSTER_ACTIONS.Configuration) {
+      dashboard = <ClusterNodesConfig clusterID={clusterID} />
     }
 
     return (

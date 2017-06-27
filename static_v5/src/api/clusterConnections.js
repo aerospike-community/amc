@@ -85,3 +85,9 @@ export function getNamespaces(clusterID)  {
   const url = toURLPath(clusterID + '/namespaces');
   return get(url);
 }
+
+// getConfig returns the configuration of the nodes
+export function getNodesConfig(clusterID) {
+  const url = toURLPath(clusterID + '/config');
+  return get(url);
+}

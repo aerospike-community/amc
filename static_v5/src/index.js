@@ -13,7 +13,7 @@ import 'font-awesome/css/font-awesome.css';
 import 'nvd3/build/nv.d3.css';
 import 'react-widgets/lib/less/react-widgets.less';
 import 'ag-grid/dist/styles/ag-grid.css';
-import 'ag-grid/dist/styles/theme-bootstrap.css';
+import 'ag-grid/dist/styles/theme-material.css';
 
 import './styles/index.scss';
 

@@ -11,33 +11,20 @@ class NodeConfigEditor extends React.Component {
     super(props);
 
     this.state = {
-      config: {}
+      config: null,
     };
 
     this.onEdit = this.onEdit.bind(this);
   }
 
   fetchConfig(clusterID, nodeHost) {
-    // TODO process config according to context
-    const processConfig = (config) => {
-      let all = [];
-      for (let k in config) {
-        all.push({
-          name: k,
-          value: config[k],
-          // TODO set if dynamic config
-          isEditable: true,
-        });
-      }
-      return all;
-    };
-
     getConfig(clusterID, nodeHost)
       .then((response) => {
-        const all = processConfig(response.config);
         this.setState({
           config: {
-            all: all,
+            [nodeHost]: {
+              all: response.config,
+            },
           }
         });
       })
@@ -61,18 +48,28 @@ class NodeConfigEditor extends React.Component {
 
   onEdit(config) {
     const { clusterID, nodeHost }  = this.props;
-    const p = setConfig(clusterID, nodeHost, config)
-              .then((response) => {
-                this.fetchConfig(clusterID, nodeHost);
-                return response;
-              });
+    const p = setConfig(clusterID, nodeHost, config);
+    p.then((response) => {
+      // redraw config editor component
+      this.setState({
+        config: null
+      });
+
+      this.fetchConfig(clusterID, nodeHost);
+      return response;
+    });
+
     return p;
   }
 
   render() {
     const { config } = this.state;
+
+    if (config === null)
+      return null;
+
     return (
-        <ConfigEditor config={config} onEdit={this.onEdit}/>
+        <ConfigEditor config={config} onEdit={this.onEdit} isEditable="true"/>
     );
   }
 }

@@ -41,6 +41,9 @@ const clusterActions = {
   Delete: {
     isEndOfGrouping: true,
   },
+  Configuration: {
+    isEndOfGrouping: true,
+  },
   Disconnect: {
     state: {
       isAuthenticated: true
