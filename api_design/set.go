@@ -18,7 +18,7 @@ var _ = Resource("set", func() {
 		Description("Query a cluster's namespaces")
 		Routing(GET(""))
 
-		Response(OK, ArrayOf(HashOf(String, Any)))
+		Response(OK, ArrayOf(SetResponseMedia))
 		Response(BadRequest, String)
 		Response(Forbidden)
 		Response(Unauthorized)
@@ -34,7 +34,7 @@ var _ = Resource("set", func() {
 			Required("setName")
 		})
 
-		Response(OK, HashOf(String, Any))
+		Response(OK, SetResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
@@ -56,4 +56,22 @@ var _ = Resource("set", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+})
+
+var SetResponseMedia = MediaType("application/vnd.aerospike.amc.set.response+json", func() {
+	Description("Set object")
+	Attributes(func() {
+		Attribute("status", String, "Node's Status")
+		Attribute("set", HashOf(String, Any), "Set's Attributes")
+
+		Required("status", "set")
+	})
+
+	View("default", func() {
+		Attribute("status")
+		Attribute("set")
+
+		Required("status", "set")
+	})
+
 })

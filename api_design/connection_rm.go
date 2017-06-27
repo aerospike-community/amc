@@ -174,6 +174,7 @@ var UserConnectionTreeResponseMedia = MediaType("application/vnd.aerospike.amc.c
 		Attribute("entityType", String, "Entity Type")
 		Attribute("nodes", ArrayOf(EntityNode), "Nodes")
 		Attribute("modules", ArrayOf(EntityModule), "modules")
+		Attribute("indexes", ArrayOf(EntityIndex), "Indexes")
 
 		Attribute("status", String, "Cureent connection status.")
 
@@ -187,6 +188,7 @@ var UserConnectionTreeResponseMedia = MediaType("application/vnd.aerospike.amc.c
 		Attribute("nodes")
 		Attribute("modules")
 		Attribute("status")
+		Attribute("indexes")
 		Required("id", "entityType", "lastUpdate", "status")
 	})
 })
@@ -200,7 +202,6 @@ var EntityNode = MediaType("application/vnd.aerospike.amc.entity.node.response+j
 		Attribute("id", String, "Node Id", func() { Example("BB9EB6C71290C00") })
 
 		Attribute("namespaces", ArrayOf(EntityNamespace), "Namespaces")
-		Attribute("indexes", ArrayOf(EntityIndex), "Indexes")
 
 		Required("host", "id", "entityType", "lastUpdate")
 	})
@@ -211,7 +212,6 @@ var EntityNode = MediaType("application/vnd.aerospike.amc.entity.node.response+j
 		Attribute("host")
 		Attribute("id")
 		Attribute("namespaces")
-		Attribute("indexes")
 		Required("host", "id", "entityType", "lastUpdate")
 	})
 })

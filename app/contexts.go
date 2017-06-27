@@ -3056,7 +3056,7 @@ func NewQuerySetContext(ctx context.Context, r *http.Request, service *goa.Servi
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *QuerySetContext) OK(r []map[string]interface{}) error {
+func (ctx *QuerySetContext) OK(r []*AerospikeAmcSetResponse) error {
 	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
@@ -3132,8 +3132,8 @@ func NewShowSetContext(ctx context.Context, r *http.Request, service *goa.Servic
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ShowSetContext) OK(r map[string]interface{}) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *ShowSetContext) OK(r *AerospikeAmcSetResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.set.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 

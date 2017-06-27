@@ -1501,7 +1501,7 @@ func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResp
 							BinName:    idx.TryString("bin", ""),
 							Type:       idx.TryString("type", ""),
 						}
-						nodeResp.Indexes = append(nodeResp.Indexes, indexResp)
+						resp.Indexes = append(resp.Indexes, indexResp)
 					}
 				}
 				namespaceResp.Sets = append(namespaceResp.Sets, setResp)

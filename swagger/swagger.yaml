@@ -327,76 +327,73 @@ definitions:
     example:
       entityType: Et non cupiditate a dignissimos in hic.
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      lastUpdate: 2.02811e+17
+      indexes:
+      - binName: id
+        entityType: Perspiciatis ab et.
+        lastUpdate: 7.0358086e+17
+        name: idx_test_customers_id
+        type: NUMERIC
+      lastUpdate: 2.4244165e+18
       modules:
-      - entityType: Ab et nostrum nulla laborum.
+      - entityType: Est laudantium.
         hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 1.1413311e+18
-        name: map_reduce.lua
-        type: lua
-      - entityType: Ab et nostrum nulla laborum.
-        hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-        lastUpdate: 1.1413311e+18
+        lastUpdate: 1.4112494e+18
         name: map_reduce.lua
         type: lua
       nodes:
-      - entityType: Recusandae quia est.
+      - entityType: Praesentium tenetur modi facilis.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        indexes:
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        lastUpdate: 7.434409e+18
+        lastUpdate: 1.5079996e+18
         namespaces:
-        - entityType: Aut vitae.
-          lastUpdate: 7.612186e+18
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
           name: Test
           sets:
-          - entityType: Et et reiciendis dolore aut deserunt nulla.
-            lastUpdate: 4.3823834e+18
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
             name: Customers
-      - entityType: Recusandae quia est.
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+      - entityType: Praesentium tenetur modi facilis.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        indexes:
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        lastUpdate: 7.434409e+18
+        lastUpdate: 1.5079996e+18
         namespaces:
-        - entityType: Aut vitae.
-          lastUpdate: 7.612186e+18
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
           name: Test
           sets:
-          - entityType: Et et reiciendis dolore aut deserunt nulla.
-            lastUpdate: 4.3823834e+18
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
             name: Customers
-      status: Harum quia modi est sit iusto.
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+      status: Est sit iusto.
     properties:
       entityType:
         description: Entity Type
@@ -407,22 +404,28 @@ definitions:
         example: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
         pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         type: string
+      indexes:
+        description: Indexes
+        example:
+        - binName: id
+          entityType: Perspiciatis ab et.
+          lastUpdate: 7.0358086e+17
+          name: idx_test_customers_id
+          type: NUMERIC
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
+        type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 2.02811e+17
+        example: 2.4244165e+18
         format: int64
         type: integer
       modules:
         description: modules
         example:
-        - entityType: Ab et nostrum nulla laborum.
+        - entityType: Est laudantium.
           hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 1.1413311e+18
-          name: map_reduce.lua
-          type: lua
-        - entityType: Ab et nostrum nulla laborum.
-          hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-          lastUpdate: 1.1413311e+18
+          lastUpdate: 1.4112494e+18
           name: map_reduce.lua
           type: lua
         items:
@@ -431,68 +434,64 @@ definitions:
       nodes:
         description: Nodes
         example:
-        - entityType: Recusandae quia est.
+        - entityType: Praesentium tenetur modi facilis.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          indexes:
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.434409e+18
+          lastUpdate: 1.5079996e+18
           namespaces:
-          - entityType: Aut vitae.
-            lastUpdate: 7.612186e+18
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
             name: Test
             sets:
-            - entityType: Et et reiciendis dolore aut deserunt nulla.
-              lastUpdate: 4.3823834e+18
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
               name: Customers
-        - entityType: Recusandae quia est.
-          host: 127.0.0.1:3000
-          id: BB9EB6C71290C00
-          indexes:
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Modi facilis.
-            lastUpdate: 1.5079996e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 7.434409e+18
-          namespaces:
-          - entityType: Aut vitae.
-            lastUpdate: 7.612186e+18
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
             name: Test
             sets:
-            - entityType: Et et reiciendis dolore aut deserunt nulla.
-              lastUpdate: 4.3823834e+18
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
+              name: Customers
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
+            name: Test
+            sets:
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
+              name: Customers
+        - entityType: Praesentium tenetur modi facilis.
+          host: 127.0.0.1:3000
+          id: BB9EB6C71290C00
+          lastUpdate: 1.5079996e+18
+          namespaces:
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
+            name: Test
+            sets:
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
+              name: Customers
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
+            name: Test
+            sets:
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
+              name: Customers
+          - entityType: Autem aut vitae quam et dignissimos et.
+            lastUpdate: 5.6132345e+18
+            name: Test
+            sets:
+            - entityType: Aut deserunt nulla saepe rerum harum.
+              lastUpdate: 2.3484733e+18
               name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
         type: array
       status:
         description: Cureent connection status.
-        example: Harum quia modi est sit iusto.
+        example: Est sit iusto.
         type: string
     required:
     - id
@@ -506,8 +505,8 @@ definitions:
     description: Index Entity (default view)
     example:
       binName: id
-      entityType: Modi facilis.
-      lastUpdate: 1.5079996e+18
+      entityType: Perspiciatis ab et.
+      lastUpdate: 7.0358086e+17
       name: idx_test_customers_id
       type: NUMERIC
     properties:
@@ -517,11 +516,11 @@ definitions:
         type: string
       entityType:
         description: Type
-        example: Modi facilis.
+        example: Perspiciatis ab et.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 1.5079996e+18
+        example: 7.0358086e+17
         format: int64
         type: integer
       name:
@@ -544,15 +543,15 @@ definitions:
   AerospikeAmcEntityModuleResponse:
     description: Module Entity (default view)
     example:
-      entityType: Ab et nostrum nulla laborum.
+      entityType: Est laudantium.
       hash: 06508300d1dc7e308ce8998bb4fe7a12505aa1f9
-      lastUpdate: 1.1413311e+18
+      lastUpdate: 1.4112494e+18
       name: map_reduce.lua
       type: lua
     properties:
       entityType:
         description: Type
-        example: Ab et nostrum nulla laborum.
+        example: Est laudantium.
         type: string
       hash:
         description: Module Hash
@@ -560,7 +559,7 @@ definitions:
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 1.1413311e+18
+        example: 1.4112494e+18
         format: int64
         type: integer
       name:
@@ -583,21 +582,21 @@ definitions:
   AerospikeAmcEntityNamespaceResponse:
     description: Namespace Entity (default view)
     example:
-      entityType: Aut vitae.
-      lastUpdate: 7.612186e+18
+      entityType: Autem aut vitae quam et dignissimos et.
+      lastUpdate: 5.6132345e+18
       name: Test
       sets:
-      - entityType: Et et reiciendis dolore aut deserunt nulla.
-        lastUpdate: 4.3823834e+18
+      - entityType: Aut deserunt nulla saepe rerum harum.
+        lastUpdate: 2.3484733e+18
         name: Customers
     properties:
       entityType:
         description: Type
-        example: Aut vitae.
+        example: Autem aut vitae quam et dignissimos et.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 7.612186e+18
+        example: 5.6132345e+18
         format: int64
         type: integer
       name:
@@ -607,8 +606,8 @@ definitions:
       sets:
         description: Namespaces
         example:
-        - entityType: Et et reiciendis dolore aut deserunt nulla.
-          lastUpdate: 4.3823834e+18
+        - entityType: Aut deserunt nulla saepe rerum harum.
+          lastUpdate: 2.3484733e+18
           name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntitySetResponse'
@@ -623,38 +622,36 @@ definitions:
   AerospikeAmcEntityNodeResponse:
     description: Node Entity (default view)
     example:
-      entityType: Recusandae quia est.
+      entityType: Praesentium tenetur modi facilis.
       host: 127.0.0.1:3000
       id: BB9EB6C71290C00
-      indexes:
-      - binName: id
-        entityType: Modi facilis.
-        lastUpdate: 1.5079996e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      - binName: id
-        entityType: Modi facilis.
-        lastUpdate: 1.5079996e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      - binName: id
-        entityType: Modi facilis.
-        lastUpdate: 1.5079996e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      lastUpdate: 7.434409e+18
+      lastUpdate: 1.5079996e+18
       namespaces:
-      - entityType: Aut vitae.
-        lastUpdate: 7.612186e+18
+      - entityType: Autem aut vitae quam et dignissimos et.
+        lastUpdate: 5.6132345e+18
         name: Test
         sets:
-        - entityType: Et et reiciendis dolore aut deserunt nulla.
-          lastUpdate: 4.3823834e+18
+        - entityType: Aut deserunt nulla saepe rerum harum.
+          lastUpdate: 2.3484733e+18
+          name: Customers
+      - entityType: Autem aut vitae quam et dignissimos et.
+        lastUpdate: 5.6132345e+18
+        name: Test
+        sets:
+        - entityType: Aut deserunt nulla saepe rerum harum.
+          lastUpdate: 2.3484733e+18
+          name: Customers
+      - entityType: Autem aut vitae quam et dignissimos et.
+        lastUpdate: 5.6132345e+18
+        name: Test
+        sets:
+        - entityType: Aut deserunt nulla saepe rerum harum.
+          lastUpdate: 2.3484733e+18
           name: Customers
     properties:
       entityType:
         description: Type
-        example: Recusandae quia est.
+        example: Praesentium tenetur modi facilis.
         type: string
       host:
         description: Network Host Address
@@ -664,41 +661,34 @@ definitions:
         description: Node Id
         example: BB9EB6C71290C00
         type: string
-      indexes:
-        description: Indexes
-        example:
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Modi facilis.
-          lastUpdate: 1.5079996e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        items:
-          $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
-        type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 7.434409e+18
+        example: 1.5079996e+18
         format: int64
         type: integer
       namespaces:
         description: Namespaces
         example:
-        - entityType: Aut vitae.
-          lastUpdate: 7.612186e+18
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
           name: Test
           sets:
-          - entityType: Et et reiciendis dolore aut deserunt nulla.
-            lastUpdate: 4.3823834e+18
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
+            name: Customers
+        - entityType: Autem aut vitae quam et dignissimos et.
+          lastUpdate: 5.6132345e+18
+          name: Test
+          sets:
+          - entityType: Aut deserunt nulla saepe rerum harum.
+            lastUpdate: 2.3484733e+18
             name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
@@ -714,17 +704,17 @@ definitions:
   AerospikeAmcEntitySetResponse:
     description: Set Entity (default view)
     example:
-      entityType: Et et reiciendis dolore aut deserunt nulla.
-      lastUpdate: 4.3823834e+18
+      entityType: Aut deserunt nulla saepe rerum harum.
+      lastUpdate: 2.3484733e+18
       name: Customers
     properties:
       entityType:
         description: Type
-        example: Et et reiciendis dolore aut deserunt nulla.
+        example: Aut deserunt nulla saepe rerum harum.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 4.3823834e+18
+        example: 2.3484733e+18
         format: int64
         type: integer
       name:
@@ -742,62 +732,62 @@ definitions:
     description: AMC Index Response Wrapper (default view)
     example:
       indexes:
-        Et cumque nihil dignissimos sit quas.:
+        Sequi ducimus et deleniti repellendus sed numquam.:
         - Stats:
-            Et accusamus qui.: false
-          bin: Ea molestiae veritatis aliquam.
-          binType: Ab omnis praesentium voluptates.
-          name: Neque et unde reprehenderit dolorem.
-          namespace: Pariatur ut earum veniam tempora rerum quis.
-          set: Dignissimos sequi ducimus et deleniti repellendus sed.
-          syncOnAllNodes: Nostrum asperiores laudantium id.
+            Quae et.: 7.410297e+18
+          bin: Accusamus qui.
+          binType: Inventore et ea molestiae.
+          name: Aliquam consectetur ab omnis praesentium.
+          namespace: Et neque et.
+          set: Reprehenderit dolorem nobis pariatur ut earum.
+          syncOnAllNodes: Tempora rerum quis.
         - Stats:
-            Et accusamus qui.: false
-          bin: Ea molestiae veritatis aliquam.
-          binType: Ab omnis praesentium voluptates.
-          name: Neque et unde reprehenderit dolorem.
-          namespace: Pariatur ut earum veniam tempora rerum quis.
-          set: Dignissimos sequi ducimus et deleniti repellendus sed.
-          syncOnAllNodes: Nostrum asperiores laudantium id.
+            Quae et.: 7.410297e+18
+          bin: Accusamus qui.
+          binType: Inventore et ea molestiae.
+          name: Aliquam consectetur ab omnis praesentium.
+          namespace: Et neque et.
+          set: Reprehenderit dolorem nobis pariatur ut earum.
+          syncOnAllNodes: Tempora rerum quis.
         - Stats:
-            Et accusamus qui.: false
-          bin: Ea molestiae veritatis aliquam.
-          binType: Ab omnis praesentium voluptates.
-          name: Neque et unde reprehenderit dolorem.
-          namespace: Pariatur ut earum veniam tempora rerum quis.
-          set: Dignissimos sequi ducimus et deleniti repellendus sed.
-          syncOnAllNodes: Nostrum asperiores laudantium id.
+            Quae et.: 7.410297e+18
+          bin: Accusamus qui.
+          binType: Inventore et ea molestiae.
+          name: Aliquam consectetur ab omnis praesentium.
+          namespace: Et neque et.
+          set: Reprehenderit dolorem nobis pariatur ut earum.
+          syncOnAllNodes: Tempora rerum quis.
       status: "on"
     properties:
       indexes:
         additionalProperties: true
         description: Index Data
         example:
-          Et cumque nihil dignissimos sit quas.:
+          Sequi ducimus et deleniti repellendus sed numquam.:
           - Stats:
-              Et accusamus qui.: false
-            bin: Ea molestiae veritatis aliquam.
-            binType: Ab omnis praesentium voluptates.
-            name: Neque et unde reprehenderit dolorem.
-            namespace: Pariatur ut earum veniam tempora rerum quis.
-            set: Dignissimos sequi ducimus et deleniti repellendus sed.
-            syncOnAllNodes: Nostrum asperiores laudantium id.
+              Quae et.: 7.410297e+18
+            bin: Accusamus qui.
+            binType: Inventore et ea molestiae.
+            name: Aliquam consectetur ab omnis praesentium.
+            namespace: Et neque et.
+            set: Reprehenderit dolorem nobis pariatur ut earum.
+            syncOnAllNodes: Tempora rerum quis.
           - Stats:
-              Et accusamus qui.: false
-            bin: Ea molestiae veritatis aliquam.
-            binType: Ab omnis praesentium voluptates.
-            name: Neque et unde reprehenderit dolorem.
-            namespace: Pariatur ut earum veniam tempora rerum quis.
-            set: Dignissimos sequi ducimus et deleniti repellendus sed.
-            syncOnAllNodes: Nostrum asperiores laudantium id.
+              Quae et.: 7.410297e+18
+            bin: Accusamus qui.
+            binType: Inventore et ea molestiae.
+            name: Aliquam consectetur ab omnis praesentium.
+            namespace: Et neque et.
+            set: Reprehenderit dolorem nobis pariatur ut earum.
+            syncOnAllNodes: Tempora rerum quis.
           - Stats:
-              Et accusamus qui.: false
-            bin: Ea molestiae veritatis aliquam.
-            binType: Ab omnis praesentium voluptates.
-            name: Neque et unde reprehenderit dolorem.
-            namespace: Pariatur ut earum veniam tempora rerum quis.
-            set: Dignissimos sequi ducimus et deleniti repellendus sed.
-            syncOnAllNodes: Nostrum asperiores laudantium id.
+              Quae et.: 7.410297e+18
+            bin: Accusamus qui.
+            binType: Inventore et ea molestiae.
+            name: Aliquam consectetur ab omnis praesentium.
+            namespace: Et neque et.
+            set: Reprehenderit dolorem nobis pariatur ut earum.
+            syncOnAllNodes: Tempora rerum quis.
         type: object
       status:
         description: Cluster/Node Status
@@ -820,10 +810,10 @@ definitions:
         free-bytes: 5.876103e+18
         total-bytes: 5.824241e+18
         used-bytes: 2.5501883e+18
-      name: Quis eum.
+      name: Quas minima ipsum ut voluptas.
       stats:
-        Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
-      status: Modi repudiandae distinctio magnam accusantium voluptas et.
+        Voluptas repudiandae velit veritatis.: false
+      status: Aut et voluptate et rerum molestiae enim.
     properties:
       disk:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
@@ -831,17 +821,17 @@ definitions:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
       name:
         description: Namespace Name
-        example: Quis eum.
+        example: Quas minima ipsum ut voluptas.
         type: string
       stats:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
+          Voluptas repudiandae velit veritatis.: false
         type: object
       status:
         description: Cluster/Node status
-        example: Modi repudiandae distinctio magnam accusantium voluptas et.
+        example: Aut et voluptate et rerum molestiae enim.
         type: string
     required:
     - name
@@ -855,29 +845,29 @@ definitions:
   AerospikeAmcNodeConfigResponse:
     description: Node Config (default view)
     example:
-      address: Sit porro natus eveniet velit ducimus laboriosam.
+      address: Ut inventore.
       config:
-        Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
-      error: Et est ipsa dolorem sit quibusdam.
-      status: Rerum deserunt ipsum.
+        Distinctio magnam accusantium voluptas et ut sit.: false
+      error: Velit ducimus laboriosam quod quam dicta.
+      status: Saepe et et odit doloremque et.
     properties:
       address:
         description: Node Address
-        example: Sit porro natus eveniet velit ducimus laboriosam.
+        example: Ut inventore.
         type: string
       config:
         additionalProperties: true
         description: Node config
         example:
-          Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
+          Distinctio magnam accusantium voluptas et ut sit.: false
         type: object
       error:
         description: Error message
-        example: Et est ipsa dolorem sit quibusdam.
+        example: Velit ducimus laboriosam quod quam dicta.
         type: string
       status:
         description: Node status
-        example: Rerum deserunt ipsum.
+        example: Saepe et et odit doloremque et.
         type: string
     required:
     - address
@@ -919,20 +909,20 @@ definitions:
     description: Restore object (default view)
     example:
       IgnoreGenerationNumber: false
-      MissingRecordsOnly: true
-      SSHPassword: Id dicta tenetur tenetur quibusdam sit rem.
-      SSHUser: Voluptas error quos est odit beatae.
-      Threads: 6.8127115e+18
-      clusterId: Nesciunt doloribus perferendis esse.
-      createDate: 2.3064225e+18
-      error: Nihil aut.
-      finishDate: 7.46425e+18
-      id: Unde sit iusto alias.
-      namespace: Vel eveniet.
-      progress: 4.3940938e+18
-      sourceAddress: Quae autem.
-      sourcePath: Aut est officia libero.
-      status: Excepturi explicabo quis itaque aut.
+      MissingRecordsOnly: false
+      SSHPassword: Sint minima est numquam.
+      SSHUser: Aut alias dolor quis id.
+      Threads: 1.6529714e+18
+      clusterId: Tenetur quibusdam sit rem et.
+      createDate: 2.2781676e+18
+      error: Quos est odit beatae.
+      finishDate: 6.8127115e+18
+      id: Nesciunt doloribus perferendis esse.
+      namespace: Ab nihil.
+      progress: 3.8005243e+18
+      sourceAddress: Quos unde sit iusto.
+      sourcePath: Quibusdam vel eveniet fuga velit.
+      status: Autem dolorem aut est.
     properties:
       IgnoreGenerationNumber:
         description: Indicates whether the restore should only update records with
@@ -942,63 +932,63 @@ definitions:
       MissingRecordsOnly:
         description: Indicates whether to restore records which do not exist on the
           cluster only
-        example: true
+        example: false
         type: boolean
       SSHPassword:
         description: SSH user's password
-        example: Id dicta tenetur tenetur quibusdam sit rem.
+        example: Sint minima est numquam.
         type: string
       SSHUser:
         description: SSH User
-        example: Voluptas error quos est odit beatae.
+        example: Aut alias dolor quis id.
         type: string
       Threads:
         description: Number of working threads.
-        example: 6.8127115e+18
+        example: 1.6529714e+18
         format: int64
         type: integer
       clusterId:
         description: Cluster Id
-        example: Nesciunt doloribus perferendis esse.
+        example: Tenetur quibusdam sit rem et.
         type: string
       createDate:
         description: The date when the restore was created
-        example: 2.3064225e+18
+        example: 2.2781676e+18
         format: int64
         type: integer
       error:
         description: Error message in case the restore was not successful
-        example: Nihil aut.
+        example: Quos est odit beatae.
         type: string
       finishDate:
         description: The date when the restore was finished
-        example: 7.46425e+18
+        example: 6.8127115e+18
         format: int64
         type: integer
       id:
         description: Restore Id
-        example: Unde sit iusto alias.
+        example: Nesciunt doloribus perferendis esse.
         type: string
       namespace:
         description: Namespace
-        example: Vel eveniet.
+        example: Ab nihil.
         type: string
       progress:
         description: Restore's progress in percent
-        example: 4.3940938e+18
+        example: 3.8005243e+18
         format: int64
         type: integer
       sourceAddress:
         description: Host on which the backup file is located
-        example: Quae autem.
+        example: Quos unde sit iusto.
         type: string
       sourcePath:
         description: Host on which the backup file is located
-        example: Aut est officia libero.
+        example: Quibusdam vel eveniet fuga velit.
         type: string
       status:
         description: Restore's status
-        example: Excepturi explicabo quis itaque aut.
+        example: Autem dolorem aut est.
         type: string
     required:
     - id
@@ -1015,6 +1005,29 @@ definitions:
     - status
     - progress
     title: 'Mediatype identifier: application/vnd.aerospike.amc.restore.response+json;
+      view=default'
+    type: object
+  AerospikeAmcSetResponse:
+    description: Set object (default view)
+    example:
+      set:
+        Nam excepturi explicabo.: 0.92077065
+      status: Minima animi distinctio ullam laudantium rem voluptas.
+    properties:
+      set:
+        additionalProperties: true
+        description: Set's Attributes
+        example:
+          Nam excepturi explicabo.: 0.92077065
+        type: object
+      status:
+        description: Node's Status
+        example: Minima animi distinctio ullam laudantium rem voluptas.
+        type: string
+    required:
+    - status
+    - set
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.set.response+json;
       view=default'
     type: object
   AerospikeAmcSystemResponse:
@@ -1034,11 +1047,17 @@ definitions:
     example:
       status: "on"
       throughput:
-        Rem voluptas sit ad distinctio praesentium.:
-          Fugiat tempore deserunt dignissimos qui voluptatem incidunt.:
-          - failed: 0.79185367
-            successful: 0.48955357
-            timestamp: 5.289416e+18
+        Aut fugiat tempore deserunt dignissimos qui voluptatem.:
+          Voluptatem laudantium voluptatem quia dicta est.:
+          - failed: 0.7267351
+            successful: 0.92942446
+            timestamp: 2.0386754e+18
+          - failed: 0.7267351
+            successful: 0.92942446
+            timestamp: 2.0386754e+18
+          - failed: 0.7267351
+            successful: 0.92942446
+            timestamp: 2.0386754e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1048,11 +1067,17 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Rem voluptas sit ad distinctio praesentium.:
-            Fugiat tempore deserunt dignissimos qui voluptatem incidunt.:
-            - failed: 0.79185367
-              successful: 0.48955357
-              timestamp: 5.289416e+18
+          Aut fugiat tempore deserunt dignissimos qui voluptatem.:
+            Voluptatem laudantium voluptatem quia dicta est.:
+            - failed: 0.7267351
+              successful: 0.92942446
+              timestamp: 2.0386754e+18
+            - failed: 0.7267351
+              successful: 0.92942446
+              timestamp: 2.0386754e+18
+            - failed: 0.7267351
+              successful: 0.92942446
+              timestamp: 2.0386754e+18
         type: object
     required:
     - status
@@ -1089,7 +1114,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Aperiam provident ea nulla.
+          example: Provident ea nulla aut corrupti facilis est.
           type: string
         type: array
       username:
@@ -1376,15 +1401,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Qui doloremque rem quasi.
+      binName: Et nostrum.
       indexName: idxAccounts
-      namespace: Est accusamus et nostrum delectus.
-      setName: Aliquid a qui odio consequuntur quo quia.
+      namespace: Molestiae aliquid a qui odio.
+      setName: Quo quia voluptatem.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Qui doloremque rem quasi.
+        example: Et nostrum.
         type: string
       indexName:
         description: Index's Name
@@ -1392,11 +1417,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Est accusamus et nostrum delectus.
+        example: Molestiae aliquid a qui odio.
         type: string
       setName:
         description: Index's Set name
-        example: Aliquid a qui odio consequuntur quo quia.
+        example: Quo quia voluptatem.
         type: string
       type:
         description: Index's type
@@ -1414,7 +1439,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Ut deserunt voluptatem modi.
+      source: Deserunt voluptatem modi vitae.
       type: LUA
     properties:
       name:
@@ -1423,7 +1448,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Ut deserunt voluptatem modi.
+        example: Deserunt voluptatem modi vitae.
         type: string
       type:
         description: Module's type
@@ -1469,7 +1494,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Corrupti facilis est impedit.
+          example: In debitis consequatur natus.
           type: string
         type: array
       username:
@@ -2931,10 +2956,12 @@ paths:
         required: true
         type: string
       produces:
-      - text/plain
+      - application/vnd.aerospike.amc.set.response+json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcSetResponse'
         "400":
           description: Bad Request
         "401":

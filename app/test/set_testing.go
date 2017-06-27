@@ -680,10 +680,10 @@ func ShowSetInternalServerError(t goatest.TInterface, ctx context.Context, servi
 }
 
 // ShowSetOK runs the method Show of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ShowSetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.SetController, connID string, node string, namespace string, setName string) http.ResponseWriter {
+func ShowSetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.SetController, connID string, node string, namespace string, setName string) (http.ResponseWriter, *app.AerospikeAmcSetResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -734,9 +734,21 @@ func ShowSetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, 
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
+	var mt *app.AerospikeAmcSetResponse
+	if resp != nil {
+		var ok bool
+		mt, ok = resp.(*app.AerospikeAmcSetResponse)
+		if !ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcSetResponse", resp)
+		}
+		_err = mt.Validate()
+		if _err != nil {
+			t.Errorf("invalid response media type: %s", _err)
+		}
+	}
 
 	// Return results
-	return rw
+	return rw, mt
 }
 
 // ShowSetUnauthorized runs the method Show of the given controller with the given parameters.

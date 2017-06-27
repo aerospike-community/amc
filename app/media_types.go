@@ -297,6 +297,8 @@ type AerospikeAmcConnectionTreeResponse struct {
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
 	// Connection Id
 	ID string `form:"id" json:"id" xml:"id"`
+	// Indexes
+	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
 	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// modules
@@ -321,6 +323,13 @@ func (mt *AerospikeAmcConnectionTreeResponse) Validate() (err error) {
 	}
 	if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, mt.ID); !ok {
 		err = goa.MergeErrors(err, goa.InvalidPatternError(`response.id`, mt.ID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+	}
+	for _, e := range mt.Indexes {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
 	for _, e := range mt.Modules {
 		if e != nil {
@@ -450,8 +459,6 @@ type AerospikeAmcEntityNodeResponse struct {
 	Host string `form:"host" json:"host" xml:"host"`
 	// Node Id
 	ID string `form:"id" json:"id" xml:"id"`
-	// Indexes
-	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
 	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespaces
@@ -470,13 +477,6 @@ func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
 	}
 
-	for _, e := range mt.Indexes {
-		if e != nil {
-			if err2 := e.Validate(); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
 	for _, e := range mt.Namespaces {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
@@ -782,6 +782,27 @@ func (mt *AerospikeAmcRestoreResponse) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
 	}
 
+	return
+}
+
+// Set object (default view)
+//
+// Identifier: application/vnd.aerospike.amc.set.response+json; view=default
+type AerospikeAmcSetResponse struct {
+	// Set's Attributes
+	Set map[string]interface{} `form:"set" json:"set" xml:"set"`
+	// Node's Status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcSetResponse media type instance.
+func (mt *AerospikeAmcSetResponse) Validate() (err error) {
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Set == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "set"))
+	}
 	return
 }
 
