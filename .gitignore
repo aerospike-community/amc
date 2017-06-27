@@ -9,3 +9,6 @@ amc
 amc.log
 amc.db
 temp/
+*.crt
+*.key
+*.pem
