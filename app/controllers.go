@@ -301,6 +301,7 @@ type ConnectionController interface {
 	Config(*ConfigConnectionContext) error
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
+	Entities(*EntitiesConnectionContext) error
 	Latency(*LatencyConnectionContext) error
 	Namespaces(*NamespacesConnectionContext) error
 	Query(*QueryConnectionContext) error
@@ -316,6 +317,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/config", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/entity-tree", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
@@ -377,6 +379,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("DELETE", "/api/v1/connections/:connId", ctrl.MuxHandler("delete", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Delete", "route", "DELETE /api/v1/connections/:connId", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewEntitiesConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Entities(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/entity-tree", ctrl.MuxHandler("entities", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Entities", "route", "GET /api/v1/connections/:connId/entity-tree", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

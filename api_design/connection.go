@@ -54,6 +54,24 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("entities", func() {
+		Description("Return the cluster's entity tree")
+		Routing(GET(":connId/entity-tree"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("connId")
+		})
+
+		Response(OK, UserConnectionTreeResponseMedia)
+		Response(BadRequest, String)
+		Response(Forbidden)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("query", func() {
 		Description("Get the list of user connections")
 		Routing(GET(""))

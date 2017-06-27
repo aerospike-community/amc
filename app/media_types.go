@@ -450,6 +450,8 @@ type AerospikeAmcEntityNodeResponse struct {
 	Host string `form:"host" json:"host" xml:"host"`
 	// Node Id
 	ID string `form:"id" json:"id" xml:"id"`
+	// Indexes
+	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
 	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Namespaces
@@ -468,6 +470,13 @@ func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
 	}
 
+	for _, e := range mt.Indexes {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
 	for _, e := range mt.Namespaces {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
@@ -484,8 +493,6 @@ func (mt *AerospikeAmcEntityNodeResponse) Validate() (err error) {
 type AerospikeAmcEntitySetResponse struct {
 	// Type
 	EntityType string `form:"entityType" json:"entityType" xml:"entityType"`
-	// Indexes
-	Indexes []*AerospikeAmcEntityIndexResponse `form:"indexes,omitempty" json:"indexes,omitempty" xml:"indexes,omitempty"`
 	// Last Update Of This Entity in Unix Seconds
 	LastUpdate int `form:"lastUpdate" json:"lastUpdate" xml:"lastUpdate"`
 	// Set Name
@@ -501,13 +508,6 @@ func (mt *AerospikeAmcEntitySetResponse) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "entityType"))
 	}
 
-	for _, e := range mt.Indexes {
-		if e != nil {
-			if err2 := e.Validate(); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
 	return
 }
 

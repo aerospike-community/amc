@@ -83,6 +83,24 @@ func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 	return ctx.NoContent()
 }
 
+// Entities runs the entities action.
+func (c *ConnectionController) Entities(ctx *app.EntitiesConnectionContext) error {
+	// ConnectionController_Entities: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	et, err := cluster.EntityTree(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// ConnectionController_Entities: end_implement
+	return ctx.OK(et)
+}
+
 // Latency runs the latency action.
 func (c *ConnectionController) Latency(ctx *app.LatencyConnectionContext) error {
 	// ConnectionController_Latency: start_implement

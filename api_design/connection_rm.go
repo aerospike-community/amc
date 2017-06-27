@@ -200,6 +200,7 @@ var EntityNode = MediaType("application/vnd.aerospike.amc.entity.node.response+j
 		Attribute("id", String, "Node Id", func() { Example("BB9EB6C71290C00") })
 
 		Attribute("namespaces", ArrayOf(EntityNamespace), "Namespaces")
+		Attribute("indexes", ArrayOf(EntityIndex), "Indexes")
 
 		Required("host", "id", "entityType", "lastUpdate")
 	})
@@ -210,6 +211,7 @@ var EntityNode = MediaType("application/vnd.aerospike.amc.entity.node.response+j
 		Attribute("host")
 		Attribute("id")
 		Attribute("namespaces")
+		Attribute("indexes")
 		Required("host", "id", "entityType", "lastUpdate")
 	})
 })
@@ -242,8 +244,6 @@ var EntitySet = MediaType("application/vnd.aerospike.amc.entity.set.response+jso
 		Attribute("entityType", String, "Type")
 		Attribute("name", String, "Set Name", func() { Example("Customers") })
 
-		Attribute("indexes", ArrayOf(EntityIndex), "Indexes")
-
 		Required("name", "entityType", "lastUpdate")
 	})
 
@@ -251,7 +251,6 @@ var EntitySet = MediaType("application/vnd.aerospike.amc.entity.set.response+jso
 		Attribute("lastUpdate")
 		Attribute("entityType")
 		Attribute("name")
-		Attribute("indexes")
 		Required("name", "entityType", "lastUpdate")
 	})
 })

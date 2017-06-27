@@ -718,6 +718,64 @@ func (ctx *DeleteConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// EntitiesConnectionContext provides the connection entities action context.
+type EntitiesConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewEntitiesConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller entities action.
+func NewEntitiesConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*EntitiesConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := EntitiesConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *EntitiesConnectionContext) OK(r *AerospikeAmcConnectionTreeResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.connection.tree.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *EntitiesConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *EntitiesConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *EntitiesConnectionContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *EntitiesConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // LatencyConnectionContext provides the connection latency action context.
 type LatencyConnectionContext struct {
 	context.Context

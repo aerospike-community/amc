@@ -343,266 +343,60 @@ definitions:
       - entityType: Recusandae quia est.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        lastUpdate: 3.1723478e+18
+        indexes:
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        lastUpdate: 7.434409e+18
         namespaces:
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
+        - entityType: Aut vitae.
+          lastUpdate: 7.612186e+18
           name: Test
           sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
+          - entityType: Et et reiciendis dolore aut deserunt nulla.
+            lastUpdate: 4.3823834e+18
             name: Customers
       - entityType: Recusandae quia est.
         host: 127.0.0.1:3000
         id: BB9EB6C71290C00
-        lastUpdate: 3.1723478e+18
+        indexes:
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        lastUpdate: 7.434409e+18
         namespaces:
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
+        - entityType: Aut vitae.
+          lastUpdate: 7.612186e+18
           name: Test
           sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
+          - entityType: Et et reiciendis dolore aut deserunt nulla.
+            lastUpdate: 4.3823834e+18
             name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-      status: Iusto nam voluptas.
+      status: Harum quia modi est sit iusto.
     properties:
       entityType:
         description: Entity Type
@@ -640,271 +434,65 @@ definitions:
         - entityType: Recusandae quia est.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          lastUpdate: 3.1723478e+18
+          indexes:
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 7.434409e+18
           namespaces:
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
+          - entityType: Aut vitae.
+            lastUpdate: 7.612186e+18
             name: Test
             sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
-            name: Test
-            sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
-            name: Test
-            sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
+            - entityType: Et et reiciendis dolore aut deserunt nulla.
+              lastUpdate: 4.3823834e+18
               name: Customers
         - entityType: Recusandae quia est.
           host: 127.0.0.1:3000
           id: BB9EB6C71290C00
-          lastUpdate: 3.1723478e+18
+          indexes:
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          - binName: id
+            entityType: Modi facilis.
+            lastUpdate: 1.5079996e+18
+            name: idx_test_customers_id
+            type: NUMERIC
+          lastUpdate: 7.434409e+18
           namespaces:
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
+          - entityType: Aut vitae.
+            lastUpdate: 7.612186e+18
             name: Test
             sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
-            name: Test
-            sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-          - entityType: Facilis autem natus.
-            lastUpdate: 8.018391e+18
-            name: Test
-            sets:
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
-              name: Customers
-            - entityType: Vitae quam et dignissimos et et reiciendis.
-              indexes:
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              - binName: id
-                entityType: Deserunt nulla saepe rerum harum quia.
-                lastUpdate: 6.856962e+18
-                name: idx_test_customers_id
-                type: NUMERIC
-              lastUpdate: 3.509305e+18
+            - entityType: Et et reiciendis dolore aut deserunt nulla.
+              lastUpdate: 4.3823834e+18
               name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNodeResponse'
         type: array
       status:
         description: Cureent connection status.
-        example: Iusto nam voluptas.
+        example: Harum quia modi est sit iusto.
         type: string
     required:
     - id
@@ -918,8 +506,8 @@ definitions:
     description: Index Entity (default view)
     example:
       binName: id
-      entityType: Deserunt nulla saepe rerum harum quia.
-      lastUpdate: 6.856962e+18
+      entityType: Modi facilis.
+      lastUpdate: 1.5079996e+18
       name: idx_test_customers_id
       type: NUMERIC
     properties:
@@ -929,11 +517,11 @@ definitions:
         type: string
       entityType:
         description: Type
-        example: Deserunt nulla saepe rerum harum quia.
+        example: Modi facilis.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 6.856962e+18
+        example: 1.5079996e+18
         format: int64
         type: integer
       name:
@@ -995,56 +583,21 @@ definitions:
   AerospikeAmcEntityNamespaceResponse:
     description: Namespace Entity (default view)
     example:
-      entityType: Facilis autem natus.
-      lastUpdate: 8.018391e+18
+      entityType: Aut vitae.
+      lastUpdate: 7.612186e+18
       name: Test
       sets:
-      - entityType: Vitae quam et dignissimos et et reiciendis.
-        indexes:
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        lastUpdate: 3.509305e+18
-        name: Customers
-      - entityType: Vitae quam et dignissimos et et reiciendis.
-        indexes:
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        lastUpdate: 3.509305e+18
+      - entityType: Et et reiciendis dolore aut deserunt nulla.
+        lastUpdate: 4.3823834e+18
         name: Customers
     properties:
       entityType:
         description: Type
-        example: Facilis autem natus.
+        example: Aut vitae.
         type: string
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 8.018391e+18
+        example: 7.612186e+18
         format: int64
         type: integer
       name:
@@ -1054,43 +607,8 @@ definitions:
       sets:
         description: Namespaces
         example:
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
+        - entityType: Et et reiciendis dolore aut deserunt nulla.
+          lastUpdate: 4.3823834e+18
           name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntitySetResponse'
@@ -1108,133 +626,30 @@ definitions:
       entityType: Recusandae quia est.
       host: 127.0.0.1:3000
       id: BB9EB6C71290C00
-      lastUpdate: 3.1723478e+18
+      indexes:
+      - binName: id
+        entityType: Modi facilis.
+        lastUpdate: 1.5079996e+18
+        name: idx_test_customers_id
+        type: NUMERIC
+      - binName: id
+        entityType: Modi facilis.
+        lastUpdate: 1.5079996e+18
+        name: idx_test_customers_id
+        type: NUMERIC
+      - binName: id
+        entityType: Modi facilis.
+        lastUpdate: 1.5079996e+18
+        name: idx_test_customers_id
+        type: NUMERIC
+      lastUpdate: 7.434409e+18
       namespaces:
-      - entityType: Facilis autem natus.
-        lastUpdate: 8.018391e+18
+      - entityType: Aut vitae.
+        lastUpdate: 7.612186e+18
         name: Test
         sets:
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-      - entityType: Facilis autem natus.
-        lastUpdate: 8.018391e+18
-        name: Test
-        sets:
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-      - entityType: Facilis autem natus.
-        lastUpdate: 8.018391e+18
-        name: Test
-        sets:
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
-          name: Customers
-        - entityType: Vitae quam et dignissimos et et reiciendis.
-          indexes:
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          - binName: id
-            entityType: Deserunt nulla saepe rerum harum quia.
-            lastUpdate: 6.856962e+18
-            name: idx_test_customers_id
-            type: NUMERIC
-          lastUpdate: 3.509305e+18
+        - entityType: Et et reiciendis dolore aut deserunt nulla.
+          lastUpdate: 4.3823834e+18
           name: Customers
     properties:
       entityType:
@@ -1249,139 +664,41 @@ definitions:
         description: Node Id
         example: BB9EB6C71290C00
         type: string
+      indexes:
+        description: Indexes
+        example:
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        - binName: id
+          entityType: Modi facilis.
+          lastUpdate: 1.5079996e+18
+          name: idx_test_customers_id
+          type: NUMERIC
+        items:
+          $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
+        type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 3.1723478e+18
+        example: 7.434409e+18
         format: int64
         type: integer
       namespaces:
         description: Namespaces
         example:
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
+        - entityType: Aut vitae.
+          lastUpdate: 7.612186e+18
           name: Test
           sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-        - entityType: Facilis autem natus.
-          lastUpdate: 8.018391e+18
-          name: Test
-          sets:
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
-            name: Customers
-          - entityType: Vitae quam et dignissimos et et reiciendis.
-            indexes:
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            - binName: id
-              entityType: Deserunt nulla saepe rerum harum quia.
-              lastUpdate: 6.856962e+18
-              name: idx_test_customers_id
-              type: NUMERIC
-            lastUpdate: 3.509305e+18
+          - entityType: Et et reiciendis dolore aut deserunt nulla.
+            lastUpdate: 4.3823834e+18
             name: Customers
         items:
           $ref: '#/definitions/AerospikeAmcEntityNamespaceResponse'
@@ -1397,54 +714,17 @@ definitions:
   AerospikeAmcEntitySetResponse:
     description: Set Entity (default view)
     example:
-      entityType: Vitae quam et dignissimos et et reiciendis.
-      indexes:
-      - binName: id
-        entityType: Deserunt nulla saepe rerum harum quia.
-        lastUpdate: 6.856962e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      - binName: id
-        entityType: Deserunt nulla saepe rerum harum quia.
-        lastUpdate: 6.856962e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      - binName: id
-        entityType: Deserunt nulla saepe rerum harum quia.
-        lastUpdate: 6.856962e+18
-        name: idx_test_customers_id
-        type: NUMERIC
-      lastUpdate: 3.509305e+18
+      entityType: Et et reiciendis dolore aut deserunt nulla.
+      lastUpdate: 4.3823834e+18
       name: Customers
     properties:
       entityType:
         description: Type
-        example: Vitae quam et dignissimos et et reiciendis.
+        example: Et et reiciendis dolore aut deserunt nulla.
         type: string
-      indexes:
-        description: Indexes
-        example:
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        - binName: id
-          entityType: Deserunt nulla saepe rerum harum quia.
-          lastUpdate: 6.856962e+18
-          name: idx_test_customers_id
-          type: NUMERIC
-        items:
-          $ref: '#/definitions/AerospikeAmcEntityIndexResponse'
-        type: array
       lastUpdate:
         description: Last Update Of This Entity in Unix Seconds
-        example: 3.509305e+18
+        example: 4.3823834e+18
         format: int64
         type: integer
       name:
@@ -1462,62 +742,62 @@ definitions:
     description: AMC Index Response Wrapper (default view)
     example:
       indexes:
-        Asperiores laudantium.:
+        Et cumque nihil dignissimos sit quas.:
         - Stats:
-            Qui debitis.: 4.1527988e+18
-          bin: Molestiae veritatis aliquam consectetur.
-          binType: Omnis praesentium.
-          name: Et neque et.
-          namespace: Reprehenderit dolorem nobis pariatur ut earum.
-          set: Tempora rerum quis.
-          syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+            Et accusamus qui.: false
+          bin: Ea molestiae veritatis aliquam.
+          binType: Ab omnis praesentium voluptates.
+          name: Neque et unde reprehenderit dolorem.
+          namespace: Pariatur ut earum veniam tempora rerum quis.
+          set: Dignissimos sequi ducimus et deleniti repellendus sed.
+          syncOnAllNodes: Nostrum asperiores laudantium id.
         - Stats:
-            Qui debitis.: 4.1527988e+18
-          bin: Molestiae veritatis aliquam consectetur.
-          binType: Omnis praesentium.
-          name: Et neque et.
-          namespace: Reprehenderit dolorem nobis pariatur ut earum.
-          set: Tempora rerum quis.
-          syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+            Et accusamus qui.: false
+          bin: Ea molestiae veritatis aliquam.
+          binType: Ab omnis praesentium voluptates.
+          name: Neque et unde reprehenderit dolorem.
+          namespace: Pariatur ut earum veniam tempora rerum quis.
+          set: Dignissimos sequi ducimus et deleniti repellendus sed.
+          syncOnAllNodes: Nostrum asperiores laudantium id.
         - Stats:
-            Qui debitis.: 4.1527988e+18
-          bin: Molestiae veritatis aliquam consectetur.
-          binType: Omnis praesentium.
-          name: Et neque et.
-          namespace: Reprehenderit dolorem nobis pariatur ut earum.
-          set: Tempora rerum quis.
-          syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+            Et accusamus qui.: false
+          bin: Ea molestiae veritatis aliquam.
+          binType: Ab omnis praesentium voluptates.
+          name: Neque et unde reprehenderit dolorem.
+          namespace: Pariatur ut earum veniam tempora rerum quis.
+          set: Dignissimos sequi ducimus et deleniti repellendus sed.
+          syncOnAllNodes: Nostrum asperiores laudantium id.
       status: "on"
     properties:
       indexes:
         additionalProperties: true
         description: Index Data
         example:
-          Asperiores laudantium.:
+          Et cumque nihil dignissimos sit quas.:
           - Stats:
-              Qui debitis.: 4.1527988e+18
-            bin: Molestiae veritatis aliquam consectetur.
-            binType: Omnis praesentium.
-            name: Et neque et.
-            namespace: Reprehenderit dolorem nobis pariatur ut earum.
-            set: Tempora rerum quis.
-            syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+              Et accusamus qui.: false
+            bin: Ea molestiae veritatis aliquam.
+            binType: Ab omnis praesentium voluptates.
+            name: Neque et unde reprehenderit dolorem.
+            namespace: Pariatur ut earum veniam tempora rerum quis.
+            set: Dignissimos sequi ducimus et deleniti repellendus sed.
+            syncOnAllNodes: Nostrum asperiores laudantium id.
           - Stats:
-              Qui debitis.: 4.1527988e+18
-            bin: Molestiae veritatis aliquam consectetur.
-            binType: Omnis praesentium.
-            name: Et neque et.
-            namespace: Reprehenderit dolorem nobis pariatur ut earum.
-            set: Tempora rerum quis.
-            syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+              Et accusamus qui.: false
+            bin: Ea molestiae veritatis aliquam.
+            binType: Ab omnis praesentium voluptates.
+            name: Neque et unde reprehenderit dolorem.
+            namespace: Pariatur ut earum veniam tempora rerum quis.
+            set: Dignissimos sequi ducimus et deleniti repellendus sed.
+            syncOnAllNodes: Nostrum asperiores laudantium id.
           - Stats:
-              Qui debitis.: 4.1527988e+18
-            bin: Molestiae veritatis aliquam consectetur.
-            binType: Omnis praesentium.
-            name: Et neque et.
-            namespace: Reprehenderit dolorem nobis pariatur ut earum.
-            set: Tempora rerum quis.
-            syncOnAllNodes: Dignissimos sequi ducimus et deleniti repellendus sed.
+              Et accusamus qui.: false
+            bin: Ea molestiae veritatis aliquam.
+            binType: Ab omnis praesentium voluptates.
+            name: Neque et unde reprehenderit dolorem.
+            namespace: Pariatur ut earum veniam tempora rerum quis.
+            set: Dignissimos sequi ducimus et deleniti repellendus sed.
+            syncOnAllNodes: Nostrum asperiores laudantium id.
         type: object
       status:
         description: Cluster/Node Status
@@ -1540,10 +820,10 @@ definitions:
         free-bytes: 5.876103e+18
         total-bytes: 5.824241e+18
         used-bytes: 2.5501883e+18
-      name: Ut voluptas.
+      name: Quis eum.
       stats:
-        Voluptas repudiandae velit veritatis.: false
-      status: Aut et voluptate et rerum molestiae enim.
+        Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
+      status: Modi repudiandae distinctio magnam accusantium voluptas et.
     properties:
       disk:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
@@ -1551,17 +831,17 @@ definitions:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
       name:
         description: Namespace Name
-        example: Ut voluptas.
+        example: Quis eum.
         type: string
       stats:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Voluptas repudiandae velit veritatis.: false
+          Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
         type: object
       status:
         description: Cluster/Node status
-        example: Aut et voluptate et rerum molestiae enim.
+        example: Modi repudiandae distinctio magnam accusantium voluptas et.
         type: string
     required:
     - name
@@ -1575,29 +855,29 @@ definitions:
   AerospikeAmcNodeConfigResponse:
     description: Node Config (default view)
     example:
-      address: Ut inventore.
+      address: Sit porro natus eveniet velit ducimus laboriosam.
       config:
-        Distinctio magnam accusantium voluptas et ut sit.: false
-      error: Velit ducimus laboriosam quod quam dicta.
-      status: Saepe et et odit doloremque et.
+        Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
+      error: Et est ipsa dolorem sit quibusdam.
+      status: Rerum deserunt ipsum.
     properties:
       address:
         description: Node Address
-        example: Ut inventore.
+        example: Sit porro natus eveniet velit ducimus laboriosam.
         type: string
       config:
         additionalProperties: true
         description: Node config
         example:
-          Distinctio magnam accusantium voluptas et ut sit.: false
+          Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
         type: object
       error:
         description: Error message
-        example: Velit ducimus laboriosam quod quam dicta.
+        example: Et est ipsa dolorem sit quibusdam.
         type: string
       status:
         description: Node status
-        example: Saepe et et odit doloremque et.
+        example: Rerum deserunt ipsum.
         type: string
     required:
     - address
@@ -1639,20 +919,20 @@ definitions:
     description: Restore object (default view)
     example:
       IgnoreGenerationNumber: false
-      MissingRecordsOnly: false
-      SSHPassword: Sint minima est numquam.
-      SSHUser: Aut alias dolor quis id.
-      Threads: 1.6529714e+18
-      clusterId: Tenetur quibusdam sit rem et.
-      createDate: 2.2781676e+18
-      error: Quos est odit beatae.
-      finishDate: 6.8127115e+18
-      id: Nesciunt doloribus perferendis esse.
-      namespace: Ab nihil.
-      progress: 3.8005243e+18
-      sourceAddress: Quos unde sit iusto.
-      sourcePath: Quibusdam vel eveniet fuga velit.
-      status: Autem dolorem aut est.
+      MissingRecordsOnly: true
+      SSHPassword: Id dicta tenetur tenetur quibusdam sit rem.
+      SSHUser: Voluptas error quos est odit beatae.
+      Threads: 6.8127115e+18
+      clusterId: Nesciunt doloribus perferendis esse.
+      createDate: 2.3064225e+18
+      error: Nihil aut.
+      finishDate: 7.46425e+18
+      id: Unde sit iusto alias.
+      namespace: Vel eveniet.
+      progress: 4.3940938e+18
+      sourceAddress: Quae autem.
+      sourcePath: Aut est officia libero.
+      status: Excepturi explicabo quis itaque aut.
     properties:
       IgnoreGenerationNumber:
         description: Indicates whether the restore should only update records with
@@ -1662,63 +942,63 @@ definitions:
       MissingRecordsOnly:
         description: Indicates whether to restore records which do not exist on the
           cluster only
-        example: false
+        example: true
         type: boolean
       SSHPassword:
         description: SSH user's password
-        example: Sint minima est numquam.
+        example: Id dicta tenetur tenetur quibusdam sit rem.
         type: string
       SSHUser:
         description: SSH User
-        example: Aut alias dolor quis id.
+        example: Voluptas error quos est odit beatae.
         type: string
       Threads:
         description: Number of working threads.
-        example: 1.6529714e+18
+        example: 6.8127115e+18
         format: int64
         type: integer
       clusterId:
         description: Cluster Id
-        example: Tenetur quibusdam sit rem et.
+        example: Nesciunt doloribus perferendis esse.
         type: string
       createDate:
         description: The date when the restore was created
-        example: 2.2781676e+18
+        example: 2.3064225e+18
         format: int64
         type: integer
       error:
         description: Error message in case the restore was not successful
-        example: Quos est odit beatae.
+        example: Nihil aut.
         type: string
       finishDate:
         description: The date when the restore was finished
-        example: 6.8127115e+18
+        example: 7.46425e+18
         format: int64
         type: integer
       id:
         description: Restore Id
-        example: Nesciunt doloribus perferendis esse.
+        example: Unde sit iusto alias.
         type: string
       namespace:
         description: Namespace
-        example: Ab nihil.
+        example: Vel eveniet.
         type: string
       progress:
         description: Restore's progress in percent
-        example: 3.8005243e+18
+        example: 4.3940938e+18
         format: int64
         type: integer
       sourceAddress:
         description: Host on which the backup file is located
-        example: Quos unde sit iusto.
+        example: Quae autem.
         type: string
       sourcePath:
         description: Host on which the backup file is located
-        example: Quibusdam vel eveniet fuga velit.
+        example: Aut est officia libero.
         type: string
       status:
         description: Restore's status
-        example: Autem dolorem aut est.
+        example: Excepturi explicabo quis itaque aut.
         type: string
     required:
     - id
@@ -1754,17 +1034,11 @@ definitions:
     example:
       status: "on"
       throughput:
-        Quis itaque aut minima animi distinctio ullam.:
-          Voluptas sit.:
-          - failed: 0.08016952
-            successful: 0.85337645
-            timestamp: 2.1252227e+18
-          - failed: 0.08016952
-            successful: 0.85337645
-            timestamp: 2.1252227e+18
-          - failed: 0.08016952
-            successful: 0.85337645
-            timestamp: 2.1252227e+18
+        Rem voluptas sit ad distinctio praesentium.:
+          Fugiat tempore deserunt dignissimos qui voluptatem incidunt.:
+          - failed: 0.79185367
+            successful: 0.48955357
+            timestamp: 5.289416e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1774,17 +1048,11 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Quis itaque aut minima animi distinctio ullam.:
-            Voluptas sit.:
-            - failed: 0.08016952
-              successful: 0.85337645
-              timestamp: 2.1252227e+18
-            - failed: 0.08016952
-              successful: 0.85337645
-              timestamp: 2.1252227e+18
-            - failed: 0.08016952
-              successful: 0.85337645
-              timestamp: 2.1252227e+18
+          Rem voluptas sit ad distinctio praesentium.:
+            Fugiat tempore deserunt dignissimos qui voluptatem incidunt.:
+            - failed: 0.79185367
+              successful: 0.48955357
+              timestamp: 5.289416e+18
         type: object
     required:
     - status
@@ -1821,7 +1089,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Consequuntur quo quia voluptatem ut deserunt.
+          example: Aperiam provident ea nulla.
           type: string
         type: array
       username:
@@ -2069,6 +1337,9 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
+      - host: 127.0.0.1
+        port: 3000
+        tlsName: ""
     properties:
       connId:
         description: Connection Id
@@ -2092,6 +1363,9 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
+        - host: 127.0.0.1
+          port: 3000
+          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -2102,15 +1376,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Voluptatem laudantium voluptatem quia dicta est.
+      binName: Qui doloremque rem quasi.
       indexName: idxAccounts
-      namespace: Facilis quas voluptatibus repudiandae qui doloremque rem.
-      setName: Autem est accusamus et.
+      namespace: Est accusamus et nostrum delectus.
+      setName: Aliquid a qui odio consequuntur quo quia.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Voluptatem laudantium voluptatem quia dicta est.
+        example: Qui doloremque rem quasi.
         type: string
       indexName:
         description: Index's Name
@@ -2118,11 +1392,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Facilis quas voluptatibus repudiandae qui doloremque rem.
+        example: Est accusamus et nostrum delectus.
         type: string
       setName:
         description: Index's Set name
-        example: Autem est accusamus et.
+        example: Aliquid a qui odio consequuntur quo quia.
         type: string
       type:
         description: Index's type
@@ -2140,7 +1414,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Delectus molestiae aliquid a qui.
+      source: Ut deserunt voluptatem modi.
       type: LUA
     properties:
       name:
@@ -2149,7 +1423,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Delectus molestiae aliquid a qui.
+        example: Ut deserunt voluptatem modi.
         type: string
       type:
         description: Module's type
@@ -2195,7 +1469,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Modi vitae aperiam provident ea nulla.
+          example: Corrupti facilis est impedit.
           type: string
         type: array
       username:
@@ -2753,6 +2027,45 @@ paths:
       - jwt:
         - api:enterprise
       summary: set config connection
+      tags:
+      - connection
+  /api/v1/connections/{connId}/entity-tree:
+    get:
+      description: |-
+        Return the cluster's entity tree
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#entities
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.connection.tree.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcConnectionTreeResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: entities connection
       tags:
       - connection
   /api/v1/connections/{connId}/indexes:
