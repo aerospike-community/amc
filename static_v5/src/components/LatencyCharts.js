@@ -162,27 +162,51 @@ class LatencyCharts extends React.Component {
       if (moment().subtract(2, 'minutes').isAfter(to)) 
         return;
 
+      const getTime = (lat) => {
+        const k = Object.keys(lat)[0];
+        return lat[k].timestampUnix*1000;
+      };
+
       this.props.getLatency(to.unix())
         .then((latency) => {
           if (!to.isSame(this.state.to)) // updated in the interim
             return;
 
-          // calculate latest timestamp
-          let lastTimestamp = null; 
+          // calculate latest time window
+          let toTimestamp = null; 
+          let fromTimestamp = null;
+
           latency.forEach((lat) => {
-            const k = Object.keys(lat)[0];
-            const time = lat[k].timestampUnix*1000;
-            if (lastTimestamp === null || time > lastTimestamp)
-              lastTimestamp = time;
+            const time = getTime(lat)
+            if (toTimestamp === null || time > toTimestamp)
+              toTimestamp = time;
           });
 
           this.latency = this.latency.concat(latency);
+          // remove earlier data
+          this.latency.splice(0, latency.length);
+
           this.drawCharts();
 
+          // from timestamp
+          if (this.latency.length > 0)
+            fromTimestamp = getTime(this.latency[0]);
+
           // update timestamp
-          if (lastTimestamp !== null) {
+          if (fromTimestamp === null && toTimestamp === null) {
+            return;
+          } else if (fromTimestamp === null) {
             this.setState({
-              to: moment(lastTimestamp)
+              to: moment(toTimestamp)
+            });
+          } else if (toTimestamp === null) {
+            this.setState({
+              from: moment(fromTimestamp)
+            });
+          } else {
+            this.setState({
+              from: moment(fromTimestamp),
+              to: moment(toTimestamp)
             });
           }
         });
