@@ -93,7 +93,7 @@ class NodesSummary extends React.Component {
       keys.slice(i, i+nr).forEach((k) => {
         cols.push(<td></td>); // empty column
         cols.push(<td style={style} key={k}> {k} </td>);
-        cols.push(<td style={style} key={k+'val'}> {stats[k]} </td>);
+        cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
       });
 
       rows.push(

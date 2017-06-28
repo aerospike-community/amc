@@ -22,8 +22,11 @@ class ClusterOverview extends React.Component {
     };
   }
 
-  componentDidMount() {
-    const { clusterID }  = this.props;
+  fetchDetails(clusterID) {
+    this.setState({
+      isFetching: true
+    });
+
     getConnectionDetails(clusterID)
       .then((details) => {
         this.setState({
@@ -32,9 +35,24 @@ class ClusterOverview extends React.Component {
         });
       })
       .catch((message) => {
+        this.setState({
+          isFetching: false,
+        });
         // TODO
         console.error(message);
       });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+
+    if (this.props.clusterID !== clusterID)
+      this.fetchDetails(clusterID);
+  }
+
+  componentDidMount() {
+    const { clusterID }  = this.props;
+    this.fetchDetails(clusterID);
   }
 
   render() {
