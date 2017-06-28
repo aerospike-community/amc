@@ -50,7 +50,12 @@ func (c *SetController) Query(ctx *app.QuerySetContext) error {
 		return ctx.BadRequest("Node not found.")
 	}
 
-	sets := cluster.NamespaceSetsInfo(ctx.Namespace)
+	namespace := node.NamespaceByName(ctx.Namespace)
+	if namespace == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	sets := namespace.SetsInfo()
 
 	res := make([]*app.AerospikeAmcSetResponse, 0, len(sets))
 	for _, attrs := range sets {
@@ -68,21 +73,26 @@ func (c *SetController) Query(ctx *app.QuerySetContext) error {
 func (c *SetController) Show(ctx *app.ShowSetContext) error {
 	// SetController_Show: start_implement
 
-	// cluster, err := getConnectionClusterById(ctx.ConnID)
-	// if err != nil {
-	// 	return ctx.BadRequest(err.Error())
-	// }
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
 
-	// node := cluster.FindNodeByAddress(ctx.Node)
-	// if node == nil {
-	// 	return ctx.BadRequest("Node not found.")
-	// }
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
 
-	// sets := cluster.NamespaceSetsInfo(ctx.Namespace)
+	namespace := node.NamespaceByName(ctx.Namespace)
+	if namespace == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	sets := namespace.SetsInfo()
 
 	res := &app.AerospikeAmcSetResponse{
-	// 	Status: string(node.Status()),
-	// 	// Set:    sets[ctx.SetName],
+		Status: string(node.Status()),
+		Set:    sets[ctx.SetName],
 	}
 
 	// SetController_Show: end_implement
