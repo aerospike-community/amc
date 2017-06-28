@@ -13,9 +13,30 @@ class NodesSummary extends React.Component {
 
     this.state = {
       nodesSummary: {}, // map of nodeHost to summary
+      expandedNodes: new Set(), 
     };
 
     this.onSelectNode = this.onSelectNode.bind(this);
+    this.onExpandNode = this.onExpandNode.bind(this);
+    this.onCollapseNode = this.onCollapseNode.bind(this);
+  }
+
+  onExpandNode(nodeHost) {
+    const s = new Set(this.state.expandedNodes);
+    s.add(nodeHost);
+
+    this.setState({
+      expandedNodes: s
+    });
+  }
+
+  onCollapseNode(nodeHost) {
+    const s = new Set(this.state.expandedNodes);
+    s.delete(nodeHost);
+
+    this.setState({
+      expandedNodes: s
+    });
   }
 
   onSelectNode(nodeHost) {
@@ -56,19 +77,73 @@ class NodesSummary extends React.Component {
     }
   }
 
+  // ncols should be >= 3
+  renderNodeStats(nodeHost, stats, ncols) {
+    let rows = [];
+    const keys = Object.keys(stats);
+
+    // empty row
+    rows.push(<tr style={{height: 25}}></tr>);
+
+    // all stats
+    const nr = Math.floor(ncols/3); // number of stats per row
+    for (let i = 0; i < keys.length; i += nr) {
+      const cols = []; 
+      const style = { fontStyle: 'italic' };
+      keys.slice(i, i+nr).forEach((k) => {
+        cols.push(<td></td>); // empty column
+        cols.push(<td style={style} key={k}> {k} </td>);
+        cols.push(<td style={style} key={k+'val'}> {stats[k]} </td>);
+      });
+
+      rows.push(
+        <tr key={nodeHost+i}>
+          {cols}
+        </tr>
+      );
+    }
+
+    // empty row
+    rows.push(<tr style={{height: 25}}></tr>);
+
+    return rows;
+  }
+
   nodes() {
+    const { expandedNodes } = this.state;
     const nodes = this.state.nodesSummary;
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
     }
 
-    const data = [];
+    let data = [];
     for (const nodeHost in nodes) {
       const node = nodes[nodeHost];
       const { stats } = node;
+      const isExpanded = expandedNodes.has(nodeHost);
+      const style = { fontSize: 12 };
+
       const row = (
         <tr key={nodeHost}>
-          <td className="as-link" onClick={() => this.onSelectNode(nodeHost)}> {nodeHost} </td>
+          <td> 
+            <span className="as-link" onClick={() => this.onSelectNode(nodeHost)}> 
+              {nodeHost} 
+            </span>
+
+            <span className="pull-right">
+              {isExpanded &&
+              <small className="as-link" onClick={() => this.onCollapseNode(nodeHost)}>
+                Less
+              </small>
+              }
+
+              {!isExpanded &&
+              <small className="as-link" onClick={() => this.onExpandNode(nodeHost)}>
+                More
+              </small>
+              }
+            </span>
+          </td>
           <td> {stats.build} </td>
           <td> {stats.cluster_size} </td>
           <td> {memory(node.disk)} </td>
@@ -77,6 +152,11 @@ class NodesSummary extends React.Component {
         </tr>
       );
       data.push(row);
+
+      if (expandedNodes.has(nodeHost)) {
+        const r = this.renderNodeStats(nodeHost, stats, 6);
+        data = data.concat(r);
+      }
     }
 
     return data;
