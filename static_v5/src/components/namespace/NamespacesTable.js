@@ -10,20 +10,100 @@ import bytes from 'bytes';
 class NamespacesTable extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      expanded: new Set(), 
+    },
+
+    this.onExpand = this.onExpand.bind(this);
+    this.onCollapse = this.onCollapse.bind(this);
+  }
+
+  onExpand(namespaceName) {
+    const s = new Set(this.state.expanded);
+    s.add(namespaceName);
+
+    this.setState({
+      expanded: s
+    });
+  }
+
+  onCollapse(namespaceName) {
+    const s = new Set(this.state.expanded);
+    s.delete(namespaceName);
+
+    this.setState({
+      expanded: s
+    });
+  }
+
+  // ncols should be >= 3
+  renderStats(namespaceName, stats, ncols) {
+    const keys = [];
+    for (let k in stats) {
+      if (typeof(stats[k]) !== 'object')
+        keys.push(k);
+    }
+
+    let rows = [];
+    // empty row
+    rows.push(<tr style={{height: 25}}></tr>);
+
+    // all stats
+    const nr = Math.floor(ncols/3); // number of stats per row
+    for (let i = 0; i < keys.length; i += nr) {
+      const cols = []; 
+      const style = { fontStyle: 'italic' };
+      keys.slice(i, i+nr).forEach((k) => {
+        cols.push(<td></td>); // empty column
+        cols.push(<td style={style} key={k}> {k} </td>);
+        cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
+      });
+
+      rows.push(
+        <tr key={namespaceName+i}>
+          {cols}
+        </tr>
+      );
+    }
+
+    // empty row
+    rows.push(<tr style={{height: 25}}></tr>);
+
+    return rows;
   }
 
   namespaces() {
     const { namespaces } = this.props;
+    const { expanded } = this.state;
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
     }
 
-    const data = [];
+    let data = [];
     namespaces.forEach((ns) => {
       const { stats, name } = ns;
+      const isExpanded = expanded.has(name);
+
       const row = (
         <tr key={name}>
-          <td> {name} </td>
+          <td> 
+            {name} 
+
+            <span className="pull-right">
+              {isExpanded &&
+              <small className="as-link" onClick={() => this.onCollapse(name)}>
+                Less
+              </small>
+              }
+
+              {!isExpanded &&
+              <small className="as-link" onClick={() => this.onExpand(name)}>
+                More
+              </small>
+              }
+            </span>
+          </td>
           <td> {memory(ns.disk)} </td>
           <td> {memory(ns.memory)} </td>
           <td> {stats['repl-factor']} </td>
@@ -32,6 +112,11 @@ class NamespacesTable extends React.Component {
         </tr>
       );
       data.push(row);
+
+      if (isExpanded) {
+        const r = this.renderStats(name, stats, 6);
+        data = data.concat(r);
+      }
     });
 
     return data;

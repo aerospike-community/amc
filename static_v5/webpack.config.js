@@ -120,6 +120,7 @@ function plugins() {
     nvd3: ['d3', 'nvd3'], 
     reactwidgets: ['react-widgets'],
     reactstrap: ['bootstrap', 'reactstrap'],
+    aggrid: ['ag-grid', 'ag-grid-react'],
   };
   var BigChunkNames = [];
 

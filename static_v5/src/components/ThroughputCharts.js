@@ -172,7 +172,8 @@ class ThroughputCharts extends React.Component {
 
           // append values
           const tp = response.throughput;
-          let lastTimestamp = null; // latest timestamp
+          let toTimestamp = null;
+          let fromTimestamp = null; 
           for (const type in tp) {
             for (const nodeHost in tp[type]) {
               const val = tp[type][nodeHost];
@@ -187,21 +188,42 @@ class ThroughputCharts extends React.Component {
                   orig.push(v);
               });
 
+              // remove earlier data
+              orig.splice(0, val.length);
+
               // latest time
               const time = val[val.length-1].timestamp; 
-              if (lastTimestamp === null || time > lastTimestamp)
-                lastTimestamp = time;
+              if (toTimestamp === null || time > toTimestamp)
+                toTimestamp = time;
+
+              // earliest time
+              if (orig.length > 0)
+                fromTimestamp = orig[0].timestamp;
             }
           }
 
           this.drawCharts();
 
           // update timestamp
-          if (lastTimestamp !== null) {
+          if (fromTimestamp === null && toTimestamp === null) {
+            return;
+          } else if (fromTimestamp === null) {
             this.setState({
-              to: moment(lastTimestamp)
+              to: moment(toTimestamp)
+            });
+          } else if (toTimestamp === null) {
+            this.setState({
+              from: moment(fromTimestamp)
+            });
+          } else {
+            this.setState({
+              from: moment(fromTimestamp),
+              to: moment(toTimestamp)
             });
           }
+
+
+          
         });
     }, 60*1000); // every minute
   }

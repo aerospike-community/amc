@@ -22,8 +22,11 @@ class ClusterOverview extends React.Component {
     };
   }
 
-  componentDidMount() {
-    const { clusterID }  = this.props;
+  fetchDetails(clusterID) {
+    this.setState({
+      isFetching: true
+    });
+
     getConnectionDetails(clusterID)
       .then((details) => {
         this.setState({
@@ -32,13 +35,28 @@ class ClusterOverview extends React.Component {
         });
       })
       .catch((message) => {
+        this.setState({
+          isFetching: false,
+        });
         // TODO
         console.error(message);
       });
   }
 
-  render() {
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+
+    if (this.props.clusterID !== clusterID)
+      this.fetchDetails(clusterID);
+  }
+
+  componentDidMount() {
     const { clusterID }  = this.props;
+    this.fetchDetails(clusterID);
+  }
+
+  render() {
+    const { clusterID, onSelectNode }  = this.props;
     const co = this.state.clusterOverview;
     const nodeHosts = co ? co.nodes : [];
 
@@ -98,7 +116,7 @@ class ClusterOverview extends React.Component {
 
             <div className="row">
               <div className="col-xl-12 as-section">
-                <NodesSummary clusterID={clusterID} nodeHosts={nodeHosts}/>
+                <NodesSummary clusterID={clusterID} nodeHosts={nodeHosts} onSelectNode={onSelectNode} />
               </div>
             </div>
             <div className="row">
@@ -115,6 +133,9 @@ class ClusterOverview extends React.Component {
 
 ClusterOverview.PropTypes = {
   clusterID: PropTypes.string.isRequired,
+  // callback to select a node
+  // onSelectNode(clusterID, nodeHost)
+  onSelectNode: PropTypes.func,
 };
 
 export default ClusterOverview;

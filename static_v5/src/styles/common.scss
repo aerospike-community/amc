@@ -186,6 +186,15 @@
   }
 }
 
+.as-link {
+  color: #0275d8 !important;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .as-hover {
   & > * {
     visibility: hidden;

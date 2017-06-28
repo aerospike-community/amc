@@ -8,6 +8,7 @@ import EditClusterConnection from 'components/cluster/EditClusterConnection';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import Tabs from 'components/Tabs';
 import ClusterLatency from 'components/cluster/ClusterLatency';
+import ClusterNodesConfig from 'components/cluster/ClusterNodesConfig';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -19,7 +20,8 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.View, CLUSTER_ACTIONS.Delete, CLUSTER_ACTIONS.Edit];
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.View, 
+                  CLUSTER_ACTIONS.Delete, CLUSTER_ACTIONS.Edit];
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onViewClusterOverview = this.onViewClusterOverview.bind(this);
   }
@@ -34,12 +36,12 @@ class ClusterDashboard extends React.Component {
   }
 
   render() {
-    const { clusterID, view, onUpdateConnectionSuccess }  = this.props;
+    const { clusterID, view, onUpdateConnectionSuccess, onSelectNode }  = this.props;
     const { name, seeds } = this.props.cluster;
 
     let dashboard;
     if (view === CLUSTER_ACTIONS.Overview) {
-      dashboard = <ClusterOverview clusterID={clusterID} />;
+      dashboard = <ClusterOverview clusterID={clusterID} onSelectNode={onSelectNode} />;
 
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
@@ -52,6 +54,8 @@ class ClusterDashboard extends React.Component {
     } else if (view === CLUSTER_ACTIONS.View || view === CLUSTER_ACTIONS.Delete) {
       dashboard = <VisibleViewClusterConnection />
 
+    } else if (view === CLUSTER_ACTIONS.Configuration) {
+      dashboard = <ClusterNodesConfig clusterID={clusterID} />
     }
 
     return (
@@ -77,6 +81,9 @@ ClusterDashboard.PropTypes = {
   // callback when the connection is successfully updated
   // onUpdateConnectionSuccess(clusterID, connection)
   onUpdateConnectionSuccess: PropTypes.func,
+  // callback to select a node
+  // onSelectNode(clusterID, nodeHost)
+  onSelectNode: PropTypes.func,
 };
 
 export default ClusterDashboard;

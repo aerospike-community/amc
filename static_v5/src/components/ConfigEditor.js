@@ -30,6 +30,9 @@ class ConfigEditor extends React.Component {
 
     this.id = 'config_editor_' + nextNumber();
 
+    this.rowData = []; // row data for the grid
+    this.context = null; // context
+
     this.onContextTabSelect = this.onContextTabSelect.bind(this);
     this.onRowSelected = this.onRowSelected.bind(this);
     this.onEdit = this.onEdit.bind(this);
@@ -47,11 +50,11 @@ class ConfigEditor extends React.Component {
     const data = row.node.data;
     const configs = this.state.selectedConfigs.slice(); // copy
   
-    let i = configs.findIndex((d) => d.name === data.name && d.value === data.value);
-    if (i >= 0)
+    let i = configs.findIndex((d) => d === data.name);
+    if (i >= 0) // already present. Remove.
       configs.splice(i, 1);
-    else
-      configs.push(data);
+    else // add
+      configs.push(data.name);
 
     this.setState({
       selectedConfigs: configs
@@ -90,8 +93,26 @@ class ConfigEditor extends React.Component {
 
   onShowEdit() {
     this.setState({
-      showEdit: true
+      showEdit: true,
     });
+  }
+
+  // return node configs for the first node
+  configsOfSingleNode() {
+    const {selectedConfigs} = this.state;
+    const {config} = this.props;
+    const node = Object.keys(config)[0];
+    const context = this.currentContext();
+
+    var edit = [];
+    selectedConfigs.forEach((c) => {
+      edit.push({
+        name: c,
+        value: config[node][context][c]
+      });
+    });
+
+    return edit;
   }
 
   onHideEdit() {
@@ -102,43 +123,122 @@ class ConfigEditor extends React.Component {
 
   componentDidMount() {
     const elm = document.getElementById(this.id);
-    const h = distanceToBottom(elm);
+    let h = distanceToBottom(elm) - 20;
+
+    if (this.props.isEditable)
+      h -= 80; // space for buttons
+
     this.setState({
-      height: h-100 // space for buttons
+      height: h,
+      selectedContext: this.allContexts()[0],
     });
   }
 
-  render() {
+  toNodeField(nodeHost) {
+    const ip = nodeHost.slice(0, nodeHost.indexOf(':'));
+    return ip.replace(/\./g, '_');
+  }
+
+  toColumnDefs() {
+    const {config} = this.props;
+    const isEditable = this.isEditable();
     const columnDefs = [{
       headerName: 'Config',
       field: 'name',
-      checkboxSelection: (row) => row.data.isEditable
-    }, {
-      headerName: 'Value',
-      field: 'value'
+      width: 250,
+      checkboxSelection: (row) => isEditable
     }];
-   
+
+    const nodes = Object.keys(config);
+    nodes.forEach((node) => {
+      const ip = node.slice(0, node.indexOf(':'));
+      columnDefs.push({
+        headerName: ip,
+        field: this.toNodeField(node), // ag-grid does not process key values with dots. Ex: 127.0.0.1
+      });
+    });
+
+    return columnDefs;
+  }
+
+  toRowData(context) {
+    // return same data, needed for 'checkbox' selection to work
+    // on ag-grid
+    if (this.context === context)
+      return this.rowData;
+
     const {config} = this.props;
-    const contexts = Object.keys(config);
-    const selected = this.state.selectedContext || contexts[0];
-    const rowData = config[selected] || [];
+
+    const nodes = Object.keys(config);
+    const rowData = [];
+    if (nodes.length > 0) {
+      const node = Object.keys(config)[0];
+      for (let c in config[node][context]) {
+        const row = {
+          name: c
+        };
+
+        for (let n in config) {
+          const k = this.toNodeField(n);
+          row[k] = config[n][context][c];
+        }
+        rowData.push(row);
+      }
+    }
+
+    this.context = context;
+    this.rowData = rowData;
+    return rowData;
+  }
+
+  allContexts() {
+    const {config} = this.props;
+    const nodes = Object.keys(config);
+    const node = nodes[0];
+    return Object.keys(config[node]);
+  }
+
+  currentContext() {
+    const allContexts = this.allContexts();
+    const context = this.state.selectedContext || allContexts[0];
+    return context;
+  }
+
+  isEditable() {
+    let {isEditable, config} = this.props;
+    if (Object.keys(config).length > 1)
+      return false;
+
+    return isEditable;
+  }
+
+  render() {
     const {showEdit, edit, selectedConfigs, height} = this.state;
+
+    const allContexts = this.allContexts();
+    const context = this.currentContext();
+    const rowData = this.toRowData(context);
+    const columnDefs = this.toColumnDefs();
+    const isEditable = this.isEditable();
+    const nodeConfigs = this.configsOfSingleNode();
 
     return (
       <div>
-        {contexts.length > 1 &&
-        <Tabs names={contexts} default={selected} onSelect={this.onContextTabSelect}/>
+        {allContexts.length > 1 &&
+        <Tabs names={allContexts} selected={context} onSelect={this.onContextTabSelect}/>
         }
 
-        <div className="ag-bootstrap" id={this.id} style={{height: height}}>
-          <AgGridReact columnDefs={columnDefs} rowData={rowData} 
+        <div className="ag-material" id={this.id} style={{height: height}}>
+          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="50"
             onRowSelected={this.onRowSelected} rowSelection="multiple" />
 
+          {isEditable &&
           <Button style={{marginTop: 20}} disabled={selectedConfigs.length === 0} color="primary" onClick={this.onShowEdit}> Edit </Button>
+          }
         </div>
 
         {showEdit &&
-         <EditConfigModal config={selectedConfigs} inProgress={edit.inProgress} errorMessage={edit.errorMessage}
+         <EditConfigModal config={nodeConfigs} inProgress={edit.inProgress} errorMessage={edit.errorMessage}
           onEdit={this.onEdit} onCancel={this.onHideEdit} />
         }
 
@@ -155,31 +255,26 @@ class ConfigEditor extends React.Component {
 }
 
 ConfigEditor.PropTypes = {
+  // Edit works only for a single node
+  //
   // callback to edit the configs
   // onEdit(configs)
   onEdit: PropTypes.func.isRequired,
 
-  config: function(props, propName, componentName) {
-    let isValid = true;
-    for (let k in props) {
-      let context = props[k];
-      context.forEach((c) => {
-        if (typeof(c.name) !== 'string')
-          isValid = false;
+  // can the configs be edited
+  isEditable: PropTypes.bool.isRequired,
 
-        const vt = typeof(c.value);
-        if (vt === 'undefined' || (vt !== 'string' && vt !== 'number'))
-          isValid = false;
-
-        // c.isEditable is a boolean 
-      });
-    }
-
-    if (!isValid) {
-      return new Error('Invalid prop `' + propName + '` supplied to' 
-          + ' `' + componentName + '`. Validation failed.');
-    }
-  }
+  // {
+  //  'nodeHost': {
+  //    'context_1': {
+  //      'config': value,
+  //      ...
+  //    },
+  //    ...
+  //  },
+  //  ...
+  // }
+  config: PropTypes.object,
 };
 
 export default ConfigEditor;
