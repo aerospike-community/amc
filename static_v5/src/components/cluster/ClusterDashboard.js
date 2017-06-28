@@ -36,12 +36,12 @@ class ClusterDashboard extends React.Component {
   }
 
   render() {
-    const { clusterID, view, onUpdateConnectionSuccess }  = this.props;
+    const { clusterID, view, onUpdateConnectionSuccess, onSelectNode }  = this.props;
     const { name, seeds } = this.props.cluster;
 
     let dashboard;
     if (view === CLUSTER_ACTIONS.Overview) {
-      dashboard = <ClusterOverview clusterID={clusterID} />;
+      dashboard = <ClusterOverview clusterID={clusterID} onSelectNode={onSelectNode} />;
 
     } else if (view === CLUSTER_ACTIONS.Edit) {
       dashboard = <EditClusterConnection clusterName={name} seeds={seeds} clusterID={clusterID}
@@ -81,6 +81,9 @@ ClusterDashboard.PropTypes = {
   // callback when the connection is successfully updated
   // onUpdateConnectionSuccess(clusterID, connection)
   onUpdateConnectionSuccess: PropTypes.func,
+  // callback to select a node
+  // onSelectNode(clusterID, nodeHost)
+  onSelectNode: PropTypes.func,
 };
 
 export default ClusterDashboard;

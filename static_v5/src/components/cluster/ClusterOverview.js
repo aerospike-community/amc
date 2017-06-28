@@ -38,7 +38,7 @@ class ClusterOverview extends React.Component {
   }
 
   render() {
-    const { clusterID }  = this.props;
+    const { clusterID, onSelectNode }  = this.props;
     const co = this.state.clusterOverview;
     const nodeHosts = co ? co.nodes : [];
 
@@ -98,7 +98,7 @@ class ClusterOverview extends React.Component {
 
             <div className="row">
               <div className="col-xl-12 as-section">
-                <NodesSummary clusterID={clusterID} nodeHosts={nodeHosts}/>
+                <NodesSummary clusterID={clusterID} nodeHosts={nodeHosts} onSelectNode={onSelectNode} />
               </div>
             </div>
             <div className="row">
@@ -115,6 +115,9 @@ class ClusterOverview extends React.Component {
 
 ClusterOverview.PropTypes = {
   clusterID: PropTypes.string.isRequired,
+  // callback to select a node
+  // onSelectNode(clusterID, nodeHost)
+  onSelectNode: PropTypes.func,
 };
 
 export default ClusterOverview;

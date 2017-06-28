@@ -2,8 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ClusterDashboard from 'components/cluster/ClusterDashboard';
 import { toClusterPath } from 'classes/entityTree';
-import { CLUSTER_ACTIONS }  from 'classes/entityActions';
-import { selectPath } from 'actions/currentView';
+import { CLUSTER_ACTIONS, NODE_ACTIONS }  from 'classes/entityActions';
+import { selectPath, selectNode } from 'actions/currentView';
 import { updateConnection } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
@@ -29,6 +29,11 @@ const mapDispatchToProps = (dispatch) => {
 
       const path = toClusterPath(clusterID);
       dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));
+    },
+
+    // select a node
+    onSelectNode: (clusterID, nodeHost) => {
+      dispatch(selectNode(clusterID, nodeHost, NODE_ACTIONS.View));
     }
   };
 };

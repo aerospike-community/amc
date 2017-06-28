@@ -14,6 +14,13 @@ class NodesSummary extends React.Component {
     this.state = {
       nodesSummary: {}, // map of nodeHost to summary
     };
+
+    this.onSelectNode = this.onSelectNode.bind(this);
+  }
+
+  onSelectNode(nodeHost) {
+    const { clusterID } = this.props;
+    this.props.onSelectNode(clusterID, nodeHost);
   }
 
   fetchSummary(clusterID, nodeHosts) {
@@ -61,7 +68,7 @@ class NodesSummary extends React.Component {
       const { stats } = node;
       const row = (
         <tr key={nodeHost}>
-          <td> {nodeHost} </td>
+          <td className="as-link" onClick={() => this.onSelectNode(nodeHost)}> {nodeHost} </td>
           <td> {stats.build} </td>
           <td> {stats.cluster_size} </td>
           <td> {memory(node.disk)} </td>
@@ -112,6 +119,9 @@ NodesSummary.PropTypes = {
   clusterID: PropTypes.string.isRequired,
   // the member nodes of the cluster
   nodeHosts: PropTypes.arrayOf(PropTypes.string).isRequired,
+  // callback to select a node
+  // onSelectNode(clusterID, nodeHost)
+  onSelectNode: PropTypes.func,
 };
 
 export default NodesSummary;
