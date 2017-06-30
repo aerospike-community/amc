@@ -6,11 +6,14 @@ import PropTypes from 'prop-types';
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
 import VisibleUDFDashboard from 'containers/udf/VisibleUDFDashboard';
 import VisibleUDFOverviewDashboard from 'containers/udf/VisibleUDFOverviewDashboard'
+import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
+import VisibleSetDashboard from 'containers/set/VisibleSetDashboard';
 
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import IndexesOverview from 'components/cluster/IndexesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
+import SetDashboard from 'components/set/SetDashboard';
 import Welcome from 'components/Welcome';
 
 import { VIEW_TYPE } from 'classes/constants';
@@ -53,6 +56,12 @@ class MainDashboard extends React.Component {
     } else if (viewType === VIEW_TYPE.NAMESPACE) {
       dashboard = <NamespaceDashboard clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}
                     view={view} onViewSelect={this.onChangeView}/>
+
+    } else if (viewType === VIEW_TYPE.SET) {
+      dashboard = <VisibleSetDashboard />
+
+    } else if (viewType === VIEW_TYPE.SET_OVERVIEW) {
+      dashboard = <VisibleSetsOverview />
 
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
       dashboard = <IndexesOverview clusterID={clusterID} />

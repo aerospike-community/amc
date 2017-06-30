@@ -125,7 +125,7 @@ export default function currentView(state = InitState, action) {
         view: action.view,
         selectedEntityPath: action.entityPath,
 
-        viewType: VIEW_TYPE.SET,
+        viewType: VIEW_TYPE.SET_OVERVIEW,
         clusterID: action.clusterID,
         nodeHost: action.nodeHost,
         namespaceName: action.namespaceName,

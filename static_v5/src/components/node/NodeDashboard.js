@@ -18,10 +18,6 @@ class NodeDashboard extends React.Component {
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 
-  componentDidMount() {
-    const {clusterID, nodeHost, onViewSelect} = this.props;
-  }
-
   onViewSelect(view) {
     this.props.onViewSelect(view);
   }

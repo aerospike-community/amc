@@ -111,7 +111,8 @@ export const NAMESPACE = extractActions(namespaceOverviewActions);
 const setActions = {
   View: {
     isDefault: true
-  }
+  },
+  Delete: {}
 };
 export const SET_ACTIONS = extractActions(setActions);
 
