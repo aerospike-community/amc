@@ -59,7 +59,7 @@ class SetsTable extends React.Component {
       const cols = []; 
       const style = { fontStyle: 'italic' };
       keys.slice(i, i+nr).forEach((k) => {
-        cols.push(<td key={'empty' + setName + i}></td>); // empty column
+        cols.push(<td key={'empty' + k}></td>); // empty column
         cols.push(<td style={style} key={k}> {k} </td>);
         cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
       });
@@ -82,8 +82,9 @@ class SetsTable extends React.Component {
   }
 
   sets() {
-    const { sets } = this.props;
+    const { sets, onSelectSet } = this.props;
     const { expanded } = this.state;
+    const isSelectable = typeof(onSelectSet) === 'function';
 
     let data = [];
     sets.forEach((set) => {
@@ -93,9 +94,15 @@ class SetsTable extends React.Component {
       const row = (
         <tr key={name}>
           <td> 
+            {isSelectable &&
             <span className="as-link" onClick={() => this.onSelectSet(name)}> 
               {name} 
             </span>
+            }
+
+            {!isSelectable && 
+            <span> {name} </span>
+            }
 
             <span className="pull-right">
               {isExpanded &&
@@ -129,11 +136,12 @@ class SetsTable extends React.Component {
 
   render() {
     const sets = this.sets();
+    const header = this.props.header || 'Sets';
     return (
       <div>
         <div className="row">
           <div className="col-xl-12 as-section-header">
-            Sets
+            {header}
           </div>
         </div>
         <div className="row">
@@ -160,6 +168,8 @@ class SetsTable extends React.Component {
 
 SetsTable.PropTypes = {
   sets: PropTypes.arrayOf(PropTypes.object),
+  // header of the table
+  header: PropTypes.string,
 
   // callback to select a set
   // onSelectSet(setName)

@@ -47,7 +47,7 @@ class NamespacesTable extends React.Component {
 
     let rows = [];
     // empty row
-    rows.push(<tr style={{height: 25}}></tr>);
+    rows.push(<tr key={'first' + namespaceName} style={{height: 25}}></tr>);
 
     // all stats
     const nr = Math.floor(ncols/3); // number of stats per row
@@ -55,10 +55,14 @@ class NamespacesTable extends React.Component {
       const cols = []; 
       const style = { fontStyle: 'italic' };
       keys.slice(i, i+nr).forEach((k) => {
-        cols.push(<td></td>); // empty column
+        cols.push(<td key={'empty' + k}></td>); // empty column
         cols.push(<td style={style} key={k}> {k} </td>);
         cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
       });
+
+      for (let j = 3*nr; j < ncols; j++) {
+        cols.push(<td key={'empty' + namespaceName + j}></td>); // empty column
+      }
 
       rows.push(
         <tr key={namespaceName+i}>
@@ -68,7 +72,7 @@ class NamespacesTable extends React.Component {
     }
 
     // empty row
-    rows.push(<tr style={{height: 25}}></tr>);
+    rows.push(<tr key={'last' + namespaceName} style={{height: 25}}></tr>);
 
     return rows;
   }

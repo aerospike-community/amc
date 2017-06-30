@@ -83,7 +83,7 @@ class NodesSummary extends React.Component {
     const keys = Object.keys(stats);
 
     // empty row
-    rows.push(<tr style={{height: 25}}></tr>);
+    rows.push(<tr key={'first' + nodeHost} style={{height: 25}}></tr>);
 
     // all stats
     const nr = Math.floor(ncols/3); // number of stats per row
@@ -91,10 +91,14 @@ class NodesSummary extends React.Component {
       const cols = []; 
       const style = { fontStyle: 'italic' };
       keys.slice(i, i+nr).forEach((k) => {
-        cols.push(<td></td>); // empty column
+        cols.push(<td key={'empty' + k}></td>); // empty column
         cols.push(<td style={style} key={k}> {k} </td>);
         cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
       });
+
+      for (let j = 3*nr; j < ncols; j++) {
+        cols.push(<td key={'empty' + nodeHost + j}></td>); // empty column
+      }
 
       rows.push(
         <tr key={nodeHost+i}>
@@ -104,7 +108,7 @@ class NodesSummary extends React.Component {
     }
 
     // empty row
-    rows.push(<tr style={{height: 25}}></tr>);
+    rows.push(<tr key={'last' + nodeHost} style={{height: 25}}></tr>);
 
     return rows;
   }
@@ -112,6 +116,7 @@ class NodesSummary extends React.Component {
   nodes() {
     const { expandedNodes } = this.state;
     const nodes = this.state.nodesSummary;
+    const isSelectable = typeof(this.props.onSelectNode) === 'function';
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
     }
@@ -126,9 +131,15 @@ class NodesSummary extends React.Component {
       const row = (
         <tr key={nodeHost}>
           <td> 
+            {isSelectable &&
             <span className="as-link" onClick={() => this.onSelectNode(nodeHost)}> 
               {nodeHost} 
             </span>
+            }
+
+            {!isSelectable && 
+            <span> {nodeHost} </span>
+            }
 
             <span className="pull-right">
               {isExpanded &&

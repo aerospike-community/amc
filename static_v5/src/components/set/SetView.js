@@ -60,8 +60,11 @@ class SetView extends React.Component {
       });
   }
 
-  componentWillMount() {
-    const {clusterID, nodeHost, namespaceName, setName} = this.props;
+  fetchData(clusterID, nodeHost, namespaceName, setName) {
+    this.setState({
+      data: null,
+    });
+
     getSet(clusterID, nodeHost, namespaceName, setName)
       .then((response) => {
         this.setState({
@@ -71,6 +74,25 @@ class SetView extends React.Component {
       .catch((message) => {
         console.error(message);
       });
+  }
+
+  componentWillMount() {
+    const {clusterID, nodeHost, namespaceName, setName} = this.props;
+    this.fetchData(clusterID, nodeHost, namespaceName, setName);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    let isSame = true;
+    ['clusterID', 'nodeHost', 'namespaceName', 'setName'].forEach((p) => {
+      if (nextProps[p] !== this.props[p])
+        isSame = false;
+    });
+
+    if (isSame)
+      return;
+
+    const {clusterID, nodeHost, namespaceName, setName} = nextProps;
+    this.fetchData(clusterID, nodeHost, namespaceName, setName);
   }
 
   renderDeleteModal() {
@@ -119,11 +141,14 @@ class SetView extends React.Component {
     if (this.state.data)
       sets.push(this.state.data);
 
+    const {nodeHost, namespaceName, setName} = this.props;
+    const header = `${nodeHost} ${namespaceName} ${setName}`;
+
     return (
       <div>
         {this.renderDeleteModal()}
 
-        <SetsTable sets={sets} />
+        <SetsTable sets={sets} header={header}/>
 
         {isDelete &&
         <div>
