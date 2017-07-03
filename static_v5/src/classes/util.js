@@ -105,3 +105,17 @@ export function replaceUnicode(s) {
     return String.fromCharCode(t);
   });
 }
+
+// addZeroWidthSpace adds a zero width space to text 
+// after every 'n' of characters
+//
+// see https://en.wikipedia.org/wiki/Zero-width_space
+export function addZeroWidthSpace(text, n = 1) {
+  const zws = '&#x200B;'; // zero width space
+
+  let s = '';
+  for (let i = 0; i < text.length; i += n) 
+    s += text.slice(i, i+n) + zws;
+
+  return s;
+}

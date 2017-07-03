@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
 
+import { renderStatsInTable } from 'classes/renderUtil';
 import { getIndexes as getIndexesAPI } from 'api/index';
 import Spinner from 'components/Spinner';
 
@@ -13,8 +14,31 @@ class IndexesOverview extends React.Component {
 
     this.state = {
       isFetching: false,
-      indexes: []
+      indexes: [],
+
+      expanded: new Set(), 
     };
+
+    this.onExpand = this.onExpand.bind(this);
+    this.onCollapse = this.onCollapse.bind(this);
+  }
+
+  onExpand(indexName) {
+    const s = new Set(this.state.expanded);
+    s.add(indexName);
+
+    this.setState({
+      expanded: s
+    });
+  }
+
+  onCollapse(indexName) {
+    const s = new Set(this.state.expanded);
+    s.delete(indexName);
+
+    this.setState({
+      expanded: s
+    });
   }
 
   componentWillMount() {
@@ -50,23 +74,46 @@ class IndexesOverview extends React.Component {
   }
 
   renderIndexes() {
-    const { indexes } = this.state;
+    const { indexes, expanded } = this.state;
 
-    const data = [];
+    let data = [];
     indexes.forEach((index, i) => {
       const { bin, binType, name } = index;
       const { namespace, set, syncOnAllNodes } = index;
+      const isExpanded = expanded.has(name);
+
       const row = (
         <tr key={name + i}>
+          <td>
+            {name}
+
+            <span className="pull-right">
+              {isExpanded &&
+              <small className="as-link" onClick={() => this.onCollapse(name)}>
+                Less
+              </small>
+              }
+
+              {!isExpanded &&
+              <small className="as-link" onClick={() => this.onExpand(name)}>
+                More
+              </small>
+              }
+            </span>
+          </td>
           <td> {namespace} </td>
           <td> {set} </td>
           <td> {bin} </td>
           <td> {binType} </td>
-          <td> {name} </td>
           <td> {syncOnAllNodes} </td>
         </tr>
       );
       data.push(row);
+
+      if (isExpanded) {
+        const r = renderStatsInTable(name, index.Stats, 6);
+        data = data.concat(r);
+      }
     });
 
     return data;
@@ -89,11 +136,11 @@ class IndexesOverview extends React.Component {
             <Table size="sm" bordered>
               <thead>
                 <tr>
+                  <th> Name </th>
                   <th> Namespace</th>
                   <th> Set </th>
                   <th> Bin </th>
                   <th> Bin Type </th>
-                  <th> Name </th>
                   <th> Synhronized on all nodes </th>
                 </tr>
               </thead>

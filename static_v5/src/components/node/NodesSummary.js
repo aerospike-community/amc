@@ -2,9 +2,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
-
-import { getNodesSummary } from 'api/node';
 import bytes from 'bytes';
+
+import { renderStatsInTable } from 'classes/renderUtil';
+import { getNodesSummary } from 'api/node';
 
 // NodesSummary provides a summary of the cluster nodes
 class NodesSummary extends React.Component {
@@ -77,42 +78,6 @@ class NodesSummary extends React.Component {
     }
   }
 
-  // ncols should be >= 3
-  renderNodeStats(nodeHost, stats, ncols) {
-    let rows = [];
-    const keys = Object.keys(stats);
-
-    // empty row
-    rows.push(<tr key={'first' + nodeHost} style={{height: 25}}></tr>);
-
-    // all stats
-    const nr = Math.floor(ncols/3); // number of stats per row
-    for (let i = 0; i < keys.length; i += nr) {
-      const cols = []; 
-      const style = { fontStyle: 'italic' };
-      keys.slice(i, i+nr).forEach((k) => {
-        cols.push(<td key={'empty' + k}></td>); // empty column
-        cols.push(<td style={style} key={k}> {k} </td>);
-        cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
-      });
-
-      for (let j = 3*nr; j < ncols; j++) {
-        cols.push(<td key={'empty' + nodeHost + j}></td>); // empty column
-      }
-
-      rows.push(
-        <tr key={nodeHost+i}>
-          {cols}
-        </tr>
-      );
-    }
-
-    // empty row
-    rows.push(<tr key={'last' + nodeHost} style={{height: 25}}></tr>);
-
-    return rows;
-  }
-
   nodes() {
     const { expandedNodes } = this.state;
     const nodes = this.state.nodesSummary;
@@ -165,7 +130,7 @@ class NodesSummary extends React.Component {
       data.push(row);
 
       if (expandedNodes.has(nodeHost)) {
-        const r = this.renderNodeStats(nodeHost, stats, 6);
+        const r = renderStatsInTable(nodeHost, stats, 6);
         data = data.concat(r);
       }
     }

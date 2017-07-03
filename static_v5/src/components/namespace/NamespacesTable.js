@@ -2,8 +2,9 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
-
 import bytes from 'bytes';
+
+import { renderStatsInTable } from 'classes/renderUtil';
 
 // NamespacesTable provides a tabular representation of the namespaces 
 // of a cluster
@@ -35,46 +36,6 @@ class NamespacesTable extends React.Component {
     this.setState({
       expanded: s
     });
-  }
-
-  // ncols should be >= 3
-  renderStats(namespaceName, stats, ncols) {
-    const keys = [];
-    for (let k in stats) {
-      if (typeof(stats[k]) !== 'object')
-        keys.push(k);
-    }
-
-    let rows = [];
-    // empty row
-    rows.push(<tr key={'first' + namespaceName} style={{height: 25}}></tr>);
-
-    // all stats
-    const nr = Math.floor(ncols/3); // number of stats per row
-    for (let i = 0; i < keys.length; i += nr) {
-      const cols = []; 
-      const style = { fontStyle: 'italic' };
-      keys.slice(i, i+nr).forEach((k) => {
-        cols.push(<td key={'empty' + k}></td>); // empty column
-        cols.push(<td style={style} key={k}> {k} </td>);
-        cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
-      });
-
-      for (let j = 3*nr; j < ncols; j++) {
-        cols.push(<td key={'empty' + namespaceName + j}></td>); // empty column
-      }
-
-      rows.push(
-        <tr key={namespaceName+i}>
-          {cols}
-        </tr>
-      );
-    }
-
-    // empty row
-    rows.push(<tr key={'last' + namespaceName} style={{height: 25}}></tr>);
-
-    return rows;
   }
 
   namespaces() {
@@ -118,7 +79,7 @@ class NamespacesTable extends React.Component {
       data.push(row);
 
       if (isExpanded) {
-        const r = this.renderStats(name, stats, 6);
+        const r = renderStatsInTable(name, stats, 6);
         data = data.concat(r);
       }
     });
