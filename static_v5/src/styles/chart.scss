@@ -1,3 +1,5 @@
+@import 'theme';
+
 .as-pie-chart {
   height: 200px;
   width: 200px;
@@ -22,7 +24,7 @@
 }
 
 .as-chart-timewindow {
-  color: white;
+  color: #88abfc;
   cursor: pointer;
   margin-right: 10px;
 

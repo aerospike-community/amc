@@ -37,9 +37,13 @@ class StorageChart {
           .x((d) => d.host)
           .y((d) => d[totalBytes])
           .showLabels(false)
+          .showLegend(false)
           .labelThreshold(0.05)
           .donut(true)
           .donutRatio(0.35);
+
+      if (this.title)
+        chart.title(this.title);
 
       chart.tooltip
           .valueFormatter(bytes);
@@ -49,15 +53,6 @@ class StorageChart {
 
       svg.datum(data)
         .call(chart);
-
-      // title
-      if (this.title) {
-        svg.append('text')
-          .attr('x', 10)
-          .attr('y', marginTop/2)
-          .style('font-size', '16px')
-          .text(this.title);
-      }
 
       // redraw on element size change
       watchElementSizeChange(this.selector, () => chart.update());

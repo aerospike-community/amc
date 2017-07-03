@@ -21,8 +21,19 @@ class ClusterStorage extends React.Component {
 
   componentDidMount() {
     const { nodeDetails } = this.props.storage;
-    this.chart = new StorageChart('#' + this.id, nodeDetails);
+    const total = this.computeTotal(nodeDetails);
+    const title = bytes(total);
+    this.chart = new StorageChart('#' + this.id, nodeDetails, title);
     this.chart.draw();
+  }
+
+  computeTotal(nodeDetails, type = totalBytes) {
+    let total = 0;
+    for (let host in nodeDetails) {
+      const node = nodeDetails[host];
+      total += node[type];
+    }
+    return total;
   }
 
   renderStorage(storage) {

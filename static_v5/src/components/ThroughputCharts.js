@@ -5,7 +5,8 @@ import moment from 'moment';
 import { Button } from 'reactstrap';
 
 import ThroughputChart from 'charts/ThroughputChart';
-import { nextNumber, formatTimeWindow } from 'classes/util';
+import { nextNumber } from 'classes/util';
+import { isCloseToNow, formatTimeWindow } from 'charts/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const Types = {
@@ -162,7 +163,7 @@ class ThroughputCharts extends React.Component {
       const to = moment(this.state.to); // copy
 
       // present 'to' should be close enough to now
-      if (moment().subtract(2, 'minutes').isAfter(to)) 
+      if (!isCloseToNow(to))
         return;
 
       this.props.getThroughput(to.unix())
