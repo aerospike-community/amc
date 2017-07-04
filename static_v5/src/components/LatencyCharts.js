@@ -5,8 +5,7 @@ import moment from 'moment';
 import { Button } from 'reactstrap';
 
 import LatencyChart from 'charts/LatencyChart';
-import { nextNumber, replaceUnicode } from 'classes/util';
-import { isCloseToNow, formatTimeWindow } from 'charts/util';
+import { nextNumber, replaceUnicode, formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const Types = {
@@ -29,6 +28,10 @@ class LatencyCharts extends React.Component {
       // the latency is shown
       from: moment().subtract(10, 'minutes'),
       to: moment(),
+
+      // the last x minutes
+      // zero signifies not selected
+      lastXMinutes: 10, 
     };
 
     this.sequenceNumber = nextNumber();
@@ -159,8 +162,7 @@ class LatencyCharts extends React.Component {
     this.intervalID = window.setInterval(() => {
       const to = moment(this.state.to); // copy
 
-      // present 'to' should be close enough to now
-      if (!isCloseToNow(to))
+      if (this.state.lastXMinutes === 0)
         return;
 
       const getTime = (lat) => {
@@ -215,9 +217,10 @@ class LatencyCharts extends React.Component {
   }
 
   // update chart based on the selected from and to
-  onSelectDateTime(from, to) {
+  onSelectDateTime(from, to, lastXMinutes) {
     this.setState({
-      showDateTimePicker: false
+      showDateTimePicker: false,
+      lastXMinutes: lastXMinutes,
     });
 
     if (!from && !to)
@@ -271,16 +274,19 @@ class LatencyCharts extends React.Component {
     const smStyle = {
       height: 200
     };
-    const { showDateTimePicker, from, to } = this.state;
+    const { showDateTimePicker, from, to, lastXMinutes } = this.state;
     const { disableTimeWindowSelection } = this.props;
     const title = this.props.title || 'Latency';
 
-    const timeWindow = formatTimeWindow(from, to);
+    const timeWindow = lastXMinutes === 0 
+                        ? formatTimeWindow(from, to) 
+                        : 'Last ' + lastXMinutes + ' minutes';
+
 
     return (
       <div>
         {showDateTimePicker &&
-        <DateTimePickerModal title="Select Time Window" from={from.toDate()} to={to.toDate()}
+        <DateTimePickerModal title="Select Time Window" from={from.toDate()} to={to.toDate()} lastXMinutes={lastXMinutes}
             onCancel={this.onHideDateTimePicker} onSelect={this.onSelectDateTime}/>}
 
         <div className="row">

@@ -204,3 +204,28 @@
     visibility: visible;
   }
 }
+
+.as-trow-stat {
+  background: #e8ebef;
+}
+
+.as-show-stat {
+  @extend .as-arrow-right;
+
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.as-hide-stat {
+  @extend .as-arrow-down;
+
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+/* HACK - overriding some of the ag-grid cell properties
+ * by the default ones on the page */
+.as-grid-cell {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #292b2c;
+}

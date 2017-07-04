@@ -87,17 +87,13 @@ class IndexesOverview extends React.Component {
           <td>
             {name}
 
-            <span className="pull-right">
+            <span className="pull-left">
               {isExpanded &&
-              <small className="as-link" onClick={() => this.onCollapse(name)}>
-                Less
-              </small>
+              <span className="as-hide-stat" onClick={() => this.onCollapse(name)} />
               }
 
               {!isExpanded &&
-              <small className="as-link" onClick={() => this.onExpand(name)}>
-                More
-              </small>
+              <span className="as-show-stat" onClick={() => this.onExpand(name)} />
               }
             </span>
           </td>

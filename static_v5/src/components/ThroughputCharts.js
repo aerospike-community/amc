@@ -5,8 +5,7 @@ import moment from 'moment';
 import { Button } from 'reactstrap';
 
 import ThroughputChart from 'charts/ThroughputChart';
-import { nextNumber } from 'classes/util';
-import { isCloseToNow, formatTimeWindow } from 'charts/util';
+import { nextNumber, formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
 
 const Types = {
@@ -41,6 +40,10 @@ class ThroughputCharts extends React.Component {
       // the throughputs are shown
       from: moment().subtract(10, 'minutes'),
       to: moment(),
+
+      // the last x minutes
+      // zero signifies not selected
+      lastXMinutes: 10, 
     };
 
     this.chartPlacements = props.chartPlacements || ChartPlacements;
@@ -162,8 +165,7 @@ class ThroughputCharts extends React.Component {
     this.intervalID = window.setInterval(() => {
       const to = moment(this.state.to); // copy
 
-      // present 'to' should be close enough to now
-      if (!isCloseToNow(to))
+      if (this.state.lastXMinutes === 0)
         return;
 
       this.props.getThroughput(to.unix())
@@ -230,9 +232,10 @@ class ThroughputCharts extends React.Component {
   }
 
   // update chart based on the selected from and to
-  onSelectDateTime(from, to) {
+  onSelectDateTime(from, to, lastXMinutes) {
     this.setState({
-      showDateTimePicker: false
+      showDateTimePicker: false,
+      lastXMinutes: lastXMinutes
     });
 
     if (!from && !to)
@@ -314,16 +317,19 @@ class ThroughputCharts extends React.Component {
   }
 
   render() {
-    const { showDateTimePicker, from, to } = this.state;
+    const { showDateTimePicker, from, to, lastXMinutes } = this.state;
     const { disableTimeWindowSelection } = this.props;
     const title = this.props.title || 'Throughput';
 
-    const timeWindow = formatTimeWindow(from, to);
+    const timeWindow = lastXMinutes === 0 
+                        ? formatTimeWindow(from, to) 
+                        : 'Last ' + lastXMinutes + ' minutes';
+
 
     return (
       <div>
         {showDateTimePicker &&
-        <DateTimePickerModal title="Select Time Window" from={from.toDate()} to={to.toDate()}
+        <DateTimePickerModal title="Select Time Window" from={from.toDate()} to={to.toDate()} lastXMinutes={lastXMinutes}
             onCancel={this.onHideDateTimePicker} onSelect={this.onSelectDateTime}/>}
 
         <div className="row">

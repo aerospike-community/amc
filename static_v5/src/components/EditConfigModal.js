@@ -10,6 +10,7 @@ class EditConfigModal extends React.Component {
   constructor(props) {
     super(props);
 
+    this.origConfig = props.config.map((c) => Object.assign({}, c));
     this.state = {
       edits: props.config.slice(), // all the edited configs
     };
@@ -25,12 +26,21 @@ class EditConfigModal extends React.Component {
 
   onEdit() {
     const { edits } = this.state;
+
     this.props.onEdit(edits);
   }
 
   onInputChange(evt) {
-    const value = evt.target.value;
-    const name = evt.target.name;
+    let { value, name } = evt.target;
+
+    if (this.getType(name) === 'number') {
+      // remove spurious non number character
+      const c = value.slice(-1);
+      if (c < '0' || c > '9')
+        value = value.slice(0, -1);
+
+      value = parseInt(value, 10);
+    }
 
     const edits = this.state.edits.slice(); // copy
     const i = edits.findIndex((e) => e.name === name);
@@ -41,36 +51,37 @@ class EditConfigModal extends React.Component {
     });
   }
 
+  getType(configName) {
+    const config = this.origConfig.find((c) => c.name === configName);
+    const { value } = config;
+
+    if (value === 'false' || value === 'true') 
+      return 'boolean';
+    
+    return typeof(value);
+  }
+
   renderConfig(config) {
     const {inProgress} = this.props;
     let { name, value } = config;
-    let type;
+    let input;
 
-    if (value === 'false')
-      value = false;
-    else if (value === 'true')
-      value = true;
-    
-    switch (typeof(value)) {
-      case 'number':
-        type = 'number';
-        break;
-
-      case 'boolean':
-        type = 'checkbox';
-        break;
-
-      case 'string':
-      default:
-        type = 'text';
-        break;
+    const type = this.getType(name);
+    if (type === 'boolean') {
+      input = <Input type="select" disabled={inProgress} name={name} value={value} onChange={this.onInputChange}>
+                <option value="true"> True </option>
+                <option value="false"> False </option>
+              </Input>;
+    } else {
+      const t = type === 'number' ? 'number' : 'text';
+      input = <Input type={t} disabled={inProgress} onChange={this.onInputChange} name={name} value={value} />;
     }
 
     return (
       <FormGroup row key={name}>
-        <Label sm={3}> {name} </Label>
-        <Col sm={9}>
-          <Input type={type} disabled={inProgress} onChange={this.onInputChange} name={name} value={value} />
+        <Label sm={5}> {name} </Label>
+        <Col sm={7}>
+          {input}
         </Col>
       </FormGroup>
     );
@@ -79,7 +90,7 @@ class EditConfigModal extends React.Component {
     const { edits } = this.state;
     const { inProgress, errorMessage } = this.props;
     return (
-      <Modal isOpen={true} toggle={() => { }}>
+      <Modal isOpen={true} toggle={() => {}} size="lg">
         <ModalHeader>Edit Configs</ModalHeader>
         <ModalBody>
           <Form >
@@ -91,7 +102,7 @@ class EditConfigModal extends React.Component {
            <span> <Spinner /> ... </span>}
           {!inProgress && errorMessage &&
             <span> errorMessage </span>}
-          <Button disabled={inProgress} color="primary" onClick={this.onEdit}>Edit</Button>
+          <Button disabled={inProgress} color="primary" onClick={this.onEdit}>Update</Button>
           <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
         </ModalFooter>
       </Modal>

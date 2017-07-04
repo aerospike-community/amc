@@ -32,13 +32,15 @@ class DateTimePickerModal extends React.Component {
       label: '1 hour',
       minutes: 60,
     }];
+
     this.defaultOption = this.timeOptions[0];
+    const selectedOption = this.timeOptions.find((t) => t.minutes === this.props.lastXMinutes) || this.defaultOption;
 
     this.state = { 
       from: from ? from : moment().subtract(30, 'minutes').toDate(),
       to: to ? to : moment().toDate(),
       showFromAndTo: true, 
-      selectedOption: this.defaultOption,
+      selectedOption: selectedOption
     };
 
     this.onSelect = this.onSelect.bind(this);
@@ -49,8 +51,8 @@ class DateTimePickerModal extends React.Component {
   }
 
   onSelect() {
-    const { from, to } = this.state;
-    this.props.onSelect(from, to);
+    const { from, to, selectedOption } = this.state;
+    this.props.onSelect(from, to, selectedOption.minutes);
   }
 
   onCancel() {
@@ -72,7 +74,7 @@ class DateTimePickerModal extends React.Component {
     const from = moment().subtract(time.minutes, 'minutes').toDate();
 
     this.setState({
-      selectedOption: time.minutes,
+      selectedOption: time,
       from: from,
       to: to
     });
@@ -157,7 +159,7 @@ class DateTimePickerModal extends React.Component {
 
 DateTimePickerModal.PropTypes = {
   // callback when the times are selected
-  // onSelect(from, to) from, to are Date objects or null
+  // onSelect(from, to, last) from, to are Date objects or null
   onSelect: PropTypes.func,
   // callback when the modal is cancelled
   onCancel: PropTypes.func,
@@ -167,6 +169,9 @@ DateTimePickerModal.PropTypes = {
   // Date objects
   from: PropTypes.object,
   to: PropTypes.object,
+
+  // the selected last 'X' minutes
+  lastXMinutes: PropTypes.number,
 };
 
 export default DateTimePickerModal;

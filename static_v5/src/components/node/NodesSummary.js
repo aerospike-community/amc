@@ -106,17 +106,13 @@ class NodesSummary extends React.Component {
             <span> {nodeHost} </span>
             }
 
-            <span className="pull-right">
+            <span className="pull-left">
               {isExpanded &&
-              <small className="as-link" onClick={() => this.onCollapseNode(nodeHost)}>
-                Less
-              </small>
+              <span className="as-hide-stat" onClick={() => this.onCollapseNode(nodeHost)} />
               }
 
               {!isExpanded &&
-              <small className="as-link" onClick={() => this.onExpandNode(nodeHost)}>
-                More
-              </small>
+              <span className="as-show-stat" onClick={() => this.onExpandNode(nodeHost)} />
               }
             </span>
           </td>

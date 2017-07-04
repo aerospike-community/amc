@@ -14,33 +14,40 @@ export function renderStatsInTable(name, stats, ncols) {
   }
 
   let rows = [];
-  // empty row
-  rows.push(<tr key={'first' + name} style={{height: 25}}></tr>);
 
   // all stats
   const nr = Math.floor(ncols/3); // number of stats per row
   for (let i = 0; i < keys.length; i += nr) {
     const cols = []; 
-    const style = { fontStyle: 'italic' };
-    keys.slice(i, i+nr).forEach((k) => {
-      cols.push(<td key={'empty' + k}></td>); // empty column
-      cols.push(<td style={style} key={k}> {k} </td>);
-      cols.push(<td style={style} key={k+'val'}> {stats[k] + ''} </td>);
+    const rowKeys = keys.slice(i, i+nr);
+
+    rowKeys.forEach((k) => {
+      cols.push(<td key={k}> {k} </td>);
+      cols.push(<td key={k+'val'}> {stats[k] + ''} </td>);
+      cols.push(<td key={k+'empty'}></td>); // empty column
     });
 
-    for (let j = 3*nr; j < ncols; j++) {
+    const nkeys = rowKeys.length; // number of keys added in this row
+    for (let j = 3*nkeys; j < ncols; j++) {
       cols.push(<td key={'empty' + j + name}></td>); // empty column
     }
 
     rows.push(
-      <tr key={i+name}>
+      <tr className="as-trow-stat" key={i+name}>
         {cols}
       </tr>
     );
   }
 
   // empty row
-  rows.push(<tr key={'last' + name} style={{height: 25}}></tr>);
+  const cols = [];
+  for (let i = 0; i < ncols; i++) 
+    cols.push(<td key={'last' + i + name}> </td>);
+  rows.push(
+    <tr key={'last' + name} style={{height: 25}}>
+      {cols}
+    </tr>
+  );
 
   return rows;
 }

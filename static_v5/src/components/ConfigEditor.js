@@ -146,7 +146,8 @@ class ConfigEditor extends React.Component {
       headerName: 'Config',
       field: 'name',
       width: 250,
-      checkboxSelection: (row) => isEditable
+      checkboxSelection: (row) => isEditable,
+      cellClass: 'as-grid-cell',
     }];
 
     const nodes = Object.keys(config);
@@ -155,6 +156,7 @@ class ConfigEditor extends React.Component {
       columnDefs.push({
         headerName: ip,
         field: this.toNodeField(node), // ag-grid does not process key values with dots. Ex: 127.0.0.1
+        cellClass: 'as-grid-cell',
       });
     });
 
@@ -229,7 +231,7 @@ class ConfigEditor extends React.Component {
         }
 
         <div className="ag-material" id={this.id} style={{height: height}}>
-          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="50"
+          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40"
             onRowSelected={this.onRowSelected} rowSelection="multiple" />
 
           {isEditable &&
