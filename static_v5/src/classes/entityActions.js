@@ -124,6 +124,15 @@ const setOverviewActions = {
 };
 export const SET_OVERVIEW_ACTIONS = extractActions(setOverviewActions);
 
+// index actions
+const indexActions = {
+  View : {
+    isDefault: true
+  },
+  Delete: {}
+};
+export const INDEX_ACTIONS = extractActions(indexActions);
+
 // indexes overview
 const indexesOverviewActions = {
   Overview: {
@@ -217,6 +226,9 @@ function viewTypeAction(viewType) {
 
   if (viewType === VIEW_TYPE.INDEXES_OVERVIEW)
     return indexesOverviewActions;
+
+  if (viewType === VIEW_TYPE.INDEX)
+    return indexActions;
 
   const msg = `Action for ${viewType} not found`;
   console.error(msg);

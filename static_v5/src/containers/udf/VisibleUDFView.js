@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import UDFDashboard from 'components/udf/UDFDashboard';
+import UDFView from 'components/udf/UDFView';
 import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
 import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
 import { selectPath } from 'actions/currentView';
@@ -12,24 +12,11 @@ const mapStateToProps = (state) => {
   return {
     clusterID: clusterID,
     udfName: udfName,
-    view: view
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onViewSelect: (clusterID, udfName, view) => {
-      const path = toUDFPath(clusterID, udfName);
-      dispatch(selectPath(path, view));
-    },
-
-    onUDFCreated: (clusterID, udfName, udfType) => {
-      dispatch(addUDF(clusterID, udfName, udfType));
-
-      const path = toUDFPath(clusterID, udfName);
-      dispatch(selectPath(path, UDF_ACTIONS.View));
-    },
-
     onDeleteSuccess: (clusterID, udfName) => {
       dispatch(deleteUDF(clusterID, udfName));
 
@@ -39,10 +26,11 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const VisibleUDFDashboard = connect(
+const VisibleUDFView = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UDFDashboard);
+)(UDFView);
 
-export default VisibleUDFDashboard;
+export default VisibleUDFView;
+
 

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import SetDashboard from 'components/set/SetDashboard';
+import SetView from 'components/set/SetView';
 import { selectSet, selectSetOverview } from 'actions/currentView';
 import { SET_OVERVIEW_ACTIONS } from 'classes/entityActions';
 
@@ -11,28 +11,24 @@ const  mapStateToProps = (state) => {
     nodeHost: nodeHost,
     namespaceName: namespaceName,
     setName: setName,
-    view: view,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onShowSetOverview: (clusterID, nodeHost, namespaceName) => {
+    onDeleteSuccess: (clusterID, nodeHost, namespaceName, setName) => {
       dispatch(selectSetOverview(clusterID, nodeHost, namespaceName, SET_OVERVIEW_ACTIONS.View));
-    },
-
-    onSetSelect: (clusterID, nodeHost, namespaceName, setName, view) => {
-      dispatch(selectSet(clusterID, nodeHost, namespaceName, setName, view));
     },
   };
 }
 
-const VisibleSetsOverview = connect(
+const VisibleSetView = connect(
     mapStateToProps,
     mapDispatchToProps
-)(SetDashboard);
+)(SetView);
 
-export default VisibleSetsOverview;
+export default VisibleSetView;
+
 
 
 

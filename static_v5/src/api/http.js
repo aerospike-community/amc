@@ -16,10 +16,22 @@ export function get(url, processResponse = true) {
   return promise(f, processResponse);
 }
 
-export function deleteAPI(url, processResponse = true) {
-  const f = fetch(url, {
+export function deleteAPI(url, data = null, processResponse = true) {
+  let init = {
     method: 'DELETE'
-  });
+  };
+
+  if (data) {
+    init = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    };
+  }
+
+  const f = fetch(url, init);
   return promise(f, processResponse);
 }
 

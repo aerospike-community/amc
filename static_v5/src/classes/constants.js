@@ -5,6 +5,7 @@ export const ENTITY_TYPE = {
   NAMESPACES: 'namespaces',
   SETS: 'sets',
   UDF: 'modules',
+  INDEX: 'indexes',
 };
 
 // type of the entity view types
@@ -14,6 +15,7 @@ export const VIEW_TYPE = {
   NAMESPACE: 'NAMESPACE',
   SET: 'SET',
   UDF: 'UDF',
+  INDEX: 'INDEX',
   NODE_OVERVIEW: 'NODE_OVERVIEW',
   NAMESPACE_OVERVIEW: 'NAMESPACE_OVERVIEW',
   SET_OVERVIEW: 'SET_OVERVIEW',

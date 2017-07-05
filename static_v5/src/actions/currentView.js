@@ -2,7 +2,7 @@ import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from 'classe
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
-import { toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
+import { toIndexPath, toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
 
 export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
 export function showLeftPane() {
@@ -157,6 +157,18 @@ export function selectIndexesOverview(clusterID, view) {
   };
 }
 
+export const SELECT_INDEX = 'SELECT_INDEX';
+export function selectIndex(clusterID, indexName, view) {
+  const path = toIndexPath(clusterID, indexName);
+  return {
+    type: SELECT_INDEX,
+    clusterID: clusterID,
+    indexName: indexName,
+    entityPath: path,
+    view: view,
+  };
+}
+
 export const SELECT_START_VIEW = 'SELECT_START_VIEW';
 export function selectStartView() {
   return {
@@ -167,7 +179,7 @@ export function selectStartView() {
 
 export function selectPath(entityPath, view) {
   const e = matchAndExtractEntityPathVariabes(entityPath);
-  const { clusterID, udfName, namespaceName, setName, nodeHost } = e;
+  const { clusterID, udfName, namespaceName, setName, nodeHost, indexName } = e;
   const viewType = getEntityPathViewType(entityPath);
 
   switch (viewType) {
@@ -179,6 +191,9 @@ export function selectPath(entityPath, view) {
 
   case VIEW_TYPE.INDEXES_OVERVIEW:
     return selectIndexesOverview(clusterID, view);
+
+  case VIEW_TYPE.INDEX:
+    return selectIndex(clusterID, indexName, view);
 
   case VIEW_TYPE.CLUSTER:
     return selectCluster(clusterID, view);

@@ -74,7 +74,8 @@ export function updateURL(selectedEntityPath, view) {
 //
 
 const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
-const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEXES_OVERVIEW } = VIEW_TYPE;
+const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEX, INDEXES_OVERVIEW } = VIEW_TYPE;
+
 const pathDefinitions = [{
   url: '',
   entityPath: '',
@@ -91,6 +92,10 @@ const pathDefinitions = [{
   url: 'physical-tree/udf/:clusterID/:udfName/:view',
   entityPath: 'physical-tree/:clusterID/' + UDF + '/:udfName',
   viewType: UDF,
+}, {
+  url: 'physical-tree/index/:clusterID/:indexName/:view',
+  entityPath: 'physical-tree/:clusterID/' + INDEX + '/:indexName',
+  viewType: INDEX,
 }, {
   url: 'physical-tree/indexes-overview/:clusterID',
   entityPath: 'physical-tree/:clusterID/indexes',

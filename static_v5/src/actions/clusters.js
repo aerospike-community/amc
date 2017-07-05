@@ -111,25 +111,30 @@ export function fetchClusters() {
 // ---------------------------------------
 // Delete entities from cluster
 
-export const DELETE_UDF = 'DELETE_UDF';
 export function deleteUDF(clusterID, udfName) {
-  return {
-    type: DELETE_UDF,
-    clusterID: clusterID,
-    udfName: udfName,
+  return (dispatch) => {
+    dispatch(getClusterEntityTree(clusterID), false);
+  };
+}
+
+export function deleteIndex(clusterID, namspaceName, setName, indexName) {
+  return (dispatch) => {
+    dispatch(getClusterEntityTree(clusterID), false);
+  };
+}
+
+export function deleteSet(clusterID, namespaceName, setName) {
+  return (dispatch) => {
+    dispatch(getClusterEntityTree(clusterID), false);
   };
 }
 
 // ---------------------------------------
 // Add new entities to cluster connections
 
-export const ADD_UDF = 'ADD_UDF';
 export function addUDF(clusterID, udfName, udfType) {
-  return {
-    type: ADD_UDF,
-    clusterID: clusterID,
-    udfName: udfName,
-    udfType: udfType
+  return (dispatch) => {
+    dispatch(getClusterEntityTree(clusterID), false);
   };
 }
 
@@ -192,14 +197,14 @@ function expandClusterTree(clusterID) {
 
 // get the cluster entity tree
 // WARNING: the cluster needs to be connected
-export function getClusterEntityTree(clusterID) {
+export function getClusterEntityTree(clusterID, expand = true) {
   return (dispatch) => {
     getClusterEntityTreeAPI(clusterID)
       .then((cluster) => {
         dispatch(clusterDetails(cluster));
         
-        // expand the cluster tree
-        dispatch(expandClusterTree(clusterID));
+        if (expand)
+          dispatch(expandClusterTree(clusterID));
       })
       .catch((error) => {
         // TODO

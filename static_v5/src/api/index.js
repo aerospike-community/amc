@@ -1,5 +1,5 @@
 import { toURLConverter } from 'api/url';
-import { get } from 'api/http';
+import { get, deleteAPI } from 'api/http';
 
 const toURLPath = toURLConverter('connections');
 
@@ -21,6 +21,28 @@ export function getIndexes(clusterID, includeStats = true) {
             });
 
   return p;
+}
+
+// getIndex gets the statistics for the index
+export function getIndex(clusterID, indexName) {
+  const url = toURLPath(clusterID + '/indexes/' + indexName);
+  const p = get(url)
+            .then((response) => {
+              const { indexes } = response;
+              const nodes = Object.keys(indexes);
+              return indexes[nodes[0]][0];
+            });
+
+  return p;
+}
+
+// deleteIndex deletes an index
+export function deleteIndex(clusterID, namespaceName, setName, indexName) {
+  const url = toURLPath(clusterID + '/indexes/' + indexName);
+  return deleteAPI(url, {
+    namespace: namespaceName,
+    setName: setName
+  });
 }
 
 

@@ -4,16 +4,16 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
-import VisibleUDFDashboard from 'containers/udf/VisibleUDFDashboard';
+import VisibleUDFView from 'containers/udf/VisibleUDFView';
 import VisibleUDFOverviewDashboard from 'containers/udf/VisibleUDFOverviewDashboard'
 import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
-import VisibleSetDashboard from 'containers/set/VisibleSetDashboard';
+import VisibleSetView from 'containers/set/VisibleSetView';
+import VisibleIndexView from 'containers/index/VisibleIndexView';
+import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
 
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
-import IndexesOverview from 'components/cluster/IndexesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
-import SetDashboard from 'components/set/SetDashboard';
 import Welcome from 'components/Welcome';
 
 import { VIEW_TYPE } from 'classes/constants';
@@ -58,16 +58,19 @@ class MainDashboard extends React.Component {
                     view={view} onViewSelect={this.onChangeView}/>
 
     } else if (viewType === VIEW_TYPE.SET) {
-      dashboard = <VisibleSetDashboard />
+      dashboard = <VisibleSetView />
 
     } else if (viewType === VIEW_TYPE.SET_OVERVIEW) {
       dashboard = <VisibleSetsOverview />
 
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
-      dashboard = <IndexesOverview clusterID={clusterID} />
+      dashboard = <VisibleIndexesOverview />
+        
+    } else if (viewType === VIEW_TYPE.INDEX) {
+      dashboard = <VisibleIndexView />
         
     } else if (viewType === VIEW_TYPE.UDF) {
-      dashboard = <VisibleUDFDashboard />
+      dashboard = <VisibleUDFView />
 
     } else if (viewType === VIEW_TYPE.UDF_OVERVIEW) {
       dashboard = <VisibleUDFOverviewDashboard />

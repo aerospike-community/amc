@@ -2,14 +2,14 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { getSet, deleteSet } from 'api/set';
-import SetsTable from 'components/set/SetsTable';
+import { getIndex, deleteIndex } from 'api/index';
+import IndexesTable from 'components/index/IndexesTable';
 import Spinner from 'components/Spinner';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
-// SetView diplays a view of the set
-class SetView extends React.Component {
+// IndexView diplays a view of the index
+class IndexView extends React.Component {
   constructor(props) {
     super(props);
 
@@ -24,7 +24,7 @@ class SetView extends React.Component {
 
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
-    this.onDeleteSet = this.onDeleteSet.bind(this);
+    this.onDeleteIndex = this.onDeleteIndex.bind(this);
   }
 
   onShowConfirm() {
@@ -34,16 +34,18 @@ class SetView extends React.Component {
   }
 
   onDeleteSuccess() {
-    const { clusterID, nodeHost, namespaceName, setName } = this.props;
-    this.props.onDeleteSuccess(clusterID, nodeHost, namespaceName, setName);
+    const { clusterID, indexName } = this.props;
+    this.props.onDeleteSuccess(clusterID, indexName);
   }
 
-  onDeleteSet() {
-    const { clusterID, nodeHost, namespaceName, setName } = this.props;
+  onDeleteIndex() {
+    const { clusterID, indexName } = this.props;
+    const { namespace, set } = this.state.data;
+
     this.setState({
       deleteInProgress: true
     });
-    deleteSet(clusterID, nodeHost, namespaceName, setName)
+    deleteIndex(clusterID, namespace, set, indexName)
       .then(() => {
         this.setState({
           deleteInProgress: false,
@@ -55,20 +57,20 @@ class SetView extends React.Component {
         this.setState({
           deleteInProgress: false,
           deleteSuccessfull: false,
-          deleteErrorMsg: msg || 'Failed to delete set'
+          deleteErrorMsg: msg || 'Failed to delete index'
         });
       });
   }
 
-  fetchData(clusterID, nodeHost, namespaceName, setName) {
+  fetchData(clusterID, indexName) {
     this.setState({
       data: null,
     });
 
-    getSet(clusterID, nodeHost, namespaceName, setName)
-      .then((response) => {
+    getIndex(clusterID, indexName)
+      .then((index) => {
         this.setState({
-          data: response.set
+          data: index
         });
       })
       .catch((message) => {
@@ -77,13 +79,13 @@ class SetView extends React.Component {
   }
 
   componentWillMount() {
-    const {clusterID, nodeHost, namespaceName, setName} = this.props;
-    this.fetchData(clusterID, nodeHost, namespaceName, setName);
+    const {clusterID, indexName} = this.props;
+    this.fetchData(clusterID, indexName);
   }
 
   componentWillReceiveProps(nextProps) {
     let isSame = true;
-    ['clusterID', 'nodeHost', 'namespaceName', 'setName'].forEach((p) => {
+    ['clusterID', 'indexName'].forEach((p) => {
       if (nextProps[p] !== this.props[p])
         isSame = false;
     });
@@ -91,8 +93,8 @@ class SetView extends React.Component {
     if (isSame)
       return;
 
-    const {clusterID, nodeHost, namespaceName, setName} = nextProps;
-    this.fetchData(clusterID, nodeHost, namespaceName, setName);
+    const {clusterID, indexName} = nextProps;
+    this.fetchData(clusterID, indexName);
   }
 
   renderDeleteModal() {
@@ -120,13 +122,13 @@ class SetView extends React.Component {
     return (
       <Modal isOpen={true} toggle={() => {}}>
         <ModalHeader> Confirm </ModalHeader>
-        <ModalBody>  Delete {this.props.setName} ?  </ModalBody>
+        <ModalBody>  Delete {this.props.indexName} ?  </ModalBody>
         <ModalFooter>
           {!deleteInProgress && deleteSuccessfull === false &&
-            errorMsg}
+            deleteErrorMsg}
           {deleteInProgress &&
            <span> <Spinner /> Deleting ... </span>}
-          <Button disabled={disabled} color="primary" onClick={this.onDeleteSet}>Confirm</Button>
+          <Button disabled={disabled} color="primary" onClick={this.onDeleteIndex}>Confirm</Button>
           <Button disabled={disabled} color="secondary" onClick={onCancelModal}>Cancel</Button>
         </ModalFooter>
       </Modal>
@@ -136,19 +138,19 @@ class SetView extends React.Component {
   render() {
     const {view} = this.props;
 
-    const sets = [];
+    const indexes = [];
     if (this.state.data)
-      sets.push(this.state.data);
+      indexes.push(this.state.data);
 
     const { deleteInProgress } = this.state;
-    const {nodeHost, namespaceName, setName} = this.props;
-    const header = `${nodeHost} ${namespaceName} ${setName}`;
+    const {clusterID, indexName} = this.props;
+    const header = `${clusterID} ${indexName}`;
 
     return (
       <div>
         {this.renderDeleteModal()}
 
-        <SetsTable sets={sets} header={header}/>
+        <IndexesTable indexes={indexes} header={header}/>
 
         <div>
           <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
@@ -159,16 +161,15 @@ class SetView extends React.Component {
   }
 }
 
-SetView.PropTypes = {
+IndexView.PropTypes = {
   clusterID: PropTypes.string.isRequired,
-  nodeHost: PropTypes.string.isRequired,
-  namespaceName: PropTypes.string.isRequired,
-  setName: PropTypes.string.isRequired,
+  indexName: PropTypes.string.isRequired,
 
   // callback on successfull delete
-  // onDeleteSuccess(clusterID, nodeHost, namespaceName, setName)
+  // onDeleteSuccess(clusterID, indexName)
   onDeleteSuccess: PropTypes.func,
 };
 
 
-export default SetView;
+export default IndexView;
+

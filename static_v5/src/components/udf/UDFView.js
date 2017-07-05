@@ -7,9 +7,10 @@ import AceEditor from 'react-ace';
 import 'brace/mode/lua';
 import 'brace/theme/github';
 
-import { getUDF, deleteUDF } from 'api/udf';
+import { getUDF, deleteUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
 import Spinner from 'components/Spinner';
+import UDFDeleteModal from 'components/udf/UDFDeleteModal';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -24,17 +25,27 @@ class UDFView extends React.Component {
 
       editorHeight: 500,
 
-      deleteShowConfirm: false,
-      deleteInProgress: false,
-      deleteSuccessfull: null,
-      deleteErrorMsg: '',
+      // delete
+      showDeleteModal: false,
+
+      // edit
+      hasErrors: false, // does the source code have errors
+      hasChanged: false, // has the source code changed
+      showUpdateSuccess: false,
     };
 
     this.id = 'udf_editor' + nextNumber();
+    this.editor; // the ace editor instance
 
+    // delete methods
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
-    this.onShowConfirm = this.onShowConfirm.bind(this);
-    this.onDeleteUDF = this.onDeleteUDF.bind(this);
+    this.onShowDeleteModal = this.onShowDeleteModal.bind(this);
+    this.onHideDeleteModal = this.onHideDeleteModal.bind(this);
+
+    // edit methods
+    this.onUpdate = this.onUpdate.bind(this);
+    this.onEditorLoad = this.onEditorLoad.bind(this);
+    this.onEditorChange = this.onEditorChange.bind(this);
   }
 
   componentDidMount() {
@@ -73,98 +84,107 @@ class UDFView extends React.Component {
       });
   }
 
-  onShowConfirm() {
+  onShowDeleteModal() {
     this.setState({
-      deleteShowConfirm: true,
+      showDeleteModal: true,
+    });
+  }
+
+  onHideDeleteModal() {
+    this.setState({
+      showDeleteModal: false,
     });
   }
 
   onDeleteSuccess() {
-    this.props.onDeleteSuccess();
+    const { clusterID, udfName } = this.props;
+    this.props.onDeleteSuccess(clusterID, udfName);
   }
 
-  onDeleteUDF() {
-    const { clusterID, udfName } = this.props;
+  onEditorLoad(editor) {
+    this.editor = editor;
+  }
+
+  onEditorChange(value, evt) {
+    const annotations = this.editor.getSession().getAnnotations();
+    const hasErrors = annotations.find((a) => a.type === 'error');
+
     this.setState({
-      deleteInProgress: true
+      hasChanged: true,
+      sourceCode: value,
+      hasErrors: hasErrors,
     });
-    deleteUDF(clusterID, udfName)
+  }
+
+  onUpdate() {
+    if (!this.state.hasChanged || this.state.hasErrors)
+      return;
+
+    this.setState({
+      isUpdating: true
+    });
+
+    const { clusterID, udfName } = this.props;
+    const { sourceCode } = this.state;
+    saveUDF(clusterID, udfName, sourceCode)
       .then(() => {
         this.setState({
-          deleteInProgress: false,
-          deleteSuccessfull: true
+          isUpdating: false,
+          showUpdateSuccess: true,
         });
-        window.setTimeout(() => this.onDeleteSuccess(), 2000);
+
+        window.setTimeout(() => {
+          this.setState({
+            showUpdateSuccess: false
+          });
+        }, 2000);
       })
-      .catch((msg) => {
+      .catch((err) => {
+        // TODO inject errors into the editor annotations
+        console.log(err);
         this.setState({
-          deleteInProgress: false,
-          deleteSuccessfull: false,
-          deleteErrorMsg: msg || 'Failed to delete UDF'
+          isUpdating: false
         });
       });
-  }
-
-  renderDeleteModal() {
-    const { deleteShowConfirm, deleteInProgress, deleteSuccessfull, deleteErrorMsg } = this.state;
-
-    const onCancelModal = () => {
-      this.setState({
-        deleteShowConfirm: false
-      });
-    };
-
-    if (!deleteShowConfirm)
-      return null;
-
-    const disabled = deleteInProgress || deleteSuccessfull;
-    if (!deleteInProgress && deleteSuccessfull === true) {
-      return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully deleted {this.props.udfName} </ModalBody>
-        </Modal>
-      );
-    }
-
-    return (
-      <Modal isOpen={true} toggle={() => {}}>
-        <ModalHeader> Confirm </ModalHeader>
-        <ModalBody>  Delete {this.props.udfName} ?  </ModalBody>
-        <ModalFooter>
-          {!deleteInProgress && deleteSuccessfull === false &&
-            errorMsg}
-          {deleteInProgress &&
-           <span> <Spinner /> Deleting ... </span>}
-          <Button disabled={disabled} color="primary" onClick={this.onDeleteUDF}>Confirm</Button>
-          <Button disabled={disabled} color="secondary" onClick={onCancelModal}>Cancel</Button>
-        </ModalFooter>
-      </Modal>
-    );
   }
 
   render() {
     if (this.state.isFetching) 
       return <div> <Spinner /> Loading ... </div>;
 
-    const isDelete = this.props.view === 'delete';
     const editorHeight = this.state.editorHeight + 'px';
+    const { clusterID, udfName } = this.props;
+    const { showDeleteModal, showUpdateSuccess, hasErrors, hasChanged, isUpdating, sourceCode } = this.state;
 
     return (
       <div>
-        {this.renderDeleteModal()}
-
-        <div className="as-centerpane-header"> 
-          {this.props.udfName} 
+        <div className="row" style={{marginBottom: 10}}>
+          <div className="col-xl-12 as-section-header">
+            {this.props.udfName} 
+          </div>
         </div>
         <div className="as-ace-editor">
-          <AceEditor width={'100%'} height={editorHeight} mode="lua" readOnly={true} theme="github" name={this.id} value={this.state.sourceCode} />
+          <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" 
+            name={this.id} value={sourceCode} readOnly={isUpdating} 
+            onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
         </div>
         
-        {isDelete &&
-        <div>
-          <Button color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+        <div className="as-submit-footer" style={{marginTop: 0}}>
+          <Button disabled={!hasChanged || hasErrors || isUpdating} color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
+          <Button disabled={isUpdating} color="danger" size="sm" onClick={this.onShowDeleteModal}> Delete </Button>
+          {isUpdating && 
+           <span> <Spinner size="1"/> Updating ... </span>}
         </div>
+
+        {showDeleteModal &&
+        <UDFDeleteModal clusterID={clusterID} udfName={udfName} onDeleteSuccess={this.onDeleteSuccess} onCancel={this.onHideDeleteModal}/>
+        }
+
+        {showUpdateSuccess &&
+        <Modal isOpen={true} toggle={() => {}}>
+          <ModalHeader> Success </ModalHeader>
+          <ModalBody> Successfully updated {this.props.udfName} </ModalBody>
+        </Modal>
         }
       </div>
     );
@@ -174,10 +194,9 @@ class UDFView extends React.Component {
 UDFView.PropTypes = {
   clusterID: PropTypes.string,
   udfName: PropTypes.string,
-  // the view type, view or delete
-  view: PropTypes.string,
+
   // callback on successfull delete
-  // onDeleteSuccess()
+  // onDeleteSuccess(clusterID, udfName)
   onDeleteSuccess: PropTypes.func,
 };
 

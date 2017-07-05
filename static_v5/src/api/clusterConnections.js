@@ -52,7 +52,8 @@ export function getConnectionDetails(clusterID) {
 
 // get the entity tree of the cluster
 export function getClusterEntityTree(clusterID) {
-  return authConnection(clusterID, '', '');
+  const url = toURLPath(clusterID + '/entity-tree');
+  return get(url);
 }
 
 // get all throughput stats for all the nodes of the connection

@@ -4,7 +4,6 @@ import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } fr
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
 import { UPDATE_CLUSTER_CONNECTION, CLUSTER_CONNECTION_FETCHED } from 'actions/clusters';
 import { DELETE_CLUSTER_CONNECTION } from 'actions/clusters';
-import { ADD_UDF, DELETE_UDF } from 'actions/clusters';
 import { ENTITY_TYPE } from 'classes/constants';
 
 // all the cluster connections of the user
@@ -32,16 +31,27 @@ export default function(state = {
   }, action) {
   let updated = clusters(state, action);
   updated = updateClusterConnection(updated, action);
-  updated = updateClusterEntities(updated, action);
   updated = newConnection(updated, action);
   updated = authConnection(updated, action);
   return updated;
 }
 
-function updateItem(state, clusterID, update) {
+function updateItem(state, clusterID, update, replace = false) {
   const clusters = state.items.slice(); // copy
   const i = clusters.findIndex((c) => c.id === clusterID);
-  const cluster = Object.assign({}, clusters[i], update);
+
+  let cluster;
+  if (replace) {
+    let c = {};
+    // preserve only these properties
+    ['id', 'name', 'connectOnLogin', 'connected', 'seeds'].forEach((p) => {
+      c[p] = clusters[i][p];
+    });
+    cluster = Object.assign({}, c, update);
+  } else {
+    cluster = Object.assign({}, clusters[i], update);
+  }
+
   clusters[i] = cluster;
   return Object.assign({}, state, {
     items: clusters
@@ -55,24 +65,28 @@ function clusters(state, action) {
       return Object.assign({}, state, {
         isFetching: true,
       });
+
     case RECEIVE_CLUSTERS:
       return Object.assign({}, state, {
         isFetching: false,
         isInitialized: true,
         items: action.clusters || [],
       });
+
     case AUTHENTICATED_CLUSTER_CONNECTION:
       id = state.authConnection.clusterID;
       update = Object.assign({}, action.cluster, {
         isAuthenticated: true
       });
       return updateItem(state, id, update);
+
     case CLUSTER_CONNECTION_FETCHED:
       id = action.cluster.id;
       update = Object.assign({}, action.cluster, {
         isAuthenticated: true
       });
-      return updateItem(state, id, update);
+      return updateItem(state, id, update, true);
+
     case DISCONNECT_CLUSTER_CONNECTION:
       id = action.clusterID;
       return updateItem(state, id, {
@@ -80,6 +94,7 @@ function clusters(state, action) {
         [ENTITY_TYPE.NODES]: [],
         isAuthenticated: false,
       });
+
     case DELETE_CLUSTER_CONNECTION: 
       id = action.clusterID;
       const clusters = state.items.slice(); // copy
@@ -128,28 +143,6 @@ function removeClusterEntity(state, clusterID, entityType, isEqual) {
   });
 }
 
-// add and remove entities from the cluster connections
-function updateClusterEntities(state, action) {
-  let entity, id;
-  switch (action.type) {
-    case ADD_UDF:
-      id = action.clusterID;
-      entity = Object.assign({}, {
-        type: action.type,
-        name: action.udfName, 
-        entityType: ENTITY_TYPE.UDF,
-      });
-      return addToClusterEntity(state, id, ENTITY_TYPE.UDF, entity);
-
-    case DELETE_UDF:
-      const isEqual = (udf) => udf.name === action.udfName;
-      return removeClusterEntity(state, action.clusterID, ENTITY_TYPE.UDF, isEqual);
-      
-    default:
-      return state;
-  }
-}
-
 // update the cluster itself
 function updateClusterConnection(state, action) {
   let id;
@@ -192,16 +185,19 @@ function authConnection(state, action) {
       if (!action.display)
         auth.hasFailed = false;
       break;
+
     case AUTHENTICATED_CLUSTER_CONNECTION:
       auth = Object.assign({}, state.authConnection, {
         inProgress: false,
       });
       break;
+
     case AUTHENTICATING_CLUSTER_CONNECTION:
       auth = Object.assign({}, state.authConnection, {
         isUpdating: true
       });
       break;
+
     case CLUSTER_CONNECTION_AUTH_FAILED:
       auth = Object.assign({}, state.authConnection, {
         hasFailed: true,

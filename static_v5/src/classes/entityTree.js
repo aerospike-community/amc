@@ -31,6 +31,9 @@ function toUDF(cluster) {
     viewType: VIEW_TYPE.UDF_OVERVIEW,
   };
 
+  if (!Array.isArray(cluster.modules)) 
+    return udfs;
+
   cluster.modules.forEach((udf) => {
     const path = toUDFPath(cluster.id, udf.name);
     let c = Object.assign({}, udf, {
@@ -66,6 +69,9 @@ function toNodes(cluster) {
     isCategory: true, // aggregator of entities
     viewType: VIEW_TYPE.NODE_OVERVIEW,
   };
+
+  if (!Array.isArray(cluster.nodes)) 
+    return nodes;
 
   cluster.nodes.forEach((node) => {
     const path = toNodePath(cluster.id, node.host);
@@ -146,15 +152,42 @@ export function toIndexesOverviewPath(clusterID) {
   });
 }
 
+export function toIndexPath(clusterID, indexName) {
+  return toEntityPath(VIEW_TYPE.INDEX, {
+    clusterID: clusterID,
+    indexName: indexName
+  });
+}
+
 function toIndexes(cluster) {
   const path = toIndexesOverviewPath(cluster.id);
-  return {
+  const indexes = {
     path: path,
     name: 'INDEXES',
     children: [],
     isCategory: true, // aggregator of entities
     viewType: VIEW_TYPE.INDEXES_OVERVIEW
   };
+
+  if (!Array.isArray(cluster.indexes)) 
+    return indexes;
+
+  cluster.indexes.forEach((index) => {
+    // FIXME remove this once the API is fixed
+    const isPresent = indexes.children.find((ind) => ind.name === index.name);
+    if (isPresent)
+      return;
+
+    const path = toIndexPath(cluster.id, index.name);
+    let c = Object.assign({}, index, {
+      path: path,
+      children: [],
+      viewType: VIEW_TYPE.INDEX,
+    });
+    indexes.children.push(c);
+  });
+
+  return indexes;
 }
 
 function toSets(cluster, node, namespace) {
@@ -195,12 +228,8 @@ export function toPhysicalEntityTree(cluster) {
     return root;
 
   let children = [];
-  if (Array.isArray(cluster.nodes)) 
-    children.push(toNodes(cluster));
-  if (Array.isArray(cluster.modules)) 
-    children.push(toUDF(cluster));
-
-  // TODO change with the API
+  children.push(toNodes(cluster));
+  children.push(toUDF(cluster));
   children.push(toIndexes(cluster));
 
   root.children = children;
