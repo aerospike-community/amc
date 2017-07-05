@@ -93,7 +93,7 @@
 
 /* emphasize a selected item */
 .as-selected {
-  background-color: #ddd;
+  background-color: #ddd !important;
   font-weight: bold;
 }
 
@@ -228,4 +228,28 @@
 .as-grid-cell {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #292b2c;
+  font-size: 16px;
 }
+
+/* emphasize the dividers */
+.as-tree-list-item .dropdown-divider {
+  background-color: lightgray;
+}
+
+.as-tree-list-item .dropdown-item {
+  /* emphasize on hover */
+  &:hover {
+    background: #eee;
+    cursor: pointer;
+  }
+
+  &:active {
+    color: #292b2c;
+    background: #eee;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+

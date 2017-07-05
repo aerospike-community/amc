@@ -34,7 +34,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(deleteUDF(clusterID, udfName));
 
       const path = toUDFOverviewPath(clusterID);
-      dispatch(selectPath(path, UDF_OVERVIEW_ACTIONS.View));
+      dispatch(selectPath(path, UDF_OVERVIEW_ACTIONS.Overview));
     }
   };
 };

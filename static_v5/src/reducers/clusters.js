@@ -114,12 +114,12 @@ function addToClusterEntity(state, clusterID, entityType, entity) {
 // remove entity from array of cluster entity type
 function removeClusterEntity(state, clusterID, entityType, isEqual) {
   const clusters = state.items.slice(); // copy
-  let i = clusters.findIndex((c) => c.id === clusterID);
+  const i = clusters.findIndex((c) => c.id === clusterID);
   let c = Object.assign({}, clusters[i]); // copy
 
   let entities = c[entityType].slice(); // copy
-  i = entities.findIndex((e) => isEqual(e));
-  entities.splice(i, 1);
+  const j = entities.findIndex((e) => isEqual(e));
+  entities.splice(j, 1);
 
   c[entityType] = entities;
   clusters[i] = c;
