@@ -27,6 +27,10 @@ class AbstractStackedAreaChart {
   
   // return y value of data point
   // y (data)
+  
+  // (optional)
+  // return html of the tooltip
+  // tooltip(obj)
 
   // -------------------------------------
 
@@ -66,6 +70,12 @@ class AbstractStackedAreaChart {
       // if all values are zero, nvd3 sets range of y axis to [-1, 1].
       // this sets the minimum range of y axis to be zero.
       chart.forceY([0, 1000]);
+
+      if (typeof(this.tooltip) === 'function') {
+        chart.interactiveLayer.tooltip.contentGenerator((obj) => {
+          return this.tooltip(obj);
+        });
+      }
 
       // draw chart
       const data = this.data;
