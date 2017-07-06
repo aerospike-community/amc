@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
-import EditConfigModal from 'components/EditConfigModal';
+import EditConfig from 'components/EditConfig';
 import Tabs from 'components/Tabs';
 import { nextNumber, distanceToBottom } from 'classes/util';
 
@@ -21,11 +21,8 @@ class ConfigEditor extends React.Component {
 
       height: 200,
       showEdit: false,
-      edit: {
-        inProgress: false,
-        errorMessage: '',
-        success: false,
-      }
+      editInProgress: false,
+      editErrorMessage: '',
     };
 
     this.id = 'config_editor_' + nextNumber();
@@ -70,23 +67,18 @@ class ConfigEditor extends React.Component {
     this.props.onEdit(edits)
       .then(() => {
         setEdit();
-        window.setTimeout(() => {
-          setEdit('', false);
-        }, 2000);
+        window.setTimeout(() => setEdit('', false), 2000);
       })
       .catch((message) => {
-        setEdit(message, false);
+        setEdit(message, false, true);
       });
 
-    var setEdit = (message = '', success = true)  => {
+    var setEdit = (message = '', success = true, showEdit = false)  => {
       this.setState({
-        showEdit: false,
+        showEdit: showEdit,
         selectedConfigs: [],
-        edit: {
-          inProgress: false,
-          errorMessage: message,
-          success: success,
-        }
+        editInProgress: false,
+        editErrorMessage: message || 'Error updating config',
       });
     };
   }
@@ -215,7 +207,7 @@ class ConfigEditor extends React.Component {
   }
 
   render() {
-    const {showEdit, edit, selectedConfigs, height} = this.state;
+    const {showEdit, editInProgress, editErrorMessage, selectedConfigs, height} = this.state;
 
     const allContexts = this.allContexts();
     const context = this.currentContext();
@@ -230,6 +222,7 @@ class ConfigEditor extends React.Component {
         <Tabs names={allContexts} selected={context} onSelect={this.onContextTabSelect}/>
         }
 
+        {!showEdit &&
         <div className="ag-material" id={this.id} style={{height: height}}>
           <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40"
             onRowSelected={this.onRowSelected} rowSelection="multiple" />
@@ -238,17 +231,18 @@ class ConfigEditor extends React.Component {
           <Button style={{marginTop: 20}} disabled={selectedConfigs.length === 0} color="primary" onClick={this.onShowEdit}> Edit </Button>
           }
         </div>
-
-        {showEdit &&
-         <EditConfigModal config={nodeConfigs} inProgress={edit.inProgress} errorMessage={edit.errorMessage}
-          onEdit={this.onEdit} onCancel={this.onHideEdit} />
         }
 
-        {edit.success &&
-          <Modal isOpen={true} toggle={() => {}}>
-            <ModalHeader> Success </ModalHeader>
-            <ModalBody> Successfully edited config </ModalBody>
-          </Modal>
+        {showEdit &&
+        <div className="row">
+          <div className="col-xl-12 as-section-header">
+            Update Config
+          </div>
+          <div className="col-xl-12" style={{marginTop: 10}}>
+            <EditConfig config={nodeConfigs} inProgress={editInProgress} errorMessage={editErrorMessage}
+              onEdit={this.onEdit} onCancel={this.onHideEdit} />
+          </div>
+        </div>
         }
 
       </div>

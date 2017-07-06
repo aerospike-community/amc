@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import ConfigEditor from 'components/ConfigEditor';
 import { getConfig, setConfig } from 'api/node';
@@ -12,6 +13,7 @@ class NodeConfigEditor extends React.Component {
 
     this.state = {
       config: null,
+      editSuccessful: false,
     };
 
     this.onEdit = this.onEdit.bind(this);
@@ -49,27 +51,44 @@ class NodeConfigEditor extends React.Component {
   onEdit(config) {
     const { clusterID, nodeHost }  = this.props;
     const p = setConfig(clusterID, nodeHost, config);
-    p.then((response) => {
-      // redraw config editor component
+    p.then((config) => {
       this.setState({
-        config: null
+        // redraw config editor
+        config: null,
+        editSuccessful: true,
       });
 
+      window.setTimeout(() => {
+        this.setState({
+          editSuccessful: false
+        });
+      }, 2000);
+
       this.fetchConfig(clusterID, nodeHost);
-      return response;
+
+      return config;
     });
 
     return p;
   }
 
   render() {
-    const { config } = this.state;
+    const { config, editSuccessful } = this.state;
 
     if (config === null)
       return null;
 
     return (
+      <div>
         <ConfigEditor config={config} onEdit={this.onEdit} isEditable="true"/>
+
+        {editSuccessful &&
+          <Modal isOpen={true} toggle={() => {}}>
+            <ModalHeader> Success </ModalHeader>
+            <ModalBody> Successfully edited config </ModalBody>
+          </Modal>
+        }
+      </div>
     );
   }
 }

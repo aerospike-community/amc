@@ -5,8 +5,8 @@ import { Button, Input, Col, Label, Form, FormGroup, Modal, ModalHeader, ModalBo
 
 import Spinner from 'components/Spinner';
 
-// EditConfigModal provides a modal to edit the configs
-class EditConfigModal extends React.Component {
+// EditConfig provides a view to edit the config
+class EditConfig extends React.Component {
   constructor(props) {
     super(props);
 
@@ -79,8 +79,8 @@ class EditConfigModal extends React.Component {
 
     return (
       <FormGroup row key={name}>
-        <Label sm={5}> {name} </Label>
-        <Col sm={7}>
+        <Label sm={2}> {name} </Label>
+        <Col sm={5}>
           {input}
         </Col>
       </FormGroup>
@@ -90,27 +90,30 @@ class EditConfigModal extends React.Component {
     const { edits } = this.state;
     const { inProgress, errorMessage } = this.props;
     return (
-      <Modal isOpen={true} toggle={() => {}} size="lg">
-        <ModalHeader>Edit Configs</ModalHeader>
-        <ModalBody>
-          <Form >
-            {edits.map((e) => this.renderConfig(e))}
-          </Form>
-        </ModalBody>
-        <ModalFooter>
-          {inProgress &&
-           <span> <Spinner /> ... </span>}
-          {!inProgress && errorMessage &&
-            <span> errorMessage </span>}
-          <Button disabled={inProgress} color="primary" onClick={this.onEdit}>Update</Button>
-          <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
-        </ModalFooter>
-      </Modal>
+      <div>
+        <div className="row">
+          <div className="col-xl-12">
+            <Form >
+              {edits.map((e) => this.renderConfig(e))}
+            </Form>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xl-12 as-submit-footer">
+            <Button disabled={inProgress} color="primary" onClick={this.onEdit}>Update</Button>
+            <Button disabled={inProgress} color="secondary" onClick={this.onCancel}>Cancel</Button>
+            {inProgress &&
+            <Spinner />}
+            {!inProgress && errorMessage &&
+            {errorMessage} }
+          </div>
+        </div>
+      </div>
       );
   }
 }
 
-EditConfigModal.PropTypes = {
+EditConfig.PropTypes = {
   // whether the edit is in progress
   inProgress: PropTypes.bool,
   // error message on editing the configs if any
@@ -139,7 +142,7 @@ EditConfigModal.PropTypes = {
   }
 };
 
-export default EditConfigModal;
+export default EditConfig;
 
 
 
