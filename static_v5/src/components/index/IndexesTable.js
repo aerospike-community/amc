@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
 
 import { renderStatsInTable } from 'classes/renderUtil';
+import { addZeroWidthSpace } from 'classes/util';
 
 // IndexesTable provides a tabular view of the indexes
 class IndexesTable extends React.Component {
@@ -45,6 +46,7 @@ class IndexesTable extends React.Component {
     const { expanded } = this.state;
     const { indexes, onSelectIndex } = this.props;
     const isSelectable = typeof(onSelectIndex) === 'function';
+    const azw = (text) => ({__html: addZeroWidthSpace(text)});
 
     let data = [];
     indexes.forEach((index, i) => {
@@ -55,18 +57,7 @@ class IndexesTable extends React.Component {
       const row = (
         <tr key={name + i}>
           <td>
-            {isSelectable &&
-            <span className="as-link" onClick={() => this.onSelectIndex(name)}> 
-              {name} 
-            </span>
-            }
-
-            {!isSelectable && 
-            <span> {name} </span>
-            }
-
-
-            <span className="pull-left">
+            <span>
               {isExpanded &&
               <span className="as-hide-stat" onClick={() => this.onCollapse(name)} />
               }
@@ -75,10 +66,20 @@ class IndexesTable extends React.Component {
               <span className="as-show-stat" onClick={() => this.onExpand(name)} />
               }
             </span>
+
+            {isSelectable &&
+            <span className="as-link" onClick={() => this.onSelectIndex(name)}> 
+              <span dangerouslySetInnerHTML={azw(name)} />
+            </span>
+            }
+
+            {!isSelectable && 
+            <span dangerouslySetInnerHTML={azw(name)} />
+            }
           </td>
-          <td> {namespace} </td>
-          <td> {set} </td>
-          <td> {bin} </td>
+          <td dangerouslySetInnerHTML={azw(namespace)} />
+          <td dangerouslySetInnerHTML={azw(set)} />
+          <td dangerouslySetInnerHTML={azw(bin)} />
           <td> {binType} </td>
           <td> {syncOnAllNodes} </td>
         </tr>
@@ -96,15 +97,9 @@ class IndexesTable extends React.Component {
 
   render() {
     const { isFetching, indexes } = this.state;
-    const header = this.props.header || 'Indexes';
 
     return (
       <div>
-        <div className="row">
-          <div className="col-xl-12 as-section-header">
-          {header} 
-          </div>
-        </div>
         <div className="row">
           <div className="col-xl-12"> 
             <Table size="sm" bordered>
@@ -131,8 +126,6 @@ class IndexesTable extends React.Component {
 
 IndexesTable.PropTypes = {
   indexes: PropTypes.arrayOf(PropTypes.object),
-  // header of the table
-  header: PropTypes.string,
 
   // callback to select a index
   // onSelectIndex(clusterID, indexName)

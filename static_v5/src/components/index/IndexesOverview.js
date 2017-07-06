@@ -63,10 +63,16 @@ class IndexesOverview extends React.Component {
     if (isFetching)
       return <div> <Spinner /> Loading ... </div>;
 
-    const header = `Indexes of ${this.props.clusterID}`;
+    const header = `Indexes - ${this.props.clusterID}`;
     return (
       <div>
-        <IndexesTable indexes={indexes} header={header} onSelectIndex={this.onSelectIndex}/>
+        <div className="row">
+          <div className="col-xl-12 as-section-header">
+            {header} 
+          </div>
+        </div>
+
+        <IndexesTable indexes={indexes} onSelectIndex={this.onSelectIndex}/>
       </div>
     );
   }

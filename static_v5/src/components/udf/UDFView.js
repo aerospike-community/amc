@@ -160,22 +160,20 @@ class UDFView extends React.Component {
       <div>
         <div className="row" style={{marginBottom: 10}}>
           <div className="col-xl-12 as-section-header">
-            {this.props.udfName} 
+            {`UDF - ${udfName}`} 
+            <span className="float-right as-space-children">
+              <Button disabled={!hasChanged || hasErrors || isUpdating} color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
+              <Button disabled={isUpdating} color="danger" size="sm" onClick={this.onShowDeleteModal}> Delete </Button>
+            </span>
           </div>
         </div>
+
         <div className="as-ace-editor">
           <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" 
             name={this.id} value={sourceCode} readOnly={isUpdating} 
             onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
         </div>
         
-        <div className="as-submit-footer" style={{marginTop: 0}}>
-          <Button disabled={!hasChanged || hasErrors || isUpdating} color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
-          <Button disabled={isUpdating} color="danger" size="sm" onClick={this.onShowDeleteModal}> Delete </Button>
-          {isUpdating && 
-           <span> <Spinner size="1"/> Updating ... </span>}
-        </div>
-
         {showDeleteModal &&
         <UDFDeleteModal clusterID={clusterID} udfName={udfName} onDeleteSuccess={this.onDeleteSuccess} onCancel={this.onHideDeleteModal}/>
         }
@@ -183,9 +181,17 @@ class UDFView extends React.Component {
         {showUpdateSuccess &&
         <Modal isOpen={true} toggle={() => {}}>
           <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully updated {this.props.udfName} </ModalBody>
+          <ModalBody> Successfully updated {udfName} </ModalBody>
         </Modal>
         }
+
+        {isUpdating &&
+        <Modal isOpen={true} toggle={() => {}}>
+          <ModalHeader> Updating {udfName} </ModalHeader>
+          <ModalBody> Updating ... <Spinner size="1"/> </ModalBody>
+        </Modal>
+        }
+
       </div>
     );
   }

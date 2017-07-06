@@ -5,6 +5,7 @@ import { Table } from 'reactstrap';
 import bytes from 'bytes';
 
 import { renderStatsInTable } from 'classes/renderUtil';
+import { addZeroWidthSpace } from 'classes/util';
 
 // NamespacesTable provides a tabular representation of the namespaces 
 // of a cluster
@@ -41,6 +42,7 @@ class NamespacesTable extends React.Component {
   namespaces() {
     const { namespaces } = this.props;
     const { expanded } = this.state;
+    const azw = (text) => ({__html: addZeroWidthSpace(text)});
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
     }
@@ -53,9 +55,7 @@ class NamespacesTable extends React.Component {
       const row = (
         <tr key={name}>
           <td> 
-            {name} 
-
-            <span className="pull-left">
+            <span>
               {isExpanded &&
               <span className="as-hide-stat" onClick={() => this.onCollapse(name)} />
               }
@@ -64,6 +64,8 @@ class NamespacesTable extends React.Component {
               <span className="as-show-stat" onClick={() => this.onExpand(name)} />
               }
             </span>
+
+            <span dangerouslySetInnerHTML={azw(name)} />
           </td>
           <td> {memory(ns.disk)} </td>
           <td> {memory(ns.memory)} </td>

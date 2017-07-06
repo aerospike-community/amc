@@ -119,3 +119,33 @@ export function addZeroWidthSpace(text, n = 1) {
 
   return s;
 }
+
+// isNumber returns true iff val is a number or 
+// can be converted to a number
+export function isNumber(val) {
+  if (typeof(val) === 'number')
+    return true;
+
+  if (typeof(val) !== 'string')
+    return false;
+
+  if (val === '')
+    return false;
+
+  let isNumber = true;
+  for (let i = 0; i < val.length; i++) {
+    if (val[i] < '0' || val[i] > '9')
+      isNumber = false;
+  }
+
+  return isNumber;
+}
+
+// add commas to a number
+export function addCommas(val) {
+  if (!isNumber(val))
+    return val;
+
+  val = parseInt(val, 10);
+  return val.toLocaleString();
+}

@@ -39,11 +39,16 @@ class SetsOverview extends React.Component {
   render() {
     const { sets } = this.state;
     const { nodeHost, namespaceName } = this.props;
-    const header = `${nodeHost} ${namespaceName}`;
+    const header = `Sets - ${nodeHost}, ${namespaceName}`;
 
     return (
       <div>
-        <SetsTable onSelectSet={this.onSelectSet} sets={sets} header={header}/>
+        <div className="row">
+          <div className="col-xl-12 as-section-header">
+            {header}
+          </div>
+        </div>
+        <SetsTable onSelectSet={this.onSelectSet} sets={sets}/>
       </div>
     );
   }

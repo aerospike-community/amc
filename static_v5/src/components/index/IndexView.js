@@ -149,11 +149,17 @@ class IndexView extends React.Component {
       <div>
         {this.renderDeleteModal()}
 
-        <IndexesTable indexes={indexes} header={indexName}/>
+        <div className="row">
+          <div className="col-xl-12 as-section-header">
+            {`Index - ${indexName}`} 
 
-        <div>
-          <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+            <span className="float-right">
+              <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+            </span>
+          </div>
         </div>
+
+        <IndexesTable indexes={indexes} header={indexName}/>
 
       </div>
     );

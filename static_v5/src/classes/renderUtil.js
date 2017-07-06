@@ -1,6 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
 
+import { isNumber, addCommas } from 'classes/util';
+
 // renderStatsInTable renders the stats in the table
 //
 // name - name of the stat. Used as the key in React rendering
@@ -20,11 +22,24 @@ export function renderStatsInTable(name, stats, ncols) {
   for (let i = 0; i < keys.length; i += nr) {
     const cols = []; 
     const rowKeys = keys.slice(i, i+nr);
+    const processStat = (val) => {
+      if (!isNumber(val))
+        return val + '';
+
+      return addCommas(val);
+    };
 
     rowKeys.forEach((k) => {
-      cols.push(<td key={k}> {k} </td>);
-      cols.push(<td key={k+'val'}> {stats[k] + ''} </td>);
+      const style = {
+        paddingLeft: 20, 
+        fontStyle: 'italic',
+        borderBottom: '1px solid #dfdfdf',
+      };
+
+      const stat = processStat(stats[k]);
       cols.push(<td key={k+'empty'}></td>); // empty column
+      cols.push(<td style={style} key={k}> {k} </td>);
+      cols.push(<td style={style} key={k+'val'}> {stat} </td>);
     });
 
     const nkeys = rowKeys.length; // number of keys added in this row

@@ -5,6 +5,7 @@ import { Table } from 'reactstrap';
 import bytes from 'bytes';
 
 import { renderStatsInTable } from 'classes/renderUtil';
+import { addZeroWidthSpace } from 'classes/util';
 
 // SetsTable provides a tabular representation of the sets 
 class SetsTable extends React.Component {
@@ -46,6 +47,7 @@ class SetsTable extends React.Component {
     const { sets, onSelectSet } = this.props;
     const { expanded } = this.state;
     const isSelectable = typeof(onSelectSet) === 'function';
+    const azw = (text) => ({__html: addZeroWidthSpace(text)});
 
     let data = [];
     sets.forEach((set) => {
@@ -55,17 +57,7 @@ class SetsTable extends React.Component {
       const row = (
         <tr key={name}>
           <td> 
-            {isSelectable &&
-            <span className="as-link" onClick={() => this.onSelectSet(name)}> 
-              {name} 
-            </span>
-            }
-
-            {!isSelectable && 
-            <span> {name} </span>
-            }
-
-            <span className="pull-left">
+            <span>
               {isExpanded &&
               <span className="as-hide-stat" onClick={() => this.onCollapse(name)} />
               }
@@ -74,8 +66,18 @@ class SetsTable extends React.Component {
               <span className="as-show-stat" onClick={() => this.onExpand(name)} />
               }
             </span>
+
+            {isSelectable &&
+            <span className="as-link" onClick={() => this.onSelectSet(name)}> 
+              <span dangerouslySetInnerHTML={azw(name)} />
+            </span>
+            }
+
+            {!isSelectable && 
+            <span dangerouslySetInnerHTML={azw(name)} />
+            }
           </td>
-          <td> {set.ns_name} </td>
+          <td dangerouslySetInnerHTML={azw(set.ns_name)} />
           <td> {set.objects} </td>
           <td> {bytes(set.memory_data_bytes)} </td>
         </tr>
@@ -93,14 +95,8 @@ class SetsTable extends React.Component {
 
   render() {
     const sets = this.sets();
-    const header = this.props.header || 'Sets';
     return (
       <div>
-        <div className="row">
-          <div className="col-xl-12 as-section-header">
-            {header}
-          </div>
-        </div>
         <div className="row">
           <div className="col-xl-12"> 
             <Table size="sm" bordered>
@@ -125,9 +121,7 @@ class SetsTable extends React.Component {
 
 SetsTable.PropTypes = {
   sets: PropTypes.arrayOf(PropTypes.object),
-  // header of the table
-  header: PropTypes.string,
-
+  
   // callback to select a set
   // onSelectSet(setName)
   onSelectSet: PropTypes.func,
