@@ -1,16 +1,22 @@
 import { connect } from 'react-redux';
-import ViewClusterConnection from 'components/cluster/ViewClusterConnection';
+import ViewClusterConnectionModal from 'components/cluster/ViewClusterConnectionModal';
+import { toClusterPath } from 'classes/entityTree';
 import { deleteClusterConnection } from 'actions/clusters';
 import { selectStartView, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import { selectPath } from 'actions/currentView';
 
 let Clusters; // the clusters
+let CurrentClusterID;
 
 const mapStateToProps = (state) => {
   Clusters = state.clusters.items;
 
   const { clusterID, view } = state.currentView;
   const cluster = state.clusters.items.find((i) => i.id === clusterID);
+
+  CurrentClusterID = cluster.id;
+
   return {
     clusterID: cluster.id,
     clusterName: cluster.name,
@@ -36,15 +42,20 @@ const mapDispatchToProps = (dispatch) => {
 
       dispatch(selectStartView());
     },
+
+    onCancel: () => {
+      const path = toClusterPath(CurrentClusterID);
+      dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));
+    }
   };
 }
 
-const VisibleViewClusterConnection = connect(
+const VisibleViewClusterConnectionModal = connect(
   mapStateToProps,
   mapDispatchToProps
-)(ViewClusterConnection);
+)(ViewClusterConnectionModal);
 
-export default VisibleViewClusterConnection;
+export default VisibleViewClusterConnectionModal;
 
 
 

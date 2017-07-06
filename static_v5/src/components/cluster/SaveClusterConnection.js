@@ -202,7 +202,7 @@ class SaveClusterConnection extends React.Component {
 
         </form>
 
-        <div className="as-submit-footer">
+        <div className="as-submit-footer float-right">
           {inProgress &&
            <span> <Spinner /> Saving ... </span>}
 

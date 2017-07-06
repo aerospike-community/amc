@@ -48,8 +48,7 @@ class AddClusterModal extends React.Component {
 
   render() {
     return (
-      <Modal size="lg" isOpen={true} toggle={() => {
-                                       }}>
+      <Modal size="lg" isOpen={true} toggle={() => {}}>
         <ModalHeader>Add Cluster Connection</ModalHeader>
         <ModalBody>
           <SaveClusterConnection clusterName={''} seeds={[]} inProgress={this.props.inProgress}
