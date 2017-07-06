@@ -142,13 +142,12 @@ class SetView extends React.Component {
 
     const { deleteInProgress } = this.state;
     const {nodeHost, namespaceName, setName} = this.props;
-    const header = `${nodeHost} ${namespaceName} ${setName}`;
 
     return (
       <div>
         {this.renderDeleteModal()}
 
-        <SetsTable sets={sets} header={header}/>
+        <SetsTable sets={sets} header={setName}/>
 
         <div>
           <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>

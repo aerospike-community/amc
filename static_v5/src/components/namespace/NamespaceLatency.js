@@ -46,11 +46,10 @@ class NamespaceLatency extends React.Component {
   render() {
     const { showChart } = this.state;
     const { namespaceName } = this.props;
-    const title = `Namespace - ${namespaceName} Latency`;
 
     let charts = null;
     if (showChart)
-      charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
+      charts = <LatencyCharts getLatency={this.getLatency} />;
 
     return charts;
   }

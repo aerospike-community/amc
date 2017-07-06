@@ -45,11 +45,10 @@ class NodeLatency extends React.Component {
   render() {
     const { throughput, showChart } = this.state;
     const { nodeHost } = this.props;
-    const title = `Node - ${nodeHost} Latency`;
 
     let charts = null;
     if (showChart)
-      charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
+      charts = <LatencyCharts getLatency={this.getLatency} title={nodeHost} />;
 
     return charts;
   }

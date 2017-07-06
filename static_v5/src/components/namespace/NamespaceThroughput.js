@@ -43,11 +43,10 @@ class NamespaceThroughput extends React.Component {
   render() {
     const { showChart } = this.state;
     const { namespaceName } = this.props;
-    const title = `Namespace - ${namespaceName} Throughput`;
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} title={title} />;
+      charts = <ThroughputCharts getThroughput={this.getThroughput} />;
 
     return charts;
   }

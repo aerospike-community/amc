@@ -144,13 +144,12 @@ class IndexView extends React.Component {
 
     const { deleteInProgress } = this.state;
     const {clusterID, indexName} = this.props;
-    const header = `${clusterID} ${indexName}`;
 
     return (
       <div>
         {this.renderDeleteModal()}
 
-        <IndexesTable indexes={indexes} header={header}/>
+        <IndexesTable indexes={indexes} header={indexName}/>
 
         <div>
           <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>

@@ -43,11 +43,10 @@ class NodeThroughput extends React.Component {
   render() {
     const { throughput, showChart } = this.state;
     const { nodeHost } = this.props;
-    const title = `Node - ${nodeHost} Throughput`;
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} title={title} />;
+      charts = <ThroughputCharts getThroughput={this.getThroughput} />;
 
     return charts;
   }
