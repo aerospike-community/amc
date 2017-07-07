@@ -178,12 +178,12 @@ class SaveClusterConnection extends React.Component {
           <div className={classNames('form-group', {
                             'has-warning': nameWarning
                           })}>
-            <label> Cluster Name </label>
+            <label> Cluster Connection Name </label>
             <input type="text" className={classNames('form-control', {'form-control-warning': nameWarning})} 
                   disabled={inProgress} onChange={this.onInputChange} name="clusterName" value={this.state.clusterName} />
           </div>
           <legend>
-            Seeds
+            Seed Nodes
             {seedsWarning && <span className="as-warning-text"> * seed node required for a cluster </span>}
           </legend>
           <div className="row">

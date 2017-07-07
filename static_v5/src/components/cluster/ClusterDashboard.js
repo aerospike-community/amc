@@ -23,7 +23,6 @@ class ClusterDashboard extends React.Component {
     this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration];
 
     this.onViewSelect = this.onViewSelect.bind(this);
-    this.onViewClusterOverview = this.onViewClusterOverview.bind(this);
   }
 
   onViewSelect(view) {
@@ -31,17 +30,12 @@ class ClusterDashboard extends React.Component {
     this.props.onViewSelect(clusterID, view);
   }
 
-  onViewClusterOverview() {
-    this.onViewSelect(CLUSTER_ACTIONS.Overview);
-  }
-
   render() {
-    const { clusterID, view, onUpdateConnectionSuccess, onSelectNode }  = this.props;
+    const { clusterID, view, onSelectNode }  = this.props;
     const { name, seeds } = this.props.cluster;
 
     let dashboard;
-    if (view === CLUSTER_ACTIONS.Overview || view === CLUSTER_ACTIONS.Edit
-        || view === CLUSTER_ACTIONS.View || view == CLUSTER_ACTIONS.Delete) {
+    if (view === CLUSTER_ACTIONS.Overview ) {
       dashboard = <ClusterOverview clusterID={clusterID} onSelectNode={onSelectNode} />;
 
     } else if (view === CLUSTER_ACTIONS.Latency) {
@@ -56,17 +50,6 @@ class ClusterDashboard extends React.Component {
         <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
 
         {dashboard}
-
-        {view === CLUSTER_ACTIONS.Edit &&
-        <EditClusterConnectionModal clusterName={name} seeds={seeds} clusterID={clusterID}
-                      onUpdateConnectionSuccess={onUpdateConnectionSuccess}
-                      onCancel={() => this.onViewClusterOverview()} />
-        }
-
-        {(view === CLUSTER_ACTIONS.Delete || view === CLUSTER_ACTIONS.View) &&
-        <VisibleViewClusterConnectionModal />
-        }
-
       </div>
     );
   }
@@ -79,12 +62,6 @@ ClusterDashboard.PropTypes = {
   // the view of the cluster
   view: PropTypes.string,
 
-  // callback to view cluster overview
-  // onViewClusterOverview(clusterID)
-  onViewClusterOverview: PropTypes.func, 
-  // callback when the connection is successfully updated
-  // onUpdateConnectionSuccess(clusterID, connection)
-  onUpdateConnectionSuccess: PropTypes.func,
   // callback to select a node
   // onSelectNode(clusterID, nodeHost)
   onSelectNode: PropTypes.func,

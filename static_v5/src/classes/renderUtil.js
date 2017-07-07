@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import { isNumber, addCommas } from 'classes/util';
+import { isInteger, addCommasToInt } from 'classes/util';
 
 // renderStatsInTable renders the stats in the table
 //
@@ -23,10 +23,10 @@ export function renderStatsInTable(name, stats, ncols) {
     const cols = []; 
     const rowKeys = keys.slice(i, i+nr);
     const processStat = (val) => {
-      if (!isNumber(val))
+      if (!isInteger(val))
         return val + '';
 
-      return addCommas(val);
+      return addCommasToInt(val);
     };
 
     rowKeys.forEach((k) => {

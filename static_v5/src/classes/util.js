@@ -113,6 +113,9 @@ export function replaceUnicode(s) {
 export function addZeroWidthSpace(text, n = 1) {
   const zws = '&#x200B;'; // zero width space
 
+  if (!text)
+    return '';
+
   let s = '';
   for (let i = 0; i < text.length; i += n) 
     s += text.slice(i, i+n) + zws;
@@ -120,11 +123,11 @@ export function addZeroWidthSpace(text, n = 1) {
   return s;
 }
 
-// isNumber returns true iff val is a number or 
-// can be converted to a number
-export function isNumber(val) {
+// isInteger returns true iff val is an integer or 
+// can be converted to an integer
+export function isInteger(val) {
   if (typeof(val) === 'number')
-    return true;
+    return Number.isInteger(val);
 
   if (typeof(val) !== 'string')
     return false;
@@ -132,18 +135,18 @@ export function isNumber(val) {
   if (val === '')
     return false;
 
-  let isNumber = true;
+  let isInt = true;
   for (let i = 0; i < val.length; i++) {
     if (val[i] < '0' || val[i] > '9')
-      isNumber = false;
+      isInt = false;
   }
 
-  return isNumber;
+  return isInt;
 }
 
-// add commas to a number
-export function addCommas(val) {
-  if (!isNumber(val))
+// add commas to an integer
+export function addCommasToInt(val) {
+  if (!isInteger(val))
     return val;
 
   val = parseInt(val, 10);

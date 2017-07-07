@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import EntityTree from 'components/cluster/EntityTree';
 import { selectPath } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
-import { displayAuthClusterConnection, disconnectCluster } from 'actions/clusters';
+import { displayAuthClusterConnection, displayViewClusterConnection, disconnectCluster } from 'actions/clusters';
 import { toPhysicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
@@ -43,6 +43,12 @@ const mapDispatchToProps = (dispatch) => {
         } 
         if (action === CLUSTER_ACTIONS.Disconnect) {
           dispatch(disconnectCluster(clusterID));
+          return;
+        }
+        if (action === CLUSTER_ACTIONS.View || action === CLUSTER_ACTIONS.Edit
+            || action === CLUSTER_ACTIONS.Delete) {
+          const isEdit = action === CLUSTER_ACTIONS.Edit;
+          dispatch(displayViewClusterConnection(true, clusterID, isEdit));
           return;
         }
       } 

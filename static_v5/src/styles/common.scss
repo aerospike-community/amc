@@ -173,6 +173,14 @@
   color: white;
   padding: 5px 0 0 15px;
   height: 40px;
+
+  & button:nth-child(1) {
+    margin-left: 20px;
+  }
+
+  & button {
+    margin-left: 10px;
+  }
 }
 
 /* footer for submit actions */

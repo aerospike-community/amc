@@ -34,14 +34,19 @@ const clusterActions = {
     },
   },
   Latency: {
+    state: {
+      isAuthenticated: true
+    },
+  },
+  Configuration: {
+    state: {
+      isAuthenticated: true
+    },
     isEndOfGrouping: true,
   },
   View: {},
   Edit: {},
   Delete: {
-    isEndOfGrouping: true,
-  },
-  Configuration: {
     isEndOfGrouping: true,
   },
   Disconnect: {

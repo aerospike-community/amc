@@ -132,8 +132,6 @@ ViewClusterConnectionModal.PropTypes = {
   clusterName: PropTypes.string,
   // seeds of the cluster
   seeds: PropTypes.array,
-  // the view of interest. view or delete
-  view: PropTypes.string,
   // callback when the delete was successful
   // onDeleteSuccess(clusterID)
   onDeleteSuccess: PropTypes.func,

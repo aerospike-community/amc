@@ -140,6 +140,8 @@ class ConfigEditor extends React.Component {
       width: 250,
       checkboxSelection: (row) => isEditable,
       cellClass: 'as-grid-cell',
+      pinned: 'left',
+      cellStyle: {background: '#eee'},
     }];
 
     const nodes = Object.keys(config);

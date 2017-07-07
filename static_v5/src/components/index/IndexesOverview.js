@@ -72,7 +72,14 @@ class IndexesOverview extends React.Component {
           </div>
         </div>
 
+        {indexes.length > 0 &&
         <IndexesTable indexes={indexes} onSelectIndex={this.onSelectIndex}/>
+        }
+
+        {indexes.length === 0 &&
+        <h4 style={{margin: 10}}> No indexes present. </h4>
+        }
+
       </div>
     );
   }

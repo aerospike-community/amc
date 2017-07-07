@@ -3,7 +3,7 @@ import { DISPLAY_ADD_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATING_CLUSTER_CONNECTION, DISPLAY_AUTH_CLUSTER_CONNECTION } from 'actions/clusters';
 import { AUTHENTICATED_CLUSTER_CONNECTION, CLUSTER_CONNECTION_AUTH_FAILED, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
 import { UPDATE_CLUSTER_CONNECTION, CLUSTER_CONNECTION_FETCHED } from 'actions/clusters';
-import { DELETE_CLUSTER_CONNECTION } from 'actions/clusters';
+import { DELETE_CLUSTER_CONNECTION, DISPLAY_VIEW_CLUSTER_CONNECTION } from 'actions/clusters';
 import { ENTITY_TYPE } from 'classes/constants';
 
 // all the cluster connections of the user
@@ -22,6 +22,13 @@ export default function(state = {
       failureMessage: '',
     },
 
+    // view a connection
+    viewConnection: {
+      clusterID: null,
+      display: false,
+      isEdit: false,
+    },
+
     // all the clusters of the user.
     // not all of them are authenticated
     isFetching: false,
@@ -33,6 +40,7 @@ export default function(state = {
   updated = updateClusterConnection(updated, action);
   updated = newConnection(updated, action);
   updated = authConnection(updated, action);
+  updated = viewConnection(updated, action);
   return updated;
 }
 
@@ -210,4 +218,22 @@ function authConnection(state, action) {
   return Object.assign({}, state, {
     authConnection: auth
   });
+}
+
+function viewConnection(state, action) {
+  let id;
+  switch (action.type) {
+    case DISPLAY_VIEW_CLUSTER_CONNECTION:
+      id = action.clusterID;
+      return Object.assign({}, state, {
+        viewConnection: {
+          display: action.display,
+          clusterID: id,
+          isEdit: action.isEdit,
+        }
+      });
+
+    default:
+      return state;
+  }
 }

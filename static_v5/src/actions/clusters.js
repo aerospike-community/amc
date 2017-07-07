@@ -1,6 +1,7 @@
 import {  authConnection as authConnectionAPI, listConnections, getClusterEntityTree as getClusterEntityTreeAPI } from 'api/clusterConnections';
 
 import { expandEntityNode } from 'actions/entityTree';
+import { selectStartView } from 'actions/currentView';
 import { toClusterPath } from 'classes/entityTree';
 import { selectClusterOnStartup, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
@@ -70,7 +71,10 @@ export function initClusters() {
             authenticateClusterConnection(conn.id, '', '');
         });
 
+        // show add cluster connection if
+        // there are no connections
         if (connections.length === 0) {
+          dispatch(selectStartView());
           dispatch(displayAddClusterConnection(true));
           return;
         }
@@ -137,6 +141,19 @@ export function addUDF(clusterID, udfName, udfType) {
     dispatch(getClusterEntityTree(clusterID), false);
   };
 }
+
+// ---------------------------------
+// Cluster Connection Updates
+export const DISPLAY_VIEW_CLUSTER_CONNECTION = 'DISPLAY_VIEW_CLUSTER_CONNECTION';
+export function displayViewClusterConnection(display = true, clusterID = null, isEdit = false) {
+  return {
+    type: DISPLAY_VIEW_CLUSTER_CONNECTION,
+    display: display,
+    clusterID: clusterID,
+    isEdit: isEdit
+  };
+}
+
 
 // ---------------------------------
 // Cluster Connection Authentication

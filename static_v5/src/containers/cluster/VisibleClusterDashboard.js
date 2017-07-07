@@ -23,14 +23,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(selectPath(path, view));
     },
 
-    // update connection is a success
-    onUpdateConnectionSuccess: (clusterID, connection) => {
-      dispatch(updateConnection(clusterID, connection));
-
-      const path = toClusterPath(clusterID);
-      dispatch(selectPath(path, CLUSTER_ACTIONS.Overview));
-    },
-
     // select a node
     onSelectNode: (clusterID, nodeHost) => {
       dispatch(selectNode(clusterID, nodeHost, NODE_ACTIONS.View));

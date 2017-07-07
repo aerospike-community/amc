@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
+import VisibleViewClusterConnectionModal from 'containers/cluster/VisibleViewClusterConnectionModal';
+import VisibleEditClusterConnectionModal from 'containers/cluster/VisibleEditClusterConnectionModal';
 import VisibleUDFView from 'containers/udf/VisibleUDFView';
 import VisibleUDFOverviewDashboard from 'containers/udf/VisibleUDFOverviewDashboard'
 import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
@@ -14,6 +16,7 @@ import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
+import NamespacesOverview from 'components/namespace/NamespacesOverview';
 import Welcome from 'components/Welcome';
 
 import { VIEW_TYPE } from 'classes/constants';
@@ -75,20 +78,36 @@ class MainDashboard extends React.Component {
     } else if (viewType === VIEW_TYPE.UDF_OVERVIEW) {
       dashboard = <VisibleUDFOverviewDashboard />
 
-    } else if (viewType === VIEW_TYPE.CLUSTER) {
+    } else if (viewType === VIEW_TYPE.CLUSTER &&
+        (view === CLUSTER_ACTIONS.Latency || view === CLUSTER_ACTIONS.Configuration || CLUSTER_ACTIONS.Overview)) {
       dashboard = <VisibleClusterDashboard />
+
+    } else if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) {
+      dashboard = <NamespacesOverview clusterID={clusterID} nodeHost={nodeHost} />
 
     } else if (viewType === VIEW_TYPE.START_VIEW) {
       dashboard = <Welcome />;
 
     } else {
-      dashboard = <div className="as-centerpane-header"> {(view ? view : '') + ' ' + viewType} </div>;
+      let h = view ? view : '';
+      if (viewType)
+        h += ' ' + viewType;
+      dashboard = <div className="as-centerpane-header"> {h} </div>;
 
     }
 
+    const { displayEditConnection, displayViewConnection } = this.props;
     return (
       <div>
         {dashboard}
+
+        {displayViewConnection &&
+        <VisibleViewClusterConnectionModal />
+        }
+
+        {displayEditConnection &&
+        <VisibleEditClusterConnectionModal />
+        }
       </div>
       );
   }
@@ -105,6 +124,10 @@ MainDashboard.PropTypes = {
   isClusterConnected: PropTypes.bool,
   // name of the cluster the dashboard is in
   clusterName: PropTypes.bool,
+  // display a connection
+  displayViewConnection: PropTypes.bool,
+  // display edit of a connection
+  displayEditConnection: PropTypes.bool,
 };
 
 export default MainDashboard;

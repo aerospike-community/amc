@@ -17,10 +17,14 @@ const  mapStateToProps = (state) => {
     }
   });
 
+  const { viewConnection } = clusters;
   return {
     currentView: state.currentView,
     isClusterConnected: isClusterConnected,
     clusterName: clusterName,
+
+    displayViewConnection: viewConnection.display && !viewConnection.isEdit,
+    displayEditConnection: viewConnection.display && viewConnection.isEdit,
   };
 }
 

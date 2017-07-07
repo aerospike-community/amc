@@ -280,7 +280,7 @@ class LatencyCharts extends React.Component {
 
     const timeWindow = lastXMinutes === 0 
                         ? formatTimeWindow(from, to) 
-                        : 'Last ' + lastXMinutes + ' minutes';
+                        : 'Last ' + lastXMinutes + (lastXMinutes > 1 ? ' minutes' : ' minute');
 
 
     return (
