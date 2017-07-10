@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import { Button, Input, Col, Label, Form, FormGroup, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Input, Col, Label, Form, FormGroup } from 'reactstrap';
 
 import Spinner from 'components/Spinner';
 

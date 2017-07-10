@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { getIndex, deleteIndex } from 'api/index';
 import IndexesTable from 'components/index/IndexesTable';
 import Spinner from 'components/Spinner';
+import AlertModal from 'components/AlertModal';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -111,11 +112,9 @@ class IndexView extends React.Component {
 
     const disabled = deleteInProgress || deleteSuccessfull;
     if (!deleteInProgress && deleteSuccessfull === true) {
+      const message = `Successfully deleted ${this.props.indexName}`;
       return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully deleted {this.props.udfName} </ModalBody>
-        </Modal>
+        <AlertModal header="Success" message={message} type="success" />
       );
     }
 

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import ConfigEditor from 'components/ConfigEditor';
+import AlertModal from 'components/AlertModal';
 import { getConfig, setConfig } from 'api/node';
 
 // NodeConfigEditor shows the configurations of a node
@@ -83,10 +84,7 @@ class NodeConfigEditor extends React.Component {
         <ConfigEditor config={config} onEdit={this.onEdit} isEditable="true"/>
 
         {editSuccessful &&
-          <Modal isOpen={true} toggle={() => {}}>
-            <ModalHeader> Success </ModalHeader>
-            <ModalBody> Successfully edited config </ModalBody>
-          </Modal>
+          <AlertModal header="Success" message="Successfully edited config" type="success" />
         }
       </div>
     );

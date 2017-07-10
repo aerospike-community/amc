@@ -11,6 +11,7 @@ import { getUDF, deleteUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
 import Spinner from 'components/Spinner';
 import UDFDeleteModal from 'components/udf/UDFDeleteModal';
+import AlertModal from 'components/AlertModal';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -178,10 +179,7 @@ class UDFView extends React.Component {
         }
 
         {showUpdateSuccess &&
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully updated {udfName} </ModalBody>
-        </Modal>
+        <AlertModal header="Success" message={`Successfully updated ${udfName}`} type="success" />
         }
 
         {isUpdating &&

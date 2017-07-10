@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button } from 'reactstrap';
 import classNames from 'classnames';
 
 import Seed from 'components/cluster/Seed';

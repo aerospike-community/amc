@@ -9,6 +9,7 @@ import 'brace/theme/github';
 
 import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
+import AlertModal from 'components/AlertModal';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -103,13 +104,11 @@ class UDFView extends React.Component {
     const { hasErrors, isUpdating, success } = this.state;
     const editorHeight = this.state.editorHeight + 'px';
 
+    const msg = `Successfully created ${this.state.udfName}`;
     return (
       <div>
         {success && 
-          <Modal isOpen={true} toggle={() => {}}>
-            <ModalHeader> Success </ModalHeader>
-            <ModalBody> Successfully created {this.state.udfName} </ModalBody>
-          </Modal>
+          <AlertModal header="Success" message={msg} type="success" />
         }
 
         <div className="as-centerpane-header"> 

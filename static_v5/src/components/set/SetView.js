@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { getSet, deleteSet } from 'api/set';
 import SetsTable from 'components/set/SetsTable';
 import Spinner from 'components/Spinner';
+import AlertModal from 'components/AlertModal';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -109,11 +110,9 @@ class SetView extends React.Component {
 
     const disabled = deleteInProgress || deleteSuccessfull;
     if (!deleteInProgress && deleteSuccessfull === true) {
+      const message = `Successfully deleted ${this.props.setName}`;
       return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully deleted {this.props.udfName} </ModalBody>
-        </Modal>
+        <AlertModal header="Success" message={message} type="success" />
       );
     }
 

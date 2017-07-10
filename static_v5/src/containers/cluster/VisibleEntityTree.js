@@ -9,6 +9,7 @@ import { toPhysicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { matchAndExtractEntityPathVariabes } from 'classes/urlAndViewSynchronizer';
+import { selectStartView } from 'actions/currentView';
 
 const mapStateToProps = (state) => {
   let clusters = state.clusters.items;
@@ -42,6 +43,7 @@ const mapDispatchToProps = (dispatch) => {
           return;
         } 
         if (action === CLUSTER_ACTIONS.Disconnect) {
+          dispatch(selectStartView());
           dispatch(disconnectCluster(clusterID));
           return;
         }

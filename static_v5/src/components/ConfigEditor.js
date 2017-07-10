@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { Button } from 'reactstrap';
 
 import EditConfig from 'components/EditConfig';
 import Tabs from 'components/Tabs';
