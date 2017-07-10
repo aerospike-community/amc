@@ -6,6 +6,7 @@ import thunkMiddleware from 'redux-thunk';
 import app from './reducers';
 import { fetchClusters } from './actions/clusters';
 import VisibleApp from './containers/VisibleApp';
+import $ from 'jquery';
 
 // import all css
 import 'bootstrap/dist/css/bootstrap.css';
@@ -28,6 +29,9 @@ const store = createStore(
     thunkMiddleware
   )
 );
+
+// remove loader
+$('#apploading').remove();
 
 render(
   <Provider store={store}>
