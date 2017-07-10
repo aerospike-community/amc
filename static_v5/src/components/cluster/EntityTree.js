@@ -18,6 +18,15 @@ class EntityTree extends React.Component {
       contextMenuEntityPath: null
     };
 
+    // HACK HACK HACK
+    // In Dropdown this.hideContextMenu is called immediately
+    // after the right click in Firefox. This prevents the context menu
+    // from rendering on Firefox when toggle option is enabled in the
+    // Dropdown. Solution is to hide context menu only if it is called 
+    // after the lapse of a particular interval of time after the context 
+    // menu is shown.
+    this.contextMenuShownTime; // time the context menu was last shown
+
     this.renderTreeNode = this.renderTreeNode.bind(this);
     this.onEntitySelect = this.onEntitySelect.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
@@ -66,7 +75,7 @@ class EntityTree extends React.Component {
 
           {showContextMenu &&
           <div style={{position: 'absolute', top: '90%', width: 0, height: 0}}>
-           <Dropdown isOpen={true} toggle={() => {}}>
+           <Dropdown isOpen={true} toggle={() => {this.hideContextMenu()}}>
              <DropdownMenu>
                {options.map((option, i) => {
                   if (option.isDivider)
@@ -98,12 +107,19 @@ class EntityTree extends React.Component {
       return;
     }
 
+    this.contextMenuShownTime = new Date();
     this.setState({
       contextMenuEntityPath: entity.path
     });
   }
 
   hideContextMenu() {
+    // HACK HACK HACK
+    // See comment on contextMenuShownTime
+    const now = new Date();
+    if (now.getTime() - this.contextMenuShownTime.getTime() < 200) 
+      return;
+
     this.setState({
       contextMenuEntityPath: null,
     });
