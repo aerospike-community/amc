@@ -1,13 +1,15 @@
 import ls from 'local-storage';
 
+import { toURLConverter } from 'api/url';
 import { authenticate as authenticateAPI } from 'api/auth';
+import { disconnectCluster, displayAuthClusterConnection } from 'actions/clusters';
 
 export const AUTHENTICATE_USER = 'AUTHENTICATE_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
 export const USER_AUTHENTICATION_SUCCESS = 'USER_AUTHENTICATION_SUCCESS';
 export const USER_AUTHENTICATION_FAILURE = 'USER_AUTHENTICATION_FAILURE';
 
-let fetch = window.fetch;
+const Fetch = window.fetch;
 const AuthHeader = 'Authorization';
 
 export function init(dispatch) {
@@ -86,12 +88,52 @@ function authorizedFetch(jwt, dispatch) {
 
     options.headers = headers;
 
-    return fetch(url, options)
+    return Fetch(url, options)
       .then((response) => {
         if (response.status === 401) // unauthorized
           dispatch(logoutUser());
 
+        if (response.status === 400)  
+          process400(url, response, dispatch);
+
         return response; 
       });
   }
+}
+
+// process a HTTP response with status 400
+function process400(url, response, dispatch) {
+  // the original text function
+  const textFn = response.text;
+
+  // Calling text on response more than once is an error.
+  // So filling the response with a promise object that resolves
+  // to the original text.
+  let resolve;
+  response.text = function() {
+    return new Promise((r) => {
+      resolve = r;
+    });
+  };
+
+  textFn.call(response).then((message) => {
+    // cluster not polled for some time
+    // show cluster connect dialog
+    if (message.indexOf('Cluster Not Found') !== -1) {
+      const clusterID = extractClusterID(url);
+      dispatch(disconnectCluster(clusterID));
+      dispatch(displayAuthClusterConnection(true, clusterID));
+    }
+
+    // resolving text promise
+    resolve(message);
+  });
+}
+
+// extract cluster id from the url
+function extractClusterID(url) {
+  const prefix = toURLConverter('connections')(''); // Ex: '/api/v1/connections'
+  
+  const s = url.slice(prefix.length + '/'.length);
+  return s.split('/')[0];
 }

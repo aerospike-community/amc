@@ -48,7 +48,7 @@ class MainDashboard extends React.Component {
       if (viewType === VIEW_TYPE.CLUSTER && view === CLUSTER_ACTIONS.Edit)
         dashboard = <VisibleClusterDashboard />
       else
-        dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} to continue </h4>;
+        dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} </h4>;
 
     } else if (viewType === VIEW_TYPE.NODE_OVERVIEW) {
       dashboard = <NodesOverview clusterID={clusterID} />
