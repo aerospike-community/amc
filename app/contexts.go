@@ -2003,6 +2003,76 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// ConfigNamespaceContext provides the namespace config action context.
+type ConfigNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewConfigNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller config action.
+func NewConfigNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*ConfigNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ConfigNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ConfigNamespaceContext) OK(r *AerospikeAmcNamespaceConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.namespace.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ConfigNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ConfigNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ConfigNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *ConfigNamespaceContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // DropNamespaceContext provides the namespace drop action context.
 type DropNamespaceContext struct {
 	context.Context
@@ -2221,6 +2291,114 @@ func (ctx *QueryNamespaceContext) Forbidden() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *QueryNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SetConfigNamespaceContext provides the namespace set config action context.
+type SetConfigNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+	Payload   *SetConfigNamespacePayload
+}
+
+// NewSetConfigNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller set config action.
+func NewSetConfigNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*SetConfigNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SetConfigNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// setConfigNamespacePayload is the namespace set config action payload.
+type setConfigNamespacePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig,omitempty" json:"newConfig,omitempty" xml:"newConfig,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *setConfigNamespacePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// Publicize creates SetConfigNamespacePayload from setConfigNamespacePayload
+func (payload *setConfigNamespacePayload) Publicize() *SetConfigNamespacePayload {
+	var pub SetConfigNamespacePayload
+	if payload.NewConfig != nil {
+		pub.NewConfig = payload.NewConfig
+	}
+	return &pub
+}
+
+// SetConfigNamespacePayload is the namespace set config action payload.
+type SetConfigNamespacePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig" json:"newConfig" xml:"newConfig"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SetConfigNamespacePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SetConfigNamespaceContext) OK(r *AerospikeAmcNamespaceConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.namespace.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SetConfigNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SetConfigNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *SetConfigNamespaceContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SetConfigNamespaceContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

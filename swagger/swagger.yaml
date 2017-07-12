@@ -799,6 +799,46 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.index.wrapper.response+json;
       view=default'
     type: object
+  AerospikeAmcNamespaceConfigResponse:
+    description: Node Config (default view)
+    example:
+      address: Quas minima ipsum ut voluptas.
+      config:
+        Voluptas repudiandae velit veritatis.: false
+      error: Aut et voluptate et rerum molestiae enim.
+      namespace: Ut inventore.
+      status: Repudiandae distinctio magnam accusantium voluptas et.
+    properties:
+      address:
+        description: Node Address
+        example: Quas minima ipsum ut voluptas.
+        type: string
+      config:
+        additionalProperties: true
+        description: Node config
+        example:
+          Voluptas repudiandae velit veritatis.: false
+        type: object
+      error:
+        description: Error message
+        example: Aut et voluptate et rerum molestiae enim.
+        type: string
+      namespace:
+        description: Namespace Name
+        example: Ut inventore.
+        type: string
+      status:
+        description: Node status
+        example: Repudiandae distinctio magnam accusantium voluptas et.
+        type: string
+    required:
+    - address
+    - namespace
+    - status
+    - config
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.namespace.config.response+json;
+      view=default'
+    type: object
   AerospikeAmcNamespaceResponse:
     description: Namespace End Point (default view)
     example:
@@ -810,10 +850,10 @@ definitions:
         free-bytes: 5.876103e+18
         total-bytes: 5.824241e+18
         used-bytes: 2.5501883e+18
-      name: Quas minima ipsum ut voluptas.
+      name: Sit porro natus eveniet velit ducimus laboriosam.
       stats:
-        Voluptas repudiandae velit veritatis.: false
-      status: Aut et voluptate et rerum molestiae enim.
+        Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
+      status: Et est ipsa dolorem sit quibusdam.
     properties:
       disk:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
@@ -821,17 +861,17 @@ definitions:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
       name:
         description: Namespace Name
-        example: Quas minima ipsum ut voluptas.
+        example: Sit porro natus eveniet velit ducimus laboriosam.
         type: string
       stats:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Voluptas repudiandae velit veritatis.: false
+          Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
         type: object
       status:
         description: Cluster/Node status
-        example: Aut et voluptate et rerum molestiae enim.
+        example: Et est ipsa dolorem sit quibusdam.
         type: string
     required:
     - name
@@ -845,29 +885,29 @@ definitions:
   AerospikeAmcNodeConfigResponse:
     description: Node Config (default view)
     example:
-      address: Ut inventore.
+      address: Rerum deserunt ipsum.
       config:
-        Distinctio magnam accusantium voluptas et ut sit.: false
-      error: Velit ducimus laboriosam quod quam dicta.
-      status: Saepe et et odit doloremque et.
+        Exercitationem molestiae ipsam inventore perferendis quia autem.: 1977-08-16T01:15:05+01:00
+      error: Aut molestiae autem.
+      status: Qui quia repellat sint minima est numquam.
     properties:
       address:
         description: Node Address
-        example: Ut inventore.
+        example: Rerum deserunt ipsum.
         type: string
       config:
         additionalProperties: true
         description: Node config
         example:
-          Distinctio magnam accusantium voluptas et ut sit.: false
+          Exercitationem molestiae ipsam inventore perferendis quia autem.: 1977-08-16T01:15:05+01:00
         type: object
       error:
         description: Error message
-        example: Velit ducimus laboriosam quod quam dicta.
+        example: Aut molestiae autem.
         type: string
       status:
         description: Node status
-        example: Saepe et et odit doloremque et.
+        example: Qui quia repellat sint minima est numquam.
         type: string
     required:
     - address
@@ -908,87 +948,87 @@ definitions:
   AerospikeAmcRestoreResponse:
     description: Restore object (default view)
     example:
-      IgnoreGenerationNumber: false
-      MissingRecordsOnly: false
-      SSHPassword: Sint minima est numquam.
-      SSHUser: Aut alias dolor quis id.
-      Threads: 1.6529714e+18
-      clusterId: Tenetur quibusdam sit rem et.
-      createDate: 2.2781676e+18
-      error: Quos est odit beatae.
-      finishDate: 6.8127115e+18
-      id: Nesciunt doloribus perferendis esse.
-      namespace: Ab nihil.
-      progress: 3.8005243e+18
-      sourceAddress: Quos unde sit iusto.
-      sourcePath: Quibusdam vel eveniet fuga velit.
-      status: Autem dolorem aut est.
+      IgnoreGenerationNumber: true
+      MissingRecordsOnly: true
+      SSHPassword: Ab nihil.
+      SSHUser: Nobis quos unde sit iusto alias.
+      Threads: 8.728471e+18
+      clusterId: Eveniet fuga velit quae autem dolorem.
+      createDate: 7.541641e+18
+      error: Officia libero nam excepturi explicabo.
+      finishDate: 3.9935537e+17
+      id: Aut minima animi distinctio.
+      namespace: Laudantium rem voluptas sit.
+      progress: 8.5724276e+18
+      sourceAddress: Praesentium distinctio aut fugiat tempore deserunt dignissimos.
+      sourcePath: Voluptatem incidunt doloremque voluptatem laudantium voluptatem.
+      status: Dicta est eum facilis.
     properties:
       IgnoreGenerationNumber:
         description: Indicates whether the restore should only update records with
           smaller generation number
-        example: false
+        example: true
         type: boolean
       MissingRecordsOnly:
         description: Indicates whether to restore records which do not exist on the
           cluster only
-        example: false
+        example: true
         type: boolean
       SSHPassword:
         description: SSH user's password
-        example: Sint minima est numquam.
+        example: Ab nihil.
         type: string
       SSHUser:
         description: SSH User
-        example: Aut alias dolor quis id.
+        example: Nobis quos unde sit iusto alias.
         type: string
       Threads:
         description: Number of working threads.
-        example: 1.6529714e+18
+        example: 8.728471e+18
         format: int64
         type: integer
       clusterId:
         description: Cluster Id
-        example: Tenetur quibusdam sit rem et.
+        example: Eveniet fuga velit quae autem dolorem.
         type: string
       createDate:
         description: The date when the restore was created
-        example: 2.2781676e+18
+        example: 7.541641e+18
         format: int64
         type: integer
       error:
         description: Error message in case the restore was not successful
-        example: Quos est odit beatae.
+        example: Officia libero nam excepturi explicabo.
         type: string
       finishDate:
         description: The date when the restore was finished
-        example: 6.8127115e+18
+        example: 3.9935537e+17
         format: int64
         type: integer
       id:
         description: Restore Id
-        example: Nesciunt doloribus perferendis esse.
+        example: Aut minima animi distinctio.
         type: string
       namespace:
         description: Namespace
-        example: Ab nihil.
+        example: Laudantium rem voluptas sit.
         type: string
       progress:
         description: Restore's progress in percent
-        example: 3.8005243e+18
+        example: 8.5724276e+18
         format: int64
         type: integer
       sourceAddress:
         description: Host on which the backup file is located
-        example: Quos unde sit iusto.
+        example: Praesentium distinctio aut fugiat tempore deserunt dignissimos.
         type: string
       sourcePath:
         description: Host on which the backup file is located
-        example: Quibusdam vel eveniet fuga velit.
+        example: Voluptatem incidunt doloremque voluptatem laudantium voluptatem.
         type: string
       status:
         description: Restore's status
-        example: Autem dolorem aut est.
+        example: Dicta est eum facilis.
         type: string
     required:
     - id
@@ -1011,18 +1051,18 @@ definitions:
     description: Set object (default view)
     example:
       set:
-        Nam excepturi explicabo.: 0.92077065
-      status: Minima animi distinctio ullam laudantium rem voluptas.
+        Repudiandae qui doloremque.: 0.92440695
+      status: Est accusamus et nostrum delectus.
     properties:
       set:
         additionalProperties: true
         description: Set's Attributes
         example:
-          Nam excepturi explicabo.: 0.92077065
+          Repudiandae qui doloremque.: 0.92440695
         type: object
       status:
         description: Node's Status
-        example: Minima animi distinctio ullam laudantium rem voluptas.
+        example: Est accusamus et nostrum delectus.
         type: string
     required:
     - status
@@ -1047,17 +1087,17 @@ definitions:
     example:
       status: "on"
       throughput:
-        Aut fugiat tempore deserunt dignissimos qui voluptatem.:
-          Voluptatem laudantium voluptatem quia dicta est.:
-          - failed: 0.7267351
-            successful: 0.92942446
-            timestamp: 2.0386754e+18
-          - failed: 0.7267351
-            successful: 0.92942446
-            timestamp: 2.0386754e+18
-          - failed: 0.7267351
-            successful: 0.92942446
-            timestamp: 2.0386754e+18
+        Consequuntur quo quia voluptatem ut deserunt.:
+          Vitae aperiam provident.:
+          - failed: 0.3326313
+            successful: 0.79623795
+            timestamp: 2.45433e+18
+          - failed: 0.3326313
+            successful: 0.79623795
+            timestamp: 2.45433e+18
+          - failed: 0.3326313
+            successful: 0.79623795
+            timestamp: 2.45433e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1067,17 +1107,17 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Aut fugiat tempore deserunt dignissimos qui voluptatem.:
-            Voluptatem laudantium voluptatem quia dicta est.:
-            - failed: 0.7267351
-              successful: 0.92942446
-              timestamp: 2.0386754e+18
-            - failed: 0.7267351
-              successful: 0.92942446
-              timestamp: 2.0386754e+18
-            - failed: 0.7267351
-              successful: 0.92942446
-              timestamp: 2.0386754e+18
+          Consequuntur quo quia voluptatem ut deserunt.:
+            Vitae aperiam provident.:
+            - failed: 0.3326313
+              successful: 0.79623795
+              timestamp: 2.45433e+18
+            - failed: 0.3326313
+              successful: 0.79623795
+              timestamp: 2.45433e+18
+            - failed: 0.3326313
+              successful: 0.79623795
+              timestamp: 2.45433e+18
         type: object
     required:
     - status
@@ -1114,7 +1154,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Provident ea nulla aut corrupti facilis est.
+          example: Repellat qui totam dolorem.
           type: string
         type: array
       username:
@@ -1362,9 +1402,6 @@ definitions:
       - host: 127.0.0.1
         port: 3000
         tlsName: ""
-      - host: 127.0.0.1
-        port: 3000
-        tlsName: ""
     properties:
       connId:
         description: Connection Id
@@ -1388,9 +1425,6 @@ definitions:
         - host: 127.0.0.1
           port: 3000
           tlsName: ""
-        - host: 127.0.0.1
-          port: 3000
-          tlsName: ""
         items:
           $ref: '#/definitions/NodeSeed'
         type: array
@@ -1401,15 +1435,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Et nostrum.
+      binName: Debitis consequatur natus rerum.
       indexName: idxAccounts
-      namespace: Molestiae aliquid a qui odio.
-      setName: Quo quia voluptatem.
+      namespace: Ut ut consectetur et non voluptatum.
+      setName: Eum quo alias et beatae.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Et nostrum.
+        example: Debitis consequatur natus rerum.
         type: string
       indexName:
         description: Index's Name
@@ -1417,11 +1451,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Molestiae aliquid a qui odio.
+        example: Ut ut consectetur et non voluptatum.
         type: string
       setName:
         description: Index's Set name
-        example: Quo quia voluptatem.
+        example: Eum quo alias et beatae.
         type: string
       type:
         description: Index's type
@@ -1439,7 +1473,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Deserunt voluptatem modi vitae.
+      source: Rerum repellat.
       type: LUA
     properties:
       name:
@@ -1448,7 +1482,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Deserunt voluptatem modi vitae.
+        example: Rerum repellat.
         type: string
       type:
         description: Module's type
@@ -1494,7 +1528,7 @@ definitions:
         - ops
         - dev
         items:
-          example: In debitis consequatur natus.
+          example: Est facilis eum nemo omnis voluptatem.
           type: string
         type: array
       username:
@@ -1520,6 +1554,21 @@ definitions:
     required:
     - newConfig
     title: SetConfigConnectionPayload
+    type: object
+  SetConfigNamespacePayload:
+    example:
+      newConfig:
+        some-config: some-value
+    properties:
+      newConfig:
+        additionalProperties: true
+        description: New config parameters
+        example:
+          some-config: some-value
+        type: object
+    required:
+    - newConfig
+    title: SetConfigNamespacePayload
     type: object
   SetConfigNodePayload:
     example:
@@ -2814,6 +2863,108 @@ paths:
       - jwt:
         - api:general
       summary: show namespace
+      tags:
+      - namespace
+  /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/config:
+    get:
+      description: |-
+        Returns the config of the namespace.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: namespace#config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Node Addresses
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.namespace.config.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNamespaceConfigResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: config namespace
+      tags:
+      - namespace
+    post:
+      description: |-
+        Changes the config of the namespace.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: namespace#set config
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Node Addresses
+        in: path
+        name: node
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SetConfigNamespacePayload'
+      produces:
+      - application/vnd.aerospike.amc.namespace.config.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNamespaceConfigResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: set config namespace
       tags:
       - namespace
   /api/v1/connections/{connId}/nodes/{node}/namespaces/{namespace}/latency:
