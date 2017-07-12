@@ -10,6 +10,7 @@ import (
 	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
+	as "github.com/aerospike/aerospike-client-go"
 	ast "github.com/aerospike/aerospike-client-go/types"
 
 	"github.com/citrusleaf/amc/common"
@@ -63,6 +64,40 @@ func NewNamespace(node *Node, name string) *Namespace {
 
 func (ns *Namespace) Name() string {
 	return ns.name
+}
+
+func (ns *Namespace) Drop() error {
+	defer ns.node.update()
+
+	client := ns.node.cluster.origClient()
+	if client == nil {
+		return errors.New("Node is not connected.")
+	}
+
+	wp := as.NewWritePolicy(0, 0)
+	wp.Timeout = 5 * time.Second
+
+	if err := client.Truncate(wp, ns.name, "", nil); err != nil {
+		return err
+	}
+
+	return ns.node.update()
+}
+
+func (ns *Namespace) DropSet(setName string) error {
+	client := ns.node.cluster.origClient()
+	if client == nil {
+		return errors.New("Node is not connected.")
+	}
+
+	wp := as.NewWritePolicy(0, 0)
+	wp.Timeout = 5 * time.Second
+
+	if err := client.Truncate(wp, ns.name, setName, nil); err != nil {
+		return err
+	}
+
+	return ns.node.update()
 }
 
 func (ns *Namespace) ServerTime() time.Time {

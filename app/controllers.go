@@ -891,6 +891,7 @@ func unmarshalSaveModulePayload(ctx context.Context, service *goa.Service, req *
 // NamespaceController is the controller interface for the Namespace actions.
 type NamespaceController interface {
 	goa.Muxer
+	Drop(*DropNamespaceContext) error
 	Latency(*LatencyNamespaceContext) error
 	Query(*QueryNamespaceContext) error
 	Show(*ShowNamespaceContext) error
@@ -901,10 +902,27 @@ type NamespaceController interface {
 func MountNamespaceController(service *goa.Service, ctrl NamespaceController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/latency", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleNamespaceOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewDropNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Drop(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNamespaceOrigin(h)
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/nodes/:node/namespaces/:namespace", ctrl.MuxHandler("drop", h, nil))
+	service.LogInfo("mount", "ctrl", "Namespace", "action", "Drop", "route", "DELETE /api/v1/connections/:connId/nodes/:node/namespaces/:namespace", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

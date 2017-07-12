@@ -16,6 +16,33 @@ func NewNamespaceController(service *goa.Service) *NamespaceController {
 	return &NamespaceController{Controller: service.NewController("NamespaceController")}
 }
 
+// Drop runs the drop action.
+func (c *NamespaceController) Drop(ctx *app.DropNamespaceContext) error {
+	// NamespaceController_Drop: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	namespace := node.Namespaces()[ctx.Namespace]
+	if namespace == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	if err := namespace.Drop(); err != nil {
+		ctx.BadRequest(err.Error())
+	}
+
+	// NamespaceController_Drop: end_implement
+	return ctx.NoContent()
+}
+
 // Latency runs the latency action.
 func (c *NamespaceController) Latency(ctx *app.LatencyNamespaceContext) error {
 	// NamespaceController_Latency: start_implement

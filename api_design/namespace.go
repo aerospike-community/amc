@@ -41,22 +41,22 @@ var _ = Resource("namespace", func() {
 		Response(InternalServerError)
 	})
 
-	// Action("drop", func() {
-	// 	Description("Drop a namespace from the cluster")
-	// 	Routing(DELETE(":name"))
+	Action("drop", func() {
+		Description("Drop a namespace from the cluster")
+		Routing(DELETE(":namespace"))
 
-	// 	Params(func() {
-	// 		Member("name", String, "Module's Name", func() {
-	// 			Example("reports")
-	// 		})
-	// 		Required("name")
-	// 	})
+		Params(func() {
+			Member("namespace", String, "Module's Name", func() {
+				Example("reports")
+			})
+			Required("namespace")
+		})
 
-	// 	Response(NoContent)
-	// 	Response(BadRequest, String)
-	// 	Response(Unauthorized)
-	// 	Response(InternalServerError)
-	// })
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 
 	Action("throughput", func() {
 		Description("Returns the aggregate throughput of the namespace for a given window of time. If From/To are not specified, the latest throughput will be returned.")

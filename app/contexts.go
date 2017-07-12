@@ -2003,6 +2003,70 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// DropNamespaceContext provides the namespace drop action context.
+type DropNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewDropNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller drop action.
+func NewDropNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*DropNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DropNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DropNamespaceContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DropNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DropNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DropNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // LatencyNamespaceContext provides the namespace latency action context.
 type LatencyNamespaceContext struct {
 	context.Context
