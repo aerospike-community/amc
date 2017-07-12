@@ -422,7 +422,7 @@ func postAddClusterNodes(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}
 
-	err = cluster.AddNode(host, port)
+	err = cluster.AddNode(host, nil, port)
 	if err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
 	}

@@ -1,6 +1,19 @@
 consumes:
 - application/json
 definitions:
+  AddNodeConnectionPayload:
+    example:
+      node:
+        host: 127.0.0.1
+        port: 3000
+        tlsName: ""
+    properties:
+      node:
+        $ref: '#/definitions/NodeSeed'
+    required:
+    - node
+    title: AddNodeConnectionPayload
+    type: object
   AerospikeAmcBackupResponse:
     description: Backup object (default view)
     example:
@@ -1865,6 +1878,44 @@ paths:
       - jwt:
         - api:general
       summary: connect connection
+      tags:
+      - connection
+  /api/v1/connections/{connId}/add-node:
+    post:
+      description: |-
+        Add a node to the cluster
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: connection#add-node
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/AddNodeConnectionPayload'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: add-node connection
       tags:
       - connection
   /api/v1/connections/{connId}/backups:

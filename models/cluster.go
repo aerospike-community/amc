@@ -146,7 +146,7 @@ func (c *Cluster) shouldAutoRemove() bool {
 	return c.observer.config.AMC.InactiveDurBeforeRemoval > 0 && time.Since(lastPing) > time.Duration(c.observer.config.AMC.InactiveDurBeforeRemoval)*time.Second
 }
 
-func (c *Cluster) AddNode(address string, port int) error {
+func (c *Cluster) AddNode(address string, tlsName *string, port int) error {
 	nodes := c.nodesCopy()
 
 	hostAddrList, err := resolveHost(address)
@@ -162,6 +162,9 @@ func (c *Cluster) AddNode(address string, port int) error {
 	}
 
 	host := as.NewHost(hostAddrList[0], port)
+	if tlsName != nil {
+		host.TLSName = *tlsName
+	}
 
 	// This is to make sure the client will have the seed for this node
 	// In case ALL nodes are removed

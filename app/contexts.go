@@ -499,6 +499,106 @@ func (ctx *ShowBackupContext) InternalServerError() error {
 	return nil
 }
 
+// AddNodeConnectionContext provides the connection add-node action context.
+type AddNodeConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *AddNodeConnectionPayload
+}
+
+// NewAddNodeConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller add-node action.
+func NewAddNodeConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*AddNodeConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := AddNodeConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// addNodeConnectionPayload is the connection add-node action payload.
+type addNodeConnectionPayload struct {
+	// New Node Seed
+	Node *nodeSeed `form:"node,omitempty" json:"node,omitempty" xml:"node,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *addNodeConnectionPayload) Validate() (err error) {
+	if payload.Node == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "node"))
+	}
+	if payload.Node != nil {
+		if err2 := payload.Node.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// Publicize creates AddNodeConnectionPayload from addNodeConnectionPayload
+func (payload *addNodeConnectionPayload) Publicize() *AddNodeConnectionPayload {
+	var pub AddNodeConnectionPayload
+	if payload.Node != nil {
+		pub.Node = payload.Node.Publicize()
+	}
+	return &pub
+}
+
+// AddNodeConnectionPayload is the connection add-node action payload.
+type AddNodeConnectionPayload struct {
+	// New Node Seed
+	Node *NodeSeed `form:"node" json:"node" xml:"node"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *AddNodeConnectionPayload) Validate() (err error) {
+	if payload.Node == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "node"))
+	}
+	if payload.Node != nil {
+		if err2 := payload.Node.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *AddNodeConnectionContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *AddNodeConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *AddNodeConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *AddNodeConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ConfigConnectionContext provides the connection config action context.
 type ConfigConnectionContext struct {
 	context.Context

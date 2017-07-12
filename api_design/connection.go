@@ -13,6 +13,33 @@ var _ = Resource("connection", func() {
 		Scope("api:general")
 	})
 
+	Action("add-node", func() {
+
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Add a node to the cluster")
+		Routing(POST(":connId/add-node"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("connId")
+		})
+
+		Payload(func() {
+			Member("node", NodeSeed, "New Node Seed")
+			Required("node")
+		})
+
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("show", func() {
 		Description("Get the user connection")
 		Routing(GET(":connId"))
