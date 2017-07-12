@@ -3,6 +3,8 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
+import Spinner from 'components/Spinner';
+
 class AuthenticateModal extends React.Component {
   constructor(props) {
     super(props);
@@ -14,6 +16,12 @@ class AuthenticateModal extends React.Component {
 
     this.onInputChange = this.onInputChange.bind(this);
     this.onAuthenticate = this.onAuthenticate.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
+  }
+
+  onKeyPress(evt) {
+    if (evt.key === 'Enter')
+      this.onAuthenticate();
   }
 
   onAuthenticate() {
@@ -43,17 +51,19 @@ class AuthenticateModal extends React.Component {
           <form>
             <div className="form-group">
               <label> User </label>
-              <input type="text" className="form-control" disabled={inProgress} onChange={this.onInputChange} name="user" value={this.state.user} />
+              <input type="text" className="form-control" disabled={inProgress} onKeyPress={this.onKeyPress}
+                  onChange={this.onInputChange} name="user" value={this.state.user} />
             </div>
             <div className="form-group">
               <label> Password </label>
-              <input type="password" className="form-control" disabled={inProgress} onChange={this.onInputChange} name="password" value={this.state.password} />
+              <input type="password" className="form-control" disabled={inProgress} onKeyPress={this.onKeyPress}
+                  onChange={this.onInputChange} name="password" value={this.state.password} />
             </div>
           </form>
         </ModalBody>
         <ModalFooter>
           {inProgress &&
-           <span> Creating ... </span>}
+           <span> <Spinner size="1" /> Authenticating ... </span>}
           <Button disabled={inProgress} color="primary" onClick={this.onAuthenticate}>Submit</Button>
         </ModalFooter>
       </Modal>
