@@ -94,7 +94,7 @@ class ClusterNodesConfig extends React.Component {
 
     return (
       <div>
-        <ConfigEditor config={config} onEdit={this.onEdit} isEditable={{true}} />
+        <ConfigEditor config={config} onEdit={this.onEdit} isEditable={true} />
 
         {editSuccessful &&
           <AlertModal header="Success" message={editMessage} type="success" />

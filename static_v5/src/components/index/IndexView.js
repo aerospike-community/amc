@@ -156,7 +156,7 @@ class IndexView extends React.Component {
           </div>
         </div>
 
-        <IndexesTable indexes={indexes} header={indexName} initiallyExpandAll={{true}}/>
+        <IndexesTable indexes={indexes} header={indexName} initiallyExpandAll={true}/>
 
       </div>
     );

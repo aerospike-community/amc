@@ -154,7 +154,7 @@ class SetView extends React.Component {
           </div>
         </div>
 
-        <SetsTable sets={sets} initiallyExpandAll={{true}}/>
+        <SetsTable sets={sets} initiallyExpandAll={true}/>
       </div>
     );
   }

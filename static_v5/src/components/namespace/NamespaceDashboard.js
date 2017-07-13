@@ -64,7 +64,7 @@ class NamespaceDashboard extends React.Component {
 
         {view === NAMESPACE_ACTIONS.View &&
         <div>
-          <NamespacesTable namespaces={namespaces} />
+          <NamespacesTable namespaces={namespaces} initiallyExpandAll={true}/>
           <NamespaceThroughput clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         </div>
         }

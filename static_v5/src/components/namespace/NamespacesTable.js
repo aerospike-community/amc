@@ -15,6 +15,7 @@ class NamespacesTable extends React.Component {
 
     this.state = {
       expanded: new Set(), 
+      expandAll: props.initiallyExpandAll,
     },
 
     this.onExpand = this.onExpand.bind(this);
@@ -35,13 +36,14 @@ class NamespacesTable extends React.Component {
     s.delete(namespaceName);
 
     this.setState({
-      expanded: s
+      expanded: s,
+      expandAll: false,
     });
   }
 
   namespaces() {
     const { namespaces } = this.props;
-    const { expanded } = this.state;
+    const { expanded, expandAll } = this.state;
     const azw = (text) => ({__html: addZeroWidthSpace(text)});
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
@@ -50,7 +52,7 @@ class NamespacesTable extends React.Component {
     let data = [];
     namespaces.forEach((ns) => {
       const { stats, name } = ns;
-      const isExpanded = expanded.has(name);
+      const isExpanded = expanded.has(name) || expandAll;
 
       const row = (
         <tr key={name}>
@@ -120,6 +122,10 @@ class NamespacesTable extends React.Component {
 
 NamespacesTable.PropTypes = {
   namespaces: PropTypes.arrayOf(PropTypes.object),
+  // whether to expand all the rows on 
+  // initial rendering
+  initiallyExpandAll: PropTypes.bool,
+  
 };
 
 export default NamespacesTable;
