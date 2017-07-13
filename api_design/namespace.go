@@ -41,22 +41,22 @@ var _ = Resource("namespace", func() {
 		Response(InternalServerError)
 	})
 
-	// Action("drop", func() {
-	// 	Description("Drop a namespace from the cluster")
-	// 	Routing(DELETE(":name"))
+	Action("drop", func() {
+		Description("Drop a namespace from the cluster")
+		Routing(DELETE(":namespace"))
 
-	// 	Params(func() {
-	// 		Member("name", String, "Module's Name", func() {
-	// 			Example("reports")
-	// 		})
-	// 		Required("name")
-	// 	})
+		Params(func() {
+			Member("namespace", String, "Module's Name", func() {
+				Example("reports")
+			})
+			Required("namespace")
+		})
 
-	// 	Response(NoContent)
-	// 	Response(BadRequest, String)
-	// 	Response(Unauthorized)
-	// 	Response(InternalServerError)
-	// })
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 
 	Action("throughput", func() {
 		Description("Returns the aggregate throughput of the namespace for a given window of time. If From/To are not specified, the latest throughput will be returned.")
@@ -98,4 +98,75 @@ var _ = Resource("namespace", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the config of the namespace.")
+		Routing(GET(":namespace/config"))
+		Params(func() {
+			Param("namespace", String, "Namespace name", func() { Example("test") })
+
+			Required("namespace")
+		})
+
+		Response(OK, NamespaceConfigResponseMedia)
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("set config", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Changes the config of the namespace.")
+		Routing(POST(":namespace/config"))
+		Params(func() {
+			Param("namespace", String, "Namespace name", func() { Example("test") })
+
+			Required("namespace")
+		})
+
+		Payload(func() {
+			Member("newConfig", HashOf(String, String), "New config parameters", func() { Example(map[string]interface{}{"some-config": "some-value"}) })
+
+			Required("newConfig")
+		})
+
+		Response(OK, NamespaceConfigResponseMedia)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+})
+
+var NamespaceConfigResponseMedia = MediaType("application/vnd.aerospike.amc.namespace.config.response+json", func() {
+	Description("Node Config")
+
+	Attributes(func() {
+		Attribute("address", String, "Node Address")
+		Attribute("namespace", String, "Namespace Name")
+		Attribute("status", String, "Node status")
+		Attribute("config", HashOf(String, Any), "Node config")
+		Attribute("error", String, "Error message")
+
+		Required("address", "namespace", "status", "config")
+	})
+
+	View("default", func() {
+		Attribute("address")
+		Attribute("namespace")
+		Attribute("status")
+		Attribute("config")
+		Attribute("error")
+
+		Required("address", "namespace", "status", "config")
+	})
+
 })

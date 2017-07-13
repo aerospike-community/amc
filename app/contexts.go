@@ -499,6 +499,106 @@ func (ctx *ShowBackupContext) InternalServerError() error {
 	return nil
 }
 
+// AddNodeConnectionContext provides the connection add-node action context.
+type AddNodeConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *AddNodeConnectionPayload
+}
+
+// NewAddNodeConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller add-node action.
+func NewAddNodeConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*AddNodeConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := AddNodeConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// addNodeConnectionPayload is the connection add-node action payload.
+type addNodeConnectionPayload struct {
+	// New Node Seed
+	Node *nodeSeed `form:"node,omitempty" json:"node,omitempty" xml:"node,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *addNodeConnectionPayload) Validate() (err error) {
+	if payload.Node == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "node"))
+	}
+	if payload.Node != nil {
+		if err2 := payload.Node.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// Publicize creates AddNodeConnectionPayload from addNodeConnectionPayload
+func (payload *addNodeConnectionPayload) Publicize() *AddNodeConnectionPayload {
+	var pub AddNodeConnectionPayload
+	if payload.Node != nil {
+		pub.Node = payload.Node.Publicize()
+	}
+	return &pub
+}
+
+// AddNodeConnectionPayload is the connection add-node action payload.
+type AddNodeConnectionPayload struct {
+	// New Node Seed
+	Node *NodeSeed `form:"node" json:"node" xml:"node"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *AddNodeConnectionPayload) Validate() (err error) {
+	if payload.Node == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "node"))
+	}
+	if payload.Node != nil {
+		if err2 := payload.Node.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *AddNodeConnectionContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *AddNodeConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *AddNodeConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *AddNodeConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ConfigConnectionContext provides the connection config action context.
 type ConfigConnectionContext struct {
 	context.Context
@@ -2003,6 +2103,140 @@ func (ctx *ShowModuleContext) InternalServerError() error {
 	return nil
 }
 
+// ConfigNamespaceContext provides the namespace config action context.
+type ConfigNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewConfigNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller config action.
+func NewConfigNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*ConfigNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ConfigNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ConfigNamespaceContext) OK(r *AerospikeAmcNamespaceConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.namespace.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ConfigNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ConfigNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ConfigNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *ConfigNamespaceContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
+// DropNamespaceContext provides the namespace drop action context.
+type DropNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+}
+
+// NewDropNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller drop action.
+func NewDropNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*DropNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DropNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DropNamespaceContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DropNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DropNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DropNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // LatencyNamespaceContext provides the namespace latency action context.
 type LatencyNamespaceContext struct {
 	context.Context
@@ -2157,6 +2391,114 @@ func (ctx *QueryNamespaceContext) Forbidden() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *QueryNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SetConfigNamespaceContext provides the namespace set config action context.
+type SetConfigNamespaceContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Namespace string
+	Node      string
+	Payload   *SetConfigNamespacePayload
+}
+
+// NewSetConfigNamespaceContext parses the incoming request URL and body, performs validations and creates the
+// context used by the namespace controller set config action.
+func NewSetConfigNamespaceContext(ctx context.Context, r *http.Request, service *goa.Service) (*SetConfigNamespaceContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SetConfigNamespaceContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNamespace := req.Params["namespace"]
+	if len(paramNamespace) > 0 {
+		rawNamespace := paramNamespace[0]
+		rctx.Namespace = rawNamespace
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// setConfigNamespacePayload is the namespace set config action payload.
+type setConfigNamespacePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig,omitempty" json:"newConfig,omitempty" xml:"newConfig,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *setConfigNamespacePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// Publicize creates SetConfigNamespacePayload from setConfigNamespacePayload
+func (payload *setConfigNamespacePayload) Publicize() *SetConfigNamespacePayload {
+	var pub SetConfigNamespacePayload
+	if payload.NewConfig != nil {
+		pub.NewConfig = payload.NewConfig
+	}
+	return &pub
+}
+
+// SetConfigNamespacePayload is the namespace set config action payload.
+type SetConfigNamespacePayload struct {
+	// New config parameters
+	NewConfig map[string]string `form:"newConfig" json:"newConfig" xml:"newConfig"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SetConfigNamespacePayload) Validate() (err error) {
+	if payload.NewConfig == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "newConfig"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SetConfigNamespaceContext) OK(r *AerospikeAmcNamespaceConfigResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.namespace.config.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SetConfigNamespaceContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SetConfigNamespaceContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *SetConfigNamespaceContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SetConfigNamespaceContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -2383,6 +2725,203 @@ func (ctx *ConfigNodeContext) NotImplemented(r string) error {
 	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
 }
 
+// JobsNodeContext provides the node jobs action context.
+type JobsNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID    string
+	Limit     *int
+	Node      string
+	Offset    *int
+	SortBy    *string
+	SortOrder *string
+	Status    *string
+}
+
+// NewJobsNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller jobs action.
+func NewJobsNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*JobsNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := JobsNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramLimit := req.Params["limit"]
+	if len(paramLimit) > 0 {
+		rawLimit := paramLimit[0]
+		if limit, err2 := strconv.Atoi(rawLimit); err2 == nil {
+			tmp19 := limit
+			tmp18 := &tmp19
+			rctx.Limit = tmp18
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("limit", rawLimit, "integer"))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramOffset := req.Params["offset"]
+	if len(paramOffset) > 0 {
+		rawOffset := paramOffset[0]
+		if offset, err2 := strconv.Atoi(rawOffset); err2 == nil {
+			tmp21 := offset
+			tmp20 := &tmp21
+			rctx.Offset = tmp20
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("offset", rawOffset, "integer"))
+		}
+	}
+	paramSortBy := req.Params["sortBy"]
+	if len(paramSortBy) > 0 {
+		rawSortBy := paramSortBy[0]
+		rctx.SortBy = &rawSortBy
+	}
+	paramSortOrder := req.Params["sortOrder"]
+	if len(paramSortOrder) > 0 {
+		rawSortOrder := paramSortOrder[0]
+		rctx.SortOrder = &rawSortOrder
+		if rctx.SortOrder != nil {
+			if ok := goa.ValidatePattern(`desc|asc`, *rctx.SortOrder); !ok {
+				err = goa.MergeErrors(err, goa.InvalidPatternError(`sortOrder`, *rctx.SortOrder, `desc|asc`))
+			}
+		}
+	}
+	paramStatus := req.Params["status"]
+	if len(paramStatus) > 0 {
+		rawStatus := paramStatus[0]
+		rctx.Status = &rawStatus
+		if rctx.Status != nil {
+			if ok := goa.ValidatePattern(`in-progress|completed`, *rctx.Status); !ok {
+				err = goa.MergeErrors(err, goa.InvalidPatternError(`status`, *rctx.Status, `in-progress|completed`))
+			}
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *JobsNodeContext) OK(r *AerospikeAmcJobResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.job.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *JobsNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *JobsNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *JobsNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *JobsNodeContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
+// KillJobNodeContext provides the node kill-job action context.
+type KillJobNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Module string
+	Node   string
+	Trid   string
+}
+
+// NewKillJobNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller kill-job action.
+func NewKillJobNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*KillJobNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := KillJobNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramModule := req.Params["module"]
+	if len(paramModule) == 0 {
+		err = goa.MergeErrors(err, goa.MissingParamError("module"))
+	} else {
+		rawModule := paramModule[0]
+		rctx.Module = rawModule
+		if ok := goa.ValidatePattern(`scan|query`, rctx.Module); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`module`, rctx.Module, `scan|query`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramTrid := req.Params["trid"]
+	if len(paramTrid) > 0 {
+		rawTrid := paramTrid[0]
+		rctx.Trid = rawTrid
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *KillJobNodeContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *KillJobNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *KillJobNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *KillJobNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *KillJobNodeContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // LatencyNodeContext provides the node latency action context.
 type LatencyNodeContext struct {
 	context.Context
@@ -2415,9 +2954,9 @@ func NewLatencyNodeContext(ctx context.Context, r *http.Request, service *goa.Se
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp19 := from
-			tmp18 := &tmp19
-			rctx.From = tmp18
+			tmp23 := from
+			tmp22 := &tmp23
+			rctx.From = tmp22
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -2431,9 +2970,9 @@ func NewLatencyNodeContext(ctx context.Context, r *http.Request, service *goa.Se
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp21 := until
-			tmp20 := &tmp21
-			rctx.Until = tmp20
+			tmp25 := until
+			tmp24 := &tmp25
+			rctx.Until = tmp24
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}
@@ -2663,9 +3202,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramFrom) > 0 {
 		rawFrom := paramFrom[0]
 		if from, err2 := strconv.Atoi(rawFrom); err2 == nil {
-			tmp23 := from
-			tmp22 := &tmp23
-			rctx.From = tmp22
+			tmp27 := from
+			tmp26 := &tmp27
+			rctx.From = tmp26
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "integer"))
 		}
@@ -2679,9 +3218,9 @@ func NewThroughputNodeContext(ctx context.Context, r *http.Request, service *goa
 	if len(paramUntil) > 0 {
 		rawUntil := paramUntil[0]
 		if until, err2 := strconv.Atoi(rawUntil); err2 == nil {
-			tmp25 := until
-			tmp24 := &tmp25
-			rctx.Until = tmp24
+			tmp29 := until
+			tmp28 := &tmp29
+			rctx.Until = tmp28
 		} else {
 			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "integer"))
 		}

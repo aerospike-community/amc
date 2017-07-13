@@ -6,6 +6,7 @@ import (
 	"github.com/goadesign/goa"
 
 	"github.com/citrusleaf/amc/app"
+	"github.com/citrusleaf/amc/common"
 )
 
 // NodeController implements the node resource.
@@ -40,6 +41,124 @@ func (c *NodeController) Config(ctx *app.ConfigNodeContext) error {
 
 	// NodeController_Config: end_implement
 	return ctx.OK(res)
+}
+
+// Jobs runs the jobs action.
+func (c *NodeController) Jobs(ctx *app.JobsNodeContext) error {
+	// NodeController_Jobs: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	sortField := "time-since-done"
+	if ctx.SortBy != nil {
+		sortField = *ctx.SortBy
+	}
+
+	limit := 50
+	if ctx.Limit != nil {
+		limit = *ctx.Limit
+	}
+
+	offset := 0
+	if ctx.Offset != nil {
+		offset = *ctx.Offset
+	}
+
+	jobStatus := ""
+	if ctx.Status != nil {
+		switch *ctx.Status {
+		case "in-progress":
+			jobStatus = "active"
+		case "completed":
+			jobStatus = "done"
+		default:
+			jobStatus = ""
+		}
+	}
+
+	sortFunc, exists := _jobsSortFields[sortField]
+	if !exists {
+		return ctx.BadRequest("Field specified by sort_by not supported.")
+	}
+
+	res := &app.AerospikeAmcJobResponse{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	jobs := []common.Stats{}
+	jobStats := node.Jobs()
+	for _, v := range jobStats {
+		if !strings.HasPrefix(v.TryString("status", ""), jobStatus) {
+			continue
+		}
+
+		v["address"] = node.Address()
+		v["node"] = map[string]interface{}{
+			"status": node.Status(),
+			"build":  node.Build(),
+			"memory": node.Memory(),
+		}
+		jobs = append(jobs, v)
+	}
+
+	jobCount := len(jobs)
+
+	sortOrder := "desc"
+	if ctx.SortOrder != nil {
+		sortOrder = *ctx.SortOrder
+	}
+
+	if sortOrder == "desc" {
+		common.StatsBy(sortFunc).SortReverse(sortField, jobs)
+	} else {
+		common.StatsBy(sortFunc).Sort(sortField, jobs)
+	}
+
+	offset *= limit
+	if offset+limit <= len(jobs) {
+		jobs = jobs[offset : offset+limit]
+	} else {
+		jobs = []common.Stats{}
+	}
+
+	for i := range jobs {
+		res.Jobs = append(res.Jobs, map[string]interface{}(jobs[i]))
+	}
+	res.JobCount = jobCount
+
+	// NodeController_Jobs: end_implement
+	return ctx.OK(res)
+}
+
+// KillJob runs the kill-job action.
+func (c *NodeController) KillJob(ctx *app.KillJobNodeContext) error {
+	// NodeController_KillJob: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	if err := node.KillJob(ctx.Module, ctx.Trid); err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// NodeController_KillJob: end_implement
+	return ctx.NoContent()
 }
 
 // Latency runs the latency action.

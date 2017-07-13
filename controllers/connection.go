@@ -22,6 +22,23 @@ func NewConnectionController(service *goa.Service) *ConnectionController {
 	return &ConnectionController{Controller: service.NewController("ConnectionController")}
 }
 
+// AddNode runs the add-node action.
+func (c *ConnectionController) AddNode(ctx *app.AddNodeConnectionContext) error {
+	// ConnectionController_AddNode: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	if err := cluster.AddNode(ctx.Payload.Node.Host, ctx.Payload.Node.TLSName, ctx.Payload.Node.Port); err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// ConnectionController_AddNode: end_implement
+	return ctx.NoContent()
+}
+
 // Config runs the config action.
 func (c *ConnectionController) Config(ctx *app.ConfigConnectionContext) error {
 	// ConnectionController_Config: start_implement

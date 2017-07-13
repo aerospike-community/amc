@@ -42,7 +42,7 @@ var _ = Resource("index", func() {
 	})
 
 	Action("save", func() {
-		Description("Save a index in the cluster")
+		Description("Save an index in the cluster")
 		Routing(POST(""))
 
 		Payload(func() {

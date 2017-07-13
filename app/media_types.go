@@ -575,6 +575,30 @@ func (mt *AerospikeAmcIndexWrapperResponse) Validate() (err error) {
 	return
 }
 
+// Job (default view)
+//
+// Identifier: application/vnd.aerospike.amc.job.response+json; view=default
+type AerospikeAmcJobResponse struct {
+	// set name
+	JobCount int `form:"jobCount" json:"jobCount" xml:"jobCount"`
+	// namespace
+	Jobs []map[string]interface{} `form:"jobs" json:"jobs" xml:"jobs"`
+	// Transaction ID
+	Limit int `form:"limit" json:"limit" xml:"limit"`
+	// Module Name
+	Offset int `form:"offset" json:"offset" xml:"offset"`
+}
+
+// Validate validates the AerospikeAmcJobResponse media type instance.
+func (mt *AerospikeAmcJobResponse) Validate() (err error) {
+
+	if mt.Jobs == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "jobs"))
+	}
+
+	return
+}
+
 // Latency Data (default view)
 //
 // Identifier: application/vnd.aerospike.amc.latency.response+json; view=default
@@ -592,6 +616,39 @@ func (mt *AerospikeAmcLatencyResponse) Validate() (err error) {
 	}
 	if mt.Status == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	return
+}
+
+// Node Config (default view)
+//
+// Identifier: application/vnd.aerospike.amc.namespace.config.response+json; view=default
+type AerospikeAmcNamespaceConfigResponse struct {
+	// Node Address
+	Address string `form:"address" json:"address" xml:"address"`
+	// Node config
+	Config map[string]interface{} `form:"config" json:"config" xml:"config"`
+	// Error message
+	Error *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Namespace Name
+	Namespace string `form:"namespace" json:"namespace" xml:"namespace"`
+	// Node status
+	Status string `form:"status" json:"status" xml:"status"`
+}
+
+// Validate validates the AerospikeAmcNamespaceConfigResponse media type instance.
+func (mt *AerospikeAmcNamespaceConfigResponse) Validate() (err error) {
+	if mt.Address == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "address"))
+	}
+	if mt.Namespace == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "namespace"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Config == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "config"))
 	}
 	return
 }

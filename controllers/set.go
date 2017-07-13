@@ -30,7 +30,14 @@ func (c *SetController) Drop(ctx *app.DropSetContext) error {
 		return ctx.BadRequest("Node not found.")
 	}
 
-	// node.RequestInfo()
+	namespace := node.Namespaces()[ctx.Namespace]
+	if namespace == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	if err := namespace.DropSet(ctx.SetName); err != nil {
+		ctx.BadRequest(err.Error())
+	}
 
 	// SetController_Drop: end_implement
 	return ctx.NoContent()

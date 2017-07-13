@@ -765,6 +765,20 @@ func (n *Node) Namespaces() map[string]*Namespace {
 	return res.(map[string]*Namespace)
 }
 
+func (n *Node) KillJob(module, trid string) error {
+	cmd := fmt.Sprintf("jobs:module=%s;cmd=kill-job;trid=%s", module, trid)
+	res, err := n.RequestInfo(3, cmd)
+	if err != nil {
+		return err
+	}
+
+	if strings.HasPrefix(res[cmd], "ERROR") {
+		return errors.New(res[cmd])
+	}
+
+	return nil
+}
+
 func (n *Node) NamespaceList() []string {
 	namespaces := n.Namespaces()
 	res := make([]string, 0, len(namespaces))
