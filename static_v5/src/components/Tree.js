@@ -49,7 +49,7 @@ class Tree extends React.Component {
         </div>
 
         {typeof renderNode === 'function' ? renderNode(node) :
-         <span onClick={this.onNodeClick}> {label} </span>}
+         <span onClick={this.onNodeClick} title={label}> {label} </span>}
       </div>
 
       <div>

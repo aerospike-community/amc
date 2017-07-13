@@ -15,6 +15,7 @@ class NodesSummary extends React.Component {
     this.state = {
       nodesSummary: {}, // map of nodeHost to summary
       expandedNodes: new Set(), 
+      expandAll: props.initiallyExpandAll,
     };
 
     this.onSelectNode = this.onSelectNode.bind(this);
@@ -36,7 +37,8 @@ class NodesSummary extends React.Component {
     s.delete(nodeHost);
 
     this.setState({
-      expandedNodes: s
+      expandedNodes: s,
+      expandAll: false,
     });
   }
 
@@ -79,7 +81,7 @@ class NodesSummary extends React.Component {
   }
 
   nodes() {
-    const { expandedNodes } = this.state;
+    const { expandedNodes, expandAll } = this.state;
     const nodes = this.state.nodesSummary;
     const isSelectable = typeof(this.props.onSelectNode) === 'function';
     const memory = (s) => {
@@ -90,7 +92,7 @@ class NodesSummary extends React.Component {
     for (const nodeHost in nodes) {
       const node = nodes[nodeHost];
       const { stats } = node;
-      const isExpanded = expandedNodes.has(nodeHost);
+      const isExpanded = expandedNodes.has(nodeHost) || expandAll;
       const style = { fontSize: 12 };
 
       const row = (
@@ -125,7 +127,7 @@ class NodesSummary extends React.Component {
       );
       data.push(row);
 
-      if (expandedNodes.has(nodeHost)) {
+      if (isExpanded) {
         const r = renderStatsInTable(nodeHost, stats, 6);
         data = data.concat(r);
       }
@@ -145,7 +147,7 @@ class NodesSummary extends React.Component {
         </div>
         <div className="row">
           <div className="col-xl-12"> 
-            <Table size="sm" bordered>
+            <Table size="sm" bordered hover>
               <thead>
                 <tr>
                   <th> Host</th>
@@ -169,6 +171,10 @@ class NodesSummary extends React.Component {
 
 NodesSummary.PropTypes = {
   clusterID: PropTypes.string.isRequired,
+  // whether to expand all the rows on
+  // initial rendering
+  initiallyExpandAll: PropTypes.bool,
+  
   // the member nodes of the cluster
   nodeHosts: PropTypes.arrayOf(PropTypes.string).isRequired,
   // callback to select a node

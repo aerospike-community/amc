@@ -152,11 +152,11 @@ class IndexView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Index - ${indexName}`} 
 
-            <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+            <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
           </div>
         </div>
 
-        <IndexesTable indexes={indexes} header={indexName}/>
+        <IndexesTable indexes={indexes} header={indexName} initiallyExpandAll={{true}}/>
 
       </div>
     );

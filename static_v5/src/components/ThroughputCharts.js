@@ -122,7 +122,11 @@ class ThroughputCharts extends React.Component {
     for (const type in chartTP) {
       const {name, throughput} = chartTP[type];
       const id = '#' + this.id(Types[type]);
-      const chart = new ThroughputChart(id, throughput, name);
+
+      const { newThroughputChart } = this.props;
+      const chart = typeof newThroughputChart === 'function' 
+                      ? newThroughputChart(id, throughput, name)
+                      : new ThroughputChart(id, throughput, name);
       chart.draw();
 
       this.charts[type] = chart;
@@ -365,6 +369,10 @@ ThroughputCharts.PropTypes = {
   // only charts defined here will be rendered
   // see ChartPlacements
   chartPlacements: PropTypes.object,
+
+  // (optional) get an instance of a new throughput chart
+  // newThroughputChart(id, throughput, name)
+  newThroughputChart: PropTypes.func,
 };
 
 export default ThroughputCharts;

@@ -33,7 +33,7 @@ class NodeDashboard extends React.Component {
 
         {view === NODE_ACTIONS.View && 
         <div>
-          <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} />
+          <NodesSummary clusterID={clusterID} nodeHosts={[nodeHost]} initiallyExpandAll={{true}}/>
           <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
         </div>
         }

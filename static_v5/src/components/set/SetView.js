@@ -150,11 +150,11 @@ class SetView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Set - ${setName}`}
 
-            <Button disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+            <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
           </div>
         </div>
 
-        <SetsTable sets={sets} />
+        <SetsTable sets={sets} initiallyExpandAll={{true}}/>
       </div>
     );
   }

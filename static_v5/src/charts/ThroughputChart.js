@@ -4,7 +4,6 @@ import bytes from 'bytes';
 import moment from 'moment';
 
 import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
-import { watchElementSizeChange } from 'charts/util';
 
 // ThroughputChart draws a chart for the throughput
 //

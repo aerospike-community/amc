@@ -20,7 +20,7 @@ export function renderStatsInTable(name, stats, ncols) {
   // all stats
   const nr = Math.floor(ncols/3); // number of stats per row
   for (let i = 0; i < keys.length; i += nr) {
-    const cols = []; 
+    const divs = []; 
     const rowKeys = keys.slice(i, i+nr);
     const processStat = (val) => {
       if (!isInteger(val))
@@ -29,27 +29,20 @@ export function renderStatsInTable(name, stats, ncols) {
       return addCommasToInt(val);
     };
 
+    const emptyWidth = 5; // percent
+    const width = Math.floor((100-emptyWidth*nr)/(2*nr));
     rowKeys.forEach((k) => {
-      const style = {
-        paddingLeft: 20, 
-        fontStyle: 'italic',
-        borderBottom: '1px solid #dfdfdf',
-      };
-
       const stat = processStat(stats[k]);
-      cols.push(<td key={k+'empty'}></td>); // empty column
-      cols.push(<td style={style} key={k}> {k} </td>);
-      cols.push(<td style={style} key={k+'val'}> {stat} </td>);
+      divs.push(<div className="as-stat-row" title={k} style={{width: width + '%'}} key={k}> {k} </div>);
+      divs.push(<div className="as-stat-row" title={stat} style={{width: width + '%'}} key={k+'val'}> {stat} </div>);
+      divs.push(<div className="float-left"  style={{width: emptyWidth + '%', minHeight: 1}} key={k+'empty'}></div>); // empty separator
     });
-
-    const nkeys = rowKeys.length; // number of keys added in this row
-    for (let j = 3*nkeys; j < ncols; j++) {
-      cols.push(<td key={'empty' + j + name}></td>); // empty column
-    }
 
     rows.push(
       <tr className="as-trow-stat" key={i+name}>
-        {cols}
+        <td colSpan={ncols}>
+          {divs}
+        </td>
       </tr>
     );
   }

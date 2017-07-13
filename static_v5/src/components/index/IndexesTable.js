@@ -13,6 +13,7 @@ class IndexesTable extends React.Component {
 
     this.state = {
       expanded: new Set(), 
+      expandAll: props.initiallyExpandAll,
     };
 
     this.onExpand = this.onExpand.bind(this);
@@ -38,12 +39,13 @@ class IndexesTable extends React.Component {
     s.delete(indexName);
 
     this.setState({
-      expanded: s
+      expanded: s,
+      expandAll: false,
     });
   }
 
   renderIndexes() {
-    const { expanded } = this.state;
+    const { expanded, expandAll } = this.state;
     const { indexes, onSelectIndex } = this.props;
     const isSelectable = typeof(onSelectIndex) === 'function';
     const azw = (text) => ({__html: addZeroWidthSpace(text)});
@@ -52,7 +54,7 @@ class IndexesTable extends React.Component {
     indexes.forEach((index, i) => {
       const { bin, binType, name } = index;
       const { namespace, set, syncOnAllNodes } = index;
-      const isExpanded = expanded.has(name);
+      const isExpanded = expanded.has(name) || expandAll;
 
       const row = (
         <tr key={name + i}>
@@ -102,7 +104,7 @@ class IndexesTable extends React.Component {
       <div>
         <div className="row">
           <div className="col-xl-12"> 
-            <Table size="sm" bordered>
+            <Table size="sm" bordered hover>
               <thead>
                 <tr>
                   <th> Name </th>
@@ -126,6 +128,9 @@ class IndexesTable extends React.Component {
 
 IndexesTable.PropTypes = {
   indexes: PropTypes.arrayOf(PropTypes.object),
+  // whether to expand all the rows on
+  // initial rendering
+  initiallyExpandAll: PropTypes.bool,
 
   // callback to select a index
   // onSelectIndex(clusterID, indexName)

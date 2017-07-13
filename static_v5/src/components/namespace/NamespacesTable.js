@@ -96,7 +96,7 @@ class NamespacesTable extends React.Component {
         </div>
         <div className="row">
           <div className="col-xl-12"> 
-            <Table size="sm" bordered>
+            <Table size="sm" bordered hover>
               <thead>
                 <tr>
                   <th> Name </th>

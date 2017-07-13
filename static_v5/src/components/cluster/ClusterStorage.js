@@ -51,7 +51,7 @@ class ClusterStorage extends React.Component {
     }
 
     return (
-      <Table size="sm" bordered>
+      <Table size="sm" bordered hover>
         <thead>
           <tr>
             <th> {this.props.name} </th>

@@ -265,3 +265,12 @@
   }
 }
 
+table .as-stat-row {
+  float: left;
+  padding-left: 20px;
+  font-style: italic;
+  border-bottom: 1px solid #dfdfdf;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+

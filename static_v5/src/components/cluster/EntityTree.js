@@ -89,7 +89,7 @@ class EntityTree extends React.Component {
            </Dropdown>
           </div>}
 
-          <div className="as-tree-node-name"> {entity.name} </div>
+          <div className="as-tree-node-name" title={entity.name}> {entity.name} </div>
         </div>
       </div>
       );

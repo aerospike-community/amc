@@ -77,7 +77,7 @@ class ViewClusterConnectionModal extends React.Component {
     return (
       <div className="row">
         <div className="col-xl-12"> 
-          <Table size="sm" bordered>
+          <Table size="sm" bordered hover>
             <thead>
               <tr>
                 <th> Host </th>

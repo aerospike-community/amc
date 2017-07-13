@@ -14,6 +14,7 @@ class SetsTable extends React.Component {
 
     this.state = {
       expanded: new Set(), 
+      expandAll: props.initiallyExpandAll,
     },
 
     this.onExpand = this.onExpand.bind(this);
@@ -39,20 +40,21 @@ class SetsTable extends React.Component {
     s.delete(setName);
 
     this.setState({
-      expanded: s
+      expanded: s,
+      expandAll: false,
     });
   }
 
   sets() {
     const { sets, onSelectSet } = this.props;
-    const { expanded } = this.state;
+    const { expanded, expandAll } = this.state;
     const isSelectable = typeof(onSelectSet) === 'function';
     const azw = (text) => ({__html: addZeroWidthSpace(text)});
 
     let data = [];
     sets.forEach((set) => {
       const name = set.set_name;
-      const isExpanded = expanded.has(name);
+      const isExpanded = expanded.has(name) || expandAll;
 
       const row = (
         <tr key={name}>
@@ -99,7 +101,7 @@ class SetsTable extends React.Component {
       <div>
         <div className="row">
           <div className="col-xl-12"> 
-            <Table size="sm" bordered>
+            <Table size="sm" bordered hover>
               <thead>
                 <tr>
                   <th> Set </th>
@@ -121,6 +123,9 @@ class SetsTable extends React.Component {
 
 SetsTable.PropTypes = {
   sets: PropTypes.arrayOf(PropTypes.object),
+  // whether to expand all the rows on 
+  // initial rendering
+  initiallyExpandAll: PropTypes.bool,
   
   // callback to select a set
   // onSelectSet(setName)
