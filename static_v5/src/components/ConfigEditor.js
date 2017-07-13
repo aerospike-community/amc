@@ -3,9 +3,8 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import { Button } from 'reactstrap';
+import { Button, Input } from 'reactstrap';
 
-import EditConfig from 'components/EditConfig';
 import Tabs from 'components/Tabs';
 import { nextNumber, distanceToBottom } from 'classes/util';
 
@@ -17,99 +16,19 @@ class ConfigEditor extends React.Component {
 
     this.state = {
       selectedContext: null,
-      selectedConfigs: [],
 
       height: 200,
       showEdit: false,
-      editInProgress: false,
-      editErrorMessage: '',
     };
 
     this.id = 'config_editor_' + nextNumber();
 
-    this.rowData = []; // row data for the grid
-    this.context = null; // context
-
     this.onContextTabSelect = this.onContextTabSelect.bind(this);
-    this.onRowSelected = this.onRowSelected.bind(this);
-    this.onEdit = this.onEdit.bind(this);
-    this.onShowEdit = this.onShowEdit.bind(this);
-    this.onHideEdit = this.onHideEdit.bind(this);
   }
 
   onContextTabSelect(context) {
     this.setState({
       selectedContext: context
-    });
-  }
-
-  onRowSelected(row) {
-    const data = row.node.data;
-    const configs = this.state.selectedConfigs.slice(); // copy
-  
-    let i = configs.findIndex((d) => d === data.name);
-    if (i >= 0) // already present. Remove.
-      configs.splice(i, 1);
-    else // add
-      configs.push(data.name);
-
-    this.setState({
-      selectedConfigs: configs
-    });
-  }
-
-  onEdit(config) {
-    const edits = {};
-    config.forEach((c) => {
-      edits[c.name] = '' + c.value
-    });
-
-    this.props.onEdit(edits)
-      .then(() => {
-        setEdit();
-        window.setTimeout(() => setEdit('', false), 2000);
-      })
-      .catch((message) => {
-        setEdit(message, false, true);
-      });
-
-    var setEdit = (message = '', success = true, showEdit = false)  => {
-      this.setState({
-        showEdit: showEdit,
-        selectedConfigs: [],
-        editInProgress: false,
-        editErrorMessage: message || 'Error updating config',
-      });
-    };
-  }
-
-  onShowEdit() {
-    this.setState({
-      showEdit: true,
-    });
-  }
-
-  // return node configs for the first node
-  configsOfSingleNode() {
-    const {selectedConfigs} = this.state;
-    const {config} = this.props;
-    const node = Object.keys(config)[0];
-    const context = this.currentContext();
-
-    var edit = [];
-    selectedConfigs.forEach((c) => {
-      edit.push({
-        name: c,
-        value: config[node][context][c]
-      });
-    });
-
-    return edit;
-  }
-
-  onHideEdit() {
-    this.setState({
-      showEdit: false
     });
   }
 
@@ -127,30 +46,48 @@ class ConfigEditor extends React.Component {
   }
 
   toNodeField(nodeHost) {
-    const ip = nodeHost.slice(0, nodeHost.indexOf(':'));
-    return ip.replace(/\./g, '_');
+    return nodeHost.replace(/\./g, '_');
   }
 
   toColumnDefs() {
-    const {config} = this.props;
-    const isEditable = this.isEditable();
+    // header
     const columnDefs = [{
       headerName: 'Config',
       field: 'name',
-      width: 250,
-      checkboxSelection: (row) => isEditable,
+      width: 280,
       cellClass: 'as-grid-cell',
       pinned: 'left',
       cellStyle: {background: '#eee'},
     }];
 
+    const {config, onEdit} = this.props;
+    const isEditable = this.props.isEditable && typeof(onEdit) === 'function';
+
     const nodes = Object.keys(config);
     nodes.forEach((node) => {
       const ip = node.slice(0, node.indexOf(':'));
+
       columnDefs.push({
         headerName: ip,
         field: this.toNodeField(node), // ag-grid does not process key values with dots. Ex: 127.0.0.1
         cellClass: 'as-grid-cell',
+
+        // referred to in onCellValueChanged
+        nodeHost: node,
+
+        // edit properties
+        editable: isEditable,
+        cellEditorFramework: CellEditor,
+        onCellValueChanged: (p) => {
+          const nodeHost = p.colDef.nodeHost;
+          const config = p.data.name;
+          const { newValue, oldValue } = p;
+
+          if (newValue === oldValue)
+            return;
+
+          onEdit(nodeHost, config, newValue);
+        }
       });
     });
 
@@ -158,11 +95,6 @@ class ConfigEditor extends React.Component {
   }
 
   toRowData(context) {
-    // return same data, needed for 'checkbox' selection to work
-    // on ag-grid
-    if (this.context === context)
-      return this.rowData;
-
     const {config} = this.props;
 
     const nodes = Object.keys(config);
@@ -182,8 +114,6 @@ class ConfigEditor extends React.Component {
       }
     }
 
-    this.context = context;
-    this.rowData = rowData;
     return rowData;
   }
 
@@ -200,23 +130,13 @@ class ConfigEditor extends React.Component {
     return context;
   }
 
-  isEditable() {
-    let {isEditable, config} = this.props;
-    if (Object.keys(config).length > 1)
-      return false;
-
-    return isEditable;
-  }
-
   render() {
-    const {showEdit, editInProgress, editErrorMessage, selectedConfigs, height} = this.state;
+    const {height} = this.state;
 
     const allContexts = this.allContexts();
     const context = this.currentContext();
     const rowData = this.toRowData(context);
     const columnDefs = this.toColumnDefs();
-    const isEditable = this.isEditable();
-    const nodeConfigs = this.configsOfSingleNode();
 
     return (
       <div>
@@ -224,39 +144,17 @@ class ConfigEditor extends React.Component {
         <Tabs names={allContexts} selected={context} onSelect={this.onContextTabSelect}/>
         }
 
-        {!showEdit &&
         <div className="ag-material" id={this.id} style={{height: height}}>
-          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40"
-            onRowSelected={this.onRowSelected} rowSelection="multiple" />
-
-          {isEditable &&
-          <Button style={{marginTop: 20}} disabled={selectedConfigs.length === 0} color="primary" onClick={this.onShowEdit}> Edit </Button>
-          }
+          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40" suppressScrollOnNewData enableColResize />
         </div>
-        }
-
-        {showEdit &&
-        <div className="row">
-          <div className="col-xl-12 as-section-header">
-            Update Config
-          </div>
-          <div className="col-xl-12" style={{marginTop: 10}}>
-            <EditConfig config={nodeConfigs} inProgress={editInProgress} errorMessage={editErrorMessage}
-              onEdit={this.onEdit} onCancel={this.onHideEdit} />
-          </div>
-        </div>
-        }
-
       </div>
     );
   }
 }
 
 ConfigEditor.PropTypes = {
-  // Edit works only for a single node
-  //
-  // callback to edit the configs
-  // onEdit(configs)
+  // (optional) callback to edit the configs
+  // onEdit(nodeHost, configName, configValue)
   onEdit: PropTypes.func.isRequired,
 
   // can the configs be edited
@@ -274,6 +172,58 @@ ConfigEditor.PropTypes = {
   // }
   config: PropTypes.object,
 };
+
+class CellEditor extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      value: props.value
+    };
+
+    this.onInputChange = this.onInputChange.bind(this);
+  }
+
+  onInputChange(evt) {
+    let { value, name } = evt.target;
+
+    if (typeof(name) === 'number') {
+      // remove spurious non number character
+      const c = value.slice(-1);
+      if (c < '0' || c > '9')
+        value = value.slice(0, -1);
+
+      value = parseInt(value, 10);
+    }
+
+    this.setState({
+      value: value,
+    });
+  }
+
+  getValue() {
+    return this.state.value;
+  }
+
+  render() {
+    const { value } = this.state;
+    
+    if (value === 'true' || value === 'false' || typeof(value) === 'boolean') {
+      return (
+        <Input type="select" value={value} onChange={this.onInputChange}>
+          <option value="true"> True </option>
+          <option value="false"> False </option>
+        </Input>
+      );
+    }
+
+    if (typeof(value) === 'number') {
+      return <Input type="number" onChange={this.onInputChange} value={value} />;
+    }
+
+    return <Input type="text" onChange={this.onInputChange} value={value} />;
+  }
+}
 
 export default ConfigEditor;
 

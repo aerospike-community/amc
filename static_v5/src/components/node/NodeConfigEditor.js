@@ -15,6 +15,8 @@ class NodeConfigEditor extends React.Component {
     this.state = {
       config: null,
       editSuccessful: false,
+      editFailed: false,
+      editMessage: '',
     };
 
     this.onEdit = this.onEdit.bind(this);
@@ -49,42 +51,54 @@ class NodeConfigEditor extends React.Component {
     this.fetchConfig(clusterID, nodeHost);
   }
 
-  onEdit(config) {
+  onEdit(nh, configName, configValue) {
     const { clusterID, nodeHost }  = this.props;
-    const p = setConfig(clusterID, nodeHost, config);
-    p.then((config) => {
-      this.setState({
-        // redraw config editor
-        config: null,
-        editSuccessful: true,
-      });
-
-      window.setTimeout(() => {
-        this.setState({
-          editSuccessful: false
-        });
-      }, 2000);
-
-      this.fetchConfig(clusterID, nodeHost);
-
-      return config;
+    const p = setConfig(clusterID, nodeHost, {
+      [configName]: configValue
     });
+
+    const setState = (editSuccessful, editFailed, editMessage) => {
+      this.setState({
+        editSuccessful: editSuccessful,
+        editFailed: editFailed,
+        editMessage: editMessage
+      });
+    };
+
+    p.then((config) => {
+        const editMessage = `${nodeHost} - Config '${configName}' changed to '${configValue}'`;
+        setState(true, false, editMessage);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+        this.fetchConfig(clusterID, nodeHost);
+      })
+      .catch((message) => {
+        const editMessage = `${nodeHost} - Failed to change '${configName}' to '${configValue}'`;
+        setState(false, true, editMessage);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+        this.fetchConfig(clusterID, nodeHost);
+      });
 
     return p;
   }
 
   render() {
-    const { config, editSuccessful } = this.state;
+    const { config, editSuccessful, editFailed, editMessage } = this.state;
 
     if (config === null)
       return null;
 
     return (
       <div>
-        <ConfigEditor config={config} onEdit={this.onEdit} isEditable="true"/>
+        <ConfigEditor config={config} onEdit={this.onEdit} isEditable={{true}} />
 
         {editSuccessful &&
-          <AlertModal header="Success" message="Successfully edited config" type="success" />
+          <AlertModal header="Success" message={editMessage} type="success" />
+        }
+
+        {editFailed && 
+          <AlertModal header="Failed" message={editMessage} type="error" />
         }
       </div>
     );

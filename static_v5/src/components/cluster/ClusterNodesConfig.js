@@ -3,7 +3,9 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import ConfigEditor from 'components/ConfigEditor';
+import AlertModal from 'components/AlertModal';
 import { getNodesConfig } from 'api/clusterConnections';
+import { setConfig } from 'api/node';
 
 // ClusterNodesConfig shows the configurations of the nodes of a cluster
 class ClusterNodesConfig extends React.Component {
@@ -12,7 +14,12 @@ class ClusterNodesConfig extends React.Component {
 
     this.state = {
       config: null,
+      editSuccessful: false,
+      editFailed: false,
+      editMessage: '',
     };
+
+    this.onEdit = this.onEdit.bind(this);
   }
 
   fetchConfig(clusterID) {
@@ -47,14 +54,56 @@ class ClusterNodesConfig extends React.Component {
     this.fetchConfig(clusterID);
   }
 
+  onEdit(nodeHost, configName, configValue) {
+    const { clusterID }  = this.props;
+    const p = setConfig(clusterID, nodeHost, {
+      [configName]: configValue
+    });
+
+    const setState = (editSuccessful, editFailed, editMessage) => {
+      this.setState({
+        editSuccessful: editSuccessful,
+        editFailed: editFailed,
+        editMessage: editMessage
+      });
+    };
+
+    p.then((config) => {
+        const editMessage = `${nodeHost} - Config '${configName}' changed to '${configValue}'`;
+        setState(true, false, editMessage);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+        this.fetchConfig(clusterID);
+      })
+      .catch((message) => {
+        const editMessage = `${nodeHost} - Failed to change '${configName}' to '${configValue}'`;
+        setState(false, true, editMessage);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+        this.fetchConfig(clusterID);
+      });
+
+    return p;
+  }
+
   render() {
-    const { config } = this.state;
+    const { config, editSuccessful, editFailed, editMessage } = this.state;
 
     if (config === null)
       return null;
 
     return (
-        <ConfigEditor config={config} isEditable="false"/>
+      <div>
+        <ConfigEditor config={config} onEdit={this.onEdit} isEditable={{true}} />
+
+        {editSuccessful &&
+          <AlertModal header="Success" message={editMessage} type="success" />
+        }
+
+        {editFailed && 
+          <AlertModal header="Failed" message={editMessage} type="error" />
+        }
+      </div>
     );
   }
 }
