@@ -1122,6 +1122,8 @@ func unmarshalSetConfigNamespacePayload(ctx context.Context, service *goa.Servic
 type NodeController interface {
 	goa.Muxer
 	Config(*ConfigNodeContext) error
+	Jobs(*JobsNodeContext) error
+	KillJob(*KillJobNodeContext) error
 	Latency(*LatencyNodeContext) error
 	SetConfig(*SetConfigNodeContext) error
 	Show(*ShowNodeContext) error
@@ -1133,6 +1135,8 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/jobs", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
@@ -1153,6 +1157,40 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	h = handleNodeOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("config", h, nil))
 	service.LogInfo("mount", "ctrl", "Node", "action", "Config", "route", "GET /api/v1/connections/:connId/nodes/:node/config", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewJobsNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Jobs(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/jobs", ctrl.MuxHandler("jobs", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Jobs", "route", "GET /api/v1/connections/:connId/nodes/:node/jobs", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewKillJobNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.KillJob(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("kill-job", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "KillJob", "route", "GET /api/v1/connections/:connId/nodes/:node/jobs/:trid", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request

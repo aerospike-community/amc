@@ -575,6 +575,30 @@ func (mt *AerospikeAmcIndexWrapperResponse) Validate() (err error) {
 	return
 }
 
+// Job (default view)
+//
+// Identifier: application/vnd.aerospike.amc.job.response+json; view=default
+type AerospikeAmcJobResponse struct {
+	// set name
+	JobCount int `form:"jobCount" json:"jobCount" xml:"jobCount"`
+	// namespace
+	Jobs []map[string]interface{} `form:"jobs" json:"jobs" xml:"jobs"`
+	// Transaction ID
+	Limit int `form:"limit" json:"limit" xml:"limit"`
+	// Module Name
+	Offset int `form:"offset" json:"offset" xml:"offset"`
+}
+
+// Validate validates the AerospikeAmcJobResponse media type instance.
+func (mt *AerospikeAmcJobResponse) Validate() (err error) {
+
+	if mt.Jobs == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "jobs"))
+	}
+
+	return
+}
+
 // Latency Data (default view)
 //
 // Identifier: application/vnd.aerospike.amc.latency.response+json; view=default

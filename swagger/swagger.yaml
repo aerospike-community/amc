@@ -812,37 +812,79 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.index.wrapper.response+json;
       view=default'
     type: object
+  AerospikeAmcJobResponse:
+    description: Job (default view)
+    example:
+      jobCount: 5.0500844e+18
+      jobs:
+      - Quo et cumque nihil dignissimos.: 1981-05-21T06:30:53+02:00
+      limit: 9.1969255e+18
+      offset: 5.648314e+18
+    properties:
+      jobCount:
+        description: set name
+        example: 5.0500844e+18
+        format: int64
+        type: integer
+      jobs:
+        description: namespace
+        example:
+        - Quo et cumque nihil dignissimos.: 1981-05-21T06:30:53+02:00
+        items:
+          additionalProperties: true
+          example:
+            Quo et cumque nihil dignissimos.: 1981-05-21T06:30:53+02:00
+          type: object
+        type: array
+      limit:
+        description: Transaction ID
+        example: 9.1969255e+18
+        format: int64
+        type: integer
+      offset:
+        description: Module Name
+        example: 5.648314e+18
+        format: int64
+        type: integer
+    required:
+    - offset
+    - limit
+    - jobs
+    - jobCount
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.job.response+json;
+      view=default'
+    type: object
   AerospikeAmcNamespaceConfigResponse:
     description: Node Config (default view)
     example:
-      address: Quas minima ipsum ut voluptas.
+      address: Quis eum.
       config:
-        Voluptas repudiandae velit veritatis.: false
-      error: Aut et voluptate et rerum molestiae enim.
-      namespace: Ut inventore.
-      status: Repudiandae distinctio magnam accusantium voluptas et.
+        Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
+      error: Modi repudiandae distinctio magnam accusantium voluptas et.
+      namespace: Sit porro natus eveniet velit ducimus laboriosam.
+      status: Quam dicta natus.
     properties:
       address:
         description: Node Address
-        example: Quas minima ipsum ut voluptas.
+        example: Quis eum.
         type: string
       config:
         additionalProperties: true
         description: Node config
         example:
-          Voluptas repudiandae velit veritatis.: false
+          Et voluptate et rerum molestiae enim.: 2009-04-10T17:23:54+02:00
         type: object
       error:
         description: Error message
-        example: Aut et voluptate et rerum molestiae enim.
+        example: Modi repudiandae distinctio magnam accusantium voluptas et.
         type: string
       namespace:
         description: Namespace Name
-        example: Ut inventore.
+        example: Sit porro natus eveniet velit ducimus laboriosam.
         type: string
       status:
         description: Node status
-        example: Repudiandae distinctio magnam accusantium voluptas et.
+        example: Quam dicta natus.
         type: string
     required:
     - address
@@ -863,10 +905,10 @@ definitions:
         free-bytes: 5.876103e+18
         total-bytes: 5.824241e+18
         used-bytes: 2.5501883e+18
-      name: Sit porro natus eveniet velit ducimus laboriosam.
+      name: Et et odit doloremque et.
       stats:
-        Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
-      status: Et est ipsa dolorem sit quibusdam.
+        Dolorem sit quibusdam.: 1986-09-24T23:19:12+02:00
+      status: Ipsum dolor ut exercitationem molestiae.
     properties:
       disk:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
@@ -874,17 +916,17 @@ definitions:
         $ref: '#/definitions/AerospikeAmcResourceUsageResponse'
       name:
         description: Namespace Name
-        example: Sit porro natus eveniet velit ducimus laboriosam.
+        example: Et et odit doloremque et.
         type: string
       stats:
         additionalProperties: true
         description: Namespace statistics
         example:
-          Dicta natus saepe et.: 2011-03-25T00:25:11+01:00
+          Dolorem sit quibusdam.: 1986-09-24T23:19:12+02:00
         type: object
       status:
         description: Cluster/Node status
-        example: Et est ipsa dolorem sit quibusdam.
+        example: Ipsum dolor ut exercitationem molestiae.
         type: string
     required:
     - name
@@ -898,29 +940,29 @@ definitions:
   AerospikeAmcNodeConfigResponse:
     description: Node Config (default view)
     example:
-      address: Rerum deserunt ipsum.
+      address: Inventore perferendis.
       config:
-        Exercitationem molestiae ipsam inventore perferendis quia autem.: 1977-08-16T01:15:05+01:00
-      error: Aut molestiae autem.
-      status: Qui quia repellat sint minima est numquam.
+        Voluptatem iusto et aut.: 9.0669605e+17
+      error: Qui quia repellat sint minima est numquam.
+      status: Aut alias dolor quis id.
     properties:
       address:
         description: Node Address
-        example: Rerum deserunt ipsum.
+        example: Inventore perferendis.
         type: string
       config:
         additionalProperties: true
         description: Node config
         example:
-          Exercitationem molestiae ipsam inventore perferendis quia autem.: 1977-08-16T01:15:05+01:00
+          Voluptatem iusto et aut.: 9.0669605e+17
         type: object
       error:
         description: Error message
-        example: Aut molestiae autem.
+        example: Qui quia repellat sint minima est numquam.
         type: string
       status:
         description: Node status
-        example: Qui quia repellat sint minima est numquam.
+        example: Aut alias dolor quis id.
         type: string
     required:
     - address
@@ -963,19 +1005,19 @@ definitions:
     example:
       IgnoreGenerationNumber: true
       MissingRecordsOnly: true
-      SSHPassword: Ab nihil.
-      SSHUser: Nobis quos unde sit iusto alias.
-      Threads: 8.728471e+18
-      clusterId: Eveniet fuga velit quae autem dolorem.
-      createDate: 7.541641e+18
-      error: Officia libero nam excepturi explicabo.
-      finishDate: 3.9935537e+17
-      id: Aut minima animi distinctio.
-      namespace: Laudantium rem voluptas sit.
-      progress: 8.5724276e+18
-      sourceAddress: Praesentium distinctio aut fugiat tempore deserunt dignissimos.
-      sourcePath: Voluptatem incidunt doloremque voluptatem laudantium voluptatem.
-      status: Dicta est eum facilis.
+      SSHPassword: Iusto alias quibusdam.
+      SSHUser: Eveniet fuga velit quae autem dolorem.
+      Threads: 7.541641e+18
+      clusterId: Officia libero nam excepturi explicabo.
+      createDate: 3.9935537e+17
+      error: Aut minima animi distinctio.
+      finishDate: 1.0085657e+18
+      id: Rem voluptas sit ad distinctio praesentium.
+      namespace: Aut fugiat tempore deserunt dignissimos qui voluptatem.
+      progress: 4.9910264e+16
+      sourceAddress: Voluptatem laudantium voluptatem quia dicta est.
+      sourcePath: Facilis quas voluptatibus repudiandae qui doloremque rem.
+      status: Autem est accusamus et.
     properties:
       IgnoreGenerationNumber:
         description: Indicates whether the restore should only update records with
@@ -989,59 +1031,59 @@ definitions:
         type: boolean
       SSHPassword:
         description: SSH user's password
-        example: Ab nihil.
+        example: Iusto alias quibusdam.
         type: string
       SSHUser:
         description: SSH User
-        example: Nobis quos unde sit iusto alias.
+        example: Eveniet fuga velit quae autem dolorem.
         type: string
       Threads:
         description: Number of working threads.
-        example: 8.728471e+18
+        example: 7.541641e+18
         format: int64
         type: integer
       clusterId:
         description: Cluster Id
-        example: Eveniet fuga velit quae autem dolorem.
+        example: Officia libero nam excepturi explicabo.
         type: string
       createDate:
         description: The date when the restore was created
-        example: 7.541641e+18
+        example: 3.9935537e+17
         format: int64
         type: integer
       error:
         description: Error message in case the restore was not successful
-        example: Officia libero nam excepturi explicabo.
+        example: Aut minima animi distinctio.
         type: string
       finishDate:
         description: The date when the restore was finished
-        example: 3.9935537e+17
+        example: 1.0085657e+18
         format: int64
         type: integer
       id:
         description: Restore Id
-        example: Aut minima animi distinctio.
+        example: Rem voluptas sit ad distinctio praesentium.
         type: string
       namespace:
         description: Namespace
-        example: Laudantium rem voluptas sit.
+        example: Aut fugiat tempore deserunt dignissimos qui voluptatem.
         type: string
       progress:
         description: Restore's progress in percent
-        example: 8.5724276e+18
+        example: 4.9910264e+16
         format: int64
         type: integer
       sourceAddress:
         description: Host on which the backup file is located
-        example: Praesentium distinctio aut fugiat tempore deserunt dignissimos.
+        example: Voluptatem laudantium voluptatem quia dicta est.
         type: string
       sourcePath:
         description: Host on which the backup file is located
-        example: Voluptatem incidunt doloremque voluptatem laudantium voluptatem.
+        example: Facilis quas voluptatibus repudiandae qui doloremque rem.
         type: string
       status:
         description: Restore's status
-        example: Dicta est eum facilis.
+        example: Autem est accusamus et.
         type: string
     required:
     - id
@@ -1064,18 +1106,18 @@ definitions:
     description: Set object (default view)
     example:
       set:
-        Repudiandae qui doloremque.: 0.92440695
-      status: Est accusamus et nostrum delectus.
+        Molestiae aliquid a qui odio.: 1996-06-25T21:31:46+02:00
+      status: Voluptatem ut deserunt voluptatem modi vitae aperiam.
     properties:
       set:
         additionalProperties: true
         description: Set's Attributes
         example:
-          Repudiandae qui doloremque.: 0.92440695
+          Molestiae aliquid a qui odio.: 1996-06-25T21:31:46+02:00
         type: object
       status:
         description: Node's Status
-        example: Est accusamus et nostrum delectus.
+        example: Voluptatem ut deserunt voluptatem modi vitae aperiam.
         type: string
     required:
     - status
@@ -1100,17 +1142,11 @@ definitions:
     example:
       status: "on"
       throughput:
-        Consequuntur quo quia voluptatem ut deserunt.:
-          Vitae aperiam provident.:
-          - failed: 0.3326313
-            successful: 0.79623795
-            timestamp: 2.45433e+18
-          - failed: 0.3326313
-            successful: 0.79623795
-            timestamp: 2.45433e+18
-          - failed: 0.3326313
-            successful: 0.79623795
-            timestamp: 2.45433e+18
+        Facilis est impedit.:
+          Consequatur natus rerum rerum.:
+          - failed: 0.6062921
+            successful: 0.3453444
+            timestamp: 7.7419297e+18
     properties:
       status:
         description: Cluster/Node Status
@@ -1120,17 +1156,11 @@ definitions:
         additionalProperties: true
         description: Throughput Data
         example:
-          Consequuntur quo quia voluptatem ut deserunt.:
-            Vitae aperiam provident.:
-            - failed: 0.3326313
-              successful: 0.79623795
-              timestamp: 2.45433e+18
-            - failed: 0.3326313
-              successful: 0.79623795
-              timestamp: 2.45433e+18
-            - failed: 0.3326313
-              successful: 0.79623795
-              timestamp: 2.45433e+18
+          Facilis est impedit.:
+            Consequatur natus rerum rerum.:
+            - failed: 0.6062921
+              successful: 0.3453444
+              timestamp: 7.7419297e+18
         type: object
     required:
     - status
@@ -1167,7 +1197,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Repellat qui totam dolorem.
+          example: Maiores doloribus ipsam.
           type: string
         type: array
       username:
@@ -1406,7 +1436,7 @@ definitions:
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
-      connectOnLogin: false
+      connectOnLogin: true
       name: Payments Cluster
       seeds:
       - host: 127.0.0.1
@@ -1423,7 +1453,7 @@ definitions:
         type: string
       connectOnLogin:
         description: Should AMC connect to this cluster automatically after user login?
-        example: false
+        example: true
         type: boolean
       name:
         description: Connection Name
@@ -1448,15 +1478,15 @@ definitions:
     type: object
   SaveIndexPayload:
     example:
-      binName: Debitis consequatur natus rerum.
+      binName: Alias et beatae.
       indexName: idxAccounts
-      namespace: Ut ut consectetur et non voluptatum.
-      setName: Eum quo alias et beatae.
+      namespace: Rerum repellat.
+      setName: Repellat qui totam dolorem.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Debitis consequatur natus rerum.
+        example: Alias et beatae.
         type: string
       indexName:
         description: Index's Name
@@ -1464,11 +1494,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Ut ut consectetur et non voluptatum.
+        example: Rerum repellat.
         type: string
       setName:
         description: Index's Set name
-        example: Eum quo alias et beatae.
+        example: Repellat qui totam dolorem.
         type: string
       type:
         description: Index's type
@@ -1486,7 +1516,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Rerum repellat.
+      source: Est facilis eum nemo omnis voluptatem.
       type: LUA
     properties:
       name:
@@ -1495,7 +1525,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Rerum repellat.
+        example: Est facilis eum nemo omnis voluptatem.
         type: string
       type:
         description: Module's type
@@ -1541,7 +1571,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Est facilis eum nemo omnis voluptatem.
+          example: Rerum impedit autem maxime illo.
           type: string
         type: array
       username:
@@ -2239,7 +2269,7 @@ paths:
       - index
     post:
       description: |-
-        Save a index in the cluster
+        Save an index in the cluster
 
         Required security scopes:
           * `api:general`
@@ -2729,6 +2759,128 @@ paths:
       - jwt:
         - api:enterprise
       summary: set config node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/jobs:
+    get:
+      description: |-
+        Returns the list of jobs for the node.
+
+        Required security scopes:
+          * `api:general`
+      operationId: node#jobs
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Number of jobs per page
+        in: query
+        name: limit
+        required: false
+        type: integer
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: Page number of the job list
+        in: query
+        name: offset
+        required: false
+        type: integer
+      - description: Field by which to sort the results
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      - description: Sort Order
+        in: query
+        name: sortOrder
+        pattern: desc|asc
+        required: false
+        type: string
+      - description: Status of the job
+        in: query
+        name: status
+        pattern: in-progress|completed
+        required: false
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.job.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcJobResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: jobs node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/jobs/{trid}:
+    get:
+      description: |-
+        Returns the list of jobs for the node.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#kill-job
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Module
+        in: query
+        name: module
+        pattern: scan|query
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: TransactionId
+        in: path
+        name: trid
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: kill-job node
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/latency:

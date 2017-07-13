@@ -76,6 +76,68 @@ var _ = Resource("node", func() {
 		Response(InternalServerError)
 	})
 
+	Action("jobs", func() {
+		// Security(JWT, func() {
+		// 	Scope("api:enterprise")
+		// })
+
+		Description("Returns the list of jobs for the node.")
+		Routing(GET(":node/jobs"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Param("sortBy", String, "Field by which to sort the results", func() { Example("time-since-done") })
+			Param("sortOrder", String, "Sort Order", func() {
+				Example("desc")
+				Pattern("desc|asc")
+			})
+			Param("offset", Integer, "Page number of the job list", func() { Example(1) })
+			Param("limit", Integer, "Number of jobs per page", func() { Example(1) })
+			Param("status", String, "Status of the job", func() {
+				Example("in-progress|completed")
+				Pattern("in-progress|completed")
+			})
+			// Param("module", String, "Module", func() { Example("scan|query") })
+
+			Required("node")
+		})
+
+		Response(OK, JobResponseMedia)
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("kill-job", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the list of jobs for the node.")
+		Routing(GET(":node/jobs/:trid"))
+		Params(func() {
+			Param("node", String, "Node Address", func() { Example("127.0.0.1:3000") })
+			Param("module", String, "Module", func() {
+				Example("scan|query")
+				Pattern("scan|query")
+			})
+			Param("trid", String, "TransactionId", func() {
+				Example("3177513851364758020")
+			})
+
+			Required("node", "module", "trid")
+		})
+
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("config", func() {
 		Security(JWT, func() {
 			Scope("api:enterprise")
@@ -171,6 +233,29 @@ var NodeConfigResponseMedia = MediaType("application/vnd.aerospike.amc.node.conf
 		Attribute("error")
 
 		Required("address", "status", "config")
+	})
+
+})
+
+var JobResponseMedia = MediaType("application/vnd.aerospike.amc.job.response+json", func() {
+	Description("Job")
+
+	Attributes(func() {
+		Attribute("offset", Integer, "Module Name")
+		Attribute("limit", Integer, "Transaction ID")
+		Attribute("jobs", ArrayOf(HashOf(String, Any)), "namespace")
+		Attribute("jobCount", Integer, "set name")
+
+		Required("offset", "limit", "jobs", "jobCount")
+	})
+
+	View("default", func() {
+		Attribute("offset")
+		Attribute("limit")
+		Attribute("jobs")
+		Attribute("jobCount")
+
+		Required("offset", "limit", "jobs", "jobCount")
 	})
 
 })
