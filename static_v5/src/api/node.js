@@ -53,3 +53,18 @@ export function setConfig(clusterID, nodeHost, config) {
   });
 }
 
+// getJobs fetches the jobs on a node
+export function getJobs(clusterID, nodeHost, offset = 0, limit = 100, sortBy, sortOrder) {
+  let query = {
+    offset: offset,
+    limit: limit
+  };
+
+  if (sortBy)
+    query.sortBy = sortBy;
+  if (sortOrder)
+    query.sortOrder = sortOrder;
+
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs', query);
+  return get(url);
+}

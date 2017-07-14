@@ -84,6 +84,7 @@ const nodeActions = {
   },
   Configuration: {},
   Latency: {},
+  Jobs: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 
