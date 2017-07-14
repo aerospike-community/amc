@@ -123,7 +123,6 @@ func (c *NodeController) Jobs(ctx *app.JobsNodeContext) error {
 		common.StatsBy(sortFunc).Sort(sortField, jobs)
 	}
 
-	offset *= limit
 	if offset+limit <= len(jobs) {
 		jobs = jobs[offset : offset+limit]
 	} else {
