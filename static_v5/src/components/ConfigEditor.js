@@ -6,6 +6,7 @@ import {AgGridReact} from 'ag-grid-react';
 import { Button, Input } from 'reactstrap';
 
 import Tabs from 'components/Tabs';
+import AlertModal from 'components/AlertModal';
 import { nextNumber, distanceToBottom } from 'classes/util';
 
 // ConfigEditor provides a view to edit configuration
@@ -15,14 +16,21 @@ class ConfigEditor extends React.Component {
     super(props);
 
     this.state = {
+      config: null, 
+
       selectedContext: null,
 
+      editSuccessful: false,
+      editFailed: false,
+      editMessage: '',
+
       height: 200,
-      showEdit: false,
     };
 
     this.id = 'config_editor_' + nextNumber();
 
+    this.fetchConfig = this.fetchConfig.bind(this);
+    this.onEdit = this.onEdit.bind(this);
     this.onContextTabSelect = this.onContextTabSelect.bind(this);
   }
 
@@ -32,16 +40,34 @@ class ConfigEditor extends React.Component {
     });
   }
 
+  fetchConfig() {
+    this.props.fetchConfig()
+      .then((config) => {
+        let { selectedContext } = this.state;
+        if (selectedContext === null) {
+          selectedContext = this.allContexts(config)[0];
+        }
+
+        this.setState({
+          config: config,
+          selectedContext: selectedContext,
+        });
+      })
+      .catch((message) => {
+        console.error(message);
+      });
+  }
+
+  componentWillMount() {
+    this.fetchConfig();
+  }
+
   componentDidMount() {
     const elm = document.getElementById(this.id);
-    let h = distanceToBottom(elm) - 20;
-
-    if (this.props.isEditable)
-      h -= 80; // space for buttons
+    let height = distanceToBottom(elm) - 20;
 
     this.setState({
-      height: h,
-      selectedContext: this.allContexts()[0],
+      height: height,
     });
   }
 
@@ -49,18 +75,41 @@ class ConfigEditor extends React.Component {
     return nodeHost.replace(/\./g, '_');
   }
 
-  toColumnDefs() {
+  onEdit(nodeHost, configName, configValue) {
+    const setState = (editSuccessful, editFailed, editMessage) => {
+      this.setState({
+        editSuccessful: editSuccessful,
+        editFailed: editFailed,
+        editMessage: editMessage
+      });
+    };
+
+    this.props.onEdit(nodeHost, configName, configValue)
+      .then((message) => {
+        setState(true, false, message);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+        this.fetchConfig();
+      })
+      .catch((message) => {
+        setState(false, true, message);
+
+        window.setTimeout(() => setState(false, false, ''), 2000);
+      });
+  }
+
+  toColumnDefs(config) {
     // header
     const columnDefs = [{
       headerName: 'Config',
       field: 'name',
-      width: 280,
+      width: 350,
       cellClass: 'as-grid-cell',
       pinned: 'left',
       cellStyle: {background: '#eee'},
     }];
 
-    const {config, onEdit} = this.props;
+    const {onEdit} = this.props;
     const isEditable = this.props.isEditable && typeof(onEdit) === 'function';
 
     const nodes = Object.keys(config);
@@ -86,7 +135,7 @@ class ConfigEditor extends React.Component {
           if (newValue === oldValue)
             return;
 
-          onEdit(nodeHost, config, newValue);
+          this.onEdit(nodeHost, config, newValue);
         }
       });
     });
@@ -94,9 +143,7 @@ class ConfigEditor extends React.Component {
     return columnDefs;
   }
 
-  toRowData(context) {
-    const {config} = this.props;
-
+  toRowData(config, context) {
     const nodes = Object.keys(config);
     const rowData = [];
     if (nodes.length > 0) {
@@ -117,26 +164,30 @@ class ConfigEditor extends React.Component {
     return rowData;
   }
 
-  allContexts() {
-    const {config} = this.props;
+  allContexts(config) {
     const nodes = Object.keys(config);
     const node = nodes[0];
     return Object.keys(config[node]);
   }
 
-  currentContext() {
-    const allContexts = this.allContexts();
+  currentContext(config) {
+    const allContexts = this.allContexts(config);
     const context = this.state.selectedContext || allContexts[0];
     return context;
   }
 
   render() {
-    const {height} = this.state;
+    const { config, height, editSuccessful, editFailed, editMessage } = this.state;
 
-    const allContexts = this.allContexts();
-    const context = this.currentContext();
-    const rowData = this.toRowData(context);
-    const columnDefs = this.toColumnDefs();
+    let grid = null, allContexts = [];
+    if (config) {
+      allContexts = this.allContexts(config);
+      const context = this.currentContext(config);
+      const rowData = this.toRowData(config, context);
+      const columnDefs = this.toColumnDefs(config);
+
+      grid = <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40" suppressScrollOnNewData enableColResize />;
+    }
 
     return (
       <div>
@@ -145,8 +196,16 @@ class ConfigEditor extends React.Component {
         }
 
         <div className="ag-material" id={this.id} style={{height: height}}>
-          <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40" suppressScrollOnNewData enableColResize />
+          {grid}
         </div>
+
+        {editSuccessful &&
+          <AlertModal header="Success" message={editMessage} type="success" />
+        }
+
+        {editFailed && 
+          <AlertModal header="Failed" message={editMessage} type="error" />
+        }
       </div>
     );
   }
@@ -155,22 +214,16 @@ class ConfigEditor extends React.Component {
 ConfigEditor.PropTypes = {
   // (optional) callback to edit the configs
   // onEdit(nodeHost, configName, configValue)
+  // should return a promise
   onEdit: PropTypes.func.isRequired,
+
+  // callback to fetch the configs
+  // fetchConfig() should return a promise
+  // that returns success and failure message appropriately
+  fetchConfig: PropTypes.func.isRequired,
 
   // can the configs be edited
   isEditable: PropTypes.bool.isRequired,
-
-  // {
-  //  'nodeHost': {
-  //    'context_1': {
-  //      'config': value,
-  //      ...
-  //    },
-  //    ...
-  //  },
-  //  ...
-  // }
-  config: PropTypes.object,
 };
 
 class CellEditor extends React.Component {

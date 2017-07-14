@@ -3,7 +3,6 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import ConfigEditor from 'components/ConfigEditor';
-import AlertModal from 'components/AlertModal';
 import { getNodesConfig } from 'api/clusterConnections';
 import { setConfig } from 'api/node';
 
@@ -13,17 +12,28 @@ class ClusterNodesConfig extends React.Component {
     super(props);
 
     this.state = {
-      config: null,
-      editSuccessful: false,
-      editFailed: false,
-      editMessage: '',
+      show: true,  // to redraw the config
     };
 
+    this.fetchConfig = this.fetchConfig.bind(this);
     this.onEdit = this.onEdit.bind(this);
   }
 
-  fetchConfig(clusterID) {
-    getNodesConfig(clusterID)
+  componentWillReceiveProps(nextProps) {
+    const { clusterID }  = this.props;
+
+    const np = nextProps;
+    if (np.clusterID === clusterID)
+      return;
+
+    // force redraw of config editor
+    this.setState({show: false});
+    window.setTimeout(() => this.setState({show: true}), 200);
+  }
+
+  fetchConfig() {
+    const { clusterID } = this.props;
+    return getNodesConfig(clusterID) 
       .then((response) => {
         const configs = {};
         const nodes = Object.keys(response);
@@ -32,77 +42,35 @@ class ClusterNodesConfig extends React.Component {
             all: response[n].config
           }
         });
-        this.setState({
-          config: configs,
-        });
-      })
-      .catch((message) => {
-        console.error(message);
+
+        return configs;
       });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { clusterID }  = this.props;
-
-    const np = nextProps;
-    if (np.clusterID !== clusterID)
-      this.fetchConfig(np.clusterID);
-  }
-
-  componentDidMount() {
-    const { clusterID }  = this.props;
-    this.fetchConfig(clusterID);
   }
 
   onEdit(nodeHost, configName, configValue) {
     const { clusterID }  = this.props;
-    const p = setConfig(clusterID, nodeHost, {
-      [configName]: configValue
-    });
 
-    const setState = (editSuccessful, editFailed, editMessage) => {
-      this.setState({
-        editSuccessful: editSuccessful,
-        editFailed: editFailed,
-        editMessage: editMessage
-      });
+    const successMsg = `${nodeHost} - Config '${configName}' changed to '${configValue}'`;
+    const failMsg = `${nodeHost} - Failed to change '${configName}' to '${configValue}'`;
+
+    const config = {
+      [configName]: configValue
     };
 
-    p.then((config) => {
-        const editMessage = `${nodeHost} - Config '${configName}' changed to '${configValue}'`;
-        setState(true, false, editMessage);
-
-        window.setTimeout(() => setState(false, false, ''), 2000);
-        this.fetchConfig(clusterID);
-      })
-      .catch((message) => {
-        const editMessage = `${nodeHost} - Failed to change '${configName}' to '${configValue}'`;
-        setState(false, true, editMessage);
-
-        window.setTimeout(() => setState(false, false, ''), 2000);
-        this.fetchConfig(clusterID);
-      });
-
-    return p;
+    return setConfig(clusterID, nodeHost, config)
+     .then((config) => successMsg)
+     .catch((message) => { throw failMsg });
   }
 
   render() {
-    const { config, editSuccessful, editFailed, editMessage } = this.state;
-
-    if (config === null)
+    const { show } = this.state;
+    
+    if (show === null)
       return null;
 
     return (
       <div>
-        <ConfigEditor config={config} onEdit={this.onEdit} isEditable={true} />
-
-        {editSuccessful &&
-          <AlertModal header="Success" message={editMessage} type="success" />
-        }
-
-        {editFailed && 
-          <AlertModal header="Failed" message={editMessage} type="error" />
-        }
+        <ConfigEditor fetchConfig={this.fetchConfig} onEdit={this.onEdit} isEditable={true} />
       </div>
     );
   }

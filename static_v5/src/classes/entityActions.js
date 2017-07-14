@@ -102,6 +102,7 @@ const namespaceActions = {
     isDefault: true
   },
   Latency: {},
+  Configuration: {},
 };
 export const NAMESPACE_ACTIONS = extractActions(namespaceActions);
 

@@ -1,5 +1,5 @@
 import { toURLConverter } from 'api/url';
-import { get } from 'api/http';
+import { get, postJSON } from 'api/http';
 
 const toURLPath = toURLConverter('connections');
 
@@ -34,5 +34,19 @@ export function getLatency(clusterID, nodeHost, namespaceName, from, to) {
 export function getStatistics(clusterID, nodeHost, namespaceName) {
   const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/namespaces/' + namespaceName);
   return get(url);
+}
+
+// getConfig fetches the config of the namespace
+export function getConfig(clusterID, nodeHost, namespaceName) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/namespaces/' + namespaceName + '/config');
+  return get(url);
+}
+
+// setConfig sets the configs
+export function setConfig(clusterID, nodeHost, namespaceName, config) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/namespaces/' + namespaceName + '/config');
+  return postJSON(url, {
+    newConfig: config
+  });
 }
 

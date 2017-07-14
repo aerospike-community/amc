@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import ConfigEditor from 'components/ConfigEditor';
-import { getConfig, setConfig } from 'api/node';
+import { getConfig, setConfig } from 'api/namespace';
 
-// NodeConfigEditor shows the configurations of a node
-class NodeConfigEditor extends React.Component {
+// NamespaceConfigEditor shows the configurations of a node
+class NamespaceConfigEditor extends React.Component {
   constructor(props) {
     super(props);
 
@@ -20,9 +20,9 @@ class NodeConfigEditor extends React.Component {
   }
 
   fetchConfig() {
-    const { clusterID, nodeHost } = this.props;
+    const { clusterID, nodeHost, namespaceName } = this.props;
 
-    return getConfig(clusterID, nodeHost)
+    return getConfig(clusterID, nodeHost, namespaceName)
       .then((response) => {
         const config = {
           [nodeHost]: {
@@ -35,10 +35,10 @@ class NodeConfigEditor extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { clusterID, nodeHost }  = this.props;
+    const { clusterID, nodeHost, namespaceName }  = this.props;
 
     const np = nextProps;
-    if (np.clusterID === clusterID && np.nodeHost === nodeHost)
+    if (np.clusterID === clusterID && np.nodeHost === nodeHost && np.namespaceName === namespaceName)
       return;
 
     // force redraw of config editor
@@ -47,16 +47,16 @@ class NodeConfigEditor extends React.Component {
   }
 
   onEdit(nh, configName, configValue) {
-    const { clusterID, nodeHost }  = this.props;
+    const { clusterID, nodeHost, namespaceName }  = this.props;
 
-    const successMsg  = `${nodeHost} - Config '${configName}' changed to '${configValue}'`;
-    const failMsg = `${nodeHost} - Failed to change '${configName}' to '${configValue}'`;
+    const successMsg  = `${namespaceName} - Config '${configName}' changed to '${configValue}' on '${nodeHost}`;
+    const failMsg = `${namespaceName} - Failed to change '${configName}' to '${configValue}' on '${nodeHost}`;
 
     const config = {
       [configName]: configValue
     };
 
-    return setConfig(clusterID, nodeHost, config)
+    return setConfig(clusterID, nodeHost, namespaceName, config)
      .then((config) => successMsg)
      .catch((message) => { throw failMsg });
   }
@@ -75,10 +75,12 @@ class NodeConfigEditor extends React.Component {
   }
 }
 
-NodeConfigEditor.PropTypes = {
+NamespaceConfigEditor.PropTypes = {
   clusterID: PropTypes.string.isRequired,
   nodeHost: PropTypes.string.isRequired,
+  namespaceName: PropTypes.string.isRequired,
 };
 
-export default NodeConfigEditor;
+export default NamespaceConfigEditor;
+
 

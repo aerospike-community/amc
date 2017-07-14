@@ -3,9 +3,10 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
-import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
-import NamespaceLatency from 'components/namespace/NamespaceLatency';
 import NamespacesTable from 'components/namespace/NamespacesTable';
+import NamespaceLatency from 'components/namespace/NamespaceLatency';
+import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
+import NamespaceConfigEditor from 'components/namespace/NamespaceConfigEditor';
 import { getStatistics } from 'api/namespace';
 import { NAMESPACE_ACTIONS } from 'classes/entityActions';
 
@@ -17,7 +18,7 @@ class NamespaceDashboard extends React.Component {
       namespaces: []
     };
 
-    this.views = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency];
+    this.views = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, NAMESPACE_ACTIONS.Configuration];
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 
@@ -71,6 +72,10 @@ class NamespaceDashboard extends React.Component {
 
         {view === NAMESPACE_ACTIONS.Latency && 
         <NamespaceLatency clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
+        }
+
+        {view === NAMESPACE_ACTIONS.Configuration && 
+        <NamespaceConfigEditor clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         }
       </div>
       );
