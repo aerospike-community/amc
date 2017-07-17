@@ -125,6 +125,8 @@ func (c *NodeController) Jobs(ctx *app.JobsNodeContext) error {
 
 	if offset+limit <= len(jobs) {
 		jobs = jobs[offset : offset+limit]
+	} else if offset < len(jobs) {
+		jobs = jobs[offset:]
 	} else {
 		jobs = []common.Stats{}
 	}
