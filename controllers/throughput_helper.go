@@ -24,7 +24,9 @@ func throughput(obj throughputEntity, ctxFrom, ctxUntil *int) map[string]map[str
 
 			statRes := make(map[string][]*app.AerospikeAmcThroughputResponse, len(primaryVals))
 			for node, yValues := range primaryVals {
-				statRes[node] = []*app.AerospikeAmcThroughputResponse{{Timestamp: yValues.TimestampJsonInt(nil), Successful: yValues.Value(&zeroVal), Failed: secondaryVals[node].Value(&zeroVal)}}
+				succ := *yValues.Value(&zeroVal)
+				fail := *secondaryVals[node].Value(&zeroVal) - *yValues.Value(&zeroVal)
+				statRes[node] = []*app.AerospikeAmcThroughputResponse{{Timestamp: yValues.TimestampJsonInt(nil), Successful: &succ, Failed: &fail}}
 			}
 
 			throughputData[outStatName] = statRes
@@ -53,7 +55,9 @@ func throughput(obj throughputEntity, ctxFrom, ctxUntil *int) map[string]map[str
 			for label, yValues := range primaryVals {
 				vals := make([]*app.AerospikeAmcThroughputResponse, 0, len(primaryVals))
 				for i := range yValues {
-					vals = append(vals, &app.AerospikeAmcThroughputResponse{Timestamp: yValues[i].TimestampJsonInt(nil), Successful: yValues[i].Value(&zeroVal), Failed: secondaryVals[label][i].Value(&zeroVal)})
+					succ := *yValues[i].Value(&zeroVal)
+					fail := *secondaryVals[label][i].Value(&zeroVal) - *yValues[i].Value(&zeroVal)
+					vals = append(vals, &app.AerospikeAmcThroughputResponse{Timestamp: yValues[i].TimestampJsonInt(nil), Successful: &succ, Failed: &fail})
 				}
 
 				statRes[label] = vals
