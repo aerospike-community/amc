@@ -424,6 +424,8 @@ func (ns *Namespace) Stats() common.Stats {
 		res[k] = v
 	}
 
+	res["raw_stats"] = ns.StatsAttrs()
+
 	return res
 }
 
