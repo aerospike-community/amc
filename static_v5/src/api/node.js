@@ -53,8 +53,12 @@ export function setConfig(clusterID, nodeHost, config) {
   });
 }
 
+// status of jobs
+export const InProgress = 'in-progress';
+export const Complete = 'completed';
+
 // getJobs fetches the jobs on a node
-export function getJobs(clusterID, nodeHost, offset = 0, limit = 100, sortBy, sortOrder) {
+export function getJobs(clusterID, nodeHost, status, offset = 0, limit = 100, sortBy, sortOrder) {
   let query = {
     offset: offset,
     limit: limit
@@ -64,6 +68,8 @@ export function getJobs(clusterID, nodeHost, offset = 0, limit = 100, sortBy, so
     query.sortBy = sortBy;
   if (sortOrder)
     query.sortOrder = sortOrder;
+  if (status)
+    query.status = status;
 
   const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs', query);
   return get(url);

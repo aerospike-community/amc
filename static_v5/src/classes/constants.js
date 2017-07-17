@@ -25,4 +25,5 @@ export const VIEW_TYPE = {
   START_VIEW: 'START_VIEW',
 };
 
-
+// polling interval
+export const POLL_INTERVAL = 10*1000; // 5000 milliseconds

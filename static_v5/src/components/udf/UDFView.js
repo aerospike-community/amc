@@ -163,10 +163,10 @@ class UDFView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`UDF - ${udfName}`} 
 
-            <Button className="float-right" style={{marginLeft: '5px'}} disabled={isUpdating} 
+            <Button className="float-right" disabled={isUpdating} 
                 color="danger" size="sm" onClick={this.onShowDeleteModal}> Delete </Button>
 
-            <Button className="float-right" style={{margin: 0}} disabled={!hasChanged || hasErrors || isUpdating} 
+            <Button className="float-right" disabled={!hasChanged || hasErrors || isUpdating} 
                 color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
           </div>
         </div>

@@ -1,12 +1,14 @@
 import { combineReducers } from 'redux';
-import clusters from 'reducers/clusters';
-import currentView from 'reducers/currentView';
-import entityTree from 'reducers/entityTree';
 import session from 'reducers/session';
+import clusters from 'reducers/clusters';
+import entityTree from 'reducers/entityTree';
+import currentView from 'reducers/currentView';
+import interceptor from 'reducers/interceptor';
 
 import { LOGOUT_USER } from 'actions/authenticate';
 
 const app = combineReducers({
+  interceptor, // _META_ functionality based on actions
   clusters,    // the aerospike clusters
   currentView, // the current view of the app
   entityTree,  // state of the entity tree

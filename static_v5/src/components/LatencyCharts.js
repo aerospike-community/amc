@@ -7,6 +7,7 @@ import { Button } from 'reactstrap';
 import LatencyChart from 'charts/LatencyChart';
 import { nextNumber, replaceUnicode, formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
+import { POLL_INTERVAL } from 'classes/constants';
 
 const Types = {
   reads: 'Reads',
@@ -213,7 +214,7 @@ class LatencyCharts extends React.Component {
             });
           }
         });
-    }, 60*1000); // every minute
+    }, POLL_INTERVAL);
   }
 
   // update chart based on the selected from and to

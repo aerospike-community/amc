@@ -7,6 +7,7 @@ import { Button } from 'reactstrap';
 import ThroughputChart from 'charts/ThroughputChart';
 import { nextNumber, formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
+import { POLL_INTERVAL } from 'classes/constants';
 
 const Types = {
   read_tps: 'Reads per second',
@@ -232,7 +233,7 @@ class ThroughputCharts extends React.Component {
 
           
         });
-    }, 60*1000); // every minute
+    }, POLL_INTERVAL); 
   }
 
   // update chart based on the selected from and to

@@ -155,7 +155,7 @@ class NodesSummary extends React.Component {
                   <th> Cluster Size </th>
                   <th> Disk </th>
                   <th> RAM </th>
-                  <th> Cluster Connections </th>
+                  <th> Client Connections </th>
                 </tr>
               </thead>
               <tbody>
