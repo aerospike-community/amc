@@ -168,7 +168,7 @@
 }
 
 .as-section-header {
-  background: #636363;
+  background: $section-bgcolor;
   font-weight: 100;
   color: white;
   padding: 5px 10px 0 15px;
@@ -176,6 +176,16 @@
 
   & button {
     margin-right: 10px;
+  }
+
+  & div {
+    margin: 0 10px 0 10px;
+    display: inline-block;
+  }
+
+  & select {
+    color: $section-header-action-color;
+    background: $section-bgcolor;
   }
 }
 

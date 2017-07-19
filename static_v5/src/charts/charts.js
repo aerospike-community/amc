@@ -1,11 +1,48 @@
-import nv from 'nvd3';
-import d3 from 'd3';
-import bytes from 'bytes';
 import moment from 'moment';
 
 import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
+import { ThroughputGrouping as TG } from 'charts/constants';
 
-// ThroughputChart draws a chart for the throughput
+// create a new throughput chart
+export function newThroughputChart(operation, selector, data) {
+  if (operation === TG.ByNamespace)
+    return new NamespaceChart(selector, data);
+
+  if (operation === TG.ByTotal)
+    return new TotalChart(selector, data);
+
+  throw `Unknown operation:${operation}`;
+}
+
+// TotalChart draws a chart for the throughput displaying the total
+//
+// selector - selects an svg element
+// throughput - [
+//  { // each of the charts
+//    key: '127.0.0.1:3000', // label name
+//    values: [
+//      { // each of the individual values
+//        value: 12345,
+//        timestamp: 1496807162727,
+//      }, ...]
+//  }, ...]
+class TotalChart extends AbstractStackedAreaChart {
+  constructor(selector, throughput) {
+    super(selector, throughput, true);
+  }
+  
+  // x value of data point
+  x(d) {
+    return d.timestamp;
+  }
+
+  // y value of data point
+  y(d) {
+    return d.value;
+  }
+}
+
+// NamespaceChart draws a chart for the throughput displaying namespaces
 //
 // selector - selects an svg element
 // throughput - [
@@ -18,7 +55,7 @@ import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
 //        timestamp: 1496807162727,
 //      }, ...]
 //  }, ...]
-class ThroughputChart extends AbstractStackedAreaChart {
+class NamespaceChart extends AbstractStackedAreaChart {
   constructor(selector, throughput) {
     super(selector, throughput, true);
   }
@@ -94,6 +131,4 @@ class ThroughputChart extends AbstractStackedAreaChart {
     }
   }
 }
-
-export default ThroughputChart;
 

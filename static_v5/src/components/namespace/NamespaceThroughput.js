@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/namespace';
-import ThroughputCharts from 'components/ThroughputCharts';
+import EntityThroughputCharts from 'components/EntityThroughputCharts';
 
 // NamespaceThroughput provides an overview of the namespace throughput
 class NamespaceThroughput extends React.Component {
@@ -46,7 +46,7 @@ class NamespaceThroughput extends React.Component {
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} />;
+      charts = <EntityThroughputCharts getThroughput={this.getThroughput} />
 
     return charts;
   }

@@ -24,8 +24,10 @@
   font-weight: bold;
 }
 
+
+
 .as-chart-timewindow {
-  color: #88abfc;
+  color: $section-header-action-color;
   cursor: pointer;
   margin-right: 10px;
 
@@ -33,3 +35,4 @@
     text-decoration: underline;
   }
 }
+

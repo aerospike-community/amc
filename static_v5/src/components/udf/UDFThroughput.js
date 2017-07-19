@@ -3,10 +3,11 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/clusterConnections';
-import ThroughputCharts from 'components/ThroughputCharts';
+import EntityThroughputCharts from 'components/EntityThroughputCharts';
+import { ThroughputOperations as TPO } from 'charts/constants';
 
-const ChartPlacements = [{
-  types: ['udf_tps'],
+const Layout = [{
+  operations: [TPO.UDF],
   height: 350,
 }];
 
@@ -27,7 +28,7 @@ class UDFThroughput extends React.Component {
   render() {
     const title = 'UDF Throughput';
     return (
-        <ThroughputCharts getThroughput={this.getThroughput} title={title} chartPlacements={ChartPlacements}/>
+        <EntityThroughputCharts getThroughput={this.getThroughput} title={title} layout={Layout}/>
     );
   }
 }

@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/node';
-import ThroughputCharts from 'components/ThroughputCharts';
+import EntityThroughputCharts from 'components/EntityThroughputCharts';
 
 // NodeThroughput provides an overview of the node throughput
 class NodeThroughput extends React.Component {
@@ -46,7 +46,7 @@ class NodeThroughput extends React.Component {
 
     let charts = null;
     if (showChart)
-      charts = <ThroughputCharts getThroughput={this.getThroughput} />;
+      charts = <EntityThroughputCharts getThroughput={this.getThroughput} />
 
     return charts;
   }
