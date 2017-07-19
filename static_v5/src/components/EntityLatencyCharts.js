@@ -4,27 +4,25 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import ChartsLayout from 'components/ChartsLayout';
-import  ThroughputCharts from 'charts/ThroughputCharts';
-import { ThroughputGrouping, ThroughputOperations as TPO } from 'charts/constants';
+import LatencyCharts from 'charts/LatencyCharts';
+import { LatencyOperations as LO } from 'charts/constants';
 import { nextNumber } from 'classes/util';
 
 // names of the operations in the charts
 const OperationNames = {
-  [TPO.Batch]: 'Batch',
-  [TPO.Query]: 'Query',
-  [TPO.Read]:  'Reads per second',
-  [TPO.Scan]:  'Scan',
-  [TPO.UDF]:   'UDF',
-  [TPO.Write]: 'Writes per second',
+  [LO.Query]: 'Query',
+  [LO.Read]:  'Reads',
+  [LO.UDF]:   'UDF',
+  [LO.Write]: 'Writes',
 };
 
 // the default chart layout 
 const DefaultLayout = [{
-  operations: [TPO.Read, TPO.Write],
+  operations: [LO.Read, LO.Write],
   height: 350,
   header: '', // optional
 }, {
-  operations: [TPO.Batch, TPO.Query, TPO.Scan, TPO.UDF],
+  operations: [LO.Query, LO.UDF],
   header: '', // optional
   height: 200, 
 }];
@@ -35,7 +33,7 @@ class Layout {
     this.num = nextNumber();
   }
 
-  // convert from the EntityThroughputCharts layout form 
+  // convert from the EntityLatencyCharts layout form 
   // to the ChartLayout form
   toChartLayout() {
     const elements = [];
@@ -52,7 +50,7 @@ class Layout {
         charts.push({
           operation: op,
           name: OperationNames[op],
-          id: 'throughput_' + op + '_' + num,
+          id: 'latency' + op + '_' + num,
         });
       });
 
@@ -76,9 +74,9 @@ class Layout {
   }
 }
 
-// EntityThroughputCharts displays charts for a 
+// EntityLatencyCharts displays charts for a 
 // single entity like a node, namespace, udf or cluster
-class EntityThroughputCharts extends React.Component {
+class EntityLatencyCharts extends React.Component {
   constructor(props) {
     super(props);
 
@@ -86,84 +84,60 @@ class EntityThroughputCharts extends React.Component {
     const layout = props.layout || DefaultLayout;
     this.layout = new Layout(layout);
 
-    // options for the chart
-    this.options = [{
-      name: 'By Total',
-      value: ThroughputGrouping.ByTotal,
-    }, {
-      name: 'By Namespace',
-      value: ThroughputGrouping.ByNamespace
-    }];
-
     // charts
     const operations = this.layout.getOperations();
-    this.groupBy = this.props.groupBy || ThroughputGrouping.ByNamespace;
-    this.tpcharts = new ThroughputCharts(this.props.getThroughput, operations, this.groupBy);
+    this.latencyCharts = new LatencyCharts(this.props.getLatency, operations);
 
     this.onUpdateTimeWindow = this.onUpdateTimeWindow.bind(this);
-    this.onOptionSelect = this.onOptionSelect.bind(this);
   }
 
   componentWillUnmount() {
-    this.tpcharts.destroy();
+    this.latencyCharts.destroy();
   }
 
   componentDidMount() {
-    this.tpcharts.init();
+    this.latencyCharts.init();
   }
   
   onUpdateTimeWindow(from, to, inSync) {
-    this.tpcharts.updateWindow(from, to, inSync);
-  }
-
-  onOptionSelect(option) {
-    const op = this.options.find((o) => o.name === option);
-    if (!op)
-      return;
-
-    this.tpcharts.setGrouping(op.value);
+    this.latencyCharts.updateWindow(from, to, inSync);
   }
 
   render() {
-    let title = this.props.title || 'Throughput';
+    let title = this.props.title || 'Latency';
     const layout = this.layout.toChartLayout();
-    const options = this.options.map((op) => op.name);
-    const groupBy = this.options.find((o) => o.value === this.groupBy);
 
     return (
       <div>
         <ChartsLayout 
             title={title}
             layout={layout} 
-            onUpdateTimeWindow={this.onUpdateTimeWindow}
-            options={options} defaultOption={groupBy.name} onOptionSelect={this.onOptionSelect} />
+            onUpdateTimeWindow={this.onUpdateTimeWindow} />
       </div>
     );
   }
 }
 
-EntityThroughputCharts.PropTypes = {
+EntityLatencyCharts.PropTypes = {
   // function to fetch throughput
   //
-  // getThroughput returns a promise with the response
+  // getLatency returns a promise with the response
   // from, to are in unix seconds
-  getThroughput: PropTypes.func.isRequired,
+  getLatency: PropTypes.func.isRequired,
   // title of the throughputs
   title: PropTypes.string,
-
-  // grouping of each of the charts
-  groupBy: PropTypes.string, 
 
   // the layout of the charts
   // only charts defined here will be rendered
   // Ex: [{
-  //   types: [ThroughputOperations.Read, ThroughputOperations.Write],
+  //   types: [LO.Read, LO.Write],
   //   height: 350,
   // }, ...
   // ];
   layout: PropTypes.object,
 };
 
-export default EntityThroughputCharts;
+export default EntityLatencyCharts;
+
 
 

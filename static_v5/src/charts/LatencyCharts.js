@@ -1,25 +1,21 @@
 import moment from 'moment';
 
-import ThroughputData from 'charts/ThroughputData';
-import { newThroughputChart } from 'charts/charts';
+import LatencyData from 'charts/LatencyData';
+import { newLatencyChart } from 'charts/charts';
 import { POLL_INTERVAL } from 'classes/constants';
-import { ThroughputGrouping } from 'charts/constants';
 
-// ThroughputCharts draws the throughput charts
-export default class ThroughputCharts {
+// LatencyCharts draws the latency charts
+export default class LatencyCharts {
   // fetchData(from, to) - function to fetch data
-  // charts - the charts to draw.  [{operation: ThroughputOperations.Read, id: 'read_chart_1234'}, ...]
-  // grouping - the grouping for all the charts
-  constructor(fetchData, charts, grouping = ThroughputGrouping.ByTotal) {
+  // charts - the charts to draw.  [{operation: LatencyOperations.Read, id: 'read_chart_1234'}, ...]
+  constructor(fetchData, charts) {
     this.charts = charts;
-    this.chartInstances = {}; // map of Throughput Operation to chart instance
+    this.chartInstances = {}; // map of latency Operation to chart instance
 
     this.fetchData = fetchData;
     this.intervalID = null;
 
-    this.grouping = grouping;
-
-    this.tpdata = new ThroughputData();
+    this.latData = new LatencyData();
   }
 
   // init fetches data and initializes the charts
@@ -28,21 +24,10 @@ export default class ThroughputCharts {
     const to = moment();
 
     this._fetchData(from, to, (data) => {
-      this.tpdata.setData(data);
+      this.latData.setData(data);
       this._setupCharts();
       this.keepInSync();
     });
-  }
-
-  // setGrouping sets the grouping in each of the charts
-  setGrouping(grouping = ThroughputGrouping.ByNamespace) {
-    if (grouping === this.grouping)
-      return;
-
-    this.grouping = grouping;
-    // redraw charts
-    this._removeCharts();
-    this._setupCharts();
   }
 
   // updateWindow updates the time window 
@@ -54,7 +39,7 @@ export default class ThroughputCharts {
     this.stopSync();
 
     this._fetchData(from, to, (data) => {
-      this.tpdata.setData(data);
+      this.latData.setData(data);
       this._updateCharts();
     });
 
@@ -63,7 +48,7 @@ export default class ThroughputCharts {
   }
 
   // destroy cleans all the data, activities of the
-  // ThroughputCharts before being destroyed
+  // LatencyCharts before being destroyed
   destroy() {
     this.stopSync();
   }
@@ -72,12 +57,12 @@ export default class ThroughputCharts {
   keepInSync() {
     this.intervalID = window.setInterval(() => {
 
-      let from = this.tpdata.latestTimestamp();
+      let from = this.latData.latestTimestamp();
       from = from && moment(from+1000); // add a second
       const to = null;
 
       this._fetchData(from, to, (data) => {
-        this.tpdata.updateWindow(data);
+        this.latData.updateWindow(data);
         this._updateCharts();
       });
     }, POLL_INTERVAL);
@@ -93,9 +78,9 @@ export default class ThroughputCharts {
   _setupCharts() {
     this.charts.forEach((chart) => {
       const { operation, id } = chart;
-      const data = this.tpdata.chartData(operation, this.grouping);
+      const data = this.latData.chartData(operation);
 
-      const c = newThroughputChart(this.grouping, '#'+id, data);
+      const c = newLatencyChart('#'+id, data);
       this.chartInstances[operation] = c;
       c.draw(data);
     });
@@ -112,7 +97,7 @@ export default class ThroughputCharts {
   _updateCharts() {
     this.charts.forEach((chart) => {
       const { operation } = chart;
-      const data = this.tpdata.chartData(operation, this.grouping);
+      const data = this.latData.chartData(operation);
 
       const c = this.chartInstances[operation];
       c.update(data);
@@ -125,12 +110,12 @@ export default class ThroughputCharts {
     const t = to && to.unix();
 
     this.fetchData(f, t)
-      .then((data) => {
-        const { throughput } = data;
-        callback(throughput);
+      .then((latency) => {
+        callback(latency);
       })
       .catch((msg) => {
         console.error(msg);
       });
   }
 }
+

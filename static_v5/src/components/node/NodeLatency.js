@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { getLatency as getLatencyAPI } from 'api/node';
-import LatencyCharts from 'components/LatencyCharts';
+import EntityLatencyCharts from 'components/EntityLatencyCharts';
 
 // NodeLatency provides an overview of the node latency
 class NodeLatency extends React.Component {
@@ -48,7 +48,7 @@ class NodeLatency extends React.Component {
 
     let charts = null;
     if (showChart)
-      charts = <LatencyCharts getLatency={this.getLatency} title={nodeHost} />;
+      charts = <EntityLatencyCharts getLatency={this.getLatency} />;
 
     return charts;
   }

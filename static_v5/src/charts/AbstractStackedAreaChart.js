@@ -9,7 +9,7 @@ import { watchElementSizeChange } from 'charts/util';
 //
 // selector - selects an svg element
 class AbstractStackedAreaChart {
-  constructor(selector, data, showLegend) {
+  constructor(selector, data, showLegend = true) {
     this.selector = selector; // element selector on which the chart will be drawn
     this.data = data; // the chart data
     this.showLegend = showLegend;

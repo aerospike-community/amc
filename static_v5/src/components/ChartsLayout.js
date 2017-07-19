@@ -145,7 +145,7 @@ class ChartsLayout extends React.Component {
               {timeWindow}
             </div>
 
-            {options.length > 1 &&
+            {options && options.length > 1 &&
             <div>
               <Input type="select" name="last" size="sm" value={option} onChange={this.onOptionSelect}>
                 {options.map((o) =>

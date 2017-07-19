@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import LatencyCharts from 'components/LatencyCharts';
+import EntityLatencyCharts from 'components/EntityLatencyCharts';
 import { getLatency as getLatencyAPI } from 'api/clusterConnections';
 
 // ClusterLatency provides an overview of the cluster latency
@@ -54,7 +54,7 @@ class ClusterLatency extends React.Component {
 
     let charts = null;
     if (this.state.showChart)
-      charts = <LatencyCharts getLatency={this.getLatency} title={title} />;
+      charts = <EntityLatencyCharts getLatency={this.getLatency} title={title} />;
 
     return charts;
   }

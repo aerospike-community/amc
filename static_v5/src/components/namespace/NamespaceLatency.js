@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { getLatency as getLatencyAPI } from 'api/namespace';
-import LatencyCharts from 'components/LatencyCharts';
+import EntityLatencyCharts from 'components/EntityLatencyCharts';
 
 // NamespaceLatency provides an overview of the namespace latency
 class NamespaceLatency extends React.Component {
@@ -49,7 +49,7 @@ class NamespaceLatency extends React.Component {
 
     let charts = null;
     if (showChart)
-      charts = <LatencyCharts getLatency={this.getLatency} />;
+      charts = <EntityLatencyCharts getLatency={this.getLatency} />;
 
     return charts;
   }

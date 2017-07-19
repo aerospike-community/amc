@@ -14,3 +14,10 @@ export const ThroughputGrouping = {
   ByNamespace: 'ByNamespace',
 };
 
+// operations for which the latency charts can be drawn
+export const LatencyOperations = {
+  Query: 'Query',
+  Read:  'Read',
+  UDF:   'UDF',
+  Write: 'Write',
+};
