@@ -30,11 +30,11 @@ class MainDashboard extends React.Component {
   }
 
   onChangeView(toView) {
-    const { selectedEntityPath, view } = this.props.currentView;
+    const { view } = this.props.currentView;
     if (toView === view)
       return;
 
-    this.props.onSelectPath(selectedEntityPath, toView);
+    this.props.onChangeView(toView);
   }
 
   render() {
@@ -116,9 +116,9 @@ class MainDashboard extends React.Component {
 MainDashboard.PropTypes = {
   // current view state
   currentView: PropTypes.object,
-  // select a path
-  // onSelectPath(path, view)
-  onSelectPath: PropTypes.func,
+  // change the view on the selected view type
+  // onChangeView(view)
+  onChangeView: PropTypes.func,
   // if a cluster entity is selected 
   // is the cluster connected
   isClusterConnected: PropTypes.bool,

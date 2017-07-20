@@ -2,9 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import UDFView from 'components/udf/UDFView';
-import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
 import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
-import { selectPath } from 'actions/currentView';
+import { selectUDFOverview } from 'actions/currentView';
 import { addUDF, deleteUDF } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
@@ -20,8 +19,7 @@ const mapDispatchToProps = (dispatch) => {
     onDeleteSuccess: (clusterID, udfName) => {
       dispatch(deleteUDF(clusterID, udfName));
 
-      const path = toUDFOverviewPath(clusterID);
-      dispatch(selectPath(path, UDF_OVERVIEW_ACTIONS.Overview));
+      dispatch(selectUDFOverview(clusterID, UDF_OVERVIEW_ACTIONS.Overview));
     }
   };
 };

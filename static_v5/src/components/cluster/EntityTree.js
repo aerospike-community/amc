@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { Checkbox, Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
-import { objectPropType, nextNumber } from 'classes/util';
+import { objectPropType, nextNumber, isEntitiesEqual  } from 'classes/util';
 import { actions, defaultAction } from 'classes/entityActions';
 import Tree from 'components/Tree';
 
@@ -15,7 +15,7 @@ class EntityTree extends React.Component {
     super(props);
 
     this.state = {
-      contextMenuEntityPath: null
+      contextMenuEntity: null
     };
 
     // HACK HACK HACK
@@ -59,7 +59,7 @@ class EntityTree extends React.Component {
 
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
-    const showContextMenu = this.state.contextMenuEntityPath === entity.path;
+    const showContextMenu = isEntitiesEqual(this.state.contextMenuEntity, entity);
     const options = this.getOptions(entity);
     const isDisconnected = this.isDisconnected(entity);
     const { isCategory } = entity;
@@ -102,14 +102,14 @@ class EntityTree extends React.Component {
     evt.preventDefault();
 
     // shown, hide it
-    if (this.state.contextMenuEntityPath) {
+    if (this.state.contextMenuEntity) {
       this.hideContextMenu();
       return;
     }
 
     this.contextMenuShownTime = new Date();
     this.setState({
-      contextMenuEntityPath: entity.path
+      contextMenuEntity: entity
     });
   }
 
@@ -121,13 +121,13 @@ class EntityTree extends React.Component {
       return;
 
     this.setState({
-      contextMenuEntityPath: null,
+      contextMenuEntity: null,
     });
   }
 
   isDisconnected(entity) {
     const clusters = this.props.clusters;
-    const i = clusters.findIndex((c) => c.path === entity.path);
+    const i = clusters.findIndex((c) => isEntitiesEqual(c, entity));
 
     if (i === -1) // not a cluster entity
       return false;
@@ -153,7 +153,7 @@ class EntityTree extends React.Component {
   }
 
   onEntitySelect(entity) {
-    if (this.state.contextMenuEntityPath !== null) {
+    if (this.state.contextMenuEntity !== null) {
       this.hideContextMenu();
       return;
     }
@@ -181,8 +181,8 @@ class EntityTree extends React.Component {
       <div>
         {clusters.map(cluster => {
            return (
-             <Tree key={cluster.path} root={cluster} renderNode={this.renderTreeNode} 
-                isNodeSelected={(entity) => this.props.selectedEntityPath === entity.path}
+             <Tree key={cluster.clusterID} root={cluster} renderNode={this.renderTreeNode} 
+                isNodeSelected={this.props.isNodeSelected}
                 isExpanded={this.props.isExpanded} onNodeCollapse={this.props.onNodeCollapse} onNodeExpand={this.onNodeExpand}
              />
              );
@@ -195,8 +195,8 @@ class EntityTree extends React.Component {
 EntityTree.PropTypes = {
   // an array of clusters to display
   clusters: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
-  // the selected entity in the tree
-  selectedEntityPath: PropTypes.string,
+  // returns true iff the node is selected
+  isNodeSelected: PropTypes.string,
   // callback when an entity is selected
   // onEntitySelect(entity)
   onEntitySelect: PropTypes.func,

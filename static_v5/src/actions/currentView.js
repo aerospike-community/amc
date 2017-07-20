@@ -1,8 +1,5 @@
-import { matchAndExtractEntityPathVariabes, getEntityPathViewType } from 'classes/urlAndViewSynchronizer';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
-import { toUDFOverviewPath, toUDFPath, toClusterPath, toNodePath, toNodeOverviewPath } from 'classes/entityTree';
-import { toIndexPath, toIndexesOverviewPath, toNamespacePath, toNamespaceOverviewPath, toSetPath, toSetOverviewPath } from 'classes/entityTree';
 
 export const SHOW_LEFT_PANE = 'SHOW_LEFT_PANE';
 export function showLeftPane() {
@@ -28,10 +25,8 @@ export function initView() {
 // select a cluster view on startup
 export const SELECT_CLUSTER_ON_STARTUP = 'SELECT_CLUSTER_ON_STARTUP';
 export function selectClusterOnStartup(clusterID) {
-  const path = toClusterPath(clusterID);
   return {
     type: SELECT_CLUSTER_ON_STARTUP,
-    entityPath: path,
     view: CLUSTER_ACTIONS.Overview, // cluster overview
     clusterID: clusterID,
   };
@@ -39,10 +34,8 @@ export function selectClusterOnStartup(clusterID) {
 
 export const SELECT_CLUSTER_VIEW = 'SELECT_CLUSTER_VIEW';
 export function selectCluster(clusterID, view) {
-  const path = toClusterPath(clusterID);
   return {
     type: SELECT_CLUSTER_VIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
   };
@@ -50,10 +43,8 @@ export function selectCluster(clusterID, view) {
 
 export const SELECT_NODE_VIEW = 'SELECT_NODE_VIEW';
 export function selectNode(clusterID, nodeHost, view) {
-  const path = toNodePath(clusterID, nodeHost);
   return {
     type: SELECT_NODE_VIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -62,10 +53,8 @@ export function selectNode(clusterID, nodeHost, view) {
 
 export const SELECT_NODE_OVERVIEW = 'SELECT_NODE_OVERVIEW';
 export function selectNodeOverview(clusterID, view) {
-  const path = toNodeOverviewPath(clusterID);
   return {
     type: SELECT_NODE_OVERVIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
   };
@@ -73,10 +62,8 @@ export function selectNodeOverview(clusterID, view) {
 
 export const SELECT_NAMESPACE_VIEW = 'SELECT_NAMESPACE_VIEW';
 export function selectNamespace(clusterID, nodeHost, namespaceName, view) {
-  const path = toNamespacePath(clusterID, nodeHost, namespaceName);
   return {
     type: SELECT_NAMESPACE_VIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -86,10 +73,8 @@ export function selectNamespace(clusterID, nodeHost, namespaceName, view) {
 
 export const SELECT_NAMESPACE_OVERVIEW = 'SELECT_NAMESPACE_OVERVIEW';
 export function selectNamespaceOverview(clusterID, nodeHost, view) {
-  const path = toNamespaceOverviewPath(clusterID, nodeHost);
   return {
     type: SELECT_NAMESPACE_OVERVIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -98,10 +83,8 @@ export function selectNamespaceOverview(clusterID, nodeHost, view) {
 
 export const SELECT_SET_VIEW = 'SELECT_SET_VIEW';
 export function selectSet(clusterID, nodeHost, namespaceName, setName, view) {
-  const path = toSetPath(clusterID, nodeHost, namespaceName, setName);
   return {
     type: SELECT_SET_VIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -112,10 +95,8 @@ export function selectSet(clusterID, nodeHost, namespaceName, setName, view) {
 
 export const SELECT_SET_OVERVIEW = 'SELECT_SET_OVERVIEW';
 export function selectSetOverview(clusterID, nodeHost, namespaceName, view) {
-  const path = toSetOverviewPath(clusterID, nodeHost, namespaceName);
   return {
     type: SELECT_SET_OVERVIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     nodeHost: nodeHost,
@@ -125,10 +106,8 @@ export function selectSetOverview(clusterID, nodeHost, namespaceName, view) {
 
 export const SELECT_UDF_VIEW = 'SELECT_UDF_VIEW';
 export function selectUDF(clusterID, udfName, view) {
-  const path = toUDFPath(clusterID, udfName);
   return {
     type: SELECT_UDF_VIEW,
-    entityPath: path,
     view: view,
     clusterID: clusterID,
     udfName: udfName,
@@ -137,34 +116,28 @@ export function selectUDF(clusterID, udfName, view) {
 
 export const SELECT_UDF_OVERVIEW = 'SELECT_UDF_OVERVIEW';
 export function selectUDFOverview(clusterID, view) {
-  const path = toUDFOverviewPath(clusterID);
   return {
     type: SELECT_UDF_OVERVIEW,
     clusterID: clusterID,
-    entityPath: path,
     view: view
   };
 }
 
 export const SELECT_INDEXES_OVERVIEW = 'SELECT_INDEXES_OVERVIEW';
 export function selectIndexesOverview(clusterID, view) {
-  const path = toIndexesOverviewPath(clusterID);
   return {
     type: SELECT_INDEXES_OVERVIEW,
     clusterID: clusterID,
-    entityPath: path,
     view: view
   };
 }
 
 export const SELECT_INDEX = 'SELECT_INDEX';
 export function selectIndex(clusterID, indexName, view) {
-  const path = toIndexPath(clusterID, indexName);
   return {
     type: SELECT_INDEX,
     clusterID: clusterID,
     indexName: indexName,
-    entityPath: path,
     view: view,
   };
 }
@@ -173,14 +146,32 @@ export const SELECT_START_VIEW = 'SELECT_START_VIEW';
 export function selectStartView() {
   return {
     type: SELECT_START_VIEW,
-    entityPath: '',
   };
 }
 
-export function selectPath(entityPath, view) {
-  const e = matchAndExtractEntityPathVariabes(entityPath);
-  const { clusterID, udfName, namespaceName, setName, nodeHost, indexName } = e;
-  const viewType = getEntityPathViewType(entityPath);
+export const SELECT_VIEW = 'SELECT_VIEW';
+// select a newView.
+// newView is an instance with the viewType and
+// the entities of the view
+export function selectView(newView) {
+  return {
+    type: SELECT_VIEW,
+    newView: newView
+  };
+}
+
+export const SELECT_VIEW_FOR_VIEW_TYPE = 'SELECT_VIEW_FOR_VIEW_TYPE';
+// only change the view, keep the selected
+// entity the same
+export function selectViewForViewType(view) {
+  return {
+    type: SELECT_VIEW_FOR_VIEW_TYPE,
+    view: view
+  };
+}
+
+export function selectEntity(entity, view) {
+  const { viewType, clusterID, udfName, namespaceName, setName, nodeHost, indexName } = entity;
 
   switch (viewType) {
   case VIEW_TYPE.UDF:
@@ -220,3 +211,4 @@ export function selectPath(entityPath, view) {
     return selectStartView();
   }
 }
+

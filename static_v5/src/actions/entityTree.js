@@ -1,16 +1,16 @@
 export const ENTITY_NODE_EXPANDED = 'ENTITY_NODE_EXPANDED';
-export function expandEntityNode(path) {
+export function expandEntityNode(entity) {
   return {
     type: ENTITY_NODE_EXPANDED,
-    path: path
+    entity: entity,
   };
 }
 
 export const ENTITY_NODE_COLLAPSED = 'ENTITY_NODE_COLLAPSED';
-export function collapseEntityNode(path) {
+export function collapseEntityNode(entity) {
   return {
     type: ENTITY_NODE_COLLAPSED,
-    path: path
+    entity: entity,
   };
 }
 

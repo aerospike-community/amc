@@ -1,28 +1,27 @@
 // type of cluster entities as returned by the server
 export const ENTITY_TYPE = {
-  CLUSTER: 'connection',
-  NODES: 'nodes',
+  CLUSTER:    'connection',
+  INDEX:      'indexes',
   NAMESPACES: 'namespaces',
-  SETS: 'sets',
-  UDF: 'modules',
-  INDEX: 'indexes',
+  NODES:      'nodes',
+  SETS:       'sets',
+  UDF:        'modules',
 };
 
 // type of the entity view types
 export const VIEW_TYPE = {
-  CLUSTER: 'CLUSTER',
-  NODE: 'NODE',
-  NAMESPACE: 'NAMESPACE',
-  SET: 'SET',
-  UDF: 'UDF',
-  INDEX: 'INDEX',
-  NODE_OVERVIEW: 'NODE_OVERVIEW',
+  CLUSTER:            'CLUSTER',
+  INDEXES_OVERVIEW:   'INDEXES_OVERVIEW',
+  INDEX:              'INDEX',
+  NAMESPACE:          'NAMESPACE',
   NAMESPACE_OVERVIEW: 'NAMESPACE_OVERVIEW',
-  SET_OVERVIEW: 'SET_OVERVIEW',
-  UDF_OVERVIEW: 'UDF_OVERVIEW',
-  INDEXES_OVERVIEW: 'INDEXES_OVERVIEW',
-
-  START_VIEW: 'START_VIEW',
+  NODE:               'NODE',
+  NODE_OVERVIEW:      'NODE_OVERVIEW',
+  SET_OVERVIEW:       'SET_OVERVIEW',
+  SET:                'SET',
+  UDF_OVERVIEW:       'UDF_OVERVIEW',
+  UDF:                'UDF',
+  START_VIEW:         'START_VIEW',
 };
 
 // polling interval

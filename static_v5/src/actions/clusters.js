@@ -2,9 +2,9 @@ import {  authConnection as authConnectionAPI, listConnections, getClusterEntity
 
 import { expandEntityNode } from 'actions/entityTree';
 import { selectStartView } from 'actions/currentView';
-import { toClusterPath } from 'classes/entityTree';
 import { selectClusterOnStartup, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -208,8 +208,11 @@ function clusterDetails(cluster) {
 
 // expand the cluster tree identified by the cluster id
 function expandClusterTree(clusterID) {
-  const path = toClusterPath(clusterID);
-  return expandEntityNode(path);
+  const entity = {
+    clusterID: clusterID,
+    viewType: VIEW_TYPE.CLUSTER
+  };
+  return expandEntityNode(entity);
 }
 
 // get the cluster entity tree

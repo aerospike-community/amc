@@ -2,9 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import EditClusterConnectionModal from 'components/cluster/EditClusterConnectionModal';
 
-import { toClusterPath } from 'classes/entityTree';
 import { CLUSTER_ACTIONS, NODE_ACTIONS }  from 'classes/entityActions';
-import { selectPath, selectNode } from 'actions/currentView';
+import { selectNode } from 'actions/currentView';
 import { updateConnection, displayViewClusterConnection } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
@@ -19,11 +18,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onViewSelect: (clusterID, view) => {
-      const path = toClusterPath(clusterID);
-      dispatch(selectPath(path, view));
-    },
-
     // update connection is a success
     onUpdateConnectionSuccess: (clusterID, connection) => {
       dispatch(updateConnection(clusterID, connection));

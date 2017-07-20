@@ -2,9 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import UDFOverviewDashboard from 'components/udf/UDFOverviewDashboard';
-import { toUDFPath, toUDFOverviewPath } from 'classes/entityTree';
 import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
-import { selectPath } from 'actions/currentView';
+import { selectViewForViewType, selectUDF } from 'actions/currentView';
 import { addUDF } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
@@ -17,16 +16,14 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onViewSelect: (clusterID, view) => {
-      const path = toUDFOverviewPath(clusterID);
-      dispatch(selectPath(path, view));
+    onViewSelect: (view) => {
+      dispatch(selectViewForViewType(view));
     },
 
     onUDFCreateSuccess: (clusterID, udfName, udfType) => {
       dispatch(addUDF(clusterID, udfName, udfType));
 
-      const path = toUDFPath(clusterID, udfName);
-      dispatch(selectPath(path, UDF_ACTIONS.View));
+      dispatch(selectUDF(clusterID, udfName, UDF_ACTIONS.View));
     },
   };
 };

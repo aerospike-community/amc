@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
 import MainDashboard from 'components/MainDashboard';
-import { selectPath } from 'actions/currentView';
+import { selectViewForViewType } from 'actions/currentView';
 
 const  mapStateToProps = (state) => {
   const { clusters } = state;
@@ -30,8 +30,8 @@ const  mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSelectPath: (path, view) => {
-      dispatch(selectPath(path, view));
+    onChangeView: (view) => {
+      dispatch(selectViewForViewType(view));
     },
   };
 }

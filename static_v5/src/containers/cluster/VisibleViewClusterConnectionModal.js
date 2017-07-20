@@ -1,10 +1,8 @@
 import { connect } from 'react-redux';
 import ViewClusterConnectionModal from 'components/cluster/ViewClusterConnectionModal';
-import { toClusterPath } from 'classes/entityTree';
 import { deleteClusterConnection, displayViewClusterConnection } from 'actions/clusters';
 import { selectStartView, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
-import { selectPath } from 'actions/currentView';
 
 let Clusters; // the clusters
 let CurrentClusterID;

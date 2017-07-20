@@ -152,3 +152,40 @@ export function addCommasToInt(val) {
   val = parseInt(val, 10);
   return val.toLocaleString();
 }
+
+
+// returns true iff both the entities are equal
+export function isEntitiesEqual(e1, e2) {
+  let equal = true;
+  const props = ['viewType', 'clusterID', 'nodeHost', 'namespaceName', 'setName', 'indexName', 'udfName'];
+
+  if (e1 === null && e2 === null)
+    return true;
+  else if (e1 === null)
+    return false;
+  else if (e2 === null)
+    return false;
+
+  if (e1 === undefined && e2 === undefined)
+    return true;
+  else if (e1 === undefined)
+    return false;
+  else if (e2 === undefined)
+    return false;
+
+  props.forEach((p) => {
+    const v1 = e1[p];
+    const v2 = e2[p];
+
+    if (v1 === undefined && v2 === undefined)
+      return;
+    else if (v1 === undefined)
+      equal = false;
+    else if (v2 === undefined)
+      equal = false;
+    else if (v1 !== v2)
+      equal = false;
+  });
+
+  return equal;
+}

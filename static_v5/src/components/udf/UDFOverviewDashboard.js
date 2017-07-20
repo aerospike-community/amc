@@ -18,8 +18,7 @@ class UDFOverviewDashboard extends React.Component {
   }
 
   onViewSelect(view) {
-    const { clusterID } = this.props;
-    this.props.onViewSelect(clusterID, view);
+    this.props.onViewSelect(view);
   }
 
   onCreateSuccess(udfName, source, type) {

@@ -12,10 +12,10 @@
 import createHistory from 'history/createHashHistory';
 import { VIEW_TYPE } from 'classes/constants';
 import { removeTrailingSlash, removeLeadingSlash } from 'classes/util';
-import { initView, selectPath, selectStartView } from 'actions/currentView';
+import { initView, selectView, selectStartView } from 'actions/currentView';
 
 const history = createHistory();
-let currentPathname = null;
+let CurrentPathname = null;
 
 // initialize the view based on url and set up the listener for url changes
 export function init(currentView, dispatch) {
@@ -32,166 +32,120 @@ export function init(currentView, dispatch) {
 function updateView(dispatch) {
   // prevent infinite loop
   const { pathname } = history.location;
-  if (currentPathname === pathname)
+  if (CurrentPathname === pathname)
     return;
-  currentPathname = pathname;
+  CurrentPathname = pathname;
 
-  const path = urlToEntityPath(pathname);
-  const entity = matchAndExtracURLVariabes(pathname);
-  dispatch(selectPath(path, entity.view));
+  const view = toView(pathname);
+  dispatch(selectView(view));
 }
 
 // sets the URL given the current view of the app
-export function updateURL(selectedEntityPath, view) {
-  let url = '/'; // leading slash is required to replace current url
-                 // else it is appended to current url
+export function updateURL(currentView) {
+  const { viewType } = currentView;
 
-  if (selectedEntityPath) 
-    url = toURL(selectedEntityPath, view);
+  if (viewType === null)
+    return;
+
+  const def = matchDefinition(viewType);
+  const url = insertVariables(def, currentView);
   
   if (url === history.location.pathname)
     return;
 
-  currentPathname = url;
+  CurrentPathname = url;
   history.push(url);
 }
 
+// get the url for the view type
+function matchDefinition(viewType) {
+  const i = URLDefinitions.findIndex((m) => m.viewType === viewType);
+  
+  if (i === -1)
+    throw `No match found for viewType=${viewType}`;
+
+  const url = URLDefinitions[i].url;
+  return url;
+}
+
+
 // ----------------------------------------------
-// url and entity path synchronizer functionality
-
-
-// A path definition defines a template for a path.
+// A url definition defines a template for a url.
 // It is made of items whih can be strings or variables.
 // A variable is defined by preceding it with ':' // i.e :variable.
 // 
-// A path definition can be matched with a path and the variables
+// A url definition can be matched with a url and the variables
 // can be extracted. 
-// Variables can be inserted into the path definition
-// and a path can be generated.
-
-// Here we define path definitions for url and entity path. This helps 
-// to convert a url to an entity path and vice versa.
-//
+// Variables can be inserted into the url definition
+// and a url can be generated.
 
 const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
 const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEX, INDEXES_OVERVIEW } = VIEW_TYPE;
 
-const pathDefinitions = [{
+const URLDefinitions = [{
   url: '',
-  entityPath: '',
   viewType: START_VIEW
 }, {
-  url: 'physical-tree/cluster/:clusterID/:view',
-  entityPath: 'physical-tree/:clusterID',
+  url: '/physical-tree/cluster/:clusterID/:view',
   viewType: CLUSTER,
 }, {
-  url: 'physical-tree/udf-overview/:clusterID/:view',
-  entityPath: 'physical-tree/:clusterID/' + UDF,
+  url: '/physical-tree/udf-overview/:clusterID/:view',
   viewType: UDF_OVERVIEW,
 }, {
-  url: 'physical-tree/udf/:clusterID/:udfName/:view',
-  entityPath: 'physical-tree/:clusterID/' + UDF + '/:udfName',
+  url: '/physical-tree/udf/:clusterID/:udfName/:view',
   viewType: UDF,
 }, {
-  url: 'physical-tree/index/:clusterID/:indexName/:view',
-  entityPath: 'physical-tree/:clusterID/' + INDEX + '/:indexName',
+  url: '/physical-tree/index/:clusterID/:indexName/:view',
   viewType: INDEX,
 }, {
-  url: 'physical-tree/indexes-overview/:clusterID',
-  entityPath: 'physical-tree/:clusterID/indexes',
+  url: '/physical-tree/indexes-overview/:clusterID',
   viewType: INDEXES_OVERVIEW,
 }, {
-  url: 'physical-tree/node/:clusterID/:nodeHost/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost',
+  url: '/physical-tree/node/:clusterID/:nodeHost/:view',
   viewType: NODE,
 }, {
-  url: 'physical-tree/namespace/:clusterID/:nodeHost/:namespaceName/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName',
+  url: '/physical-tree/namespace/:clusterID/:nodeHost/:namespaceName/:view',
   viewType: NAMESPACE, 
 }, {
-  url: 'physical-tree/set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET + '/:setName',
+  url: '/physical-tree/set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
   viewType: SET, 
 }, {
-  url: 'physical-tree/node-overview/:clusterID/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE,
+  url: '/physical-tree/node-overview/:clusterID/:view',
   viewType: NODE_OVERVIEW, 
 }, {
-  url: 'physical-tree/namespace-overview/:clusterID/:nodeHost/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE,
+  url: '/physical-tree/namespace-overview/:clusterID/:nodeHost/:view',
   viewType: NAMESPACE_OVERVIEW, 
 }, {
-  url: 'physical-tree/set-overview/:clusterID/:nodeHost/:namespaceName/:view',
-  entityPath: 'physical-tree/:clusterID/' + NODE + '/:nodeHost/' + NAMESPACE + '/:namespaceName/' + SET,
+  url: '/physical-tree/set-overview/:clusterID/:nodeHost/:namespaceName/:view',
   viewType: SET_OVERVIEW, 
 }];
 
-// generate a url from the entity path for the view
-function toURL(entityPath, view) {
-  const match = findMatch(entityPath, 'entityPath');
-  let variables = extractVariables(entityPath, match.entityPath);
-  variables.view = view;
-  return insertVariables(match.url, variables);
+// convert the url to a view
+function toView(url) {
+  const def = findDefinition(url);
+  let variables = extractVariables(url, def.url);
+  variables.viewType = def.viewType;
+  return variables;
 }
 
-// generate an entity path from the url
-function urlToEntityPath(url) {
-  const match = findMatch(url, 'url');
-  const variables = extractVariables(url, match.url);
-  let path = insertVariables(match.entityPath, variables);
-  return removeSlashes(path);
-}
+// extract variables as specified by the url definition from the
+// url
+function extractVariables(url, urlDef) {
+  if (!isDefinitionMatch(url, urlDef))
+      throw new Error(`url=${url} and defintion=${urlDef} do not match`);
 
-// generate the entity path for the given view type
-// entities is an object with 
-// keys = [clusterID, nodeHost, udfName, namespaceName, setName]
-export function toEntityPath(viewType, entities) {
-  const pathDef = pathDefinitions.find((p) => p.viewType === viewType);
-  if (!pathDef)
-    throw new Error(`No match found for view type=${viewType}`);
+  url = removeSlashes(url);
+  urlDef = removeSlashes(urlDef);
 
-  const path = insertVariables(pathDef.entityPath, entities);
-  return removeLeadingSlash(path);
-}
-
-// match the entityPath and extract the entity path variables
-export function matchAndExtractEntityPathVariabes(entityPath) {
-  const match = findMatch(entityPath, 'entityPath');
-  return extractVariables(entityPath, match.entityPath);
-}
-
-// get the view type for the entity path
-export function getEntityPathViewType(entityPath) {
-  const match = findMatch(entityPath, 'entityPath');
-  return match.viewType;
-}
-
-// match the url and extract the path variables
-export function matchAndExtracURLVariabes(url) {
-  if (url.length === 0)
-    return {};
-
-  const match = findMatch(url, 'url');
-  return extractVariables(url, match.url);
-}
-
-// extract variables from the path for the path definition
-function extractVariables(path, pathDefinition) {
-  if (!isDefinitionMatch(path, pathDefinition))
-      throw new Error(`path=${path} and defintion=${pathDefinition} do not match`);
-
-  path = removeSlashes(path);
-  pathDefinition = removeSlashes(pathDefinition);
-
-  let defItems = pathDefinition.split('/');
-  let pathItems = path.split('/');
+  let defItems = urlDef.split('/');
+  let urlItems = url.split('/');
   
   let variables = {};
   for (let i = 0; i < defItems.length; i++) {
     const defItem = defItems[i];
     if (isVariable(defItem)) {
       let k = extractVariableName(defItem);
-      variables[k] = pathItems[i];
+      variables[k] = urlItems[i];
     }
   }
   return variables;
@@ -219,22 +173,23 @@ function insertVariables(pathDefinition, variables) {
   return path;
 }
 
-// find a match for the path. key is url or entityPath
-function findMatch(path, key) {
+// find a match for the url
+// return the path definition
+function findDefinition(url) {
   let match = null;
-  for (let i = 0; i < pathDefinitions.length; i++) {
-    let def = pathDefinitions[i];
-    if (isDefinitionMatch(path, def[key])) {
+  for (let i = 0; i < URLDefinitions.length; i++) {
+    let path = URLDefinitions[i];
+    if (isDefinitionMatch(url, path.url)) {
       if (match !== null) // multiple matches
-        throw new Error(`multiple matches for path=${path} ${def[key]}, ${match[key]}`);
-      match = def;
+        throw `Multiple matches for url=${url} ${match.url} and ${path.url}`;
+      match = path;
     }
   }
 
   if (match)
     return match;
 
-  throw new Error(`No match found for path=${path} for ${key}`);
+  throw `No match found for url=${url}`;
 }
 
 // returns true if the path definition item is a variable
@@ -248,14 +203,15 @@ function extractVariableName(item) {
   return item.slice(i);
 }
 
-function isDefinitionMatch(path, pathDefinition) {
-  path = removeSlashes(path);
-  pathDefinition = removeSlashes(pathDefinition);
+// does the url match the definition
+function isDefinitionMatch(url, urlDef) {
+  url = removeSlashes(url);
+  urlDef = removeSlashes(urlDef);
 
-  let defItems = pathDefinition.length === 0 ? [] : pathDefinition.split('/');
-  let pathItems = path.length === 0 ? [] : path.split('/');
+  let defItems = urlDef.length === 0 ? [] : urlDef.split('/');
+  let urlItems = url.length === 0 ? [] : url.split('/');
   
-  if (defItems.length !== pathItems.length)
+  if (defItems.length !== urlItems.length)
     return false;
 
   for (let i = 0; i < defItems.length; i++) {
@@ -263,7 +219,7 @@ function isDefinitionMatch(path, pathDefinition) {
     if (isVariable(defItem))
       continue;
 
-    if (defItem !== pathItems[i])
+    if (defItem !== urlItems[i])
       return false;
   }
   return true;
