@@ -104,7 +104,12 @@ export default class ThroughputCharts {
   // _removeCharts removes all the charts
   _removeCharts() {
     this.charts.forEach((chart) => {
-      d3.select('#' + chart.id).selectAll('*').remove();
+      const { operation, id } = chart;
+
+      const c = this.chartInstances[operation];
+      c.destroy();
+
+      d3.select('#' + id).selectAll('*').remove();
     });
   }
 

@@ -4,6 +4,8 @@ import moment from 'moment';
 
 // watch for change in element size every interval milliseconds and if there
 // is a change execute the callback function.
+//
+// returns a callback, which if called cancels the watcher
 export function watchElementSizeChange(selector, callback, interval = 500) {
     const elm = $(selector);
     let height = elm.height();
@@ -26,6 +28,10 @@ export function watchElementSizeChange(selector, callback, interval = 500) {
         callback();
       }
     }, interval); 
+
+    return () => {
+      window.clearInterval(id);
+    };
 }
 
 // for a time x, if now-x <= MarginMinutes then

@@ -31,14 +31,22 @@ export default class ThroughputData {
 
         // append values
         const orig = this.data[op][key];
+        const origLen = orig.length;
         const last = orig.length === 0 ? null : orig[orig.length-1].timestamp;
+
+        let nadded = 0;
         val.forEach((v) => {
-          if (last === null || v.timestamp > last)
+          if (last === null || v.timestamp > last) {
             orig.push(v);
+            nadded++;
+          }
         });
 
-        // maintain window
-        orig.splice(0, val.length);
+        // slide the window
+        if (nadded < origLen)
+          orig.splice(0, nadded);
+        else
+          orig.splice(0, origLen);
       }
     }
   }

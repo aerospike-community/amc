@@ -22,8 +22,13 @@ export default class LatencyData {
   //
   // it removes data.length points from the beginning
   updateWindow(data) {
+    const len = this.data.length;
     this.data = this.data.concat(data);
-    this.data.splice(0, data.length);
+
+    if (data.length < len)
+      this.data.splice(0, data.length);
+    else
+      this.data.splice(0, len);
   }
 
   // setData sets the data

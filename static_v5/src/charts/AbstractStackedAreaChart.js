@@ -16,6 +16,8 @@ class AbstractStackedAreaChart {
 
     this.chart = null; // nvd3 chart
     this.chartData = null;  // d3 chart data on element
+
+    this.cancelWatcher;
   }
   
   // -------------------------------------
@@ -48,6 +50,13 @@ class AbstractStackedAreaChart {
   // redraw the chart
   redraw() {
     this.chart.redraw();
+  }
+
+  // destroy the chart
+  destroy() {
+    const fn = this.cancelWatcher;
+    if (typeof(fn) === 'function')
+      fn();
   }
 
   draw() {
@@ -84,7 +93,7 @@ class AbstractStackedAreaChart {
       this.chartData.call(chart);
 
       // redraw on element size change
-      watchElementSizeChange(this.selector, () => chart.update());
+      this.cancelWatcher = watchElementSizeChange(this.selector, () => chart.update());
 
       this.chart = chart;
       return chart;
