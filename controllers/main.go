@@ -257,6 +257,9 @@ func GoaServer(config *common.Config) {
 	service.Use(gzm.Middleware(gzip.BestCompression))
 	service.Use(gmiddleware.LogRequest(true))
 
+	// Mount caching middleware
+	service.Use(mw.CacheMiddleware)
+
 	// Mount security middlewares
 	jwtMiddleware, err := mw.NewJWTMiddleware(logger)
 	if err != nil {
