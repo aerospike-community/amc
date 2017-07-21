@@ -89,12 +89,9 @@ export default class LatencyCharts {
   // _removeCharts removes all the charts
   _removeCharts() {
     this.charts.forEach((chart) => {
-      const { operation, id } = chart;
-
+      const { operation } = chart;
       const c = this.chartInstances[operation];
       c.destroy();
-
-      d3.select('#' + id).selectAll('*').remove();
     });
   }
 

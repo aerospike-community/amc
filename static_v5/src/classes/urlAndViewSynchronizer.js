@@ -4,10 +4,6 @@
 //
 // On each view change update the url and vice versa.
 // Only functionality needed is to convert between urls and the view.
-// The view in our case is captured completely by the path to the selected
-// entity in the tree and the view (of the entity).
-//
-// SEE below for how the entity path and the url is kept in sync.
 
 import createHistory from 'history/createHashHistory';
 import { VIEW_TYPE } from 'classes/constants';
@@ -20,7 +16,7 @@ let CurrentPathname = null;
 // initialize the view based on url and set up the listener for url changes
 export function init(currentView, dispatch) {
   if (!currentView.isInitialized) {
-    updateView(dispatch);
+    updateView(dispatch, true);
     dispatch(initView());
   }
 
@@ -29,10 +25,10 @@ export function init(currentView, dispatch) {
 }
 
 // update view based on the current url
-function updateView(dispatch) {
+function updateView(dispatch, isInit = false) {
   // prevent infinite loop
   const { pathname } = history.location;
-  if (CurrentPathname === pathname)
+  if (CurrentPathname === pathname && !isInit)
     return;
   CurrentPathname = pathname;
 

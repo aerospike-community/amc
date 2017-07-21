@@ -28,14 +28,15 @@ class Tree extends React.Component {
   renderTree(node, depth) {
     const expanded = this.props.isExpanded(node);
     const renderNode = this.props.renderNode;
-    const {label, children, path} = node;
+    const {name, children} = node;
     const hasChildren = Array.isArray(children) && children.length > 0;
     const isSelected = this.props.isNodeSelected(node);
     const style = {
       marginLeft: depth * 10,
     };
+    const key = depth + '_' + name;
     let tree = (
-    <div key={path}>
+    <div key={key}>
       <div style={style} className={classNames('as-tree-list-item', 'as-selectable', {
                                                 'as-selected': isSelected, 
                                                 'as-tree-root': depth === 0})}>
@@ -49,7 +50,7 @@ class Tree extends React.Component {
         </div>
 
         {typeof renderNode === 'function' ? renderNode(node) :
-         <span onClick={this.onNodeClick} title={label}> {label} </span>}
+         <span onClick={this.onNodeClick} title={name}> {name} </span>}
       </div>
 
       <div>

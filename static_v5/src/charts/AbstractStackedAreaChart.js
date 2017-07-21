@@ -52,8 +52,14 @@ class AbstractStackedAreaChart {
     this.chart.redraw();
   }
 
-  // destroy the chart
+  // destroy the chart.
+  // after this call a new chart can be drawn on the
+  // same svg element
   destroy() {
+    // remove children of svg element
+    d3.select(this.selector).selectAll('*').remove();
+
+    // stop updating
     const fn = this.cancelWatcher;
     if (typeof(fn) === 'function')
       fn();
