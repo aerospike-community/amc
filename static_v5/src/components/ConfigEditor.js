@@ -64,7 +64,7 @@ class ConfigEditor extends React.Component {
 
   componentDidMount() {
     const elm = document.getElementById(this.id);
-    let height = distanceToBottom(elm) - 20;
+    let height = distanceToBottom(elm) - 30;
 
     this.setState({
       height: height,
@@ -106,7 +106,7 @@ class ConfigEditor extends React.Component {
       width: 350,
       cellClass: 'as-grid-cell',
       pinned: 'left',
-      cellStyle: {background: '#eee'},
+      cellStyle: {'font-weight': 'bold', 'font-size': '14px'},
     }];
 
     const {onEdit} = this.props;

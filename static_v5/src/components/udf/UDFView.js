@@ -164,10 +164,16 @@ class UDFView extends React.Component {
             {`UDF - ${udfName}`} 
 
             <Button className="float-right" disabled={isUpdating} 
-                color="danger" size="sm" onClick={this.onShowDeleteModal}> Delete </Button>
+                color="danger" size="sm" onClick={this.onShowDeleteModal}> 
+              <i className="fa fa-trash"></i>
+              Delete 
+            </Button>
 
             <Button className="float-right" disabled={!hasChanged || hasErrors || isUpdating} 
-                color="primary" size="sm" onClick={this.onUpdate}> Update </Button>
+                color="primary" size="sm" onClick={this.onUpdate}> 
+              <i className="fa fa-floppy-o"></i>
+              Update 
+            </Button>
           </div>
         </div>
 

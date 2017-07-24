@@ -1,12 +1,12 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { AgGridReact } from 'ag-grid-react';
 import { Input } from 'reactstrap';
 
 import { nextNumber, distanceToBottom } from 'classes/util';
 import { getJobs, InProgress, Complete } from 'api/node';
+import AgGridPagination from 'components/AgGridPagination';
 
 // JobTable diplays a table of jobs
 // for a node
@@ -16,19 +16,21 @@ class JobTable extends React.Component {
 
     this.state = {
       height: 200,
+      gridAPI: null,
     };
 
     const { clusterID, nodeHost } = this.props;
     this.dataSource = new JobDataSource(clusterID, nodeHost);
 
     this.id = 'node_job_table' + nextNumber();
-    this.gridAPI = null;
 
     this.onGridReady = this.onGridReady.bind(this);
   }
 
   onGridReady(params) {
-    this.gridAPI = params.api;
+    this.setState({
+      gridAPI: params.api
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -36,14 +38,15 @@ class JobTable extends React.Component {
 
     const np = nextProps;
     if (np.clusterID !== clusterID || np.nodeHost !== nodeHost) {
+      const { gridAPI } = this.state;
       this.dataSource = new JobDataSource(np.clusterID, np.nodeHost);
-      this.gridAPI.setDatasource(this.dataSource);
+      gridAPI.setDatasource(this.dataSource);
     }
   }
 
   componentDidMount() {
     const elm = document.getElementById(this.id);
-    let h = distanceToBottom(elm) - 50;
+    let h = distanceToBottom(elm) - 60;
 
     this.setState({
       height: h,
@@ -52,34 +55,42 @@ class JobTable extends React.Component {
 
   columnDefs() {
     return [{
+      cellClass: 'as-grid-cell',
       headerName: 'Namespace',
       field: 'ns',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Module',
       field: 'module',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Status',
       field: 'status',
       filterFramework: StatusFilter,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Progress',
       field: 'job-progress',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Run Time',
       field: 'run-time',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Records Read',
       field: 'recs-read',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Priority',
       field: 'priority',
       suppressFilter: true,
     }, {
+      cellClass: 'as-grid-cell',
       headerName: 'Set',
       field: 'set',
       suppressFilter: true,
@@ -88,7 +99,7 @@ class JobTable extends React.Component {
   }
 
   render() {
-    const { height } = this.state;
+    const { height, gridAPI } = this.state;
     const columnDefs = this.columnDefs();
 
     return (
@@ -98,8 +109,10 @@ class JobTable extends React.Component {
             columnDefs={columnDefs} 
             rowHeight="40" suppressScrollOnNewData enableColResize 
             datasource={this.dataSource} enableServerSideSorting enableServerSideFilter enableFilter
-            pagination paginationAutoPageSize rowModelType="infinite" cacheOverflowSize="2"
+            suppressPaginationPanel pagination paginationAutoPageSize rowModelType="infinite" cacheOverflowSize="2"
         />
+
+        <AgGridPagination gridAPI={gridAPI} />
       </div>
     );
   }

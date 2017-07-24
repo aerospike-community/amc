@@ -152,7 +152,10 @@ class IndexView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Index - ${indexName}`} 
 
-            <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> Delete </Button>
+            <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 
+              <i className="fa fa-trash"></i>
+              Delete 
+            </Button>
           </div>
         </div>
 

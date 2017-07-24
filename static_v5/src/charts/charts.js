@@ -90,7 +90,7 @@ class ThroughputTotalChart extends AbstractStackedAreaChart {
 //  }, ...]
 class ThroughputNamespaceChart extends AbstractStackedAreaChart {
   constructor(selector, throughput) {
-    super(selector, throughput, true);
+    super(selector, throughput, false);
   }
   
   // x value of data point

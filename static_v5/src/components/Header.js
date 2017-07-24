@@ -19,7 +19,10 @@ class Header extends React.Component {
         </div>
         <div className="float-right">
           { userName }
-          <Button color="link" onClick={onLogout}> Log out </Button>
+          <Button color="link" onClick={onLogout}> 
+            <i className="fa fa-sign-out"></i>
+            Log out 
+          </Button>
         </div>
       </div>
       );

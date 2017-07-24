@@ -217,30 +217,21 @@
   }
 }
 
-.as-trow-stat {
-  background: #e8ebef;
-}
-
-.as-show-stat {
-  @extend .as-arrow-right;
-
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.as-hide-stat {
-  @extend .as-arrow-down;
-
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-/* HACK - overriding some of the ag-grid cell properties
- * by the default ones on the page */
-.as-grid-cell {
+%grid-cell {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #292b2c;
+}
+
+/* Override cell styles of ag grid */
+.as-grid-cell {
+  @extend %grid-cell;
   font-size: 16px;
+}
+
+/* Override header styles of ag grid */
+.ag-material .ag-header {
+  @extend %grid-cell;
+  font-size: 15px;
 }
 
 /* emphasize the dividers */
@@ -251,7 +242,7 @@
 .as-tree-list-item .dropdown-item {
   /* emphasize on hover */
   &:hover {
-    background: #eee;
+    background: $link-color;
     cursor: pointer;
   }
 
@@ -271,12 +262,54 @@
   }
 }
 
-table .as-stat-row {
-  float: left;
-  padding-left: 20px;
-  font-style: italic;
-  border-bottom: 1px solid #dfdfdf;
-  text-overflow: ellipsis;
-  overflow-x: hidden;
+/*------------------------------*/
+/* stats in a table             */
+
+.as-trow-stat {
+  background: #e8ebef;
 }
 
+.as-show-stat {
+  @extend .as-arrow-right;
+
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.as-hide-stat {
+  @extend .as-arrow-down;
+
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+%stat-row {
+  border-bottom: 1px solid #dfdfdf;
+  float: left;
+  font-style: italic;
+  line-height: 24px;
+  overflow-x: hidden;
+  padding-left: 20px;
+  text-overflow: ellipsis;
+}
+
+table .as-stat-row-key {
+  @extend %stat-row;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+table .as-stat-row-value {
+  @extend %stat-row;
+}
+
+/* space the text and icon inside a button */
+button .fa {
+  margin-right: 5px;
+}
+
+/* highlight active tab */
+.nav-tabs .nav-link.active {
+  background: $link-color !important;
+  color: white !important;
+}
