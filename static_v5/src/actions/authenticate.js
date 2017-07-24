@@ -1,7 +1,7 @@
 import ls from 'local-storage';
 
 import { toURLConverter } from 'api/url';
-import { authenticate as authenticateAPI } from 'api/auth';
+import { authenticate as authenticateAPI, isAuthURL } from 'api/auth';
 import { disconnectCluster, displayAuthClusterConnection } from 'actions/clusters';
 
 export const AUTHENTICATE_USER = 'AUTHENTICATE_USER';
@@ -11,6 +11,7 @@ export const USER_AUTHENTICATION_FAILURE = 'USER_AUTHENTICATION_FAILURE';
 
 const Fetch = window.fetch;
 const AuthHeader = 'Authorization';
+const AMCUnreachable = 'Failed to fetch';
 
 export function init(dispatch) {
   const jwt = ls.get('jwt');
@@ -19,7 +20,7 @@ export function init(dispatch) {
     window.fetch = authorizedFetch(jwt, dispatch);
     dispatch(authSuccess(user)); // TODO user roles
   } else {
-    dispatch(logoutUser());
+    dispatch(logout());
   }
 }
 
@@ -29,22 +30,20 @@ function authenticateUser(credentials) {
   };
 }
 
-function authFailed() {
+function authFailed(msg) {
   return {
     type: USER_AUTHENTICATION_FAILURE,
-    failureMessage: 'Authentication failure'
-  };
-}
-
-function logoutUser() {
-  return {
-    type: LOGOUT_USER
+    failureMessage: msg || 'Authentication failure'
   };
 }
 
 export function logout() {
   ls.clear();
-  return logoutUser();
+  window.fetch = Fetch;
+
+  return {
+    type: LOGOUT_USER
+  };
 }
 
 function authSuccess(user, roles = []) {
@@ -70,7 +69,11 @@ export function authenticate(credentials) {
         dispatch(authSuccess(user));
       })
       .catch((response) => {
-          dispatch(authFailed()); // TODO error message
+        let { message } = response;
+        if (message === AMCUnreachable)
+          message = 'AMC server unreachable';
+        dispatch(authFailed(message)); 
+        throw message;
       });
   }
 }
@@ -91,12 +94,22 @@ function authorizedFetch(jwt, dispatch) {
     return Fetch(url, options)
       .then((response) => {
         if (response.status === 401) // unauthorized
-          dispatch(logoutUser());
+          dispatch(logout());
 
         if (response.status === 400)  
           process400(url, response, dispatch);
 
         return response; 
+      })
+      .catch((err) => {
+        let msg = err.message;
+        // some unknown network error.
+        // Maybe network unavailability.
+        if (msg === AMCUnreachable && !isAuthURL(url)) {
+          dispatch(logout());
+          msg = 'AMC server unreachable';
+        }
+        throw msg;
       });
   }
 }

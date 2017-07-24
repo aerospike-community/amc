@@ -1,5 +1,6 @@
 import { AUTHENTICATED_CLUSTER_CONNECTION, DISCONNECT_CLUSTER_CONNECTION } from 'actions/clusters';
 import { CLUSTER_CONNECTION_FETCHED, DELETE_CLUSTER_CONNECTION } from 'actions/clusters';
+import { LOGOUT_USER } from 'actions/authenticate';
 
 import { getConnectionDetails } from 'api/clusterConnections';
 
@@ -39,6 +40,13 @@ class ClusterPoller {
     delete this.pollers[clusterID];
     window.clearInterval(intervalID);
   }
+
+  removeAll() {
+    let ids = Object.keys(this.pollers);
+    ids.forEach((id) => {
+      this.remove(id);
+    });
+  }
 }
 const CPoller = new ClusterPoller();
 
@@ -57,6 +65,11 @@ function handleClusterPollers(action) {
       id = action.clusterID;
       CPoller.remove(id);
       break;
+
+    case LOGOUT_USER:
+      CPoller.removeAll();
+      break;
+
   }
 }
 

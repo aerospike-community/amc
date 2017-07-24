@@ -42,7 +42,7 @@ class AuthenticateModal extends React.Component {
   }
 
   render() {
-    const inProgress = this.props.inProgress;
+    const { inProgress, failureMessage } = this.props;
     return (
       <Modal isOpen={true} toggle={() => {
                              }}>
@@ -64,6 +64,10 @@ class AuthenticateModal extends React.Component {
         <ModalFooter>
           {inProgress &&
            <span> <Spinner size="1" /> Authenticating ... </span>}
+
+          {!inProgress && failureMessage && 
+           <span className="as-error-text"> {failureMessage} </span>}
+
           <Button disabled={inProgress} color="primary" onClick={this.onAuthenticate}>Submit</Button>
         </ModalFooter>
       </Modal>

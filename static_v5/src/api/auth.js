@@ -10,3 +10,8 @@ export function authenticate(credentials) {
       password: credentials.password
   }, false);
 }
+
+export function isAuthURL(url) {
+  const s = toURLPath('authenticate');
+  return s === url;
+}
