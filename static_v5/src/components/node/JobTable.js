@@ -95,6 +95,12 @@ class JobTable extends React.Component {
       field: 'set',
       suppressFilter: true,
       width: 470,
+    }, {
+      headerName: 'Others',
+      cellRendererFramework: AllPropsRenderer,
+      suppressFilter: true,
+      suppressSorting: true,
+      width: 1500, // all properties fit in this width
     }];
   }
 
@@ -113,6 +119,49 @@ class JobTable extends React.Component {
         />
 
         <AgGridPagination gridAPI={gridAPI} />
+      </div>
+    );
+  }
+}
+
+class AllPropsRenderer extends React.Component {
+  renderData() {
+    const { data } = this.props;
+    const keys = Object.keys(data);
+
+    const row = [];
+    keys.forEach((k) => {
+      const value = data[k];
+      const type = typeof(value);
+
+      if (type === 'function' || type === 'object')
+        return;
+
+      // headers shown in other columns
+      const headers = ['ns', 'module', 'status', 'job-progress', 'run-time', 
+                       'recs-read', 'priority', 'set'];
+      
+      if(headers.findIndex((h) => h === k) !== -1)
+        return;
+
+      row.push(
+        <div className="float-left as-grid-cell" style={{marginRight: 10}} key={k}>
+          <span style={{fontWeight: 'bold', marginRight: 5}}>
+            {k}: 
+          </span>
+          {value}
+        </div>
+      );
+    });
+
+    console.log(row.length);
+    return row;
+  }
+
+  render() {
+    return (
+      <div className="as-grid-cell">
+        {this.renderData()}
       </div>
     );
   }
