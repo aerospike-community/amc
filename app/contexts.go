@@ -3252,6 +3252,70 @@ func (ctx *ThroughputNodeContext) InternalServerError() error {
 	return nil
 }
 
+// QueryNotificationContext provides the notification query action context.
+type QueryNotificationContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	LastID *int
+}
+
+// NewQueryNotificationContext parses the incoming request URL and body, performs validations and creates the
+// context used by the notification controller query action.
+func NewQueryNotificationContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryNotificationContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryNotificationContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramLastID := req.Params["lastId"]
+	if len(paramLastID) > 0 {
+		rawLastID := paramLastID[0]
+		if lastID, err2 := strconv.Atoi(rawLastID); err2 == nil {
+			tmp31 := lastID
+			tmp30 := &tmp31
+			rctx.LastID = tmp30
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("lastId", rawLastID, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryNotificationContext) OK(r []*AerospikeAmcNotificationResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryNotificationContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryNotificationContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryNotificationContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // CreateRestoreContext provides the restore create action context.
 type CreateRestoreContext struct {
 	context.Context

@@ -284,6 +284,7 @@ func GoaServer(config *common.Config) {
 	app.MountIndexController(service, NewIndexController(service))
 	app.MountBackupController(service, NewBackupController(service))
 	app.MountRestoreController(service, NewRestoreController(service))
+	app.MountNotificationController(service, NewNotificationController(service))
 
 	if config.AMC.StaticPath == "" {
 		log.Fatalln("No static dir has been set in the config file. Quiting...")

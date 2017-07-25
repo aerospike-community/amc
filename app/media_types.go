@@ -756,6 +756,45 @@ func (mt *AerospikeAmcNodeResponse) Validate() (err error) {
 	return
 }
 
+// Notification (default view)
+//
+// Identifier: application/vnd.aerospike.amc.notification.response+json; view=default
+type AerospikeAmcNotificationResponse struct {
+	// Cluster ID
+	ConnID string `form:"connId" json:"connId" xml:"connId"`
+	// Notification Description
+	Desc string `form:"desc" json:"desc" xml:"desc"`
+	// Notification ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Last Occured Time
+	LastOccured int `form:"lastOccured" json:"lastOccured" xml:"lastOccured"`
+	// Status
+	Status string `form:"status" json:"status" xml:"status"`
+	// Notification Type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate validates the AerospikeAmcNotificationResponse media type instance.
+func (mt *AerospikeAmcNotificationResponse) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.ConnID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "connId"))
+	}
+	if mt.Desc == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "desc"))
+	}
+	if mt.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if mt.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+
+	return
+}
+
 // Resource Usage (default view)
 //
 // Identifier: application/vnd.aerospike.amc.resource.usage.response+json; view=default
