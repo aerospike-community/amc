@@ -42,6 +42,11 @@ const clusterActions = {
     state: {
       isAuthenticated: true
     },
+  },
+  Alerts: {
+    state: {
+      isAuthenticated: true
+    },
     isEndOfGrouping: true,
   },
   Edit: {},

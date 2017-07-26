@@ -28,6 +28,18 @@
   margin-left: 5px;
   width: 100%;
   @extend .as-text-overflow-ellipsis;
+
+  .as-alert {
+    float: right;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    background: $warn-color;
+    color: black;
+    font-size: 14px;
+    text-align: center;
+    line-height: 28px;
+  }
 }
 
 %arrow {

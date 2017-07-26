@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux';
+import alerts from 'reducers/alerts';
 import session from 'reducers/session';
 import clusters from 'reducers/clusters';
 import entityTree from 'reducers/entityTree';
@@ -13,6 +14,7 @@ const app = combineReducers({
   currentView, // the current view of the app
   entityTree,  // state of the entity tree
   session,     // information of current session
+  alerts,      // alerts for all the clusters
 });
 
 // see https://stackoverflow.com/questions/35622588/how-to-reset-the-state-of-a-redux-store/35641992#35641992

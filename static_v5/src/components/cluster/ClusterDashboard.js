@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import VisibleClusterAlerts from 'containers/VisibleClusterAlerts';
 import VisibleViewClusterConnectionModal from 'containers/cluster/VisibleViewClusterConnectionModal';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnectionModal from 'components/cluster/EditClusterConnectionModal';
@@ -20,7 +21,7 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration];
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Alerts];
 
     this.onViewSelect = this.onViewSelect.bind(this);
   }
@@ -42,6 +43,9 @@ class ClusterDashboard extends React.Component {
 
     } else if (view === CLUSTER_ACTIONS.Configuration) {
       dashboard = <ClusterNodesConfig clusterID={clusterID} />
+        
+    } else if (view === CLUSTER_ACTIONS.Alerts) {
+      dashboard = <VisibleClusterAlerts />
     }
 
     return (

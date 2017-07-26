@@ -3,10 +3,12 @@ import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
+import $ from 'jquery';
+
 import app from './reducers';
 import { fetchClusters } from './actions/clusters';
 import VisibleApp from './containers/VisibleApp';
-import $ from 'jquery';
+import pollingMiddleware from 'classes/pollingMiddleware';
 
 // import all css
 import 'bootstrap/dist/css/bootstrap.css';
@@ -26,7 +28,8 @@ momentLocalizer(moment);
 const store = createStore(
   app,
   applyMiddleware(
-    thunkMiddleware
+    thunkMiddleware,
+    pollingMiddleware
   )
 );
 

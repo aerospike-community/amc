@@ -4,8 +4,9 @@ import PropTypes from 'prop-types'
 import { Checkbox, Dropdown, DropdownMenu, DropdownItem } from 'reactstrap';
 import classNames from 'classnames';
 
+import { VIEW_TYPE } from 'classes/constants';
 import { objectPropType, nextNumber, isEntitiesEqual  } from 'classes/util';
-import { actions, defaultAction } from 'classes/entityActions';
+import { actions, defaultAction, CLUSTER_ACTIONS } from 'classes/entityActions';
 import Tree from 'components/Tree';
 
 // Display all the clusters and its entites 
@@ -57,6 +58,28 @@ class EntityTree extends React.Component {
     return options;
   }
 
+  renderAlerts(entity) {
+    const { alerts } = this.props;
+    const { clusterID } = entity;
+    const isCluster = entity.viewType === VIEW_TYPE.CLUSTER;
+
+    let nalerts = 0;
+    if (isCluster && alerts[clusterID])
+        nalerts = alerts[clusterID].alerts.length;
+
+    if (nalerts === 0)
+      return null;
+
+    const onShowAlerts = (evt) => {
+      evt.stopPropagation();
+      this.props.onEntityAction(entity, CLUSTER_ACTIONS.Alerts);
+    };
+
+    return (
+      <span className="as-alert" onClick={onShowAlerts}> {nalerts} </span>
+    );
+  }
+
   // called from the Tree component to render a entity
   renderTreeNode(entity) {
     const showContextMenu = isEntitiesEqual(this.state.contextMenuEntity, entity);
@@ -89,7 +112,10 @@ class EntityTree extends React.Component {
            </Dropdown>
           </div>}
 
-          <div className="as-tree-node-name" title={entity.name}> {entity.name} </div>
+          <div className="as-tree-node-name" title={entity.name}> 
+            {entity.name} 
+            {this.renderAlerts(entity)}
+          </div>
         </div>
       </div>
       );
@@ -99,7 +125,7 @@ class EntityTree extends React.Component {
     if (evt.ctrlKey)
       return;
 
-    evt.preventDefault();
+    evt.stopPropagation();
 
     // shown, hide it
     if (this.state.contextMenuEntity) {
@@ -195,6 +221,8 @@ class EntityTree extends React.Component {
 EntityTree.PropTypes = {
   // an array of clusters to display
   clusters: PropTypes.arrayOf(objectPropType(Tree)).isRequired,
+  // map of clusterID to alerts
+  alerts: PropTypes.object,
   // returns true iff the node is selected
   isNodeSelected: PropTypes.string,
   // callback when an entity is selected

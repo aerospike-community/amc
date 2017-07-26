@@ -28,7 +28,8 @@ const mapStateToProps = (state) => {
   return {
     isFetching: state.clusters.isFetching,
     clusters: items,
-    isExpanded: (treeNode) => state.entityTree.expanded.has(treeNode)
+    isExpanded: (treeNode) => state.entityTree.expanded.has(treeNode),
+    alerts: state.alerts,
   };
 };
 

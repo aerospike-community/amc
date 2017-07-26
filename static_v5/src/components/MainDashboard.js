@@ -79,7 +79,8 @@ class MainDashboard extends React.Component {
       dashboard = <VisibleUDFOverviewDashboard />
 
     } else if (viewType === VIEW_TYPE.CLUSTER &&
-        (view === CLUSTER_ACTIONS.Latency || view === CLUSTER_ACTIONS.Configuration || CLUSTER_ACTIONS.Overview)) {
+        (view === CLUSTER_ACTIONS.Latency || view === CLUSTER_ACTIONS.Configuration || CLUSTER_ACTIONS.Overview 
+         || view === CLUSTER_ACTIONS.Alerts)) {
       dashboard = <VisibleClusterDashboard />
 
     } else if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) {
