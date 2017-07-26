@@ -31,10 +31,27 @@ const InitState = {
   indexName: null,
 };
 
+function updateEntityView(state) {
+  return (update) => {
+    const NullEntities = {
+      clusterID: null,
+      nodeHost: null,
+      namespaceName: null,
+      setName:null,
+      udfName: null,
+      indexName: null,
+    };
+
+    return Object.assign({}, state, NullEntities, update);
+  };
+}
+
 // the current state of the view of the app
 export default function currentView(state = InitState, action) {
+  const updateFn = updateEntityView(state);
   let updated;
   const wasInitialized = state.isInitialized;
+
   switch (action.type) {
     case SELECT_VIEW:
       const nv = action.newView;
@@ -42,12 +59,12 @@ export default function currentView(state = InitState, action) {
         view:          nv.view,
         viewType:      nv.viewType,
 
-        clusterID:     nv.clusterID,
-        nodeHost:      nv.nodeHost,
-        namespaceName: nv.namespaceName,
-        setName:       nv.setName,
-        udfName:       nv.udfName,
-        indexName:     nv.indexName,
+        clusterID:     nv.clusterID || null,
+        nodeHost:      nv.nodeHost || null,
+        namespaceName: nv.namespaceName || null,
+        setName:       nv.setName || null,
+        udfName:       nv.udfName || null,
+        indexName:     nv.indexName || null,
       });
       break;
 
@@ -58,7 +75,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_CLUSTER_VIEW:
-      updated = Object.assign({}, state, {
+      updated = updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.CLUSTER,
@@ -71,7 +88,7 @@ export default function currentView(state = InitState, action) {
 
       const v = state.viewType;
       if (v === null || v === VIEW_TYPE.START_VIEW) {
-        updated = Object.assign({}, state, {
+        updated = updateFn({
           view: action.view,
 
           viewType: VIEW_TYPE.CLUSTER,
@@ -81,7 +98,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_NODE_VIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.NODE,
@@ -91,7 +108,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_NODE_OVERVIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.NODE_OVERVIEW,
@@ -100,7 +117,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_NAMESPACE_VIEW:
-      updated = Object.assign({}, state, {
+      updated = updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.NAMESPACE,
@@ -111,7 +128,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_NAMESPACE_OVERVIEW:
-      updated = Object.assign({}, state, {
+      updated = updateFn({
         view: action.view, 
 
         viewType: VIEW_TYPE.NAMESPACE_OVERVIEW,
@@ -121,7 +138,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_SET_VIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.SET,
@@ -133,7 +150,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_SET_OVERVIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.SET_OVERVIEW,
@@ -144,7 +161,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_UDF_VIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.UDF,
@@ -155,7 +172,7 @@ export default function currentView(state = InitState, action) {
 
 
     case SELECT_UDF_OVERVIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view, 
 
         viewType: VIEW_TYPE.UDF_OVERVIEW,
@@ -164,7 +181,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_INDEXES_OVERVIEW:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
         
         viewType: VIEW_TYPE.INDEXES_OVERVIEW,
@@ -173,7 +190,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_INDEX:
-      updated =  Object.assign({}, state, {
+      updated =  updateFn({
         view: action.view,
 
         viewType: VIEW_TYPE.INDEX,
@@ -189,7 +206,7 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_START_VIEW:
-      updated = Object.assign({}, InitState, {
+      updated = updateFn({
         viewType: VIEW_TYPE.START_VIEW,
       });
       break;

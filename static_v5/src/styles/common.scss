@@ -93,7 +93,7 @@
 
 /* emphasize a selected item */
 .as-selected {
-  background-color: #ddd !important;
+  background-color: $link-color !important;
   font-weight: bold;
 }
 
@@ -109,7 +109,7 @@
 .as-selectable {
   &:hover {
     cursor: pointer;
-    background: #eee;
+    background: $hover-color;
     font-weight: bold;
   }
 }
@@ -242,7 +242,7 @@
 .as-tree-list-item .dropdown-item {
   /* emphasize on hover */
   &:hover {
-    background: $link-color;
+    background: $hover-color;
     cursor: pointer;
   }
 

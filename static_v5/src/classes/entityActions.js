@@ -44,7 +44,6 @@ const clusterActions = {
     },
     isEndOfGrouping: true,
   },
-  View: {},
   Edit: {},
   Delete: {
     isEndOfGrouping: true,
@@ -63,8 +62,6 @@ const udfActions = {
   View: {
     isDefault: true,
   },
-  Edit: {},
-  Delete: {},
 };
 export const UDF_ACTIONS = extractActions(udfActions);
 
@@ -119,7 +116,6 @@ const setActions = {
   View: {
     isDefault: true
   },
-  Delete: {}
 };
 export const SET_ACTIONS = extractActions(setActions);
 
@@ -136,7 +132,6 @@ const indexActions = {
   View : {
     isDefault: true
   },
-  Delete: {}
 };
 export const INDEX_ACTIONS = extractActions(indexActions);
 

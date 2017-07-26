@@ -159,29 +159,23 @@ export function isEntitiesEqual(e1, e2) {
   let equal = true;
   const props = ['viewType', 'clusterID', 'nodeHost', 'namespaceName', 'setName', 'indexName', 'udfName'];
 
-  if (e1 === null && e2 === null)
+  const isNull = (e) => { return e === null || e === undefined; }
+  if (isNull(e1) && isNull(e2))
     return true;
-  else if (e1 === null)
+  else if (isNull(e1))
     return false;
-  else if (e2 === null)
-    return false;
-
-  if (e1 === undefined && e2 === undefined)
-    return true;
-  else if (e1 === undefined)
-    return false;
-  else if (e2 === undefined)
+  else if (isNull(e2))
     return false;
 
   props.forEach((p) => {
     const v1 = e1[p];
     const v2 = e2[p];
 
-    if (v1 === undefined && v2 === undefined)
+    if (isNull(v1) && isNull(v2))
       return;
-    else if (v1 === undefined)
+    else if (isNull(v1))
       equal = false;
-    else if (v2 === undefined)
+    else if (isNull(v2))
       equal = false;
     else if (v1 !== v2)
       equal = false;

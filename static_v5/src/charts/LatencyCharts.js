@@ -16,6 +16,7 @@ export default class LatencyCharts {
     this.intervalID = null;
 
     this.latData = new LatencyData();
+    this.poll = false;
   }
 
   // init fetches data and initializes the charts
@@ -55,8 +56,11 @@ export default class LatencyCharts {
 
   // keepInSync keeps the data in sync with the current time
   keepInSync() {
-    this.intervalID = window.setInterval(() => {
+    this.poll = true;
 
+    // don't use setInterval. 
+    // see http://reallifejs.com/brainchunks/repeated-events-timeout-or-interval
+    const updateData = () => {
       let from = this.latData.latestTimestamp();
       from = from && moment(from+1000); // add a second
       const to = null;
@@ -64,13 +68,17 @@ export default class LatencyCharts {
       this._fetchData(from, to, (data) => {
         this.latData.updateWindow(data);
         this._updateCharts();
+
+        if (this.poll)
+          window.setTimeout(updateData, POLL_INTERVAL);
       });
-    }, POLL_INTERVAL);
+    };
+    window.setTimeout(updateData, POLL_INTERVAL);
   }
 
   // stopSync stops keeping the data in sync with the current time
   stopSync() {
-    window.clearInterval(this.intervalID);
+    this.poll = false;
   }
 
   // _setupCharts sets up the charts

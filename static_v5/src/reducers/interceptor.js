@@ -14,36 +14,37 @@ export default function(state = {}, action) {
 // to keep the cluster alive at the server.
 class ClusterPoller {
   constructor() {
-    // map of cluster id to 'interval id'
-    this.pollers = {};
+    // set of clusters to poll
+    this.clusters = new Set();
 
     this.interval = 10*1000; // 10 seconds
   }
 
   add(clusterID) {
-    if (clusterID in this.pollers)
+    if (this.clusters.has(clusterID))
       return;
 
-    const intervalID = window.setInterval(() => {
-      getConnectionDetails(clusterID);
-    }, this.interval);
+    this.clusters.add(clusterID);
+    // don't use setInterval. 
+    // see http://reallifejs.com/brainchunks/repeated-events-timeout-or-interval
+    const poll = () => {
+      // stop if not in set
+      if (!this.clusters.has(clusterID))
+        return;
 
-    this.pollers[clusterID] = intervalID;
+      getConnectionDetails(clusterID)
+        .then(() =>  window.setTimeout(poll, this.interval))
+        .catch(() => window.setTimeout(poll, this.interval));
+    };
+    window.setTimeout(poll, this.interval);
   }
 
   remove(clusterID) {
-    if ( !(clusterID in this.pollers))
-      return;
-
-    const intervalID = this.pollers[clusterID];
-
-    delete this.pollers[clusterID];
-    window.clearInterval(intervalID);
+    this.clusters.delete(clusterID);
   }
 
   removeAll() {
-    let ids = Object.keys(this.pollers);
-    ids.forEach((id) => {
+    this.clusters.forEach((id) => {
       this.remove(id);
     });
   }

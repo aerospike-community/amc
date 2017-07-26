@@ -11,14 +11,15 @@ export function watchElementSizeChange(selector, callback, interval = 500) {
     let height = elm.height();
     let width = elm.width();
 
-    let id = setInterval(() => {
+    // don't use setInterval. 
+    // see http://reallifejs.com/brainchunks/repeated-events-timeout-or-interval
+    let poll = true;
+    const watch = () => {
       const s = $(selector);
       // element removed
       // stop watching for size changes
-      if (s.length === 0) { 
-        clearInterval(id);
+      if (s.length === 0)
         return;
-      }
 
       // if size of element has changed execute callback
       const h = s.height(), w = s.width();
@@ -27,10 +28,14 @@ export function watchElementSizeChange(selector, callback, interval = 500) {
         width = w;
         callback();
       }
-    }, interval); 
+
+      if (poll)
+        window.setTimeout(watch, interval);
+    };
+    window.setTimeout(watch, interval);
 
     return () => {
-      window.clearInterval(id);
+      poll = false;
     };
 }
 
