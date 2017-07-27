@@ -84,3 +84,54 @@ func (ut *NodeSeed) Validate() (err error) {
 	}
 	return
 }
+
+// privilege user type.
+type privilege struct {
+	// Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Database Privileges
+	Privilege *string `form:"privilege,omitempty" json:"privilege,omitempty" xml:"privilege,omitempty"`
+	// Set
+	Set *string `form:"set,omitempty" json:"set,omitempty" xml:"set,omitempty"`
+}
+
+// Validate validates the privilege type instance.
+func (ut *privilege) Validate() (err error) {
+	if ut.Privilege == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "privilege"))
+	}
+	return
+}
+
+// Publicize creates Privilege from privilege
+func (ut *privilege) Publicize() *Privilege {
+	var pub Privilege
+	if ut.Namespace != nil {
+		pub.Namespace = ut.Namespace
+	}
+	if ut.Privilege != nil {
+		pub.Privilege = *ut.Privilege
+	}
+	if ut.Set != nil {
+		pub.Set = ut.Set
+	}
+	return &pub
+}
+
+// Privilege user type.
+type Privilege struct {
+	// Namespace
+	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty" xml:"namespace,omitempty"`
+	// Database Privileges
+	Privilege string `form:"privilege" json:"privilege" xml:"privilege"`
+	// Set
+	Set *string `form:"set,omitempty" json:"set,omitempty" xml:"set,omitempty"`
+}
+
+// Validate validates the Privilege type instance.
+func (ut *Privilege) Validate() (err error) {
+	if ut.Privilege == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "privilege"))
+	}
+	return
+}

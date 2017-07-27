@@ -151,16 +151,71 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.cluster.resource.usage.response+json;
       view=default'
     type: object
+  AerospikeAmcClusterRoleResponse:
+    description: Database User (default view)
+    example:
+      name: ada
+      roles:
+      - namespace: test
+        privilege: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+        set: test
+    properties:
+      name:
+        description: User Id
+        example: ada
+        type: string
+      roles:
+        description: Database Roles
+        example:
+        - namespace: test
+          privilege: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+          set: test
+        items:
+          $ref: '#/definitions/Privilege'
+        type: array
+    required:
+    - name
+    - roles
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.cluster.role.response+json;
+      view=default'
+    type: object
+  AerospikeAmcClusterUserResponse:
+    description: Database User (default view)
+    example:
+      roles:
+      - ops
+      - dev
+      username: ada
+    properties:
+      roles:
+        description: Database User Roles
+        example:
+        - ops
+        - dev
+        items:
+          example: Voluptatem blanditiis reiciendis aut facilis nulla.
+          type: string
+        type: array
+      username:
+        description: User Id
+        example: ada
+        type: string
+    required:
+    - username
+    - roles
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.cluster.user.response+json;
+      view=default'
+    type: object
   AerospikeAmcConnectionModulesResponseFull:
     description: Cluster Modules (full view)
     example:
-      name: Rerum ut dolor voluptatibus occaecati sunt ullam.
+      name: Occaecati sunt ullam.
       source: Nihil iste deserunt ut.
       type: Nostrum natus voluptatem ea rem quia ducimus.
     properties:
       name:
         description: Module's Name
-        example: Rerum ut dolor voluptatibus occaecati sunt ullam.
+        example: Occaecati sunt ullam.
         type: string
       source:
         description: Module's Source Code
@@ -1209,7 +1264,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Quaerat qui vitae qui tenetur quis ea.
+          example: Eaque fugit officia quo ipsam excepturi dignissimos.
           type: string
         type: array
       username:
@@ -1445,6 +1500,28 @@ definitions:
     - port
     title: NodeSeed
     type: object
+  Privilege:
+    example:
+      namespace: test
+      privilege: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+      set: test
+    properties:
+      namespace:
+        description: Namespace
+        example: test
+        type: string
+      privilege:
+        description: Database Privileges
+        example: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+        type: string
+      set:
+        description: Set
+        example: test
+        type: string
+    required:
+    - privilege
+    title: Privilege
+    type: object
   SaveConnectionPayload:
     example:
       connId: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
@@ -1494,17 +1571,82 @@ definitions:
     - seeds
     title: SaveConnectionPayload
     type: object
+  SaveDbRolePayload:
+    example:
+      name: report
+      privileges:
+      - namespace: test
+        privilege: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+        set: test
+    properties:
+      name:
+        description: Role name
+        example: report
+        type: string
+      privileges:
+        description: Valid database privilege
+        example:
+        - namespace: test
+          privilege: read|read-write|read-write-udf|sys-admin|user-admin|data-admin
+          set: test
+        items:
+          $ref: '#/definitions/Privilege'
+        type: array
+    required:
+    - name
+    - privileges
+    title: SaveDbRolePayload
+    type: object
+  SaveDbUserPayload:
+    example:
+      grantRoles:
+      - Ut placeat aut temporibus.
+      - Ut placeat aut temporibus.
+      password: password
+      revokeRoles:
+      - Animi incidunt ut voluptatem.
+      username: ada
+    properties:
+      grantRoles:
+        description: Database User Roles to be granted to the User
+        example:
+        - Ut placeat aut temporibus.
+        - Ut placeat aut temporibus.
+        items:
+          example: Ut placeat aut temporibus.
+          type: string
+        type: array
+      password:
+        description: Password. If Password is not provided, the user will be updated.
+        example: password
+        type: string
+      revokeRoles:
+        description: Database User Roles to be revoked from the User
+        example:
+        - Animi incidunt ut voluptatem.
+        items:
+          example: Animi incidunt ut voluptatem.
+          type: string
+        type: array
+      username:
+        description: Database User Id
+        example: ada
+        type: string
+    required:
+    - username
+    title: SaveDbUserPayload
+    type: object
   SaveIndexPayload:
     example:
-      binName: Voluptate est ut placeat aut temporibus.
+      binName: Nulla explicabo dignissimos.
       indexName: idxAccounts
-      namespace: Aperiam animi.
-      setName: Ut voluptatem facere nulla explicabo.
+      namespace: Voluptates et veniam aut libero aut.
+      setName: Quaerat qui vitae qui tenetur quis ea.
       type: NUMERIC
     properties:
       binName:
         description: Index's Bin name
-        example: Voluptate est ut placeat aut temporibus.
+        example: Nulla explicabo dignissimos.
         type: string
       indexName:
         description: Index's Name
@@ -1512,11 +1654,11 @@ definitions:
         type: string
       namespace:
         description: Index's Namespace
-        example: Aperiam animi.
+        example: Voluptates et veniam aut libero aut.
         type: string
       setName:
         description: Index's Set name
-        example: Ut voluptatem facere nulla explicabo.
+        example: Quaerat qui vitae qui tenetur quis ea.
         type: string
       type:
         description: Index's type
@@ -1534,7 +1676,7 @@ definitions:
   SaveModulePayload:
     example:
       name: reports
-      source: Non voluptates et veniam aut libero aut.
+      source: Ab aliquid iure.
       type: LUA
     properties:
       name:
@@ -1543,7 +1685,7 @@ definitions:
         type: string
       source:
         description: Module's Source Code
-        example: Non voluptates et veniam aut libero aut.
+        example: Ab aliquid iure.
         type: string
       type:
         description: Module's type
@@ -1589,7 +1731,7 @@ definitions:
         - ops
         - dev
         items:
-          example: Ab aliquid iure.
+          example: Hic aspernatur.
           type: string
         type: array
       username:
@@ -3621,6 +3763,121 @@ paths:
       summary: progress restore
       tags:
       - restore
+  /api/v1/connections/{connId}/roles:
+    get:
+      description: |-
+        Get the list of roles
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-role#query
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: query db-role
+      tags:
+      - db-role
+    post:
+      description: |-
+        Register or Update a role
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-role#save
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SaveDbRolePayload'
+      produces:
+      - application/vnd.aerospike.amc.cluster.role.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcClusterRoleResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: save db-role
+      tags:
+      - db-role
+  /api/v1/connections/{connId}/roles/{role}:
+    delete:
+      description: |-
+        Delete a role
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-role#delete
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: path
+        name: role
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: delete db-role
+      tags:
+      - db-role
   /api/v1/connections/{connId}/throughput:
     get:
       description: |-
@@ -3668,6 +3925,165 @@ paths:
       summary: throughput connection
       tags:
       - connection
+  /api/v1/connections/{connId}/users:
+    get:
+      description: |-
+        Get the list of users
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-user#query
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: query db-user
+      tags:
+      - db-user
+    post:
+      description: |-
+        Register or Update a user
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-user#save
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SaveDbUserPayload'
+      produces:
+      - application/vnd.aerospike.amc.cluster.user.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcClusterUserResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: save db-user
+      tags:
+      - db-user
+  /api/v1/connections/{connId}/users/{username}:
+    delete:
+      description: |-
+        Delete a user
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-user#delete
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: path
+        name: username
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: delete db-user
+      tags:
+      - db-user
+    get:
+      description: |-
+        Get the information for users
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: db-user#show
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/vnd.aerospike.amc.cluster.user.response+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcClusterUserResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: show db-user
+      tags:
+      - db-user
   /api/v1/users:
     get:
       description: |-

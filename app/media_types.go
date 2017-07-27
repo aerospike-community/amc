@@ -134,6 +134,55 @@ func (mt *AerospikeAmcClusterResourceUsageResponse) Validate() (err error) {
 	return
 }
 
+// Database User (default view)
+//
+// Identifier: application/vnd.aerospike.amc.cluster.role.response+json; view=default
+type AerospikeAmcClusterRoleResponse struct {
+	// User Id
+	Name string `form:"name" json:"name" xml:"name"`
+	// Database Roles
+	Roles []*Privilege `form:"roles" json:"roles" xml:"roles"`
+}
+
+// Validate validates the AerospikeAmcClusterRoleResponse media type instance.
+func (mt *AerospikeAmcClusterRoleResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "roles"))
+	}
+	for _, e := range mt.Roles {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Database User (default view)
+//
+// Identifier: application/vnd.aerospike.amc.cluster.user.response+json; view=default
+type AerospikeAmcClusterUserResponse struct {
+	// Database User Roles
+	Roles []string `form:"roles" json:"roles" xml:"roles"`
+	// User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate validates the AerospikeAmcClusterUserResponse media type instance.
+func (mt *AerospikeAmcClusterUserResponse) Validate() (err error) {
+	if mt.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "username"))
+	}
+	if mt.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "roles"))
+	}
+	return
+}
+
 // Cluster Modules (default view)
 //
 // Identifier: application/vnd.aerospike.amc.connection.modules.response+json; view=default

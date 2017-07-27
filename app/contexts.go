@@ -1406,6 +1406,539 @@ func (ctx *ThroughputConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// DeleteDbRoleContext provides the db-role delete action context.
+type DeleteDbRoleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+	Role   string
+}
+
+// NewDeleteDbRoleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-role controller delete action.
+func NewDeleteDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*DeleteDbRoleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DeleteDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramRole := req.Params["role"]
+	if len(paramRole) > 0 {
+		rawRole := paramRole[0]
+		rctx.Role = rawRole
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DeleteDbRoleContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DeleteDbRoleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DeleteDbRoleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *DeleteDbRoleContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DeleteDbRoleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryDbRoleContext provides the db-role query action context.
+type QueryDbRoleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewQueryDbRoleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-role controller query action.
+func NewQueryDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryDbRoleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryDbRoleContext) OK(r []*AerospikeAmcClusterRoleResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryDbRoleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryDbRoleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryDbRoleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SaveDbRoleContext provides the db-role save action context.
+type SaveDbRoleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *SaveDbRolePayload
+}
+
+// NewSaveDbRoleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-role controller save action.
+func NewSaveDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveDbRoleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SaveDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// saveDbRolePayload is the db-role save action payload.
+type saveDbRolePayload struct {
+	// Role name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Valid database privilege
+	Privileges []*privilege `form:"privileges,omitempty" json:"privileges,omitempty" xml:"privileges,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *saveDbRolePayload) Validate() (err error) {
+	if payload.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Privileges == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	}
+	for _, e := range payload.Privileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Publicize creates SaveDbRolePayload from saveDbRolePayload
+func (payload *saveDbRolePayload) Publicize() *SaveDbRolePayload {
+	var pub SaveDbRolePayload
+	if payload.Name != nil {
+		pub.Name = *payload.Name
+	}
+	if payload.Privileges != nil {
+		pub.Privileges = make([]*Privilege, len(payload.Privileges))
+		for i2, elem2 := range payload.Privileges {
+			pub.Privileges[i2] = elem2.Publicize()
+		}
+	}
+	return &pub
+}
+
+// SaveDbRolePayload is the db-role save action payload.
+type SaveDbRolePayload struct {
+	// Role name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Valid database privilege
+	Privileges []*Privilege `form:"privileges" json:"privileges" xml:"privileges"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SaveDbRolePayload) Validate() (err error) {
+	if payload.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Privileges == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	}
+	for _, e := range payload.Privileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SaveDbRoleContext) OK(r *AerospikeAmcClusterRoleResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.role.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SaveDbRoleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SaveDbRoleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SaveDbRoleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// DeleteDbUserContext provides the db-user delete action context.
+type DeleteDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID   string
+	Username string
+}
+
+// NewDeleteDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller delete action.
+func NewDeleteDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*DeleteDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DeleteDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramUsername := req.Params["username"]
+	if len(paramUsername) > 0 {
+		rawUsername := paramUsername[0]
+		rctx.Username = rawUsername
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *DeleteDbUserContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DeleteDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *DeleteDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *DeleteDbUserContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DeleteDbUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryDbUserContext provides the db-user query action context.
+type QueryDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewQueryDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller query action.
+func NewQueryDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryDbUserContext) OK(r []*AerospikeAmcClusterUserResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *QueryDbUserContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryDbUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// SaveDbUserContext provides the db-user save action context.
+type SaveDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *SaveDbUserPayload
+}
+
+// NewSaveDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller save action.
+func NewSaveDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SaveDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// saveDbUserPayload is the db-user save action payload.
+type saveDbUserPayload struct {
+	// Database User Roles to be granted to the User
+	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
+	// Password. If Password is not provided, the user will be updated.
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database User Roles to be revoked from the User
+	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
+	// Database User Id
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *saveDbUserPayload) Validate() (err error) {
+	if payload.Username == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	return
+}
+
+// Publicize creates SaveDbUserPayload from saveDbUserPayload
+func (payload *saveDbUserPayload) Publicize() *SaveDbUserPayload {
+	var pub SaveDbUserPayload
+	if payload.GrantRoles != nil {
+		pub.GrantRoles = payload.GrantRoles
+	}
+	if payload.Password != nil {
+		pub.Password = payload.Password
+	}
+	if payload.RevokeRoles != nil {
+		pub.RevokeRoles = payload.RevokeRoles
+	}
+	if payload.Username != nil {
+		pub.Username = *payload.Username
+	}
+	return &pub
+}
+
+// SaveDbUserPayload is the db-user save action payload.
+type SaveDbUserPayload struct {
+	// Database User Roles to be granted to the User
+	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
+	// Password. If Password is not provided, the user will be updated.
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database User Roles to be revoked from the User
+	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
+	// Database User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SaveDbUserPayload) Validate() (err error) {
+	if payload.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *SaveDbUserContext) OK(r *AerospikeAmcClusterUserResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.user.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SaveDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SaveDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SaveDbUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowDbUserContext provides the db-user show action context.
+type ShowDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID   string
+	Username string
+}
+
+// NewShowDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller show action.
+func NewShowDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramUsername := req.Params["username"]
+	if len(paramUsername) > 0 {
+		rawUsername := paramUsername[0]
+		rctx.Username = rawUsername
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowDbUserContext) OK(r *AerospikeAmcClusterUserResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.user.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ShowDbUserContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowDbUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // DropIndexContext provides the index drop action context.
 type DropIndexContext struct {
 	context.Context

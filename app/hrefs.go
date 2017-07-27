@@ -28,6 +28,13 @@ func ConnectionHref(connID interface{}) string {
 	return fmt.Sprintf("/api/v1/connections/%v", paramconnID)
 }
 
+// DbUserHref returns the resource href.
+func DbUserHref(connID, username interface{}) string {
+	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })
+	paramusername := strings.TrimLeftFunc(fmt.Sprintf("%v", username), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/connections/%v/users/%v", paramconnID, paramusername)
+}
+
 // IndexHref returns the resource href.
 func IndexHref(connID, name interface{}) string {
 	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })
