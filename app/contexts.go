@@ -1406,6 +1406,126 @@ func (ctx *ThroughputConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// CreateDbRoleContext provides the db-role create action context.
+type CreateDbRoleContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *CreateDbRolePayload
+}
+
+// NewCreateDbRoleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-role controller create action.
+func NewCreateDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*CreateDbRoleContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := CreateDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// createDbRolePayload is the db-role create action payload.
+type createDbRolePayload struct {
+	// Role name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Valid database privileges
+	Privileges []*privilege `form:"privileges,omitempty" json:"privileges,omitempty" xml:"privileges,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *createDbRolePayload) Validate() (err error) {
+	if payload.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Privileges == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	}
+	for _, e := range payload.Privileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// Publicize creates CreateDbRolePayload from createDbRolePayload
+func (payload *createDbRolePayload) Publicize() *CreateDbRolePayload {
+	var pub CreateDbRolePayload
+	if payload.Name != nil {
+		pub.Name = *payload.Name
+	}
+	if payload.Privileges != nil {
+		pub.Privileges = make([]*Privilege, len(payload.Privileges))
+		for i2, elem2 := range payload.Privileges {
+			pub.Privileges[i2] = elem2.Publicize()
+		}
+	}
+	return &pub
+}
+
+// CreateDbRolePayload is the db-role create action payload.
+type CreateDbRolePayload struct {
+	// Role name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Valid database privileges
+	Privileges []*Privilege `form:"privileges" json:"privileges" xml:"privileges"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *CreateDbRolePayload) Validate() (err error) {
+	if payload.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
+	}
+	if payload.Privileges == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	}
+	for _, e := range payload.Privileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *CreateDbRoleContext) OK(r *AerospikeAmcClusterRoleResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.role.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *CreateDbRoleContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *CreateDbRoleContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *CreateDbRoleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // DeleteDbRoleContext provides the db-role delete action context.
 type DeleteDbRoleContext struct {
 	context.Context
@@ -1522,24 +1642,24 @@ func (ctx *QueryDbRoleContext) InternalServerError() error {
 	return nil
 }
 
-// SaveDbRoleContext provides the db-role save action context.
-type SaveDbRoleContext struct {
+// UpdateDbRoleContext provides the db-role update action context.
+type UpdateDbRoleContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
 	ConnID  string
-	Payload *SaveDbRolePayload
+	Payload *UpdateDbRolePayload
 }
 
-// NewSaveDbRoleContext parses the incoming request URL and body, performs validations and creates the
-// context used by the db-role controller save action.
-func NewSaveDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveDbRoleContext, error) {
+// NewUpdateDbRoleContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-role controller update action.
+func NewUpdateDbRoleContext(ctx context.Context, r *http.Request, service *goa.Service) (*UpdateDbRoleContext, error) {
 	var err error
 	resp := goa.ContextResponse(ctx)
 	resp.Service = service
 	req := goa.ContextRequest(ctx)
 	req.Request = r
-	rctx := SaveDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
+	rctx := UpdateDbRoleContext{Context: ctx, ResponseData: resp, RequestData: req}
 	paramConnID := req.Params["connId"]
 	if len(paramConnID) > 0 {
 		rawConnID := paramConnID[0]
@@ -1551,23 +1671,29 @@ func NewSaveDbRoleContext(ctx context.Context, r *http.Request, service *goa.Ser
 	return &rctx, err
 }
 
-// saveDbRolePayload is the db-role save action payload.
-type saveDbRolePayload struct {
+// updateDbRolePayload is the db-role update action payload.
+type updateDbRolePayload struct {
+	// DB Privileges to be granted
+	GrantPrivileges []*privilege `form:"grantPrivileges,omitempty" json:"grantPrivileges,omitempty" xml:"grantPrivileges,omitempty"`
 	// Role name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// Valid database privilege
-	Privileges []*privilege `form:"privileges,omitempty" json:"privileges,omitempty" xml:"privileges,omitempty"`
+	// DB Privileges to be revoked
+	RevokePrivileges []*privilege `form:"revokePrivileges,omitempty" json:"revokePrivileges,omitempty" xml:"revokePrivileges,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
-func (payload *saveDbRolePayload) Validate() (err error) {
+func (payload *updateDbRolePayload) Validate() (err error) {
 	if payload.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
 	}
-	if payload.Privileges == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	for _, e := range payload.GrantPrivileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
-	for _, e := range payload.Privileges {
+	for _, e := range payload.RevokePrivileges {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
 				err = goa.MergeErrors(err, err2)
@@ -1577,38 +1703,50 @@ func (payload *saveDbRolePayload) Validate() (err error) {
 	return
 }
 
-// Publicize creates SaveDbRolePayload from saveDbRolePayload
-func (payload *saveDbRolePayload) Publicize() *SaveDbRolePayload {
-	var pub SaveDbRolePayload
+// Publicize creates UpdateDbRolePayload from updateDbRolePayload
+func (payload *updateDbRolePayload) Publicize() *UpdateDbRolePayload {
+	var pub UpdateDbRolePayload
+	if payload.GrantPrivileges != nil {
+		pub.GrantPrivileges = make([]*Privilege, len(payload.GrantPrivileges))
+		for i2, elem2 := range payload.GrantPrivileges {
+			pub.GrantPrivileges[i2] = elem2.Publicize()
+		}
+	}
 	if payload.Name != nil {
 		pub.Name = *payload.Name
 	}
-	if payload.Privileges != nil {
-		pub.Privileges = make([]*Privilege, len(payload.Privileges))
-		for i2, elem2 := range payload.Privileges {
-			pub.Privileges[i2] = elem2.Publicize()
+	if payload.RevokePrivileges != nil {
+		pub.RevokePrivileges = make([]*Privilege, len(payload.RevokePrivileges))
+		for i2, elem2 := range payload.RevokePrivileges {
+			pub.RevokePrivileges[i2] = elem2.Publicize()
 		}
 	}
 	return &pub
 }
 
-// SaveDbRolePayload is the db-role save action payload.
-type SaveDbRolePayload struct {
+// UpdateDbRolePayload is the db-role update action payload.
+type UpdateDbRolePayload struct {
+	// DB Privileges to be granted
+	GrantPrivileges []*Privilege `form:"grantPrivileges,omitempty" json:"grantPrivileges,omitempty" xml:"grantPrivileges,omitempty"`
 	// Role name
 	Name string `form:"name" json:"name" xml:"name"`
-	// Valid database privilege
-	Privileges []*Privilege `form:"privileges" json:"privileges" xml:"privileges"`
+	// DB Privileges to be revoked
+	RevokePrivileges []*Privilege `form:"revokePrivileges,omitempty" json:"revokePrivileges,omitempty" xml:"revokePrivileges,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
-func (payload *SaveDbRolePayload) Validate() (err error) {
+func (payload *UpdateDbRolePayload) Validate() (err error) {
 	if payload.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "name"))
 	}
-	if payload.Privileges == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "privileges"))
+	for _, e := range payload.GrantPrivileges {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
-	for _, e := range payload.Privileges {
+	for _, e := range payload.RevokePrivileges {
 		if e != nil {
 			if err2 := e.Validate(); err2 != nil {
 				err = goa.MergeErrors(err, err2)
@@ -1619,25 +1757,141 @@ func (payload *SaveDbRolePayload) Validate() (err error) {
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *SaveDbRoleContext) OK(r *AerospikeAmcClusterRoleResponse) error {
+func (ctx *UpdateDbRoleContext) OK(r *AerospikeAmcClusterRoleResponse) error {
 	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.role.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
 // BadRequest sends a HTTP response with status code 400.
-func (ctx *SaveDbRoleContext) BadRequest(r string) error {
+func (ctx *UpdateDbRoleContext) BadRequest(r string) error {
 	ctx.ResponseData.Header().Set("Content-Type", "")
 	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
 }
 
 // Unauthorized sends a HTTP response with status code 401.
-func (ctx *SaveDbRoleContext) Unauthorized() error {
+func (ctx *UpdateDbRoleContext) Unauthorized() error {
 	ctx.ResponseData.WriteHeader(401)
 	return nil
 }
 
 // InternalServerError sends a HTTP response with status code 500.
-func (ctx *SaveDbRoleContext) InternalServerError() error {
+func (ctx *UpdateDbRoleContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// CreateDbUserContext provides the db-user create action context.
+type CreateDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *CreateDbUserPayload
+}
+
+// NewCreateDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller create action.
+func NewCreateDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*CreateDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := CreateDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// createDbUserPayload is the db-user create action payload.
+type createDbUserPayload struct {
+	// Password. If Password is not provided, the user will be updated.
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database User Roles to be granted to the User
+	Roles []string `form:"roles,omitempty" json:"roles,omitempty" xml:"roles,omitempty"`
+	// Database User Id
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *createDbUserPayload) Validate() (err error) {
+	if payload.Username == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Password == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "password"))
+	}
+	if payload.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "roles"))
+	}
+	return
+}
+
+// Publicize creates CreateDbUserPayload from createDbUserPayload
+func (payload *createDbUserPayload) Publicize() *CreateDbUserPayload {
+	var pub CreateDbUserPayload
+	if payload.Password != nil {
+		pub.Password = *payload.Password
+	}
+	if payload.Roles != nil {
+		pub.Roles = payload.Roles
+	}
+	if payload.Username != nil {
+		pub.Username = *payload.Username
+	}
+	return &pub
+}
+
+// CreateDbUserPayload is the db-user create action payload.
+type CreateDbUserPayload struct {
+	// Password. If Password is not provided, the user will be updated.
+	Password string `form:"password" json:"password" xml:"password"`
+	// Database User Roles to be granted to the User
+	Roles []string `form:"roles" json:"roles" xml:"roles"`
+	// Database User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *CreateDbUserPayload) Validate() (err error) {
+	if payload.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	if payload.Password == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "password"))
+	}
+	if payload.Roles == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "roles"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *CreateDbUserContext) OK(r *AerospikeAmcClusterUserResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.user.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *CreateDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *CreateDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *CreateDbUserContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -1764,117 +2018,6 @@ func (ctx *QueryDbUserContext) InternalServerError() error {
 	return nil
 }
 
-// SaveDbUserContext provides the db-user save action context.
-type SaveDbUserContext struct {
-	context.Context
-	*goa.ResponseData
-	*goa.RequestData
-	ConnID  string
-	Payload *SaveDbUserPayload
-}
-
-// NewSaveDbUserContext parses the incoming request URL and body, performs validations and creates the
-// context used by the db-user controller save action.
-func NewSaveDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*SaveDbUserContext, error) {
-	var err error
-	resp := goa.ContextResponse(ctx)
-	resp.Service = service
-	req := goa.ContextRequest(ctx)
-	req.Request = r
-	rctx := SaveDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
-	paramConnID := req.Params["connId"]
-	if len(paramConnID) > 0 {
-		rawConnID := paramConnID[0]
-		rctx.ConnID = rawConnID
-		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
-			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
-		}
-	}
-	return &rctx, err
-}
-
-// saveDbUserPayload is the db-user save action payload.
-type saveDbUserPayload struct {
-	// Database User Roles to be granted to the User
-	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
-	// Password. If Password is not provided, the user will be updated.
-	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
-	// Database User Roles to be revoked from the User
-	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
-	// Database User Id
-	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
-}
-
-// Validate runs the validation rules defined in the design.
-func (payload *saveDbUserPayload) Validate() (err error) {
-	if payload.Username == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
-	}
-	return
-}
-
-// Publicize creates SaveDbUserPayload from saveDbUserPayload
-func (payload *saveDbUserPayload) Publicize() *SaveDbUserPayload {
-	var pub SaveDbUserPayload
-	if payload.GrantRoles != nil {
-		pub.GrantRoles = payload.GrantRoles
-	}
-	if payload.Password != nil {
-		pub.Password = payload.Password
-	}
-	if payload.RevokeRoles != nil {
-		pub.RevokeRoles = payload.RevokeRoles
-	}
-	if payload.Username != nil {
-		pub.Username = *payload.Username
-	}
-	return &pub
-}
-
-// SaveDbUserPayload is the db-user save action payload.
-type SaveDbUserPayload struct {
-	// Database User Roles to be granted to the User
-	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
-	// Password. If Password is not provided, the user will be updated.
-	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
-	// Database User Roles to be revoked from the User
-	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
-	// Database User Id
-	Username string `form:"username" json:"username" xml:"username"`
-}
-
-// Validate runs the validation rules defined in the design.
-func (payload *SaveDbUserPayload) Validate() (err error) {
-	if payload.Username == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
-	}
-	return
-}
-
-// OK sends a HTTP response with status code 200.
-func (ctx *SaveDbUserContext) OK(r *AerospikeAmcClusterUserResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.user.response+json")
-	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
-}
-
-// BadRequest sends a HTTP response with status code 400.
-func (ctx *SaveDbUserContext) BadRequest(r string) error {
-	ctx.ResponseData.Header().Set("Content-Type", "")
-	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
-}
-
-// Unauthorized sends a HTTP response with status code 401.
-func (ctx *SaveDbUserContext) Unauthorized() error {
-	ctx.ResponseData.WriteHeader(401)
-	return nil
-}
-
-// InternalServerError sends a HTTP response with status code 500.
-func (ctx *SaveDbUserContext) InternalServerError() error {
-	ctx.ResponseData.WriteHeader(500)
-	return nil
-}
-
 // ShowDbUserContext provides the db-user show action context.
 type ShowDbUserContext struct {
 	context.Context
@@ -1935,6 +2078,117 @@ func (ctx *ShowDbUserContext) NotFound() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *ShowDbUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// UpdateDbUserContext provides the db-user update action context.
+type UpdateDbUserContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *UpdateDbUserPayload
+}
+
+// NewUpdateDbUserContext parses the incoming request URL and body, performs validations and creates the
+// context used by the db-user controller update action.
+func NewUpdateDbUserContext(ctx context.Context, r *http.Request, service *goa.Service) (*UpdateDbUserContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := UpdateDbUserContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// updateDbUserPayload is the db-user update action payload.
+type updateDbUserPayload struct {
+	// Database User Roles to be granted to the User
+	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
+	// Password. If Password is not provided, the user will be updated.
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database User Roles to be revoked from the User
+	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
+	// Database User Id
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *updateDbUserPayload) Validate() (err error) {
+	if payload.Username == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	return
+}
+
+// Publicize creates UpdateDbUserPayload from updateDbUserPayload
+func (payload *updateDbUserPayload) Publicize() *UpdateDbUserPayload {
+	var pub UpdateDbUserPayload
+	if payload.GrantRoles != nil {
+		pub.GrantRoles = payload.GrantRoles
+	}
+	if payload.Password != nil {
+		pub.Password = payload.Password
+	}
+	if payload.RevokeRoles != nil {
+		pub.RevokeRoles = payload.RevokeRoles
+	}
+	if payload.Username != nil {
+		pub.Username = *payload.Username
+	}
+	return &pub
+}
+
+// UpdateDbUserPayload is the db-user update action payload.
+type UpdateDbUserPayload struct {
+	// Database User Roles to be granted to the User
+	GrantRoles []string `form:"grantRoles,omitempty" json:"grantRoles,omitempty" xml:"grantRoles,omitempty"`
+	// Password. If Password is not provided, the user will be updated.
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
+	// Database User Roles to be revoked from the User
+	RevokeRoles []string `form:"revokeRoles,omitempty" json:"revokeRoles,omitempty" xml:"revokeRoles,omitempty"`
+	// Database User Id
+	Username string `form:"username" json:"username" xml:"username"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *UpdateDbUserPayload) Validate() (err error) {
+	if payload.Username == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "username"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *UpdateDbUserContext) OK(r *AerospikeAmcClusterUserResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.cluster.user.response+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *UpdateDbUserContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *UpdateDbUserContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *UpdateDbUserContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

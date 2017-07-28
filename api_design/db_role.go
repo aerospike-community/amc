@@ -40,7 +40,26 @@ var _ = Resource("db-role", func() {
 	// 	Response(InternalServerError)
 	// })
 
-	Action("save", func() {
+	Action("create", func() {
+		Description("Register or Update a role")
+		Routing(PUT(""))
+		Params(func() {
+		})
+
+		Payload(func() {
+			Member("name", String, "Role name", func() { Example("report") })
+			Member("privileges", ArrayOf(Privilege), "DB Privileges", func() { Description("Valid database privileges") })
+
+			Required("name", "privileges")
+		})
+
+		Response(OK, DBRoleResponseMedia)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("update", func() {
 		Description("Register or Update a role")
 		Routing(POST(""))
 		Params(func() {
@@ -48,11 +67,10 @@ var _ = Resource("db-role", func() {
 
 		Payload(func() {
 			Member("name", String, "Role name", func() { Example("report") })
-			Member("privileges", ArrayOf(Privilege), "DB Roles", func() {
-				Description("Valid database privilege")
-			})
+			Member("grantPrivileges", ArrayOf(Privilege), "DB Privileges to be granted")
+			Member("revokePrivileges", ArrayOf(Privilege), "DB Privileges to be revoked")
 
-			Required("name", "privileges")
+			Required("name")
 		})
 
 		Response(OK, DBRoleResponseMedia)

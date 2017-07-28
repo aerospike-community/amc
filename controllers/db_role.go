@@ -77,8 +77,8 @@ func (c *DbRoleController) Query(ctx *app.QueryDbRoleContext) error {
 	return ctx.OK(rList)
 }
 
-// Save runs the save action.
-func (c *DbRoleController) Save(ctx *app.SaveDbRoleContext) error {
+// Create runs the save action.
+func (c *DbRoleController) Create(ctx *app.CreateDbRoleContext) error {
 	// DbRoleController_Save: start_implement
 
 	cluster, err := getConnectionClusterById(ctx.ConnID)
@@ -110,6 +110,32 @@ func (c *DbRoleController) Save(ctx *app.SaveDbRoleContext) error {
 	return ctx.OK(res)
 }
 
+// Update runs the save action.
+func (c *DbRoleController) Update(ctx *app.UpdateDbRoleContext) error {
+	// DbRoleController_Save: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	pList := toPriviledeList(ctx.Payload.GrantPrivileges)
+	err = cluster.AddPrivileges(ctx.Payload.Name, pList)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	pList = toPriviledeList(ctx.Payload.RevokePrivileges)
+	err = cluster.RemovePrivileges(ctx.Payload.Name, pList)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// DbRoleController_Save: end_implement
+	res := &app.AerospikeAmcClusterRoleResponse{}
+	return ctx.OK(res)
+}
+
 // // Show runs the show action.
 // func (c *DbRoleController) Show(ctx *app.ShowDbRoleContext) error {
 // 	// DbRoleController_Show: start_implement
@@ -120,3 +146,20 @@ func (c *DbRoleController) Save(ctx *app.SaveDbRoleContext) error {
 // 	res := &app.AerospikeAmcClusterRoleResponse{}
 // 	return ctx.OK(res)
 // }
+
+func toPriviledeList(l []*app.Privilege) []as.Privilege {
+	pList := make([]as.Privilege, 0, len(l))
+	for _, p := range l {
+		pv := privilegeFromString(p.Privilege)
+
+		if p.Namespace != nil && len(*p.Namespace) > 0 {
+			pv.Namespace = *p.Namespace
+		}
+		if p.Set != nil && len(*p.Set) > 0 {
+			pv.SetName = *p.Set
+		}
+
+		pList = append(pList, *pv)
+	}
+	return pList
+}

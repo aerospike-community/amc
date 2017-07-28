@@ -24,6 +24,294 @@ import (
 	"net/url"
 )
 
+// CreateDbRoleBadRequest runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbRoleBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.CreateDbRolePayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/roles", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbRoleContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// CreateDbRoleInternalServerError runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbRoleInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.CreateDbRolePayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/roles", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbRoleContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// CreateDbRoleOK runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbRoleOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.CreateDbRolePayload) (http.ResponseWriter, *app.AerospikeAmcClusterRoleResponse) {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil, nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/roles", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbRoleContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcClusterRoleResponse
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcClusterRoleResponse)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcClusterRoleResponse", resp)
+		}
+		__err = mt.Validate()
+		if __err != nil {
+			t.Errorf("invalid response media type: %s", __err)
+		}
+	}
+
+	// Return results
+	return rw, mt
+}
+
+// CreateDbRoleUnauthorized runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbRoleUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.CreateDbRolePayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/roles", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbRoleContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
 // DeleteDbRoleBadRequest runs the method Delete of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
@@ -542,11 +830,11 @@ func QueryDbRoleUnauthorized(t goatest.TInterface, ctx context.Context, service 
 	return rw
 }
 
-// SaveDbRoleBadRequest runs the method Save of the given controller with the given parameters and payload.
+// UpdateDbRoleBadRequest runs the method Update of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveDbRoleBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.SaveDbRolePayload) http.ResponseWriter {
+func UpdateDbRoleBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.UpdateDbRolePayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -590,14 +878,14 @@ func SaveDbRoleBadRequest(t goatest.TInterface, ctx context.Context, service *go
 		ctx = context.Background()
 	}
 	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbRoleContext(goaCtx, req, service)
+	updateCtx, __err := app.NewUpdateDbRoleContext(goaCtx, req, service)
 	if __err != nil {
 		panic("invalid test data " + __err.Error()) // bug
 	}
-	saveCtx.Payload = payload
+	updateCtx.Payload = payload
 
 	// Perform action
-	__err = ctrl.Save(saveCtx)
+	__err = ctrl.Update(updateCtx)
 
 	// Validate response
 	if __err != nil {
@@ -611,11 +899,11 @@ func SaveDbRoleBadRequest(t goatest.TInterface, ctx context.Context, service *go
 	return rw
 }
 
-// SaveDbRoleInternalServerError runs the method Save of the given controller with the given parameters and payload.
+// UpdateDbRoleInternalServerError runs the method Update of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveDbRoleInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.SaveDbRolePayload) http.ResponseWriter {
+func UpdateDbRoleInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.UpdateDbRolePayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -659,14 +947,14 @@ func SaveDbRoleInternalServerError(t goatest.TInterface, ctx context.Context, se
 		ctx = context.Background()
 	}
 	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbRoleContext(goaCtx, req, service)
+	updateCtx, __err := app.NewUpdateDbRoleContext(goaCtx, req, service)
 	if __err != nil {
 		panic("invalid test data " + __err.Error()) // bug
 	}
-	saveCtx.Payload = payload
+	updateCtx.Payload = payload
 
 	// Perform action
-	__err = ctrl.Save(saveCtx)
+	__err = ctrl.Update(updateCtx)
 
 	// Validate response
 	if __err != nil {
@@ -680,11 +968,11 @@ func SaveDbRoleInternalServerError(t goatest.TInterface, ctx context.Context, se
 	return rw
 }
 
-// SaveDbRoleOK runs the method Save of the given controller with the given parameters and payload.
+// UpdateDbRoleOK runs the method Update of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveDbRoleOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.SaveDbRolePayload) (http.ResponseWriter, *app.AerospikeAmcClusterRoleResponse) {
+func UpdateDbRoleOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.UpdateDbRolePayload) (http.ResponseWriter, *app.AerospikeAmcClusterRoleResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -728,14 +1016,14 @@ func SaveDbRoleOK(t goatest.TInterface, ctx context.Context, service *goa.Servic
 		ctx = context.Background()
 	}
 	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbRoleContext(goaCtx, req, service)
+	updateCtx, __err := app.NewUpdateDbRoleContext(goaCtx, req, service)
 	if __err != nil {
 		panic("invalid test data " + __err.Error()) // bug
 	}
-	saveCtx.Payload = payload
+	updateCtx.Payload = payload
 
 	// Perform action
-	__err = ctrl.Save(saveCtx)
+	__err = ctrl.Update(updateCtx)
 
 	// Validate response
 	if __err != nil {
@@ -761,11 +1049,11 @@ func SaveDbRoleOK(t goatest.TInterface, ctx context.Context, service *goa.Servic
 	return rw, mt
 }
 
-// SaveDbRoleUnauthorized runs the method Save of the given controller with the given parameters and payload.
+// UpdateDbRoleUnauthorized runs the method Update of the given controller with the given parameters and payload.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func SaveDbRoleUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.SaveDbRolePayload) http.ResponseWriter {
+func UpdateDbRoleUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbRoleController, connID string, payload *app.UpdateDbRolePayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -809,14 +1097,14 @@ func SaveDbRoleUnauthorized(t goatest.TInterface, ctx context.Context, service *
 		ctx = context.Background()
 	}
 	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbRoleTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbRoleContext(goaCtx, req, service)
+	updateCtx, __err := app.NewUpdateDbRoleContext(goaCtx, req, service)
 	if __err != nil {
 		panic("invalid test data " + __err.Error()) // bug
 	}
-	saveCtx.Payload = payload
+	updateCtx.Payload = payload
 
 	// Perform action
-	__err = ctrl.Save(saveCtx)
+	__err = ctrl.Update(updateCtx)
 
 	// Validate response
 	if __err != nil {

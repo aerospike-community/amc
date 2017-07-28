@@ -24,6 +24,294 @@ import (
 	"net/url"
 )
 
+// CreateDbUserBadRequest runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbUserBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.CreateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// CreateDbUserInternalServerError runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbUserInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.CreateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// CreateDbUserOK runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbUserOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.CreateDbUserPayload) (http.ResponseWriter, *app.AerospikeAmcClusterUserResponse) {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil, nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcClusterUserResponse
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcClusterUserResponse)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcClusterUserResponse", resp)
+		}
+		__err = mt.Validate()
+		if __err != nil {
+			t.Errorf("invalid response media type: %s", __err)
+		}
+	}
+
+	// Return results
+	return rw, mt
+}
+
+// CreateDbUserUnauthorized runs the method Create of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func CreateDbUserUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.CreateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("PUT", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	createCtx, __err := app.NewCreateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	createCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Create(createCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
 // DeleteDbUserBadRequest runs the method Delete of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
@@ -599,294 +887,6 @@ func QueryDbUserUnauthorized(t goatest.TInterface, ctx context.Context, service 
 	return rw
 }
 
-// SaveDbUserBadRequest runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveDbUserBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.SaveDbUserPayload) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Validate payload
-	err := payload.Validate()
-	if err != nil {
-		e, ok := err.(goa.ServiceError)
-		if !ok {
-			panic(err) // bug
-		}
-		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
-	}
-	req, _err := http.NewRequest("POST", u.String(), nil)
-	if _err != nil {
-		panic("invalid test " + _err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbUserContext(goaCtx, req, service)
-	if __err != nil {
-		panic("invalid test data " + __err.Error()) // bug
-	}
-	saveCtx.Payload = payload
-
-	// Perform action
-	__err = ctrl.Save(saveCtx)
-
-	// Validate response
-	if __err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
-	}
-	if rw.Code != 400 {
-		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// SaveDbUserInternalServerError runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveDbUserInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.SaveDbUserPayload) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Validate payload
-	err := payload.Validate()
-	if err != nil {
-		e, ok := err.(goa.ServiceError)
-		if !ok {
-			panic(err) // bug
-		}
-		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
-	}
-	req, _err := http.NewRequest("POST", u.String(), nil)
-	if _err != nil {
-		panic("invalid test " + _err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbUserContext(goaCtx, req, service)
-	if __err != nil {
-		panic("invalid test data " + __err.Error()) // bug
-	}
-	saveCtx.Payload = payload
-
-	// Perform action
-	__err = ctrl.Save(saveCtx)
-
-	// Validate response
-	if __err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
-	}
-	if rw.Code != 500 {
-		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
-// SaveDbUserOK runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveDbUserOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.SaveDbUserPayload) (http.ResponseWriter, *app.AerospikeAmcClusterUserResponse) {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Validate payload
-	err := payload.Validate()
-	if err != nil {
-		e, ok := err.(goa.ServiceError)
-		if !ok {
-			panic(err) // bug
-		}
-		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil, nil
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
-	}
-	req, _err := http.NewRequest("POST", u.String(), nil)
-	if _err != nil {
-		panic("invalid test " + _err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbUserContext(goaCtx, req, service)
-	if __err != nil {
-		panic("invalid test data " + __err.Error()) // bug
-	}
-	saveCtx.Payload = payload
-
-	// Perform action
-	__err = ctrl.Save(saveCtx)
-
-	// Validate response
-	if __err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
-	}
-	if rw.Code != 200 {
-		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
-	}
-	var mt *app.AerospikeAmcClusterUserResponse
-	if resp != nil {
-		var _ok bool
-		mt, _ok = resp.(*app.AerospikeAmcClusterUserResponse)
-		if !_ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcClusterUserResponse", resp)
-		}
-		__err = mt.Validate()
-		if __err != nil {
-			t.Errorf("invalid response media type: %s", __err)
-		}
-	}
-
-	// Return results
-	return rw, mt
-}
-
-// SaveDbUserUnauthorized runs the method Save of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
-// If ctx is nil then context.Background() is used.
-// If service is nil then a default service is created.
-func SaveDbUserUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.SaveDbUserPayload) http.ResponseWriter {
-	// Setup service
-	var (
-		logBuf bytes.Buffer
-		resp   interface{}
-
-		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
-	)
-	if service == nil {
-		service = goatest.Service(&logBuf, respSetter)
-	} else {
-		logger := log.New(&logBuf, "", log.Ltime)
-		service.WithLogger(goa.NewLogger(logger))
-		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
-		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
-		service.Encoder.Register(newEncoder, "*/*")
-	}
-
-	// Validate payload
-	err := payload.Validate()
-	if err != nil {
-		e, ok := err.(goa.ServiceError)
-		if !ok {
-			panic(err) // bug
-		}
-		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil
-	}
-
-	// Setup request context
-	rw := httptest.NewRecorder()
-	u := &url.URL{
-		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
-	}
-	req, _err := http.NewRequest("POST", u.String(), nil)
-	if _err != nil {
-		panic("invalid test " + _err.Error()) // bug
-	}
-	prms := url.Values{}
-	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
-	saveCtx, __err := app.NewSaveDbUserContext(goaCtx, req, service)
-	if __err != nil {
-		panic("invalid test data " + __err.Error()) // bug
-	}
-	saveCtx.Payload = payload
-
-	// Perform action
-	__err = ctrl.Save(saveCtx)
-
-	// Validate response
-	if __err != nil {
-		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
-	}
-	if rw.Code != 401 {
-		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
-	}
-
-	// Return results
-	return rw
-}
-
 // ShowDbUserBadRequest runs the method Show of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
@@ -1180,6 +1180,294 @@ func ShowDbUserUnauthorized(t goatest.TInterface, ctx context.Context, service *
 	// Validate response
 	if _err != nil {
 		t.Fatalf("controller returned %+v, logs:\n%s", _err, logBuf.String())
+	}
+	if rw.Code != 401 {
+		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// UpdateDbUserBadRequest runs the method Update of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func UpdateDbUserBadRequest(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.UpdateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	updateCtx, __err := app.NewUpdateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	updateCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Update(updateCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 400 {
+		t.Errorf("invalid response status code: got %+v, expected 400", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// UpdateDbUserInternalServerError runs the method Update of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func UpdateDbUserInternalServerError(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.UpdateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	updateCtx, __err := app.NewUpdateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	updateCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Update(updateCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 500 {
+		t.Errorf("invalid response status code: got %+v, expected 500", rw.Code)
+	}
+
+	// Return results
+	return rw
+}
+
+// UpdateDbUserOK runs the method Update of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func UpdateDbUserOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.UpdateDbUserPayload) (http.ResponseWriter, *app.AerospikeAmcClusterUserResponse) {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil, nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	updateCtx, __err := app.NewUpdateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	updateCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Update(updateCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
+	}
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcClusterUserResponse
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcClusterUserResponse)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcClusterUserResponse", resp)
+		}
+		__err = mt.Validate()
+		if __err != nil {
+			t.Errorf("invalid response media type: %s", __err)
+		}
+	}
+
+	// Return results
+	return rw, mt
+}
+
+// UpdateDbUserUnauthorized runs the method Update of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers.
+// If ctx is nil then context.Background() is used.
+// If service is nil then a default service is created.
+func UpdateDbUserUnauthorized(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.DbUserController, connID string, payload *app.UpdateDbUserPayload) http.ResponseWriter {
+	// Setup service
+	var (
+		logBuf bytes.Buffer
+		resp   interface{}
+
+		respSetter goatest.ResponseSetterFunc = func(r interface{}) { resp = r }
+	)
+	if service == nil {
+		service = goatest.Service(&logBuf, respSetter)
+	} else {
+		logger := log.New(&logBuf, "", log.Ltime)
+		service.WithLogger(goa.NewLogger(logger))
+		newEncoder := func(io.Writer) goa.Encoder { return respSetter }
+		service.Encoder = goa.NewHTTPEncoder() // Make sure the code ends up using this decoder
+		service.Encoder.Register(newEncoder, "*/*")
+	}
+
+	// Validate payload
+	err := payload.Validate()
+	if err != nil {
+		e, ok := err.(goa.ServiceError)
+		if !ok {
+			panic(err) // bug
+		}
+		t.Errorf("unexpected payload validation error: %+v", e)
+		return nil
+	}
+
+	// Setup request context
+	rw := httptest.NewRecorder()
+	u := &url.URL{
+		Path: fmt.Sprintf("/api/v1/connections/%v/users", connID),
+	}
+	req, _err := http.NewRequest("POST", u.String(), nil)
+	if _err != nil {
+		panic("invalid test " + _err.Error()) // bug
+	}
+	prms := url.Values{}
+	prms["connId"] = []string{fmt.Sprintf("%v", connID)}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	goaCtx := goa.NewContext(goa.WithAction(ctx, "DbUserTest"), rw, req, prms)
+	updateCtx, __err := app.NewUpdateDbUserContext(goaCtx, req, service)
+	if __err != nil {
+		panic("invalid test data " + __err.Error()) // bug
+	}
+	updateCtx.Payload = payload
+
+	// Perform action
+	__err = ctrl.Update(updateCtx)
+
+	// Validate response
+	if __err != nil {
+		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
 	}
 	if rw.Code != 401 {
 		t.Errorf("invalid response status code: got %+v, expected 401", rw.Code)

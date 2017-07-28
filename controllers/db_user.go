@@ -55,8 +55,8 @@ func (c *DbUserController) Query(ctx *app.QueryDbUserContext) error {
 	return ctx.OK(res)
 }
 
-// Save runs the save action.
-func (c *DbUserController) Save(ctx *app.SaveDbUserContext) error {
+// Create runs the create action.
+func (c *DbUserController) Create(ctx *app.CreateDbUserContext) error {
 	// DbUserController_Save: start_implement
 
 	cluster, err := getConnectionClusterById(ctx.ConnID)
@@ -64,23 +64,40 @@ func (c *DbUserController) Save(ctx *app.SaveDbUserContext) error {
 		return ctx.BadRequest(err.Error())
 	}
 
-	if ctx.Payload.Password != nil {
-		// create user
-		if err := cluster.CreateUser(ctx.Payload.Username, *ctx.Payload.Password, ctx.Payload.GrantRoles); err != nil {
+	// create user
+	if err := cluster.CreateUser(ctx.Payload.Username, ctx.Payload.Password, ctx.Payload.Roles); err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// DbUserController_Save: end_implement
+	res := &app.AerospikeAmcClusterUserResponse{}
+	return ctx.OK(res)
+}
+
+// Update runs the update action.
+func (c *DbUserController) Update(ctx *app.UpdateDbUserContext) error {
+	// DbUserController_Save: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	if ctx.Payload.Password != nil && len(*ctx.Payload.Password) > 0 {
+		if err := cluster.ChangeUserPassword(ctx.Payload.Username, *ctx.Payload.Password); err != nil {
 			return ctx.BadRequest(err.Error())
 		}
-	} else {
-		// update user
-		if len(ctx.Payload.GrantRoles) > 0 {
-			if err := cluster.GrantRoles(ctx.Payload.Username, ctx.Payload.GrantRoles); err != nil {
-				return ctx.BadRequest(err.Error())
-			}
-		}
+	}
 
-		if len(ctx.Payload.RevokeRoles) > 0 {
-			if err := cluster.RevokeRoles(ctx.Payload.Username, ctx.Payload.RevokeRoles); err != nil {
-				return ctx.BadRequest(err.Error())
-			}
+	if len(ctx.Payload.GrantRoles) > 0 {
+		if err := cluster.GrantRoles(ctx.Payload.Username, ctx.Payload.GrantRoles); err != nil {
+			return ctx.BadRequest(err.Error())
+		}
+	}
+
+	if len(ctx.Payload.RevokeRoles) > 0 {
+		if err := cluster.RevokeRoles(ctx.Payload.Username, ctx.Payload.RevokeRoles); err != nil {
+			return ctx.BadRequest(err.Error())
 		}
 	}
 

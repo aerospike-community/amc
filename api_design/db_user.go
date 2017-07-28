@@ -42,7 +42,27 @@ var _ = Resource("db-user", func() {
 		Response(InternalServerError)
 	})
 
-	Action("save", func() {
+	Action("create", func() {
+		Description("Register or Update a user")
+		Routing(PUT(""))
+		Params(func() {
+		})
+
+		Payload(func() {
+			Member("username", String, "Database User Id", func() { Example("ada") })
+			Member("password", String, "Password. If Password is not provided, the user will be updated.", func() { Example("password") })
+			Member("roles", ArrayOf(String), "Database User Roles to be granted to the User")
+
+			Required("username", "password", "roles")
+		})
+
+		Response(OK, DBUserResponseMedia)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("update", func() {
 		Description("Register or Update a user")
 		Routing(POST(""))
 		Params(func() {

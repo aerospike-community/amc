@@ -644,17 +644,41 @@ func unmarshalSetConfigConnectionPayload(ctx context.Context, service *goa.Servi
 // DbRoleController is the controller interface for the DbRole actions.
 type DbRoleController interface {
 	goa.Muxer
+	Create(*CreateDbRoleContext) error
 	Delete(*DeleteDbRoleContext) error
 	Query(*QueryDbRoleContext) error
-	Save(*SaveDbRoleContext) error
+	Update(*UpdateDbRoleContext) error
 }
 
 // MountDbRoleController "mounts" a DbRole resource controller on the given service.
 func MountDbRoleController(service *goa.Service, ctrl DbRoleController) {
 	initService(service)
 	var h goa.Handler
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/roles/:role", ctrl.MuxHandler("preflight", handleDbRoleOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/roles", ctrl.MuxHandler("preflight", handleDbRoleOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/roles/:role", ctrl.MuxHandler("preflight", handleDbRoleOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewCreateDbRoleContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*CreateDbRolePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Create(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleDbRoleOrigin(h)
+	service.Mux.Handle("PUT", "/api/v1/connections/:connId/roles", ctrl.MuxHandler("create", h, unmarshalCreateDbRolePayload))
+	service.LogInfo("mount", "ctrl", "DbRole", "action", "Create", "route", "PUT /api/v1/connections/:connId/roles", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -696,22 +720,22 @@ func MountDbRoleController(service *goa.Service, ctrl DbRoleController) {
 			return err
 		}
 		// Build the context
-		rctx, err := NewSaveDbRoleContext(ctx, req, service)
+		rctx, err := NewUpdateDbRoleContext(ctx, req, service)
 		if err != nil {
 			return err
 		}
 		// Build the payload
 		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
-			rctx.Payload = rawPayload.(*SaveDbRolePayload)
+			rctx.Payload = rawPayload.(*UpdateDbRolePayload)
 		} else {
 			return goa.MissingPayloadError()
 		}
-		return ctrl.Save(rctx)
+		return ctrl.Update(rctx)
 	}
 	h = handleSecurity("jwt", h, "api:enterprise")
 	h = handleDbRoleOrigin(h)
-	service.Mux.Handle("POST", "/api/v1/connections/:connId/roles", ctrl.MuxHandler("save", h, unmarshalSaveDbRolePayload))
-	service.LogInfo("mount", "ctrl", "DbRole", "action", "Save", "route", "POST /api/v1/connections/:connId/roles", "security", "jwt")
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/roles", ctrl.MuxHandler("update", h, unmarshalUpdateDbRolePayload))
+	service.LogInfo("mount", "ctrl", "DbRole", "action", "Update", "route", "POST /api/v1/connections/:connId/roles", "security", "jwt")
 }
 
 // handleDbRoleOrigin applies the CORS response headers corresponding to the origin.
@@ -741,9 +765,24 @@ func handleDbRoleOrigin(h goa.Handler) goa.Handler {
 	}
 }
 
-// unmarshalSaveDbRolePayload unmarshals the request body into the context request data Payload field.
-func unmarshalSaveDbRolePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
-	payload := &saveDbRolePayload{}
+// unmarshalCreateDbRolePayload unmarshals the request body into the context request data Payload field.
+func unmarshalCreateDbRolePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &createDbRolePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalUpdateDbRolePayload unmarshals the request body into the context request data Payload field.
+func unmarshalUpdateDbRolePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &updateDbRolePayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}
@@ -759,18 +798,42 @@ func unmarshalSaveDbRolePayload(ctx context.Context, service *goa.Service, req *
 // DbUserController is the controller interface for the DbUser actions.
 type DbUserController interface {
 	goa.Muxer
+	Create(*CreateDbUserContext) error
 	Delete(*DeleteDbUserContext) error
 	Query(*QueryDbUserContext) error
-	Save(*SaveDbUserContext) error
 	Show(*ShowDbUserContext) error
+	Update(*UpdateDbUserContext) error
 }
 
 // MountDbUserController "mounts" a DbUser resource controller on the given service.
 func MountDbUserController(service *goa.Service, ctrl DbUserController) {
 	initService(service)
 	var h goa.Handler
-	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/users/:username", ctrl.MuxHandler("preflight", handleDbUserOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/users", ctrl.MuxHandler("preflight", handleDbUserOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/users/:username", ctrl.MuxHandler("preflight", handleDbUserOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewCreateDbUserContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*CreateDbUserPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Create(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleDbUserOrigin(h)
+	service.Mux.Handle("PUT", "/api/v1/connections/:connId/users", ctrl.MuxHandler("create", h, unmarshalCreateDbUserPayload))
+	service.LogInfo("mount", "ctrl", "DbUser", "action", "Create", "route", "PUT /api/v1/connections/:connId/users", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -812,29 +875,6 @@ func MountDbUserController(service *goa.Service, ctrl DbUserController) {
 			return err
 		}
 		// Build the context
-		rctx, err := NewSaveDbUserContext(ctx, req, service)
-		if err != nil {
-			return err
-		}
-		// Build the payload
-		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
-			rctx.Payload = rawPayload.(*SaveDbUserPayload)
-		} else {
-			return goa.MissingPayloadError()
-		}
-		return ctrl.Save(rctx)
-	}
-	h = handleSecurity("jwt", h, "api:enterprise")
-	h = handleDbUserOrigin(h)
-	service.Mux.Handle("POST", "/api/v1/connections/:connId/users", ctrl.MuxHandler("save", h, unmarshalSaveDbUserPayload))
-	service.LogInfo("mount", "ctrl", "DbUser", "action", "Save", "route", "POST /api/v1/connections/:connId/users", "security", "jwt")
-
-	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-		// Check if there was an error loading the request
-		if err := goa.ContextError(ctx); err != nil {
-			return err
-		}
-		// Build the context
 		rctx, err := NewShowDbUserContext(ctx, req, service)
 		if err != nil {
 			return err
@@ -845,6 +885,29 @@ func MountDbUserController(service *goa.Service, ctrl DbUserController) {
 	h = handleDbUserOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/users/:username", ctrl.MuxHandler("show", h, nil))
 	service.LogInfo("mount", "ctrl", "DbUser", "action", "Show", "route", "GET /api/v1/connections/:connId/users/:username", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewUpdateDbUserContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*UpdateDbUserPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Update(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleDbUserOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/users", ctrl.MuxHandler("update", h, unmarshalUpdateDbUserPayload))
+	service.LogInfo("mount", "ctrl", "DbUser", "action", "Update", "route", "POST /api/v1/connections/:connId/users", "security", "jwt")
 }
 
 // handleDbUserOrigin applies the CORS response headers corresponding to the origin.
@@ -874,9 +937,24 @@ func handleDbUserOrigin(h goa.Handler) goa.Handler {
 	}
 }
 
-// unmarshalSaveDbUserPayload unmarshals the request body into the context request data Payload field.
-func unmarshalSaveDbUserPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
-	payload := &saveDbUserPayload{}
+// unmarshalCreateDbUserPayload unmarshals the request body into the context request data Payload field.
+func unmarshalCreateDbUserPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &createDbUserPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalUpdateDbUserPayload unmarshals the request body into the context request data Payload field.
+func unmarshalUpdateDbUserPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &updateDbUserPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}
