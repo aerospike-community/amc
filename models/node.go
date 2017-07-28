@@ -779,6 +779,28 @@ func (n *Node) KillJob(module, trid string) error {
 	return nil
 }
 
+func (n *Node) SetJobPriority(module, trid, priority string) error {
+	priorityVal := 3
+	switch priority {
+	case "low":
+		priorityVal = 1
+	case "high":
+		priorityVal = 5
+	}
+
+	cmd := fmt.Sprintf("jobs:module=%s;cmd=set-priority;trid=%s;value=%d", module, trid, priorityVal)
+	res, err := n.RequestInfo(3, cmd)
+	if err != nil {
+		return err
+	}
+
+	if strings.HasPrefix(res[cmd], "ERROR") {
+		return errors.New(res[cmd])
+	}
+
+	return nil
+}
+
 func (n *Node) NamespaceList() []string {
 	namespaces := n.Namespaces()
 	res := make([]string, 0, len(namespaces))

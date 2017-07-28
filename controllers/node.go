@@ -257,6 +257,28 @@ func (c *NodeController) SetConfig(ctx *app.SetConfigNodeContext) error {
 	return ctx.OK(res)
 }
 
+// SetJobPriority runs the set-job-priority action.
+func (c *NodeController) SetJobPriority(ctx *app.SetJobPriorityNodeContext) error {
+	// NodeController_KillJob: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	if err := node.SetJobPriority(ctx.Module, ctx.Trid, ctx.Priority); err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	// NodeController_KillJob: end_implement
+	return ctx.NoContent()
+}
+
 // Throughput runs the throughput action.
 func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 	// NodeController_Throughput: start_implement

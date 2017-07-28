@@ -116,8 +116,8 @@ var _ = Resource("node", func() {
 			Scope("api:enterprise")
 		})
 
-		Description("Returns the list of jobs for the node.")
-		Routing(GET(":node/jobs/:trid"))
+		Description("Kills the specified job on the node.")
+		Routing(DELETE(":node/jobs/:trid"))
 		Params(func() {
 			Param("node", String, "Node Address", func() { Example("127.0.0.1:3000") })
 			Param("module", String, "Module", func() {
@@ -129,6 +129,37 @@ var _ = Resource("node", func() {
 			})
 
 			Required("node", "module", "trid")
+		})
+
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("set-job-priority", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Sets the priority of a job for the node.")
+		Routing(POST(":node/jobs/:trid"))
+		Params(func() {
+			Param("node", String, "Node Address", func() { Example("127.0.0.1:3000") })
+			Param("module", String, "Module", func() {
+				Example("scan|query")
+				Pattern("scan|query")
+			})
+			Param("trid", String, "TransactionId", func() {
+				Example("3177513851364758020")
+			})
+			Param("priority", String, "TransactionId", func() {
+				Example("low|medium|high")
+				Pattern("low|medium|high")
+			})
+
+			Required("node", "module", "trid", "priority")
 		})
 
 		Response(NoContent)

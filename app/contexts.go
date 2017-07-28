@@ -3899,6 +3899,98 @@ func (ctx *SetConfigNodeContext) InternalServerError() error {
 	return nil
 }
 
+// SetJobPriorityNodeContext provides the node set-job-priority action context.
+type SetJobPriorityNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID   string
+	Module   string
+	Node     string
+	Priority string
+	Trid     string
+}
+
+// NewSetJobPriorityNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller set-job-priority action.
+func NewSetJobPriorityNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*SetJobPriorityNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SetJobPriorityNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramModule := req.Params["module"]
+	if len(paramModule) == 0 {
+		err = goa.MergeErrors(err, goa.MissingParamError("module"))
+	} else {
+		rawModule := paramModule[0]
+		rctx.Module = rawModule
+		if ok := goa.ValidatePattern(`scan|query`, rctx.Module); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`module`, rctx.Module, `scan|query`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	paramPriority := req.Params["priority"]
+	if len(paramPriority) == 0 {
+		err = goa.MergeErrors(err, goa.MissingParamError("priority"))
+	} else {
+		rawPriority := paramPriority[0]
+		rctx.Priority = rawPriority
+		if ok := goa.ValidatePattern(`low|medium|high`, rctx.Priority); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`priority`, rctx.Priority, `low|medium|high`))
+		}
+	}
+	paramTrid := req.Params["trid"]
+	if len(paramTrid) > 0 {
+		rawTrid := paramTrid[0]
+		rctx.Trid = rawTrid
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *SetJobPriorityNodeContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SetJobPriorityNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SetJobPriorityNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SetJobPriorityNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// NotImplemented sends a HTTP response with status code 501.
+func (ctx *SetJobPriorityNodeContext) NotImplemented(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 501, r)
+}
+
 // ShowNodeContext provides the node show action context.
 type ShowNodeContext struct {
 	context.Context

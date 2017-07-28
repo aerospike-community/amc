@@ -3072,9 +3072,9 @@ paths:
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/jobs/{trid}:
-    get:
+    delete:
       description: |-
-        Returns the list of jobs for the node.
+        Kills the specified job on the node.
 
         Required security scopes:
           * `api:enterprise`
@@ -3120,6 +3120,62 @@ paths:
       - jwt:
         - api:enterprise
       summary: kill-job node
+      tags:
+      - node
+    post:
+      description: |-
+        Sets the priority of a job for the node.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#set-job-priority
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Module
+        in: query
+        name: module
+        pattern: scan|query
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - description: TransactionId
+        in: query
+        name: priority
+        pattern: low|medium|high
+        required: true
+        type: string
+      - description: TransactionId
+        in: path
+        name: trid
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+        "501":
+          description: Not Implemented
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: set-job-priority node
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/latency:

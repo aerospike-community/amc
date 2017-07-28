@@ -1452,6 +1452,7 @@ type NodeController interface {
 	KillJob(*KillJobNodeContext) error
 	Latency(*LatencyNodeContext) error
 	SetConfig(*SetConfigNodeContext) error
+	SetJobPriority(*SetJobPriorityNodeContext) error
 	Show(*ShowNodeContext) error
 	Throughput(*ThroughputNodeContext) error
 }
@@ -1515,8 +1516,8 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	}
 	h = handleSecurity("jwt", h, "api:enterprise")
 	h = handleNodeOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("kill-job", h, nil))
-	service.LogInfo("mount", "ctrl", "Node", "action", "KillJob", "route", "GET /api/v1/connections/:connId/nodes/:node/jobs/:trid", "security", "jwt")
+	service.Mux.Handle("DELETE", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("kill-job", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "KillJob", "route", "DELETE /api/v1/connections/:connId/nodes/:node/jobs/:trid", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -1557,6 +1558,23 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	h = handleNodeOrigin(h)
 	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("set config", h, unmarshalSetConfigNodePayload))
 	service.LogInfo("mount", "ctrl", "Node", "action", "SetConfig", "route", "POST /api/v1/connections/:connId/nodes/:node/config", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSetJobPriorityNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.SetJobPriority(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("set-job-priority", h, nil))
+	service.LogInfo("mount", "ctrl", "Node", "action", "SetJobPriority", "route", "POST /api/v1/connections/:connId/nodes/:node/jobs/:trid", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
