@@ -71,6 +71,7 @@ class EntityTree extends React.Component {
       return null;
 
     const onShowAlerts = (evt) => {
+      evt.preventDefault();
       evt.stopPropagation();
       this.props.onEntityAction(entity, CLUSTER_ACTIONS.Alerts);
     };
@@ -125,6 +126,7 @@ class EntityTree extends React.Component {
     if (evt.ctrlKey)
       return;
 
+    evt.preventDefault();
     evt.stopPropagation();
 
     // shown, hide it

@@ -15,6 +15,7 @@ class NamespacesTable extends React.Component {
 
     this.state = {
       expanded: new Set(), 
+      showRawStats: new Set(), // namespaces to display the raw stats for
       expandAll: props.initiallyExpandAll,
     },
 
@@ -43,7 +44,7 @@ class NamespacesTable extends React.Component {
 
   namespaces() {
     const { namespaces } = this.props;
-    const { expanded, expandAll } = this.state;
+    const { expanded, expandAll, showRawStats } = this.state;
     const azw = (text) => ({__html: addZeroWidthSpace(text)});
     const memory = (s) => {
       return bytes(s['used-bytes']) + ' / ' +  bytes(s['total-bytes']);
@@ -79,7 +80,31 @@ class NamespacesTable extends React.Component {
       data.push(row);
 
       if (isExpanded) {
-        const r = renderStatsInTable(name, stats, 6);
+        const ncols = 6;
+
+        // toggle button
+        const toggle = () => {
+          const s = new Set(showRawStats);
+          if (s.has(name))
+            s.delete(name);
+          else
+            s.add(name);
+          this.setState({
+            showRawStats: s
+          });
+        };
+        const text = showRawStats.has(name) ? 'Hide Raw Stats' : 'Show Raw Stats';
+        data.push(
+          <tr key={name+'_raw_stats'}>
+            <td colSpan={ncols} className="as-link" onClick={toggle}>
+              {text}
+            </td>
+          </tr>
+        );
+
+        // raw stats or not
+        const props = showRawStats.has(name) ? stats.raw_stats : stats;
+        const r = renderStatsInTable(name, props, ncols);
         data = data.concat(r);
       }
     });
