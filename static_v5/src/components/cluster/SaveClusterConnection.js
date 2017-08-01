@@ -226,7 +226,7 @@ SaveClusterConnection.PropTypes = {
   // adding a connection is in progress
   inProgress: PropTypes.bool,
   // error message on save
-  onSaveErrorMessage: PropTypes.bool,
+  onSaveErrorMessage: PropTypes.string,
   // callback to update a connection
   // callback(connection)
   onSaveConnection: PropTypes.func,

@@ -6,10 +6,13 @@ import VisibleClusterAlerts from 'containers/VisibleClusterAlerts';
 import VisibleViewClusterConnectionModal from 'containers/cluster/VisibleViewClusterConnectionModal';
 import ClusterOverview from 'components/cluster/ClusterOverview';
 import EditClusterConnectionModal from 'components/cluster/EditClusterConnectionModal';
-import { CLUSTER_ACTIONS } from 'classes/entityActions';
-import Tabs from 'components/Tabs';
 import ClusterLatency from 'components/cluster/ClusterLatency';
 import ClusterNodesConfig from 'components/cluster/ClusterNodesConfig';
+import ClusterRolesDashboard from 'components/cluster/ClusterRolesDashboard';
+import ClusterUsersDashboard from 'components/cluster/ClusterUsersDashboard';
+
+import Tabs from 'components/Tabs';
+import { CLUSTER_ACTIONS } from 'classes/entityActions';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -21,7 +24,8 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Alerts];
+    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.Configuration, 
+                  CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, CLUSTER_ACTIONS.Alerts];
 
     this.onViewSelect = this.onViewSelect.bind(this);
   }
@@ -46,6 +50,12 @@ class ClusterDashboard extends React.Component {
         
     } else if (view === CLUSTER_ACTIONS.Alerts) {
       dashboard = <VisibleClusterAlerts />
+
+    } else if (view === CLUSTER_ACTIONS.Users) {
+      dashboard = <ClusterUsersDashboard clusterID={clusterID} />
+        clusterID
+    } else if (view === CLUSTER_ACTIONS.Roles) {
+      dashboard = <ClusterRolesDashboard clusterID={clusterID} />
     }
 
     return (

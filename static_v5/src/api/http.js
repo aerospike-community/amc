@@ -9,6 +9,17 @@ export function postJSON(url, data, processResponse = true) {
   return promise(f, processResponse);
 }
 
+export function putJSON(url, data, processResponse = true) {
+  const f = fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  })
+  return promise(f, processResponse);
+}
+
 export function get(url, processResponse = true) {
   const f = fetch(url, {
     method: 'GET',

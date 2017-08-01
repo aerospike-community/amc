@@ -49,6 +49,17 @@ const clusterActions = {
     },
     isEndOfGrouping: true,
   },
+  Users: {
+    state: {
+      isAuthenticated: true
+    }
+  },
+  Roles: {
+    state: {
+      isAuthenticated: true
+    },
+    isEndOfGrouping: true,
+  },
   Edit: {},
   Delete: {
     isEndOfGrouping: true,

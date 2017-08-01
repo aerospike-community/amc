@@ -24,6 +24,14 @@ class AlertModal extends React.Component {
       'alert-success': type === 'success',
     });
 
+    const btnColor = {
+      'info': 'info',
+      'error': 'danger',
+      'warn': 'warning',
+      'success': 'success',
+    };
+    const color = btnColor[type];
+
     return (
       <Modal isOpen={true} toggle={() => {}}>
         <ModalHeader className={headerCSS}> {header} </ModalHeader>
@@ -31,7 +39,7 @@ class AlertModal extends React.Component {
         {showFooter &&
         <ModalFooter>
           {showOK && 
-          <Button color="primary" onClick={onOK}>OK</Button>
+          <Button color={color} onClick={onOK}>OK</Button>
           }
 
           {showCancel &&
