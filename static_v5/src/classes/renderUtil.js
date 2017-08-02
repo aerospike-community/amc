@@ -9,16 +9,12 @@ import { isInteger, addCommasToInt, nextNumber } from 'classes/util';
 // stats - all the stats to display
 // ncols - number of columns in the table. should be >= 3
 export function renderStatsInTable(name, stats, ncols) {
-  const keys = [];
-  for (let k in stats) {
-    if (typeof(stats[k]) !== 'object')
-      keys.push(k);
-  }
-
-  let rows = [];
+  const nr = Math.floor(ncols/3); // number of stats per row
+  let keys = extractKeys(stats);
+  keys = columnSort(keys, nr);
 
   // all stats
-  const nr = Math.floor(ncols/3); // number of stats per row
+  let rows = [];
   for (let i = 0; i < keys.length; i += nr) {
     const divs = []; 
     const rowKeys = keys.slice(i, i+nr);
@@ -70,5 +66,35 @@ export function renderStatsInTable(name, stats, ncols) {
       </tr>
     );
   }
+}
+
+// extract keys from the stats
+function extractKeys(stats) {
+  const keys = [];
+  for (let k in stats) {
+    if (typeof(stats[k]) !== 'object')
+      keys.push(k);
+  }
+  return keys;
+}
+
+// arrange the keys in the columns such that they are vertically ordered
+// n - number of columns
+function columnSort(keys, n) {
+  keys = keys.slice();
+  keys.sort();
+
+  const sorted = [];
+  let start = 0;
+  let i = start;
+  keys.forEach((k) => {
+    sorted[i] = k;
+
+    i += n;
+    if (i >= keys.length)
+      i = ++start;
+  });
+
+  return sorted;
 }
 

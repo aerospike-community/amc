@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { deleteUDF } from 'api/udf';
 import Spinner from 'components/Spinner';
+import AlertModal from 'components/AlertModal';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -57,24 +58,22 @@ class UDFDeleteModal extends React.Component {
 
     const disabled = inProgress || successful;
     if (!inProgress && successful) {
+      const message = `Successfully deleted ${this.props.udfName}`;
       return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully deleted {this.props.udfName} </ModalBody>
-        </Modal>
+        <AlertModal header="Success" message={message} type="success" />
       );
     }
 
     return (
       <Modal isOpen={true} toggle={() => {}}>
-        <ModalHeader> Confirm </ModalHeader>
-        <ModalBody>  Delete {this.props.udfName} ?  </ModalBody>
+        <ModalHeader className="alert-danger"> Confirm </ModalHeader>
+        <ModalBody>  Delete {this.props.udfName}  </ModalBody>
         <ModalFooter>
           {!inProgress && successful &&
             errorMsg}
           {inProgress &&
            <span> <Spinner /> Deleting ... </span>}
-          <Button disabled={disabled} color="primary" onClick={this.onDeleteUDF}>Confirm</Button>
+          <Button disabled={disabled} color="danger" onClick={this.onDeleteUDF}>Confirm</Button>
           <Button disabled={disabled} color="secondary" onClick={this.onCancel}>Cancel</Button>
         </ModalFooter>
       </Modal>

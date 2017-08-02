@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import NodeThroughput from 'components/node/NodeThroughput';
+import ClusterNamespaces from 'components/cluster/ClusterNamespaces';
 
 // NamespacesOverview provides an overview of the namespace
 class NamespacesOverview extends React.Component {
@@ -23,6 +24,7 @@ class NamespacesOverview extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 as-section">
+            <ClusterNamespaces clusterID={clusterID} />
             <NodeThroughput clusterID={clusterID} nodeHost={nodeHost} />
           </div>
         </div>
