@@ -519,6 +519,79 @@ func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*com
 	return res
 }
 
+// isMemoryStorageEngine returns true iff the namespace storage engine is memory
+func (ns *Namespace) isMemoryStorageEngine() bool {
+	return ns.latestStats.TryString("storage-engine", "") == "memory"
+}
+
+// ObjectSize returns the object size histogram for the namespace
+func (ns *Namespace) ObjectSize() []*HistBucket {
+	if ns.isMemoryStorageEngine() {
+		return nil
+	}
+
+	cmd := objszInfoCmd(ns.name)
+	hist := ns.latestInfo.TryString(cmd, "")
+	buckets := parseHistogram(hist)
+
+	rblock := 128 // default byte size of the read block
+	bwidth := rblock * ns.objszBucketWidth() / len(buckets)
+	for i := 0; i < len(buckets); i++ {
+		bucket := buckets[i]
+		bucket.Min *= int64(bwidth)
+		bucket.Max *= int64(bwidth)
+	}
+
+	return buckets
+}
+
+// objszBucketWidth returns the bucket width of the object size histogram
+func (ns *Namespace) objszBucketWidth() int {
+	config := ns.ConfigAttrs()
+	return int(config.TryInt("obj-size-hist-max", 100))
+}
+
+// HistBucket represents a single bucket in a histogram
+type HistBucket struct {
+	Min   int64 `json:"min"`   // values less than Min are not counted towards this bucket
+	Max   int64 `json:"max"`   // values greater than Max are not counted towards this bucket
+	Count int64 `json:"count"` // count of the records whose values falls in this bucket [Min, Max]
+}
+
+// TimeToLive returns the time to live histogram for the namespace
+func (ns *Namespace) TimeToLive() []*HistBucket {
+	cmd := ttlInfoCmd(ns.name)
+	hist := ns.latestInfo.TryString(cmd, "")
+	return parseHistogram(hist)
+}
+
+// parseHistogram parses the histogram and returns the buckets of the
+// histogram
+func parseHistogram(hist string) []*HistBucket {
+	hist = strings.Trim(hist, ";")
+	vals := strings.Split(hist, ",")
+	if len(vals) < 2 {
+		return nil
+	}
+
+	width, _ := strconv.Atoi(vals[1])
+	counts := vals[2:] // remove NUM_BUCKETS, BUCKET_WIDTH
+
+	var buckets []*HistBucket
+	for i := 0; i < len(counts); i++ {
+		n, _ := strconv.ParseInt(counts[i], 10, 64)
+		bucket := &HistBucket{
+			Min:   int64(width * i),
+			Max:   int64(width * (i + 1)),
+			Count: n,
+		}
+
+		buckets = append(buckets, bucket)
+	}
+
+	return buckets
+}
+
 func (ns *Namespace) LatestLatency() map[string]common.Stats {
 	res := ns.latencystats.Get()
 	if res == nil {

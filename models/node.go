@@ -152,7 +152,7 @@ func (n *Node) update() error {
 	nsAggStats := common.Stats{}
 	nsAggCalcStats := common.Stats{}
 	for _, ns := range n.Namespaces() {
-		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name))
+		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name, ttlInfoCmd(ns.name), objszInfoCmd(ns.name)))
 		ns.updateIndexInfo(n.Indexes(ns.name))
 		ns.updateLatencyInfo(latencyMap[ns.name])
 		ns.aggStats(nsAggStats, nsAggCalcStats)
@@ -520,6 +520,8 @@ func (n *Node) infoKeys() []string {
 	// add namespace stat requests
 	for ns, _ := range n.Namespaces() {
 		res = append(res, "namespace/"+ns)
+		res = append(res, ttlInfoCmd(ns))
+		res = append(res, objszInfoCmd(ns))
 		res = append(res, "sets/"+ns)
 		res = append(res, "get-config:context=namespace;id="+ns)
 	}
@@ -1162,6 +1164,8 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 			Disk:   toSystemResource(ns.Disk(), "disk"),
 			Stats:  stats,
 			Status: string(n.Status()),
+			TTL:    ns.TimeToLive(),
+			Objsz:  ns.ObjectSize(),
 		}
 	}
 
