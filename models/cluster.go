@@ -43,9 +43,10 @@ const (
 )
 
 type Cluster struct {
-	observer *ObserverT
-	client   common.SyncValue //*as.Client
-	nodes    common.SyncValue //map[as.Host]*Node
+	observer   *ObserverT
+	client     common.SyncValue // *as.Client
+	nodes      common.SyncValue // map[as.Host]*Node
+	namespaces common.SyncValue // map[namespace]*LogicalNamespace
 
 	// last time updated
 	lastUpdate common.SyncValue //time.Time
@@ -121,6 +122,19 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 	newCluster.nodes.Set(newNodes)
 
 	return &newCluster
+}
+
+func (c *Cluster) updateNamespaces() {
+	if c.namespaces.Get() != nil {
+		return
+	}
+
+	m := map[string]*LogicalNamespace{}
+	for _, ns := range c.NamespaceList() {
+		m[ns] = newLogicalNamespace(c, ns)
+		log.Infof("Namespace %s added to cluster %s", ns, c.Id())
+	}
+	c.namespaces.Set(m)
 }
 
 func (c *Cluster) setPermanent(v bool) {
@@ -444,6 +458,15 @@ func (c *Cluster) Nodes() (nodes []*Node) {
 	return nodes
 }
 
+// GetNamespace returns the namespace of the given name
+func (c *Cluster) GetNamespace(name string) *LogicalNamespace {
+	m, ok := c.namespaces.Get().(map[string]*LogicalNamespace)
+	if !ok {
+		return nil
+	}
+	return m[name]
+}
+
 func (c *Cluster) nodesCopy() map[as.Host]*Node {
 	cNodes := c.nodes.Get().(map[as.Host]*Node)
 	nodes := make(map[as.Host]*Node, len(cNodes))
@@ -657,6 +680,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateUsers()
 	c.checkHealth()
 	c.updateRedAlertCount()
+	c.updateNamespaces()
 	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 
 	c.setUpdatedAt(time.Now())
