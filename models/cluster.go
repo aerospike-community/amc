@@ -125,15 +125,21 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 }
 
 func (c *Cluster) updateNamespaces() {
-	if c.namespaces.Get() != nil {
-		return
+	m := map[string]*LogicalNamespace{}
+
+	if nspaces, ok := c.namespaces.Get().(map[string]*LogicalNamespace); ok {
+		for name, ns := range nspaces {
+			m[name] = ns
+		}
 	}
 
-	m := map[string]*LogicalNamespace{}
 	for _, ns := range c.NamespaceList() {
-		m[ns] = newLogicalNamespace(c, ns)
-		log.Infof("Namespace %s added to cluster %s", ns, c.Id())
+		if _, ok := m[ns]; !ok {
+			m[ns] = newLogicalNamespace(c, ns)
+			log.Infof("Namespace %s added to cluster %s", ns, c.Id())
+		}
 	}
+
 	c.namespaces.Set(m)
 }
 

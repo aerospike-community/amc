@@ -29,6 +29,23 @@ var _ = Resource("logical-namespace", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("throughput", func() {
+		Description("Returns the aggregate throughput of the namespace for a given window of time.")
+		Routing(GET(":namespace/throughput"))
+		Params(func() {
+			Param("namespace", String, "Namespace", func() { Example("test") })
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("namespace", "from", "until")
+		})
+
+		Response(OK, ThroughputWrapperResponseMedia)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 })
 
 var LogicalNamespaceResponseMedia = MediaType("application/vnd.aerospike.amc.logical.namespace.response+json", func() {
