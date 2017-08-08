@@ -38,11 +38,33 @@ var _ = Resource("logical-namespace", func() {
 			Param("from", Integer, "From time in unix seconds")
 			Param("until", Integer, "Until time in unix seconds")
 
-			Required("namespace", "from", "until")
+			Required("namespace", "from")
 		})
 
 		Response(OK, ThroughputWrapperResponseMedia)
 		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("latency", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Returns the aggregate latency of the namespace for a given window of time.")
+		Routing(GET(":namespace/latency"))
+		Params(func() {
+			Param("namespace", String, "Namespace name", func() { Example("test") })
+			Param("from", Integer, "From time in unix seconds")
+			Param("until", Integer, "Until time in unix seconds")
+
+			Required("namespace", "from")
+		})
+
+		Response(OK, ArrayOf(Any))
+		Response(BadRequest, String)
+		Response(NotImplemented, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})

@@ -41,11 +41,11 @@ func (c *LogicalNamespaceController) Show(ctx *app.ShowLogicalNamespaceContext) 
 	return ctx.OK(res)
 }
 
+// Stub to satisfy the throughputEntity interface
 type nsthroughput struct {
 	ns *models.LogicalNamespace
 }
 
-// Stub to satisfy the throughputEntity interface
 func (tp *nsthroughput) LatestThroughput() map[string]map[string]*common.SinglePointValue { return nil }
 func (tp *nsthroughput) Throughput(from, to time.Time) map[string]map[string][]*common.SinglePointValue {
 	return tp.ns.Throughput(from, to)
@@ -67,8 +67,38 @@ func (c *LogicalNamespaceController) Throughput(ctx *app.ThroughputLogicalNamesp
 		ns: ns,
 	}
 	res := app.AerospikeAmcThroughputWrapperResponse{
-		Throughput: throughput(nstp, &ctx.From, &ctx.Until),
+		Throughput: throughput(nstp, &ctx.From, ctx.Until),
 	}
 
 	return ctx.OK(&res)
+}
+
+// Stub to satisfy the latencyEntity interface
+type nslatency struct {
+	ns *models.LogicalNamespace
+}
+
+func (lat *nslatency) LatestLatency() map[string]common.Stats { return nil }
+func (lat *nslatency) Latency(from, to time.Time) []map[string]common.Stats {
+	return lat.ns.Latency(from, to)
+}
+
+// Latency runs the latency action.
+func (c *LogicalNamespaceController) Latency(ctx *app.LatencyLogicalNamespaceContext) error {
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	ns := cluster.GetNamespace(ctx.Namespace)
+	if ns == nil {
+		return ctx.BadRequest("Namespace not found.")
+	}
+
+	nslat := &nslatency{
+		ns: ns,
+	}
+	res := latency(nslat, &ctx.From, ctx.Until)
+
+	return ctx.OK(res)
 }

@@ -61,7 +61,44 @@ func (ns *LogicalNamespace) Name() string {
 
 // Latency returns the latency of the namespace.
 func (ns *LogicalNamespace) Latency(from, to time.Time) []map[string]common.Stats {
-	return nil
+	latencies := map[string][]common.Stats{} // map of operation to the statistic
+
+	// fill latencies
+	for _, namespace := range ns.namespaces() {
+		if lat := namespace.Latency(from, to); lat != nil {
+			for _, l := range lat {
+				for op, stat := range l {
+					latencies[op] = append(latencies[op], stat)
+				}
+			}
+		}
+	}
+
+	// combine latencies
+	for op, stats := range latencies {
+		latencies[op] = aggregateLatencies(stats)
+	}
+
+	// convert to array
+	max := 0
+	for op, _ := range latencies {
+		if n := len(latencies[op]); n > max {
+			max = n
+		}
+	}
+
+	arr := make([]map[string]common.Stats, max)
+	for i := 0; i < max; i++ {
+		arr[i] = map[string]common.Stats{}
+	}
+
+	for op, stats := range latencies {
+		for i, stat := range stats {
+			arr[i][op] = stat
+		}
+	}
+
+	return arr
 }
 
 // Throughput returns the throughput of the namespace.
@@ -93,17 +130,17 @@ func (ns *LogicalNamespace) Throughput(from, to time.Time) map[string]map[string
 	return m
 }
 
-// byTime implements the sorting interface.
+// tpByTime implements the sorting interface.
 // Sorts the single point values by time.
-type byTime []*common.SinglePointValue
+type tpByTime []*common.SinglePointValue
 
-func (tp byTime) Len() int           { return len(tp) }
-func (tp byTime) Swap(i, j int)      { tp[i], tp[j] = tp[j], tp[i] }
-func (tp byTime) Less(i, j int) bool { return *tp[i].Timestamp(1) < *tp[j].Timestamp(1) }
+func (tp tpByTime) Len() int           { return len(tp) }
+func (tp tpByTime) Swap(i, j int)      { tp[i], tp[j] = tp[j], tp[i] }
+func (tp tpByTime) Less(i, j int) bool { return *tp[i].Timestamp(1) < *tp[j].Timestamp(1) }
 
 // aggregrateThroughputs combines the values within a second
 func aggregrateThroughputs(vals []*common.SinglePointValue) []*common.SinglePointValue {
-	sort.Sort(byTime(vals))
+	sort.Sort(tpByTime(vals))
 
 	zero := float64(0)
 	var agg []*common.SinglePointValue
@@ -113,9 +150,8 @@ func aggregrateThroughputs(vals []*common.SinglePointValue) []*common.SinglePoin
 		var sum float64
 		var j int
 		for j = i; j < len(vals); j++ {
-			t := *vals[j].Timestamp(1)
-			if t-time > 1 { // merge only if within a second
-				break
+			if t := *vals[j].Timestamp(1); t-time > 1 {
+				break // merge only if within a second
 			}
 			sum += *vals[j].Value(&zero)
 		}
@@ -138,19 +174,6 @@ func (ns *LogicalNamespace) Sets() {
 
 // Indexes returns the indexes of the namespace.
 func (ns *LogicalNamespace) Indexes() {
-}
-
-// nodes returns all the nodes having this namespace.
-func (ns *LogicalNamespace) nodes() []*Node {
-	var nodes []*Node
-
-	for _, n := range ns.cluster.Nodes() {
-		if n.NamespaceByName(ns.name) != nil {
-			nodes = append(nodes, n)
-		}
-	}
-
-	return nodes
 }
 
 // namespaces returns all the namespace instances on all the nodes.
