@@ -76,7 +76,9 @@ func (ns *LogicalNamespace) Latency(from, to time.Time) []map[string]common.Stat
 
 	// combine latencies
 	for op, stats := range latencies {
-		latencies[op] = aggregateLatencies(stats)
+		s := newLatencies(stats)
+		m := s.merge()
+		latencies[op] = m.toStats()
 	}
 
 	// convert to array
