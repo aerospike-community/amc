@@ -65,6 +65,15 @@ func (lat Latency) timestampUnix() int64 {
 	return s.TryInt("timestamp_unix", 0)
 }
 
+// onemsPct returns the percentage of operations below one millisecond
+func (lat Latency) onemsPct() float64 {
+	var n float64
+	for _, v := range lat.valBuckets() {
+		n += v
+	}
+	return 100.0 - n
+}
+
 //----------------------------
 type Latencies []Latency
 
@@ -77,6 +86,15 @@ func newLatencies(stats []common.Stats) Latencies {
 	l := Latencies(arr)
 	sort.Sort(l)
 	return l
+}
+
+func (lats Latencies) append(others ...Latencies) Latencies {
+	stats := lats.toStats()
+	for _, o := range others {
+		stats = append(stats, o.toStats()...)
+	}
+
+	return newLatencies(stats)
 }
 
 func (lats Latencies) toStats() []common.Stats {
@@ -96,6 +114,16 @@ func (lats Latencies) Less(i, j int) bool { return lats[i].timestampUnix() < lat
 // nstats returns the number of statistics
 func (lats Latencies) nstats() int {
 	return len(lats)
+}
+
+// timemap returns the map of the time to the index in the latencies
+func (lats Latencies) timemap() map[int64]int {
+	m := map[int64]int{}
+	for i, l := range lats {
+		t := l.timestampUnix()
+		m[t] = i
+	}
+	return m
 }
 
 // mergedBuckets returns the buckets if they were merged
@@ -203,6 +231,24 @@ func (lats Latencies) merge() Latencies {
 	}
 
 	return Latencies(newstats)
+}
+
+// onemsPct returns the percentage of operations less than one millisecond
+// aggregated over all the latencies
+func (lats Latencies) onemsPct() float64 {
+	var onems, total float64
+	for _, lat := range lats {
+		n := lat.tps()
+		x := lat.onemsPct()
+		onems += x / 100.0 * n
+		total += n
+	}
+
+	if total == 0 {
+		return 0
+	}
+
+	return onems / total
 }
 
 func (lats Latencies) totalTPS() float64 {

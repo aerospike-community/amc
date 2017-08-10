@@ -61,46 +61,8 @@ func (ns *LogicalNamespace) Name() string {
 
 // Latency returns the latency of the namespace.
 func (ns *LogicalNamespace) Latency(from, to time.Time) []map[string]common.Stats {
-	latencies := map[string][]common.Stats{} // map of operation to the statistic
-
-	// fill latencies
-	for _, namespace := range ns.namespaces() {
-		if lat := namespace.Latency(from, to); lat != nil {
-			for _, l := range lat {
-				for op, stat := range l {
-					latencies[op] = append(latencies[op], stat)
-				}
-			}
-		}
-	}
-
-	// combine latencies
-	for op, stats := range latencies {
-		s := newLatencies(stats)
-		m := s.merge()
-		latencies[op] = m.toStats()
-	}
-
-	// convert to array
-	max := 0
-	for op, _ := range latencies {
-		if n := len(latencies[op]); n > max {
-			max = n
-		}
-	}
-
-	arr := make([]map[string]common.Stats, max)
-	for i := 0; i < max; i++ {
-		arr[i] = map[string]common.Stats{}
-	}
-
-	for op, stats := range latencies {
-		for i, stat := range stats {
-			arr[i][op] = stat
-		}
-	}
-
-	return arr
+	n := newNamespaceLatency(ns, from, to)
+	return n.merge()
 }
 
 // Throughput returns the throughput of the namespace.

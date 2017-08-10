@@ -585,3 +585,7 @@ func (ns *Namespace) Latency(from, to time.Time) []map[string]common.Stats {
 
 	return vsTyped
 }
+
+func (ns *Namespace) NodeAddress() string {
+	return ns.node.Address()
+}
