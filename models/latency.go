@@ -16,6 +16,26 @@ func newLatency(stat common.Stats) Latency {
 	return Latency(stat)
 }
 
+// time returns the total time taken to complete this operation
+func (lat Latency) time() float64 {
+	b := lat.buckets()
+	tps := lat.tps()
+
+	var sum, total float64
+	for i, v := range lat.valBuckets() {
+		weight := float64(b[i])
+		sum += v / 100.0 * tps * weight
+		total += float64(b[i])
+	}
+
+	// for the first threshold taking the value of the
+	// firstbucket/2
+	weight := float64(b[0] / 2)
+	pct := 100 - total
+	sum += pct / 100.0 * tps * weight
+	return sum
+}
+
 func (lat Latency) toStat() common.Stats {
 	return common.Stats(lat)
 }
@@ -63,15 +83,6 @@ func (lat Latency) timestamp() string {
 func (lat Latency) timestampUnix() int64 {
 	s := common.Stats(lat)
 	return s.TryInt("timestamp_unix", 0)
-}
-
-// onemsPct returns the percentage of operations below one millisecond
-func (lat Latency) onemsPct() float64 {
-	var n float64
-	for _, v := range lat.valBuckets() {
-		n += v
-	}
-	return 100.0 - n
 }
 
 //----------------------------
@@ -233,22 +244,18 @@ func (lats Latencies) merge() Latencies {
 	return Latencies(newstats)
 }
 
-// onemsPct returns the percentage of operations less than one millisecond
-// aggregated over all the latencies
-func (lats Latencies) onemsPct() float64 {
-	var onems, total float64
-	for _, lat := range lats {
-		n := lat.tps()
-		x := lat.onemsPct()
-		onems += x / 100.0 * n
-		total += n
+// avgLatency returns average latency across all the the latencies
+func (lats Latencies) avgLatency() float64 {
+	var tps, time float64
+	for _, l := range lats {
+		time += l.time()
+		tps += l.tps()
 	}
 
-	if total == 0 {
+	if tps == 0 {
 		return 0
 	}
-
-	return onems / total
+	return time / tps
 }
 
 func (lats Latencies) totalTPS() float64 {

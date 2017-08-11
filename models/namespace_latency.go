@@ -1,8 +1,6 @@
 package models
 
 import (
-	"math"
-	"sort"
 	"time"
 
 	"github.com/citrusleaf/amc/common"
@@ -110,6 +108,7 @@ func (ns NamespaceLatency) merge() []map[string]common.Stats {
 		}
 	}
 
+	ns.outliers()
 	return arr
 }
 
@@ -132,53 +131,22 @@ func (ns NamespaceLatency) outliers() map[string][]string {
 
 // returns node hosts which are outliers for the given operation
 func (ns NamespaceLatency) outlier(op string) []string {
-	var onems []float64
+	var avgs []float64
 	for _, lat := range ns[op] {
-		pct := lat.onemsPct()
-		onems = append(onems, pct)
+		x := lat.avgLatency()
+		avgs = append(avgs, x)
 	}
 
-	trimean := _trimean(onems)
-	stddev := _stddev(onems, trimean)
+	// assume distribution is normal
+	isOutlier := normOutlier(avgs)
 
-	// assume a normal distribution
-	// outliers are the ones that lie 2 stddev away from the mean
 	var nodes []string
 	for id, lat := range ns[op] {
-		pct := lat.onemsPct()
-		x := math.Abs(pct - trimean)
-		if x > 2*stddev {
+		avg := lat.avgLatency()
+		if isOutlier(avg) {
 			nodes = append(nodes, id)
 		}
 	}
 
 	return nodes
-}
-
-// trimean is more robust against outliers
-func _trimean(vals []float64) float64 {
-	sort.Float64s(vals)
-
-	n := float64(len(vals))
-	i := int(math.Ceil(0.25*n)) - 1 // 25th quantile
-	j := int(math.Ceil(0.50*n)) - 1 // 50th quantile
-	k := int(math.Ceil(0.75*n)) - 1 // 75th quantile
-
-	return (vals[i] + 2*vals[j] + vals[k]) / 4
-}
-
-func _stddev(vals []float64, mean float64) float64 {
-	var sum float64
-
-	for _, v := range vals {
-		sum += math.Pow(v-mean, 2)
-	}
-
-	if len(vals) < 2 {
-		return 0
-	}
-
-	n := float64(len(vals))
-	x := sum / (n - 1)
-	return math.Sqrt(x)
 }
