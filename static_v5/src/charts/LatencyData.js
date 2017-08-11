@@ -1,7 +1,7 @@
 import { LatencyOperations as LO } from 'charts/constants';
 import { replaceUnicode } from 'classes/util';
 
-// map of throughput operation to the
+// map of latency operation to the
 // key in the data
 const OperationKey = {
   [LO.Query]: 'query',

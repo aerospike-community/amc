@@ -228,7 +228,7 @@ EntityTree.PropTypes = {
   // returns true iff the node is selected
   isNodeSelected: PropTypes.string,
   // callback when an entity is selected
-  // onEntitySelect(entity)
+  // onEntitySelect(entity, default)
   onEntitySelect: PropTypes.func,
   // callback when an action is performed on an entity
   // onEntityAction(entity, action)

@@ -35,7 +35,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEntitySelect: (entity, view = '') => {
+    onEntitySelect: (entity, defView = '') => {
+      const view = CurrentView.viewType === entity.viewType ? CurrentView.view : defView;
       dispatch(selectEntity(entity, view));
     },
 

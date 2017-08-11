@@ -33,16 +33,17 @@ class NamespaceDashboard extends React.Component {
         isSame = false;
     });
 
-    if (!isSame)
-      this.fetchNamespaces();
+    if (!isSame) {
+      this.fetchNamespaces(nextProps);
+    }
   }
 
   componentDidMount() {
-    this.fetchNamespaces();
+    this.fetchNamespaces(this.props);
   }
 
-  fetchNamespaces() {
-    const { clusterID, nodeHost, namespaceName } = this.props;
+  fetchNamespaces(props) {
+    const { clusterID, nodeHost, namespaceName } = props;
 
     getStatistics(clusterID, nodeHost, namespaceName)
       .then((stat) => {

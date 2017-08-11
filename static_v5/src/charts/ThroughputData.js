@@ -49,11 +49,57 @@ export default class ThroughputData {
           orig.splice(0, origLen);
       }
     }
+
+    this.syncAll();
+  }
+
+  // synchronize all data
+  syncAll() {
+    Object.keys(this.data).forEach((op) => {
+      this.sync(op);
+    });
+  }
+
+  // synchronize data across all the namespaces
+  sync(op) {
+    let from, to;
+
+    // find from, to across all namespaces
+    for (const ns in this.data[op]) {
+      const val = this.data[op][ns];
+
+      const first = val[0];
+      if (!from || first.timestamp > from)
+        from = first.timestamp;
+
+      const last = val[val.length-1];
+      if (!to || last.timestamp < to)
+        to = last.timestamp;
+    }
+
+    // keep only [from, to] window
+    for (const ns in this.data[op]) {
+      const val = this.data[op][ns];
+
+      let i;
+      for (i = 0; i < val.length; i++) {
+        if (val[i].timestamp === from) 
+          break;
+      }
+      val.splice(0, i)
+
+      for (i = val.length-1; i >= 0; i--) {
+        if (val[i].timestamp === to)
+          break;
+      }
+      val.splice(i+1)
+    }
   }
 
   // setData sets the data
   setData(data) {
     this.data = data;
+    this.syncAll();
   }
 
   // earliestTimestamp returns the earliest timestamp
