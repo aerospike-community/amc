@@ -1062,11 +1062,13 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 		}
 
 		stats := common.Stats{
-			"tps":        opsCount,
-			"timestamp":  timestamp,
-			"buckets":    buckets,
-			"valBuckets": valBucketsFloat,
+			"tps":            opsCount,
+			"timestamp":      timestamp,
+			"buckets":        buckets,
+			"valBuckets":     valBucketsFloat,
+			"timestamp_unix": n.ServerTime().Unix(),
 		}
+		topct(stats)
 
 		if res[ns] == nil {
 			res[ns] = map[string]common.Stats{
@@ -1100,20 +1102,19 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 		}
 	}
 
-	for _, nstats := range nodeStats {
-		tps := nstats.TryFloat("tps", 0)
-		if tps == 0 {
-			tps = 1
-		}
-		nValBuckets := nstats["valBuckets"].([]float64)
-		for i := range nValBuckets {
-			nValBuckets[i] /= tps
-		}
-		nstats["valBuckets"] = nValBuckets
-		nstats["timestamp_unix"] = n.ServerTime().Unix()
-	}
-
 	return res, nodeStats
+}
+
+func topct(stat common.Stats) {
+	tps := stat.TryFloat("tps", 0)
+	if tps == 0 {
+		tps = 1
+	}
+	nValBuckets := stat["valBuckets"].([]float64)
+	for i := range nValBuckets {
+		nValBuckets[i] /= tps
+	}
+	stat["valBuckets"] = nValBuckets
 }
 
 func (n *Node) setAlertState(name string, value interface{}) {
