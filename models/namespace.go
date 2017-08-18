@@ -519,6 +519,43 @@ func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*com
 	return res
 }
 
+// isMemoryStorageEngine returns true iff the namespace storage engine is memory
+func (ns *Namespace) isMemoryStorageEngine() bool {
+	return ns.latestStats.TryString("storage-engine", "") == "memory"
+}
+
+// ObjectSize returns the object size histogram for the namespace
+func (ns *Namespace) ObjectSize() Histogram {
+	if ns.isMemoryStorageEngine() {
+		return nil
+	}
+
+	cmd := objszInfoCmd(ns.name)
+	hist := parseHistogram(ns.latestInfo.TryString(cmd, ""))
+
+	rblock := 128 // default byte size of the read block
+	bwidth := rblock * ns.objszBucketWidth() / hist.NBuckets()
+	hist.Apply(func(b *HistBucket, _ int) {
+		b.Min *= bwidth
+		b.Max *= bwidth
+	})
+
+	return hist
+}
+
+// objszBucketWidth returns the bucket width of the object size histogram
+func (ns *Namespace) objszBucketWidth() int {
+	config := ns.ConfigAttrs()
+	return int(config.TryInt("obj-size-hist-max", 100))
+}
+
+// TimeToLive returns the time to live histogram for the namespace
+func (ns *Namespace) TimeToLive() Histogram {
+	cmd := ttlInfoCmd(ns.name)
+	hist := ns.latestInfo.TryString(cmd, "")
+	return parseHistogram(hist)
+}
+
 func (ns *Namespace) LatestLatency() map[string]common.Stats {
 	res := ns.latencystats.Get()
 	if res == nil {
@@ -547,4 +584,8 @@ func (ns *Namespace) Latency(from, to time.Time) []map[string]common.Stats {
 	}
 
 	return vsTyped
+}
+
+func (ns *Namespace) NodeAddress() string {
+	return ns.node.Address()
 }
