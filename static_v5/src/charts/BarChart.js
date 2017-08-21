@@ -59,6 +59,8 @@ class BarChart {
       chart.yAxis
           .tickFormat(f);
 
+      chart.forceY([0, 100]);
+
       // draw chart
       const data = this.data;
       const svg = d3.select(this.selector);

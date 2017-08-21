@@ -15,16 +15,38 @@ class ObjectSizeChart extends React.Component {
     this.barChart = null; // the bar chart
   }
 
+  componentWillReceiveProps(nextProps) {
+    let isEqual = true;
+
+    const objsz = nextProps.objectSize;
+    this.props.objectSize.forEach((p, i) => {
+      const q = objsz[i];
+      ['min', 'max', 'count'].forEach((v) => {
+          if (p[v] !== q[v])
+            isEqual = false;
+      });
+    });
+
+    if (!isEqual) {
+      this.barChart.destroy();
+      this.drawChart(objsz);
+    }
+  }
+
   componentDidMount() {
-    const data = this.toChartData();
+    const objsz = this.props.objectSize;
+    this.drawChart(objsz);
+  }
+
+  drawChart(objsz) {
+    const data = this.toChartData(objsz);
     const chart = new BarChart('#' + this.id, data);
     chart.draw();
 
     this.barChart = chart;
   }
 
-  toChartData() {
-    const objsz = this.props.objectSize;
+  toChartData(objsz) {
     const values = [];
 
     objsz.forEach((o) => {

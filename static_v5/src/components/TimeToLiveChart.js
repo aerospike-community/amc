@@ -14,16 +14,38 @@ class TimeToLiveChart extends React.Component {
     this.barChart = null; // the bar chart
   }
 
+  componentWillReceiveProps(nextProps) {
+    let isEqual = true;
+
+    const ttl = nextProps.timeToLive;
+    this.props.timeToLive.forEach((p, i) => {
+      const q = ttl[i];
+      ['min', 'max', 'count'].forEach((v) => {
+          if (p[v] !== q[v])
+            isEqual = false;
+      });
+    });
+
+    if (!isEqual) {
+      this.barChart.destroy();
+      this.drawChart(ttl);
+    }
+  }
+
   componentDidMount() {
-    const data = this.toChartData();
+    const ttl = this.props.timeToLive;
+    this.drawChart(ttl);
+  }
+
+  drawChart(ttl) {
+    const data = this.toChartData(ttl);
     const chart = new BarChart('#' + this.id, data);
     chart.draw();
 
     this.barChart = chart;
   }
 
-  toChartData() {
-    const ttl = this.props.timeToLive;
+  toChartData(ttl) {
     const values = [];
 
     ttl.forEach((o) => {
