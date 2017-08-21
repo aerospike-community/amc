@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import Tabs from 'components/Tabs';
+import Histograms from 'components/Histograms';
 import NamespacesTable from 'components/namespace/NamespacesTable';
 import NamespaceLatency from 'components/namespace/NamespaceLatency';
 import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
@@ -15,7 +16,7 @@ class NamespaceDashboard extends React.Component {
     super(props);
 
     this.state = {
-      namespaces: []
+      stat: null,
     };
 
     this.views = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, NAMESPACE_ACTIONS.Configuration];
@@ -48,7 +49,7 @@ class NamespaceDashboard extends React.Component {
     getStatistics(clusterID, nodeHost, namespaceName)
       .then((stat) => {
         this.setState({
-          namespaces: [stat]
+          stat: stat,
         });
       })
       .catch((message) => {
@@ -58,7 +59,8 @@ class NamespaceDashboard extends React.Component {
 
   render() {
     const {clusterID, nodeHost, namespaceName, onViewSelect, view} = this.props;
-    const { namespaces } = this.state;
+    const { stat } = this.state;
+    const namespaces = stat ? [stat] : [];
 
     return (
       <div>
@@ -67,6 +69,11 @@ class NamespaceDashboard extends React.Component {
         {view === NAMESPACE_ACTIONS.View &&
         <div>
           <NamespacesTable namespaces={namespaces} initiallyExpandAll={true}/>
+
+          {stat !== null &&
+          <Histograms objectSize={stat.objsz} timeToLive={stat.ttl} height={250} />
+          }
+
           <NamespaceThroughput clusterID={clusterID} nodeHost={nodeHost} namespaceName={namespaceName}/>
         </div>
         }
