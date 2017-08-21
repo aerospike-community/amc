@@ -265,4 +265,17 @@ var _ = Resource("connection", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("overview", func() {
+		Description("Get a multi-cluster overview with all XDR replications")
+		Routing(GET("overview"))
+		Params(func() {
+		})
+
+		Response(OK, Any)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 })

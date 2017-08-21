@@ -1010,6 +1010,49 @@ func (ctx *NamespacesConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// OverviewConnectionContext provides the connection overview action context.
+type OverviewConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+}
+
+// NewOverviewConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller overview action.
+func NewOverviewConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*OverviewConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := OverviewConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *OverviewConnectionContext) OK(r interface{}) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *OverviewConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *OverviewConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *OverviewConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // QueryConnectionContext provides the connection query action context.
 type QueryConnectionContext struct {
 	context.Context
@@ -4890,6 +4933,104 @@ func (ctx *SaveUserContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *SaveUserContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// QueryXdrContext provides the xdr query action context.
+type QueryXdrContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+}
+
+// NewQueryXdrContext parses the incoming request URL and body, performs validations and creates the
+// context used by the xdr controller query action.
+func NewQueryXdrContext(ctx context.Context, r *http.Request, service *goa.Service) (*QueryXdrContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := QueryXdrContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *QueryXdrContext) OK(r interface{}) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *QueryXdrContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *QueryXdrContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// Forbidden sends a HTTP response with status code 403.
+func (ctx *QueryXdrContext) Forbidden() error {
+	ctx.ResponseData.WriteHeader(403)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *QueryXdrContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// ShowXdrContext provides the xdr show action context.
+type ShowXdrContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Node string
+}
+
+// NewShowXdrContext parses the incoming request URL and body, performs validations and creates the
+// context used by the xdr controller show action.
+func NewShowXdrContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowXdrContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowXdrContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowXdrContext) OK(r interface{}) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowXdrContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *ShowXdrContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *ShowXdrContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

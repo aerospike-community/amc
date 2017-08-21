@@ -4301,6 +4301,34 @@ paths:
       summary: show db-user
       tags:
       - db-user
+  /api/v1/connections/overview:
+    get:
+      description: |-
+        Get a multi-cluster overview with all XDR replications
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#overview
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: overview connection
+      tags:
+      - connection
   /api/v1/users:
     get:
       description: |-
@@ -4427,6 +4455,70 @@ paths:
       summary: get user
       tags:
       - user
+  /api/v1/xdr:
+    get:
+      description: |-
+        Query all XDR data
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: xdr#query
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: query xdr
+      tags:
+      - xdr
+  /api/v1/xdr/{node}:
+    get:
+      description: |-
+        Get a node's XDR info
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: xdr#show
+      parameters:
+      - description: Set name
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: show xdr
+      tags:
+      - xdr
   /static/{filepath}:
     get:
       operationId: public#/static/*filepath

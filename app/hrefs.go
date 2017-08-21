@@ -72,3 +72,9 @@ func SetHref(connID, node, namespace, setName interface{}) string {
 	paramsetName := strings.TrimLeftFunc(fmt.Sprintf("%v", setName), func(r rune) bool { return r == '/' })
 	return fmt.Sprintf("/api/v1/connections/%v/nodes/%v/namespaces/%v/sets/%v", paramconnID, paramnode, paramnamespace, paramsetName)
 }
+
+// XdrHref returns the resource href.
+func XdrHref(node interface{}) string {
+	paramnode := strings.TrimLeftFunc(fmt.Sprintf("%v", node), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/xdr/%v", paramnode)
+}

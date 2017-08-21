@@ -87,6 +87,16 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 	return ctx.OK(et)
 }
 
+// Overview runs the overview action.
+func (c *ConnectionController) Overview(ctx *app.OverviewConnectionContext) error {
+	// ConnectionController_Overview: start_implement
+
+	sessionId := ctx.Value("sessionId").(string)
+
+	// ConnectionController_Overview: end_implement
+	return ctx.OK(_observer.DatacenterInfo(sessionId))
+}
+
 // Delete runs the delete action.
 func (c *ConnectionController) Delete(ctx *app.DeleteConnectionContext) error {
 	// ConnectionController_Delete: start_implement

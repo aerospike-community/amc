@@ -305,6 +305,7 @@ type ConnectionController interface {
 	Entities(*EntitiesConnectionContext) error
 	Latency(*LatencyConnectionContext) error
 	Namespaces(*NamespacesConnectionContext) error
+	Overview(*OverviewConnectionContext) error
 	Query(*QueryConnectionContext) error
 	Save(*SaveConnectionContext) error
 	SetConfig(*SetConfigConnectionContext) error
@@ -322,6 +323,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/entity-tree", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/overview", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
@@ -455,6 +457,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("namespaces", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Namespaces", "route", "GET /api/v1/connections/:connId/namespaces", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewOverviewConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Overview(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/overview", ctrl.MuxHandler("overview", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Overview", "route", "GET /api/v1/connections/overview", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -2132,4 +2151,80 @@ func unmarshalSaveUserPayload(ctx context.Context, service *goa.Service, req *ht
 	}
 	goa.ContextRequest(ctx).Payload = payload.Publicize()
 	return nil
+}
+
+// XdrController is the controller interface for the Xdr actions.
+type XdrController interface {
+	goa.Muxer
+	Query(*QueryXdrContext) error
+	Show(*ShowXdrContext) error
+}
+
+// MountXdrController "mounts" a Xdr resource controller on the given service.
+func MountXdrController(service *goa.Service, ctrl XdrController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/xdr", ctrl.MuxHandler("preflight", handleXdrOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/xdr/:node", ctrl.MuxHandler("preflight", handleXdrOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewQueryXdrContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Query(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleXdrOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/xdr", ctrl.MuxHandler("query", h, nil))
+	service.LogInfo("mount", "ctrl", "Xdr", "action", "Query", "route", "GET /api/v1/xdr", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowXdrContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleXdrOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/xdr/:node", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Xdr", "action", "Show", "route", "GET /api/v1/xdr/:node", "security", "jwt")
+}
+
+// handleXdrOrigin applies the CORS response headers corresponding to the origin.
+func handleXdrOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
 }
