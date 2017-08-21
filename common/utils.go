@@ -143,3 +143,36 @@ func HashPassword(password string) ([]byte, error) {
 	}
 	return []byte(hashedPassword), nil
 }
+
+// gcd returns the gcd of the two numbers.
+func gcd(x, y int) int {
+	for y != 0 {
+		x, y = y, x%y
+	}
+	return x
+}
+
+// GCD returns the greatest common divisor of the numbers.
+func GCD(x, y int, numbers ...int) int {
+	z := gcd(x, y)
+	for _, n := range numbers {
+		z = gcd(z, n)
+	}
+
+	return z
+}
+
+// lcm returns the lcm of the two numbers
+func lcm(x, y int) int {
+	return x * y / gcd(x, y)
+}
+
+// LCM returns the least common multiple of the numbers.
+func LCM(x, y int, numbers ...int) int {
+	z := lcm(x, y)
+	for _, n := range numbers {
+		z = lcm(z, n)
+	}
+
+	return z
+}

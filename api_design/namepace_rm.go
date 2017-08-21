@@ -14,8 +14,10 @@ var NamespaceResponseMedia = MediaType("application/vnd.aerospike.amc.namespace.
 		Attribute("disk", ResourceUsageResponseMedia, "Disk Usage")
 		Attribute("status", String, "Cluster/Node status")
 		Attribute("stats", HashOf(String, Any), "Namespace statistics")
+		Attribute("objsz", Any, "Object size histogram")
+		Attribute("ttl", Any, "Time to live histogram")
 
-		Required("name", "memory", "disk", "status", "stats")
+		Required("name", "memory", "disk", "status", "stats", "objsz", "ttl")
 	})
 
 	View("default", func() {
@@ -24,8 +26,10 @@ var NamespaceResponseMedia = MediaType("application/vnd.aerospike.amc.namespace.
 		Attribute("disk")
 		Attribute("status")
 		Attribute("stats")
+		Attribute("objsz")
+		Attribute("ttl")
 
-		Required("name", "memory", "disk", "status", "stats")
+		Required("name", "memory", "disk", "status", "stats", "ttl", "objsz")
 	})
 
 })

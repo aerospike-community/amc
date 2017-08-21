@@ -35,23 +35,23 @@ export default function(state = {
 function appendAlerts(cluster, alerts) {
   const toAppend = [];
 
-  const lastID = getLastID(cluster.alerts);
-  alerts.forEach((n) => {
-    if (n.id > lastID)
-      toAppend.push(n);
+  const time = latestTime(cluster.alerts);
+  alerts.forEach((al) => {
+    if (al.lastOccured > time)
+      toAppend.push(al);
   });
 
-  cluster.alerts = [].concat(cluster.alerts, alerts);
+  cluster.alerts = [].concat(cluster.alerts, toAppend);
 }
 
-// get the latest id 
-function getLastID(alerts) {
-  let id = -1;
-  alerts.forEach((n) => {
-    if (n.id > id)
-      id = id;
+// get the latest time of the alerts 
+function latestTime(alerts) {
+  let time = 0;
+  alerts.forEach((al) => {
+    if (al.lastOccured > time)
+      time = al.lastOccured;
   });
-  return id;
+  return time;
 }
 
 // get the cluster for the clusterID

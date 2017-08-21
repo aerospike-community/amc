@@ -207,7 +207,7 @@ func (b *Bucket) currentOffset() *int {
 
 func (b *Bucket) ValuesBetween(from, to time.Time) []*common.SinglePointValue {
 	// if map is empty,
-	if b.isEmpty() || to.Unix() < *b.beginTime || from.After(to) {
+	if b.isEmpty() || from.Unix() > *b.lastTimestamp || to.Unix() < *b.beginTime || from.After(to) {
 		return []*common.SinglePointValue{}
 	}
 

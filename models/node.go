@@ -152,7 +152,7 @@ func (n *Node) update() error {
 	nsAggStats := common.Stats{}
 	nsAggCalcStats := common.Stats{}
 	for _, ns := range n.Namespaces() {
-		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name))
+		ns.update(n.InfoAttrs("namespace/"+ns.name, "sets/"+ns.name, "get-config:context=namespace;id="+ns.name, ttlInfoCmd(ns.name), objszInfoCmd(ns.name)))
 		ns.updateIndexInfo(n.Indexes(ns.name))
 		ns.updateLatencyInfo(latencyMap[ns.name])
 		ns.aggStats(nsAggStats, nsAggCalcStats)
@@ -520,6 +520,8 @@ func (n *Node) infoKeys() []string {
 	// add namespace stat requests
 	for ns, _ := range n.Namespaces() {
 		res = append(res, "namespace/"+ns)
+		res = append(res, ttlInfoCmd(ns))
+		res = append(res, objszInfoCmd(ns))
 		res = append(res, "sets/"+ns)
 		res = append(res, "get-config:context=namespace;id="+ns)
 	}
@@ -1062,11 +1064,13 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 		}
 
 		stats := common.Stats{
-			"tps":        opsCount,
-			"timestamp":  timestamp,
-			"buckets":    buckets,
-			"valBuckets": valBucketsFloat,
+			"tps":            opsCount,
+			"timestamp":      timestamp,
+			"buckets":        buckets,
+			"valBuckets":     valBucketsFloat,
+			"timestamp_unix": n.ServerTime().Unix(),
 		}
+		topct(stats)
 
 		if res[ns] == nil {
 			res[ns] = map[string]common.Stats{
@@ -1100,20 +1104,19 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 		}
 	}
 
-	for _, nstats := range nodeStats {
-		tps := nstats.TryFloat("tps", 0)
-		if tps == 0 {
-			tps = 1
-		}
-		nValBuckets := nstats["valBuckets"].([]float64)
-		for i := range nValBuckets {
-			nValBuckets[i] /= tps
-		}
-		nstats["valBuckets"] = nValBuckets
-		nstats["timestamp_unix"] = n.ServerTime().Unix()
-	}
-
 	return res, nodeStats
+}
+
+func topct(stat common.Stats) {
+	tps := stat.TryFloat("tps", 0)
+	if tps == 0 {
+		tps = 1
+	}
+	nValBuckets := stat["valBuckets"].([]float64)
+	for i := range nValBuckets {
+		nValBuckets[i] /= tps
+	}
+	stat["valBuckets"] = nValBuckets
 }
 
 func (n *Node) setAlertState(name string, value interface{}) {
@@ -1162,6 +1165,8 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 			Disk:   toSystemResource(ns.Disk(), "disk"),
 			Stats:  stats,
 			Status: string(n.Status()),
+			TTL:    ns.TimeToLive(),
+			Objsz:  ns.ObjectSize(),
 		}
 	}
 
