@@ -217,6 +217,36 @@ var _ = Resource("node", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("switch XDR", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+
+		Description("Switch node's XDR on/off.")
+		Routing(POST(":node/xdr"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Required("node")
+		})
+
+		Payload(func() {
+			Member("state", String, "New XDR state. Should be either ON or OFF", func() {
+				Example("ON")
+				Pattern("(?i)[ON|OFF]")
+			})
+			Required("state")
+		})
+
+		Response(NoContent)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
 })
 
 var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+json", func() {

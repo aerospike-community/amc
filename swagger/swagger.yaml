@@ -1780,6 +1780,19 @@ definitions:
     - newConfig
     title: SetConfigNodePayload
     type: object
+  SwitchXDRNodePayload:
+    example:
+      state: "ON"
+    properties:
+      state:
+        description: New XDR state. Should be either ON or OFF
+        example: "ON"
+        pattern: (?i)[ON|OFF]
+        type: string
+    required:
+    - state
+    title: SwitchXDRNodePayload
+    type: object
   UpdateDbRolePayload:
     example:
       grantPrivileges:
@@ -3775,6 +3788,51 @@ paths:
       - jwt:
         - api:general
       summary: throughput node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/xdr:
+    post:
+      description: |-
+        Switch node's XDR on/off.
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#switch XDR
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/SwitchXDRNodePayload'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:enterprise
+      summary: switch XDR node
       tags:
       - node
   /api/v1/connections/{connId}/notifications:

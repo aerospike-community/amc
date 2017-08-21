@@ -1473,6 +1473,7 @@ type NodeController interface {
 	SetConfig(*SetConfigNodeContext) error
 	SetJobPriority(*SetJobPriorityNodeContext) error
 	Show(*ShowNodeContext) error
+	SwitchXDR(*SwitchXDRNodeContext) error
 	Throughput(*ThroughputNodeContext) error
 }
 
@@ -1485,6 +1486,7 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/jobs/:trid", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/latency", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/xdr", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
@@ -1618,6 +1620,29 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 			return err
 		}
 		// Build the context
+		rctx, err := NewSwitchXDRNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*SwitchXDRNodePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.SwitchXDR(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/xdr", ctrl.MuxHandler("switch XDR", h, unmarshalSwitchXDRNodePayload))
+	service.LogInfo("mount", "ctrl", "Node", "action", "SwitchXDR", "route", "POST /api/v1/connections/:connId/nodes/:node/xdr", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
 		rctx, err := NewThroughputNodeContext(ctx, req, service)
 		if err != nil {
 			return err
@@ -1660,6 +1685,21 @@ func handleNodeOrigin(h goa.Handler) goa.Handler {
 // unmarshalSetConfigNodePayload unmarshals the request body into the context request data Payload field.
 func unmarshalSetConfigNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &setConfigNodePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalSwitchXDRNodePayload unmarshals the request body into the context request data Payload field.
+func unmarshalSwitchXDRNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &switchXDRNodePayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}

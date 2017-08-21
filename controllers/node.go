@@ -279,6 +279,41 @@ func (c *NodeController) SetJobPriority(ctx *app.SetJobPriorityNodeContext) erro
 	return ctx.NoContent()
 }
 
+// SwitchXDR runs the switch XDR action.
+func (c *NodeController) SwitchXDR(ctx *app.SwitchXDRNodeContext) error {
+	// NodeController_SwitchXDR: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	on := strings.ToLower(ctx.Payload.State) == "on"
+
+	switch string(node.XdrStatus()) {
+	case "on":
+		if on {
+			return ctx.BadRequest("XDR Already On")
+		}
+	case "off":
+		if !on {
+			return ctx.BadRequest("XDR Already Off")
+		}
+	}
+
+	if err := node.SwitchXDR(on); err != nil {
+		return ctx.BadRequest("XDR Already Off")
+	}
+
+	// NodeController_SwitchXDR: end_implement
+	return ctx.NoContent()
+}
+
 // Throughput runs the throughput action.
 func (c *NodeController) Throughput(ctx *app.ThroughputNodeContext) error {
 	// NodeController_Throughput: start_implement

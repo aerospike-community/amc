@@ -4092,6 +4092,116 @@ func (ctx *ShowNodeContext) InternalServerError() error {
 	return nil
 }
 
+// SwitchXDRNodeContext provides the node switch XDR action context.
+type SwitchXDRNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Node    string
+	Payload *SwitchXDRNodePayload
+}
+
+// NewSwitchXDRNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller switch XDR action.
+func NewSwitchXDRNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*SwitchXDRNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SwitchXDRNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// switchXDRNodePayload is the node switch XDR action payload.
+type switchXDRNodePayload struct {
+	// New XDR state. Should be either ON or OFF
+	State *string `form:"state,omitempty" json:"state,omitempty" xml:"state,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *switchXDRNodePayload) Validate() (err error) {
+	if payload.State == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "state"))
+	}
+	if payload.State != nil {
+		if ok := goa.ValidatePattern(`(?i)[ON|OFF]`, *payload.State); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.state`, *payload.State, `(?i)[ON|OFF]`))
+		}
+	}
+	return
+}
+
+// Publicize creates SwitchXDRNodePayload from switchXDRNodePayload
+func (payload *switchXDRNodePayload) Publicize() *SwitchXDRNodePayload {
+	var pub SwitchXDRNodePayload
+	if payload.State != nil {
+		pub.State = *payload.State
+	}
+	return &pub
+}
+
+// SwitchXDRNodePayload is the node switch XDR action payload.
+type SwitchXDRNodePayload struct {
+	// New XDR state. Should be either ON or OFF
+	State string `form:"state" json:"state" xml:"state"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *SwitchXDRNodePayload) Validate() (err error) {
+	if payload.State == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "state"))
+	}
+	if ok := goa.ValidatePattern(`(?i)[ON|OFF]`, payload.State); !ok {
+		err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.state`, payload.State, `(?i)[ON|OFF]`))
+	}
+	return
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *SwitchXDRNodeContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *SwitchXDRNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *SwitchXDRNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *SwitchXDRNodeContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *SwitchXDRNodeContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ThroughputNodeContext provides the node throughput action context.
 type ThroughputNodeContext struct {
 	context.Context
