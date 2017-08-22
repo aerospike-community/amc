@@ -5,11 +5,11 @@ import EntityTree from 'components/cluster/EntityTree';
 import { selectEntity } from 'actions/currentView';
 import { expandEntityNode, collapseEntityNode } from 'actions/entityTree';
 import { displayAuthClusterConnection, displayViewClusterConnection, disconnectCluster } from 'actions/clusters';
-import { toPhysicalEntityTree } from 'classes/entityTree';
+import { toPhysicalEntityTree, toLogicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { selectStartView } from 'actions/currentView';
-import { isEntitiesEqual } from 'classes/util';
+import { isEntitiesEqual, isLogicalView } from 'classes/util';
 
 // the latest current view
 let CurrentView;
@@ -21,7 +21,12 @@ const mapStateToProps = (state) => {
   let items = [];
   // trasform each cluster to entity tree representation
   clusters.forEach((c) => {
-    const item = toPhysicalEntityTree(c);
+    let item;
+    if (isLogicalView(CurrentView.viewType))
+      item = toLogicalEntityTree(c)
+    else
+      item = toPhysicalEntityTree(c);
+
     items.push(item);
   });
 
@@ -41,9 +46,9 @@ const mapDispatchToProps = (dispatch) => {
     },
 
     onEntityAction: (entity, action) => {
-      const {clusterID} = entity;
+      const { clusterID, viewType } = entity;
 
-      if (entity.viewType === VIEW_TYPE.CLUSTER) {
+      if (viewType === VIEW_TYPE.CLUSTER || viewType === VIEW_TYPE.LOGICAL_CLUSTER) {
         if (action === CLUSTER_ACTIONS.Connect) {
           dispatch(displayAuthClusterConnection(true, clusterID));
           return;

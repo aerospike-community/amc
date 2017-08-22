@@ -20,6 +20,7 @@ function extractActions(obj) {
 // isDefault: the default view for the (role, state)
 // isEndOfGrouping: end of grouping for the actions
 //
+
 const clusterActions = {
   Connect: {
     isDefault: true,
@@ -159,6 +160,49 @@ const indexesOverviewActions = {
 }
 export const INDEXES_OVERVIEW_ACTIONS = extractActions(indexesOverviewActions);
 
+const logicalClusterActions = {
+  Connect: {
+    isDefault: true,
+    state: {
+      isAuthenticated: false
+    }
+  },
+  View: {
+    isDefault: true,
+    isEndOfGrouping: true,
+  },
+  Edit: {},
+  Delete: {
+    isEndOfGrouping: true,
+  },
+  Disconnect: {
+    state: {
+      isAuthenticated: true
+    },
+    isEndOfGrouping: true,
+  },
+};
+export const LOGICAL_CLUSTER_ACTIONS = extractActions(logicalClusterActions);
+
+const logicalNamespaceActions = {
+  View: {
+    isDefault: true
+  },
+  Latency: {},
+};
+export const LOGICAL_NAMESPACE_ACTIONS = extractActions(logicalNamespaceActions);
+
+const logicalNamespaceOverviewActions = {
+  View: {
+    isDefault: true
+  }
+};
+export const LOGICAL_NAMESPACE_OVERVIEW_ACTIONS = extractActions(logicalNamespaceOverviewActions);
+
+// -----------------------------------------------------------------------------
+// Queries on the actions
+// ----------------------
+
 // TODO implement this
 function satisfiesRoles(requiredRoles, userRoles) {
   requiredRoles = requiredRoles || [];
@@ -247,6 +291,15 @@ function viewTypeAction(viewType) {
 
   if (viewType === VIEW_TYPE.INDEX)
     return indexActions;
+
+  if (viewType === VIEW_TYPE.LOGICAL_CLUSTER)
+    return logicalClusterActions;
+
+  if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE)
+    return logicalNamespaceActions;
+
+  if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW)
+    return logicalNamespaceOverviewActions;
 
   const msg = `Action for ${viewType} not found`;
   console.error(msg);

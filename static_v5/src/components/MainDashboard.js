@@ -17,6 +17,7 @@ import NodeDashboard from 'components/node/NodeDashboard';
 import NodesOverview from 'components/node/NodesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import NamespacesOverview from 'components/namespace/NamespacesOverview';
+import LogicalNamespaceDashboard from 'components/logical-namespace/LogicalNamespaceDashboard';
 import Welcome from 'components/Welcome';
 
 import { VIEW_TYPE } from 'classes/constants';
@@ -86,6 +87,11 @@ class MainDashboard extends React.Component {
 
     } else if (viewType === VIEW_TYPE.START_VIEW) {
       dashboard = <Welcome />;
+
+    } else if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE) {
+      dashboard = <LogicalNamespaceDashboard 
+                    clusterID={clusterID} namespaceName={namespaceName} 
+                    view={view} onViewSelect={this.onChangeView} />;
 
     } else {
       let h = view ? view : '';

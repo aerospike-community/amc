@@ -10,7 +10,7 @@ import { VIEW_TYPE } from 'classes/constants';
 import { removeTrailingSlash, removeLeadingSlash } from 'classes/util';
 import { initView, selectView, selectStartView } from 'actions/currentView';
 
-const history = createHistory();
+const History = createHistory();
 let CurrentPathname = null;
 
 // initialize the view based on url and set up the listener for url changes
@@ -21,13 +21,13 @@ export function init(currentView, dispatch) {
   }
 
   // update view on url change
-  history.listen(() => updateView(dispatch));
+  History.listen(() => updateView(dispatch));
 }
 
 // update view based on the current url
 function updateView(dispatch, isInit = false) {
   // prevent infinite loop
-  const { pathname } = history.location;
+  const { pathname } = History.location;
   if (CurrentPathname === pathname && !isInit)
     return;
   CurrentPathname = pathname;
@@ -46,11 +46,11 @@ export function updateURL(currentView) {
   const def = matchDefinition(viewType);
   const url = insertVariables(def, currentView);
   
-  if (url === history.location.pathname)
+  if (url === History.location.pathname)
     return;
 
   CurrentPathname = url;
-  history.push(url);
+  History.push(url);
 }
 
 // get the url for the view type
@@ -67,16 +67,18 @@ function matchDefinition(viewType) {
 
 // ----------------------------------------------
 // A url definition defines a template for a url.
-// It is made of items whih can be strings or variables.
+// It is made of items which can be strings or variables.
 // A variable is defined by preceding it with ':' // i.e :variable.
 // 
-// A url definition can be matched with a url and the variables
-// can be extracted. 
-// Variables can be inserted into the url definition
-// and a url can be generated.
+// A url definition can be matched with a url and the variables can be extracted. 
+// Similarly variables can be inserted into the url definition and a url can 
+// be generated.
 
 const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
-const { SET, NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEX, INDEXES_OVERVIEW } = VIEW_TYPE;
+const { NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEX } = VIEW_TYPE;
+const { SET, INDEXES_OVERVIEW } = VIEW_TYPE;
+const { LOGICAL_CLUSTER, LOGICAL_NAMESPACE, LOGICAL_START_VIEW } = VIEW_TYPE;
+const { LOGICAL_NAMESPACE_OVERVIEW } = VIEW_TYPE;
 
 const URLDefinitions = [{
   url: '',
@@ -114,6 +116,18 @@ const URLDefinitions = [{
 }, {
   url: '/physical-tree/set-overview/:clusterID/:nodeHost/:namespaceName/:view',
   viewType: SET_OVERVIEW, 
+}, {
+  url: '/logical-tree',
+  viewType: LOGICAL_START_VIEW
+}, {
+  url: '/logical-tree/cluster/:clusterID/:view',
+  viewType: LOGICAL_CLUSTER,
+}, {
+  url: '/logical-tree/namespace-overview/:clusterID/:view',
+  viewType: LOGICAL_NAMESPACE_OVERVIEW,
+}, {
+  url: '/logical-tree/namespace/:clusterID/:namespaceName/:view',
+  viewType: LOGICAL_NAMESPACE,
 }];
 
 // convert the url to a view

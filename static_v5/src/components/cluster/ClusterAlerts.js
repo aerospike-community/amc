@@ -11,9 +11,10 @@ class ClusterAlerts extends React.Component {
   }
 
   renderAlerts() {
-    const { alerts } = this.props;
     const data = [];
+    let alerts = this.props.alerts.slice(); // copy
 
+    alerts.sort((a, b) => b.lastOccured - a.lastOccured); 
     alerts.forEach((alert) => {
       const {id, status, lastOccured, desc} = alert;
       const time = moment(new Date(lastOccured));

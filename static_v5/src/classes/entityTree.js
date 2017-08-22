@@ -183,3 +183,61 @@ export function toPhysicalEntityTree(cluster) {
   return root;
 }
 
+
+// ----------------------------------------------------------------------------
+// LOGICAL ENTITY TREE
+
+function toLogicalNamespaces(cluster) {
+  let namespaces = {
+    name: 'NAMESPACES',
+    children: [],
+    isCategory: true, // aggregator of entities
+
+    [Keys.ClusterID]: cluster.id,
+    viewType: VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW,
+  };
+
+  const all = new Set();
+  cluster.nodes.forEach((node) => {
+    node.namespaces.forEach((namespace) => {
+      all.add(namespace.name);
+    });
+  });
+
+  all.forEach((namespace) => {
+    let ns = {
+      name: namespace,
+      children: [],
+
+      [Keys.ClusterID]: cluster.id,
+      [Keys.Namespace]: namespace,
+      viewType: VIEW_TYPE.LOGICAL_NAMESPACE,
+    };
+
+    namespaces.children.push(ns);
+  });
+
+  return namespaces;
+}
+
+// convert the cluster into a logical entity tree
+export function toLogicalEntityTree(cluster) {
+  let root = {
+    name: cluster.name,
+    isAuthenticated: cluster.isAuthenticated,
+    children: [],
+    isCategory: true, // aggregator of entities
+
+    viewType: VIEW_TYPE.LOGICAL_CLUSTER,
+    [Keys.ClusterID]: cluster.id,
+  };
+
+  if (!cluster.isAuthenticated)
+    return root;
+
+  let children = [];
+  children.push(toLogicalNamespaces(cluster));
+
+  root.children = children;
+  return root;
+}
