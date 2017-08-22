@@ -8,8 +8,15 @@ export const ENTITY_TYPE = {
   UDF:        'modules',
 };
 
+export const LOGICAL_VIEW_TYPE = {
+  LOGICAL_START_VIEW: 'LOGICAL_START_VIEW',
+  LOGICAL_CLUSTER: 'LOGICAL_CLUSTER',
+  LOGICAL_NAMESPACE: 'LOGICAL_NAMESPACE',
+  LOGICAL_NAMESPACE_OVERVIEW: 'LOGICAL_NAMESPACE_OVERVIEW',
+};
+
 // type of the entity view types
-export const VIEW_TYPE = {
+export const VIEW_TYPE = Object.assign({}, LOGICAL_VIEW_TYPE, {
   CLUSTER:            'CLUSTER',
   INDEXES_OVERVIEW:   'INDEXES_OVERVIEW',
   INDEX:              'INDEX',
@@ -22,7 +29,7 @@ export const VIEW_TYPE = {
   UDF_OVERVIEW:       'UDF_OVERVIEW',
   UDF:                'UDF',
   START_VIEW:         'START_VIEW',
-};
+});
 
 // polling interval
-export const POLL_INTERVAL = 10*1000; // 5000 milliseconds
+export const POLL_INTERVAL = 10*1000; // 10 seconds

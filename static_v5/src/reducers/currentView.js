@@ -4,8 +4,27 @@ import { SELECT_NODE_OVERVIEW, SELECT_NAMESPACE_OVERVIEW, SELECT_SET_OVERVIEW } 
 import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } from 'actions/currentView';
 import { SELECT_INDEX, SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP } from 'actions/currentView';
 import { SELECT_VIEW, SELECT_VIEW_FOR_VIEW_TYPE } from 'actions/currentView';
+import { SELECT_LOGICAL_NAMESPACE, SELECT_LOGICAL_CLUSTER } from 'actions/currentView';
+import { SELECT_LOGICAL_NAMESPACE_OVERVIEW } from 'actions/currentView';
+import { SELECT_LOGICAL_VIEW, SELECT_PHYSICAL_VIEW } from 'actions/currentView';
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
+
+// store the previous physical, logical state between view changes
+let PhysicalState = {};
+let LogicalState = {};
+
+function getViewState(state) {
+  const props = ['viewType', 'view', 'clusterID', 'nodeHost', 'namespaceName', 
+                 'setName', 'udfName', 'indexName'];
+
+  let obj = {};
+  props.forEach((v) => {
+    obj[v] = state[v];
+  });
+
+  return obj;
+}
 
 const InitState = {
   // is the current view initialized
@@ -49,10 +68,62 @@ function updateEntityView(state) {
 // the current state of the view of the app
 export default function currentView(state = InitState, action) {
   const updateFn = updateEntityView(state);
-  let updated;
   const wasInitialized = state.isInitialized;
+  let updated, w;
 
   switch (action.type) {
+    case SELECT_PHYSICAL_VIEW:
+      // restore previous physical view
+      w = Object.assign({}, {
+        viewType: VIEW_TYPE.START_VIEW,
+        view: null,
+      }, PhysicalState);
+      updated = updateFn(w);
+
+      // save current logical view
+      LogicalState = getViewState(state);
+      break;
+
+    case SELECT_LOGICAL_VIEW:
+      // restore previous logical view
+      w = Object.assign({}, {
+        viewType: VIEW_TYPE.LOGICAL_START_VIEW,
+        view: null,
+      }, LogicalState);
+      updated = updateFn(w);
+
+      // save current physical view
+      PhysicalState = getViewState(state);
+      break;
+
+    case SELECT_LOGICAL_NAMESPACE:
+      updated = updateFn({
+        clusterID: action.clusterID,
+        namespaceName: action.namespaceName,
+        view: action.view,
+
+        viewType: VIEW_TYPE.LOGICAL_NAMESPACE,
+      });
+      break;
+
+    case SELECT_LOGICAL_CLUSTER:
+      updated = updateFn({
+        clusterID: action.clusterID,
+        view: action.view,
+
+        viewType: VIEW_TYPE.LOGICAL_CLUSTER,
+      });
+      break;
+
+    case SELECT_LOGICAL_NAMESPACE_OVERVIEW:
+      updated = updateFn({
+        clusterID: action.clusterID,
+        view: action.view,
+
+        viewType: VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW,
+      });
+      break;
+
     case SELECT_VIEW:
       const nv = action.newView;
       updated = Object.assign({}, state, {

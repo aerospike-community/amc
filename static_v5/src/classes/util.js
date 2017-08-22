@@ -1,5 +1,7 @@
 import moment from 'moment';
 
+import { LOGICAL_VIEW_TYPE } from 'classes/constants';
+
 /** 
  * Returns a function that checks for "obj" property type in React
  * @param {object} obj - the property type to check for
@@ -157,7 +159,8 @@ export function addCommasToInt(val) {
 // returns true iff both the entities are equal
 export function isEntitiesEqual(e1, e2) {
   let equal = true;
-  const props = ['viewType', 'clusterID', 'nodeHost', 'namespaceName', 'setName', 'indexName', 'udfName'];
+  const props = ['viewType', 'clusterID', 'nodeHost', 'namespaceName', 
+                 'setName', 'indexName', 'udfName'];
 
   const isNull = (e) => { return e === null || e === undefined; }
   if (isNull(e1) && isNull(e2))
@@ -182,4 +185,8 @@ export function isEntitiesEqual(e1, e2) {
   });
 
   return equal;
+}
+
+export function isLogicalView(viewType) {
+  return viewType in LOGICAL_VIEW_TYPE;
 }

@@ -207,12 +207,18 @@ function clusterDetails(cluster) {
 }
 
 // expand the cluster tree identified by the cluster id
-function expandClusterTree(clusterID) {
-  const entity = {
+function expandClusterTree(dispatch, clusterID) {
+  const physical = {
     clusterID: clusterID,
     viewType: VIEW_TYPE.CLUSTER
   };
-  return expandEntityNode(entity);
+  const logical = {
+    clusterID: clusterID,
+    viewType: VIEW_TYPE.LOGICAL_CLUSTER
+  };
+
+  dispatch(expandEntityNode(physical));
+  dispatch(expandEntityNode(logical));
 }
 
 // get the cluster entity tree
@@ -224,7 +230,7 @@ export function getClusterEntityTree(clusterID, expand = true) {
         dispatch(clusterDetails(cluster));
         
         if (expand)
-          dispatch(expandClusterTree(clusterID));
+          expandClusterTree(dispatch, clusterID);
       })
       .catch((error) => {
         // TODO
@@ -240,7 +246,7 @@ export function authenticateClusterConnection(id, name, password) {
         dispatch(authSuccess(cluster));
 
         // expand the cluster on authentication
-        dispatch(expandClusterTree(cluster.id));
+        expandClusterTree(dispatch, cluster.id);
 
         // select cluster overview
         dispatch(selectCluster(id, CLUSTER_ACTIONS.Overview));

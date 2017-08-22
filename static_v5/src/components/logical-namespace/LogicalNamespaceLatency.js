@@ -37,7 +37,9 @@ class LogicalNamespaceLatency extends React.Component {
 
   getLatency(from, to) {
     const { clusterID, namespaceName } = this.props;
-    return getLatencyAPI(clusterID, namespaceName, from, to);
+    const p = getLatencyAPI(clusterID, namespaceName, from, to)
+                .then((lat) => lat || []);
+    return p;
   }
   
   render() {

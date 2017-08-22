@@ -142,6 +142,34 @@ export function selectIndex(clusterID, indexName, view) {
   };
 }
 
+export const SELECT_LOGICAL_CLUSTER = 'SELECT_LOGICAL_CLUSTER';
+export function selectLogicalCluster(clusterID, view) {
+  return {
+    type: SELECT_LOGICAL_CLUSTER,
+    clusterID: clusterID,
+    view: view
+  };
+}
+
+export const SELECT_LOGICAL_NAMESPACE = 'SELECT_LOGICAL_NAMESPACE';
+export function selectLogicalNamespace(clusterID, namespaceName, view) {
+  return {
+    type: SELECT_LOGICAL_NAMESPACE,
+    clusterID: clusterID,
+    namespaceName: namespaceName,
+    view: view
+  };
+}
+
+export const SELECT_LOGICAL_NAMESPACE_OVERVIEW = 'SELECT_LOGICAL_NAMESPACE_OVERVIEW';
+export function selectLogicalNamespaceOverview(clusterID, view) {
+  return {
+    type: SELECT_LOGICAL_NAMESPACE_OVERVIEW,
+    clusterID: clusterID,
+    view: view
+  };
+}
+
 export const SELECT_START_VIEW = 'SELECT_START_VIEW';
 export function selectStartView() {
   return {
@@ -167,6 +195,20 @@ export function selectViewForViewType(view) {
   return {
     type: SELECT_VIEW_FOR_VIEW_TYPE,
     view: view
+  };
+}
+
+export const SELECT_LOGICAL_VIEW = 'SELECT_LOGICAL_VIEW';
+export function selectLogicalView() {
+  return {
+    type: SELECT_LOGICAL_VIEW,
+  };
+}
+
+export const SELECT_PHYSICAL_VIEW = 'SELECT_PHYSICAL_VIEW';
+export function selectPhysicalView() {
+  return {
+    type: SELECT_PHYSICAL_VIEW,
   };
 }
 
@@ -206,6 +248,15 @@ export function selectEntity(entity, view) {
 
   case VIEW_TYPE.SET_OVERVIEW:
     return selectSetOverview(clusterID, nodeHost, namespaceName, view);
+
+  case VIEW_TYPE.LOGICAL_CLUSTER:
+    return selectLogicalCluster(clusterID, view);
+
+  case VIEW_TYPE.LOGICAL_NAMESPACE:
+    return selectLogicalNamespace(clusterID, namespaceName, view);
+
+  case VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW:
+    return selectLogicalNamespaceOverview(clusterID, view);
 
   default:
     return selectStartView();
