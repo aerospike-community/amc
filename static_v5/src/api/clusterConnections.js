@@ -56,6 +56,12 @@ export function getClusterEntityTree(clusterID) {
   return get(url);
 }
 
+// get the overview of all the clusters
+export function getOverview() {
+  const url = toURLPath('/overview');
+  return get(url);
+}
+
 // get all throughput stats for all the nodes of the connection
 // from, to are in unix seconds
 export function getThroughput(clusterID, from, to) {

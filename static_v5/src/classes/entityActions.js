@@ -99,6 +99,7 @@ const nodeActions = {
   Configuration: {},
   Latency: {},
   Jobs: {},
+  XDR: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

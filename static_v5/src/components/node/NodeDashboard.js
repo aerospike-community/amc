@@ -8,6 +8,7 @@ import NodeLatency from 'components/node/NodeLatency';
 import NodesSummary from 'components/node/NodesSummary';
 import NodeConfigEditor from 'components/node/NodeConfigEditor';
 import JobTable from 'components/node/JobTable';
+import XDRGraph from 'components/XDRGraph';
 import { NODE_ACTIONS } from 'classes/entityActions';
 
 // NodeDashboard diplays all views of a node
@@ -15,7 +16,8 @@ class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs];
+    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration, 
+                  NODE_ACTIONS.Jobs, NODE_ACTIONS.XDR];
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 
@@ -49,6 +51,10 @@ class NodeDashboard extends React.Component {
 
         {view === NODE_ACTIONS.Jobs &&
         <JobTable clusterID={clusterID} nodeHost={nodeHost} />
+        }
+
+        {view === NODE_ACTIONS.XDR &&
+          <XDRGraph />
         }
       </div>
     );

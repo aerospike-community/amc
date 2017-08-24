@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import moment from 'moment';
 
 import { LOGICAL_VIEW_TYPE } from 'classes/constants';
@@ -189,4 +190,25 @@ export function isEntitiesEqual(e1, e2) {
 
 export function isLogicalView(viewType) {
   return viewType in LOGICAL_VIEW_TYPE;
+}
+
+// get the dimensions of an svg element identified by selector
+export function svgDimensions(selector) {
+  const bbox = $(selector).getBBox();
+  const svg = d3.select(selector);
+
+  let w, h;
+
+  w = +svg.attrs('width');
+  if (w === 0)
+    w = bbox.width;
+
+  h = +svg.attrs('height');
+  if (h === 0)
+    h = bbox.height;
+
+  return {
+    width: w,
+    height: h
+  };
 }
