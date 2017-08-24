@@ -44,6 +44,11 @@ const clusterActions = {
       isAuthenticated: true
     },
   },
+  XDR: {
+    state: {
+      isAuthenticated: true
+    },
+  },
   Alerts: {
     state: {
       isAuthenticated: true
@@ -99,7 +104,6 @@ const nodeActions = {
   Configuration: {},
   Latency: {},
   Jobs: {},
-  XDR: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

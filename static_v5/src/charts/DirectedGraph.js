@@ -226,17 +226,16 @@ export default class DirectedGraph {
         .attr('y', (d) => d.y-15)
         .attr('fill', (d) => d.color)
         .text((d) => d.label || '')
+        .style('text-anchor', 'middle')
         ;
   }
 
   _width() {
-    return 800;
     const d = svgDimensions(this.selector);
     return d.width;
   }
 
   _height() {
-    return 400;
     const d = svgDimensions(this.selector);
     return d.height;
   }

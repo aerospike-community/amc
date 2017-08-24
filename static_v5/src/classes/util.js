@@ -192,20 +192,21 @@ export function isLogicalView(viewType) {
   return viewType in LOGICAL_VIEW_TYPE;
 }
 
-// get the dimensions of an svg element identified by selector
+// get the dimensions of an svg element identified by id
 export function svgDimensions(selector) {
-  const bbox = $(selector).getBBox();
+  const elm = document.querySelector(selector);
+  const par = elm.parentElement;
   const svg = d3.select(selector);
 
   let w, h;
 
-  w = +svg.attrs('width');
+  w = +svg.attr('width');
   if (w === 0)
-    w = bbox.width;
+    w = elm.clientWidth || par.clientWidth;
 
-  h = +svg.attrs('height');
+  h = +svg.attr('height');
   if (h === 0)
-    h = bbox.height;
+    h = elm.clientHeight || par.clientHeight;
 
   return {
     width: w,
