@@ -1,5 +1,5 @@
-// State of the view is also stored in redux.
-// This module provides functionality to keep the data and the url 
+// State of the view is stored in redux.
+// This module provides functionality to keep the view and the url 
 // in sync.
 //
 // On each view change update the url and vice versa.

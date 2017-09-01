@@ -313,3 +313,12 @@ button .fa {
   background: $link-color !important;
   color: white !important;
 }
+
+.as-breadcrumbs {
+  background: #021533;
+  color: white;
+
+  .as-separator {
+    margin: 0 5px 0 5px;
+  }
+}

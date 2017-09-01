@@ -14,11 +14,12 @@ import VisibleIndexView from 'containers/index/VisibleIndexView';
 import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
 import VisibleNodesOverview from 'containers/VisibleNodesOverview';
 
+import Welcome from 'components/Welcome';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import NamespacesOverview from 'components/namespace/NamespacesOverview';
+import MainDashboardBreadcrumbs from 'components/MainDashboardBreadcrumbs';
 import LogicalNamespaceDashboard from 'components/logical-namespace/LogicalNamespaceDashboard';
-import Welcome from 'components/Welcome';
 
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
@@ -104,6 +105,7 @@ class MainDashboard extends React.Component {
     const { displayEditConnection, displayViewConnection } = this.props;
     return (
       <div>
+        <MainDashboardBreadcrumbs clusterName={clusterName} currentView={currentView} />
         {dashboard}
 
         {displayViewConnection &&

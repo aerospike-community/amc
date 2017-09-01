@@ -20,8 +20,6 @@ class NamespacesOverview extends React.Component {
     
     return (
       <div>
-        <h4 style={{margin: 10}}> Namespaces Overview </h4>
-
         <div className="row">
           <div className="col-xl-12 as-section">
             <ClusterNamespaces clusterID={clusterID} />
