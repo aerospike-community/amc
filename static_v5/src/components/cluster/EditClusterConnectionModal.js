@@ -6,6 +6,7 @@ import classNames from 'classnames';
 
 import SaveClusterConnection from 'components/cluster/SaveClusterConnection';
 import { updateConnection as updateConnectionAPI } from 'api/clusterConnections';
+import AlertModal from 'components/AlertModal';
 
 // EditClusterConnectionModal shows a modal to edit a cluster connection
 class EditClusterConnectionModal extends React.Component {
@@ -57,11 +58,10 @@ class EditClusterConnectionModal extends React.Component {
     const { inProgress, saveErrorMsg, saveSuccessful } = this.state;
 
     if (!inProgress && saveSuccessful === true) {
+      const header = "Success";
+      const msg = "Successfully updated connection";
       return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully updated connection </ModalBody>
-        </Modal>
+        <AlertModal type="success" header={header} message={msg} />
       );
     }
 

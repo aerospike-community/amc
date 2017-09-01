@@ -190,13 +190,17 @@ function authConnection(state, action) {
         inProgress: action.display,
         clusterID: action.clusterID
       });
-      if (!action.display)
+      if (!action.display) {
         auth.hasFailed = false;
+        auth.isUpdating = false;
+        auth.failureMessage = '';
+      }
       break;
 
     case AUTHENTICATED_CLUSTER_CONNECTION:
       auth = Object.assign({}, state.authConnection, {
         inProgress: false,
+        isUpdating: false,
       });
       break;
 
@@ -209,7 +213,8 @@ function authConnection(state, action) {
     case CLUSTER_CONNECTION_AUTH_FAILED:
       auth = Object.assign({}, state.authConnection, {
         hasFailed: true,
-        failureMessage: action.errorMsg
+        isUpdating: false,
+        failureMessage: action.errorMsg,
       });
       break;
     default:

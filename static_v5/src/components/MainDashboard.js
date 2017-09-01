@@ -12,9 +12,9 @@ import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
 import VisibleSetView from 'containers/set/VisibleSetView';
 import VisibleIndexView from 'containers/index/VisibleIndexView';
 import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
+import VisibleNodesOverview from 'containers/VisibleNodesOverview';
 
 import NodeDashboard from 'components/node/NodeDashboard';
-import NodesOverview from 'components/node/NodesOverview';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
 import NamespacesOverview from 'components/namespace/NamespacesOverview';
 import LogicalNamespaceDashboard from 'components/logical-namespace/LogicalNamespaceDashboard';
@@ -52,7 +52,7 @@ class MainDashboard extends React.Component {
         dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} </h4>;
 
     } else if (viewType === VIEW_TYPE.NODE_OVERVIEW) {
-      dashboard = <NodesOverview clusterID={clusterID} />
+      dashboard = <VisibleNodesOverview />
 
     } else if (viewType === VIEW_TYPE.NODE) {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} view={view} onViewSelect={this.onChangeView}/>

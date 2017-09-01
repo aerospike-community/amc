@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import classNames from 'classnames';
 
+import Spinner from 'components/Spinner';
+
 class AuthClusterConnectionModal extends React.Component {
   constructor(props) {
     super(props);
@@ -56,7 +58,7 @@ class AuthClusterConnectionModal extends React.Component {
         </ModalBody>
         <ModalFooter>
           {inProgress &&
-           <span> Creating ... </span>}
+           <Spinner />}
           {!inProgress && hasFailed &&
            <span className="as-error-text"> {failureMessage} </span>}
           <Button disabled={inProgress} color="primary" onClick={this.onConnect}>Authenticate</Button>

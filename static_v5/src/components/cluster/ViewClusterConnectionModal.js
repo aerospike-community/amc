@@ -6,6 +6,7 @@ import classNames from 'classnames';
 
 import { deleteConnection } from 'api/clusterConnections';
 import Spinner from 'components/Spinner';
+import AlertModal from 'components/AlertModal';
 
 // ViewClusterConnectionModal shows a view for the cluster connection
 class ViewClusterConnectionModal extends React.Component {
@@ -99,11 +100,10 @@ class ViewClusterConnectionModal extends React.Component {
     const { deleteInProgress, deleteSuccessfull, deleteErrorMsg } = this.state;
 
     if (!deleteInProgress && deleteSuccessfull === true) {
+      const header = "Success";
+      const msg = "Successfully deleted connection";
       return (
-        <Modal isOpen={true} toggle={() => {}}>
-          <ModalHeader> Success </ModalHeader>
-          <ModalBody> Successfully deleted connection </ModalBody>
-        </Modal>
+        <AlertModal type="success" header={header} message={msg} />
       );
     }
 

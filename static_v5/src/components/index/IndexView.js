@@ -120,14 +120,14 @@ class IndexView extends React.Component {
 
     return (
       <Modal isOpen={true} toggle={() => {}}>
-        <ModalHeader> Confirm </ModalHeader>
+        <ModalHeader className="alert-danger"> Confirm </ModalHeader>
         <ModalBody>  Delete {this.props.indexName} ?  </ModalBody>
         <ModalFooter>
           {!deleteInProgress && deleteSuccessfull === false &&
             deleteErrorMsg}
           {deleteInProgress &&
            <span> <Spinner /> Deleting ... </span>}
-          <Button disabled={disabled} color="primary" onClick={this.onDeleteIndex}>Confirm</Button>
+          <Button disabled={disabled} color="danger" onClick={this.onDeleteIndex}>Confirm</Button>
           <Button disabled={disabled} color="secondary" onClick={onCancelModal}>Cancel</Button>
         </ModalFooter>
       </Modal>

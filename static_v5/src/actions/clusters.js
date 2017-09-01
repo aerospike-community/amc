@@ -241,6 +241,7 @@ export function getClusterEntityTree(clusterID, expand = true) {
 
 export function authenticateClusterConnection(id, name, password) {
   return (dispatch) => {
+    dispatch(authenticatingConnection());
     authConnectionAPI(id, name, password)
       .then((cluster) => {
         dispatch(authSuccess(cluster));

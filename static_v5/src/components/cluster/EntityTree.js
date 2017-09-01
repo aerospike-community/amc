@@ -59,6 +59,9 @@ class EntityTree extends React.Component {
   }
 
   renderAlerts(entity) {
+    if (this.isDisconnected(entity))
+      return null;
+
     const { alerts } = this.props;
     const { clusterID } = entity;
     const isCluster = entity.viewType === VIEW_TYPE.CLUSTER;
