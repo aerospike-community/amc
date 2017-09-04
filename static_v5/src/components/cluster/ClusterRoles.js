@@ -19,9 +19,13 @@ class ClusterRoles extends React.Component {
     this.renderPrivilege = this.renderPrivilege.bind(this);
   }
 
-  componentWillMount() {
-    const { clusterID } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const id = nextProps.clusterID;
+    if (this.props.clusterID !== id)
+      this.fetchRoles(id);
+  }
 
+  fetchRoles(clusterID) {
     this.setState({ isFetching: true });
     getRoles(clusterID)
       .then((privileges) => {
@@ -30,6 +34,11 @@ class ClusterRoles extends React.Component {
           privileges: privileges
         });
       });
+  }
+
+  componentWillMount() {
+    const { clusterID } = this.props;
+    this.fetchRoles(clusterID);
   }
 
   renderPrivilege(role) {

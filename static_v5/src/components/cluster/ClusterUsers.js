@@ -19,9 +19,13 @@ class ClusterUsers extends React.Component {
     this.renderUser = this.renderUser.bind(this);
   }
 
-  componentWillMount() {
-    const { clusterID } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const id = nextProps.clusterID;
+    if (this.props.clusterID !== id)
+      this.fetchUsers(id);
+  }
 
+  fetchUsers(clusterID) {
     this.setState({ isFetching: true });
     getUsers(clusterID)
       .then((users) => {
@@ -30,6 +34,11 @@ class ClusterUsers extends React.Component {
           users: users
         });
       });
+  }
+
+  componentWillMount() {
+    const { clusterID } = this.props;
+    this.fetchUsers(clusterID);
   }
 
   renderUser(user) {

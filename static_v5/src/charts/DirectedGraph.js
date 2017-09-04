@@ -295,12 +295,12 @@ function coord(n, width, height, margin) {
       rad,     // radius of the circle
       i, x, y;
 
-  // Calculate center of circle
-  cx = width/2;
-  cy = height/2;
-
   // Radius of circle
   rad = (Math.min(width, height) - margin)/2;
+
+  // Calculate center of circle
+  cx = rad + margin/2;
+  cy = cx;
 
   // Equally distribute all the nodes on the circle
   for (i = 0; i < n; i++) {

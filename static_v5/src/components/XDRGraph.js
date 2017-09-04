@@ -84,7 +84,7 @@ class XDRGraph extends React.Component {
 
   render() {
     const { id } = this;
-    const height = this.props.height || 400;
+    const height = this.props.height || 600;
     const style = { height: height };
 
     return (
