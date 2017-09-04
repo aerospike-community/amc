@@ -1,4 +1,5 @@
 import { VIEW_TYPE } from 'classes/constants';
+import { isEntitiesEqual as isEqual } from 'classes/util';
 
 // the keys as defined in reducer/currentView
 const Keys = {
@@ -158,20 +159,57 @@ function toSets(cluster, node, namespace) {
 
   return sets;
 }
-  
+
+const PARENT_KEY = '_tree_parent';
+
+// assign a parent to each of the nodes in the tree 
+function assignParent(root) {
+  const k = PARENT_KEY;
+
+  const assign = (node) => {
+    node.children.forEach((c) => {
+      c[k] = node;
+      assign(c);
+    });
+  };
+
+  root[k] = null;
+  assign(root);
+}
+
+// find the entity in the given tree
+function findEntity(root, entity) {
+  // depth first search of the tree
+  const dfs = (node, cb) => {
+    cb(node);
+    node.children.forEach((n) => {
+      dfs(n, cb);
+    });
+  };
+
+  let entityNode = null;
+
+  dfs(root, (node) => {
+    if (isEqual(node, entity))
+      entityNode = node;
+  });
+
+  return entityNode;
+}
+
 // convert the cluster into a physical entity tree representation
-export function toPhysicalEntityTree(cluster) {
+export function toPhysicalEntityTree(cluster, isAuthenticated) {
   let root = {
     name: cluster.name,
-    isAuthenticated: cluster.isAuthenticated,
     children: [],
+    isAuthenticated: isAuthenticated,
     isCategory: true, // aggregator of entities
 
     viewType: VIEW_TYPE.CLUSTER,
     [Keys.ClusterID]: cluster.id,
   };
 
-  if (!cluster.isAuthenticated)
+  if (!isAuthenticated)
     return root;
 
   let children = [];
@@ -180,9 +218,25 @@ export function toPhysicalEntityTree(cluster) {
   children.push(toIndexes(cluster));
 
   root.children = children;
+
+  assignParent(root);
   return root;
 }
 
+// returns an array of entities which are the ancestors of the given entity
+export function findAncestors(tree, entity) {
+  const ancestors = [];
+  const node = findEntity(tree, entity);
+  
+  if (!node)
+    return [];
+
+  const k = PARENT_KEY;
+  for (let p = node[k]; p !== null; p = p[k])
+    ancestors.push(p);
+
+  return ancestors;
+}
 
 // ----------------------------------------------------------------------------
 // LOGICAL ENTITY TREE
@@ -221,23 +275,25 @@ function toLogicalNamespaces(cluster) {
 }
 
 // convert the cluster into a logical entity tree
-export function toLogicalEntityTree(cluster) {
+export function toLogicalEntityTree(cluster, isAuthenticated) {
   let root = {
     name: cluster.name,
-    isAuthenticated: cluster.isAuthenticated,
     children: [],
+    isAuthenticated: isAuthenticated,
     isCategory: true, // aggregator of entities
 
     viewType: VIEW_TYPE.LOGICAL_CLUSTER,
     [Keys.ClusterID]: cluster.id,
   };
 
-  if (!cluster.isAuthenticated)
+  if (!isAuthenticated)
     return root;
 
   let children = [];
   children.push(toLogicalNamespaces(cluster));
 
   root.children = children;
+  assignParent(root);
   return root;
 }
+

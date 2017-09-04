@@ -5,6 +5,8 @@ import { selectStartView } from 'actions/currentView';
 import { selectClusterOnStartup, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { VIEW_TYPE } from 'classes/constants';
+import { isLogicalView } from 'classes/util';
+import { toPhysicalEntityTree, toLogicalEntityTree, findAncestors } from 'classes/entityTree';
 
 // ---------------------------
 // Adding a Cluster Connection
@@ -55,21 +57,32 @@ function receiveClusters(clusters = []) {
   };
 }
 
-export function initClusters() {
+// expand all the ancestors of the selected entity
+function expandEntityAncestors(entity) {
+  return function(cluster, dispatch) {
+    const vt = entity.viewType;
+
+    let tree;
+    const isAuthenticated = true;
+    if (isLogicalView(vt)) 
+      tree = toLogicalEntityTree(cluster, isAuthenticated);
+    else 
+      tree = toPhysicalEntityTree(cluster, isAuthenticated);
+
+    const ancestors = findAncestors(tree, entity);
+    ancestors.forEach((entity) => {
+      dispatch(expandEntityNode(entity));
+    });
+  };
+}
+
+export function initClusters(currentView) {
   return (dispatch) => {
     dispatch(requestClusters());
 
     listConnections()
       .then((connections) => {
         dispatch(receiveClusters(connections));
-
-        // connect to clusters
-        connections.forEach((conn) => {
-          if (conn.connected) 
-            dispatch(getClusterEntityTree(conn.id));
-          else if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
-            authenticateClusterConnection(conn.id, '', '');
-        });
 
         // show add cluster connection if
         // there are no connections
@@ -78,6 +91,18 @@ export function initClusters() {
           dispatch(displayAddClusterConnection(true));
           return;
         }
+
+        // connect to clusters
+        connections.forEach((conn) => {
+          let cb = null;
+          if (conn.id === currentView.clusterID)
+            cb = expandEntityAncestors(currentView);
+
+          if (conn.connected)
+            dispatch(getClusterEntityTree(conn.id, cb));
+          else if (conn.connectOnLogin)  // automatically connect to 'clusters without authentication'
+            authenticateClusterConnection(conn.id, '', '', cb);
+        });
 
         // select a cluster for overview
         for (let i = 0; i < connections.length; i++) {
@@ -117,19 +142,19 @@ export function fetchClusters() {
 
 export function deleteUDF(clusterID, udfName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID), false);
+    dispatch(getClusterEntityTree(clusterID));
   };
 }
 
 export function deleteIndex(clusterID, namspaceName, setName, indexName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID), false);
+    dispatch(getClusterEntityTree(clusterID));
   };
 }
 
 export function deleteSet(clusterID, namespaceName, setName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID), false);
+    dispatch(getClusterEntityTree(clusterID));
   };
 }
 
@@ -138,7 +163,7 @@ export function deleteSet(clusterID, namespaceName, setName) {
 
 export function addUDF(clusterID, udfName, udfType) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID), false);
+    dispatch(getClusterEntityTree(clusterID));
   };
 }
 
@@ -223,25 +248,27 @@ function expandClusterTree(dispatch, clusterID) {
 
 // get the cluster entity tree
 // WARNING: the cluster needs to be connected
-export function getClusterEntityTree(clusterID, expand = true) {
+export function getClusterEntityTree(clusterID, callback) {
   return (dispatch) => {
     getClusterEntityTreeAPI(clusterID)
       .then((cluster) => {
         dispatch(clusterDetails(cluster));
-        
-        if (expand)
-          expandClusterTree(dispatch, clusterID);
+        expandClusterTree(dispatch, clusterID);
+
+        if (typeof(callback) === 'function')
+          callback(cluster, dispatch);
       })
-      .catch((error) => {
-        // TODO
-        console.error('Failed to fetch cluster details for ' + clusterID);
+      .catch((err) => {
+        const msg = 'Failed to fetch cluster details for ' + clusterID;
+        console.error(msg + ': ' + err);
       });
   }
 }
 
-export function authenticateClusterConnection(id, name, password) {
+export function authenticateClusterConnection(id, name, password, callback) {
   return (dispatch) => {
     dispatch(authenticatingConnection());
+
     authConnectionAPI(id, name, password)
       .then((cluster) => {
         dispatch(authSuccess(cluster));
@@ -251,6 +278,9 @@ export function authenticateClusterConnection(id, name, password) {
 
         // select cluster overview
         dispatch(selectCluster(id, CLUSTER_ACTIONS.Overview));
+
+        if (typeof(callback) === 'function')
+          callback(cluster, dispatch);
       })
       .catch((message) => {
         message = message || 'Failed to authenticate';

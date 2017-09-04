@@ -23,9 +23,9 @@ const mapStateToProps = (state) => {
   clusters.forEach((c) => {
     let item;
     if (isLogicalView(CurrentView.viewType))
-      item = toLogicalEntityTree(c)
+      item = toLogicalEntityTree(c, c.isAuthenticated)
     else
-      item = toPhysicalEntityTree(c);
+      item = toPhysicalEntityTree(c, c.isAuthenticated);
 
     items.push(item);
   });

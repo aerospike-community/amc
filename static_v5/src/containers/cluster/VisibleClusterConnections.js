@@ -3,7 +3,11 @@ import { connect } from 'react-redux';
 import ClusterConnections from 'components/cluster/ClusterConnections';
 import { initClusters as initializeClusters } from 'actions/clusters';
 
+let CurrentView = null;
+
 const mapStateToProps = (state) => {
+  CurrentView = state.currentView;
+
   const clusters = state.clusters;
   return {
     displayAddCluster: clusters.newConnection.inProgress,
@@ -16,7 +20,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     initClusters: () => {
-      dispatch(initializeClusters());
+      dispatch(initializeClusters(CurrentView));
     },
   };
 }
