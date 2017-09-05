@@ -8,7 +8,7 @@ import $ from 'jquery';
 import app from './reducers';
 import { fetchClusters } from './actions/clusters';
 import VisibleApp from './containers/VisibleApp';
-import pollingMiddleware from 'classes/pollingMiddleware';
+import reduxMiddleware from 'classes/reduxMiddleware';
 
 // import all css
 import 'bootstrap/dist/css/bootstrap.css';
@@ -29,7 +29,7 @@ const store = createStore(
   app,
   applyMiddleware(
     thunkMiddleware,
-    pollingMiddleware
+    reduxMiddleware
   )
 );
 

@@ -5,13 +5,15 @@ import PropTypes from 'prop-types';
 import Tabs from 'components/Tabs';
 import UDFCreate from 'components/udf/UDFCreate';
 import UDFOverview from 'components/udf/UDFOverview';
-import { UDF_OVERVIEW_ACTIONS } from 'classes/entityActions';
+import { filterActions, UDF_OVERVIEW_ACTIONS } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 
 class UDFOverviewDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [UDF_OVERVIEW_ACTIONS.Overview, UDF_OVERVIEW_ACTIONS.Create];
+    const actions = [UDF_OVERVIEW_ACTIONS.Overview, UDF_OVERVIEW_ACTIONS.Create];
+    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.UDF_OVERVIEW);
 
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onCreateSuccess = this.onCreateSuccess.bind(this);

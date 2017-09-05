@@ -9,7 +9,8 @@ import NamespaceLatency from 'components/namespace/NamespaceLatency';
 import NamespaceThroughput from 'components/namespace/NamespaceThroughput';
 import NamespaceConfigEditor from 'components/namespace/NamespaceConfigEditor';
 import { getStatistics } from 'api/namespace';
-import { NAMESPACE_ACTIONS } from 'classes/entityActions';
+import { NAMESPACE_ACTIONS, filterNamespaceActions } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 
 class NamespaceDashboard extends React.Component {
   constructor(props) {
@@ -19,7 +20,10 @@ class NamespaceDashboard extends React.Component {
       stat: null,
     };
 
-    this.views = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, NAMESPACE_ACTIONS.Configuration];
+    const actions = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, NAMESPACE_ACTIONS.Configuration];
+
+    const { clusterID, namespaceName } = props;
+    this.views = filterNamespaceActions(actions, clusterID, namespaceName);
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 

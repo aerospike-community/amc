@@ -1,7 +1,7 @@
-// entityActions maintains the actions permissible for
-// each entity.
+// All the actions permissible on all the view types are defined here.
 
-import { VIEW_TYPE } from 'classes/constants';
+import { VIEW_TYPE, DB_ROLES as ROLES } from 'classes/constants';
+import { canAccess, canAccessNamespace, canAccessSet } from 'classes/security';
 
 function extractActions(obj) {
   let actions = {};
@@ -12,14 +12,18 @@ function extractActions(obj) {
 }
 
 // Template for defining actions. Field not pertinent can be omitted.
-// The order defined here is maintained.
+// The order defined here is maintained. All properties are optional.
 //
 // Properties are
-// roles: the roles needed to access the action
-// state: the state of the entity in which the action can be accessed
+// state: the state of the cluster in which the action can be accessed
+// dbRoles: the roles needed in the database to access the action 
+// amcRoles: the roles needed by the user in amc 
+// isEnterprise: should AMC be enterprise version 
+//
 // isDefault: the default view for the (role, state)
 // isEndOfGrouping: end of grouping for the actions
-//
+// hideInContextMenu: (default: false) should the action be hidden in the 
+// context menu
 
 const clusterActions = {
   Connect: {
@@ -46,7 +50,8 @@ const clusterActions = {
   },
   XDR: {
     state: {
-      isAuthenticated: true
+      isAuthenticated: true,
+      hasXDR: true, 
     },
   },
   Alerts: {
@@ -57,13 +62,16 @@ const clusterActions = {
   },
   Users: {
     state: {
-      isAuthenticated: true
-    }
+      isAuthenticated: true,
+    },
+    dbRoles: [ROLES.USR_ADMN],
   },
   Roles: {
     state: {
-      isAuthenticated: true
+      isAuthenticated: true,
+      isSecure: true,
     },
+    dbRoles: [ROLES.USR_ADMN],
     isEndOfGrouping: true,
   },
   Edit: {},
@@ -84,15 +92,63 @@ const udfActions = {
   View: {
     isDefault: true,
   },
+  Edit: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
+  },
+  Create: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
+  },
+  Delete: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
+  },
 };
 export const UDF_ACTIONS = extractActions(udfActions);
+
+// roles
+const roleActions = {
+  Create: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+  Delete: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+  Edit: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+};
+export const ROLE_ACTIONS = extractActions(roleActions);
+
+// user
+const userActions = {
+  Create: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+  Delete: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+  Edit: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.USR_ADMN],
+  },
+};
+export const USER_ACTIONS = extractActions(userActions);
 
 // udf overview
 const udfOverviewActions = {
   Overview: {
     isDefault: true,
   },
-  Create: {}
+  Create: {
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
+  },
 };
 export const UDF_OVERVIEW_ACTIONS = extractActions(udfOverviewActions);
 
@@ -101,7 +157,8 @@ const nodeActions = {
   View: {
     isDefault: true
   },
-  Configuration: {},
+  Configuration: {
+  },
   Latency: {},
   Jobs: {},
 };
@@ -138,6 +195,10 @@ const setActions = {
   View: {
     isDefault: true
   },
+  Delete: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.RW, ROLES.RWU]
+  },
 };
 export const SET_ACTIONS = extractActions(setActions);
 
@@ -153,6 +214,10 @@ export const SET_OVERVIEW_ACTIONS = extractActions(setOverviewActions);
 const indexActions = {
   View : {
     isDefault: true
+  },
+  Delete: {
+    hideInContextMenu: true,
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
   },
 };
 export const INDEX_ACTIONS = extractActions(indexActions);
@@ -208,62 +273,8 @@ export const LOGICAL_NAMESPACE_OVERVIEW_ACTIONS = extractActions(logicalNamespac
 // Queries on the actions
 // ----------------------
 
-// TODO implement this
-function satisfiesRoles(requiredRoles, userRoles) {
-  requiredRoles = requiredRoles || [];
-  return true;
-}
-
-// check for state compatibility
-function inPermissibleState(requiredState, state) {
-  requiredState = requiredState || {};
-  for (let k in requiredState) {
-    let r = requiredState[k];
-    let s = state[k];
-    if (s === undefined) {
-      if (r)
-        return false;
-    } else if (s !== r) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// filter the permissible actions based on roles and state
-function filterActions(actions, entity, userRoles) {
-  let filtered = [],
-      group = [];
-  for (let k in actions) {
-    let {roles, state, isEndOfGrouping} = actions[k];
-
-    if (inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles)) 
-      group.push(k);
-
-    if (isEndOfGrouping && group.length > 0) {
-      filtered.push(group);
-      group = [];
-    }
-  }
-
-  if (group.length > 0)
-    filtered.push(group);
-
-  return filtered;
-}
-
-function getDefaultAction(actions, entity, userRoles) {
-  for (let k in actions) {
-    let {roles, state, isDefault} = actions[k];
-    if (isDefault && inPermissibleState(state, entity) && satisfiesRoles(roles, userRoles))
-      return k;
-  }
-
-  throw new Error('Default action not found');
-}
-
-// get action based on view type
-function viewTypeAction(viewType) {
+// get all the actions for the view type
+function getActions(viewType) {
   if (viewType === VIEW_TYPE.CLUSTER)
     return clusterActions;
 
@@ -306,26 +317,173 @@ function viewTypeAction(viewType) {
   if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW)
     return logicalNamespaceOverviewActions;
 
+  if (viewType === VIEW_TYPE.ROLE)
+    return roleActions;
+
+  if (viewType === VIEW_TYPE.USER)
+    return userActions;
+
   const msg = `Action for ${viewType} not found`;
   console.error(msg);
   throw new Error(msg);
 }
 
-// get all permissible actions for the user 
-// for an entity of the given view type
+// filter the permissible actions on the entity for the current user
+function toContextMenuActions(actions, isPermitted) {
+  const filtered = [];
+  let group = [];
+
+  for (let k in actions) {
+    const action = actions[k];
+    const { hideInContextMenu, isEndOfGrouping } = action;
+
+    if (!hideInContextMenu && isPermitted(action))
+      group.push(k);
+
+    if (isEndOfGrouping && group.length > 0) {
+      filtered.push(group);
+      group = [];
+    }
+  }
+
+  if (group.length > 0)
+    filtered.push(group);
+
+  return filtered;
+}
+
+// get all permited actions for the user 
+// for an entity to show in the context menu
 //
 // returns an array of arrays based on the grouping.
 // actions are grouped by the arrays. i.e
 // [[View, Edit], [Add, Delete]]
-export function actions(viewType, entity, userRoles) {
-  let actions = viewTypeAction(viewType);
-  return filterActions(actions, entity, userRoles);
+export function contextMenuActions(entity) {
+  const vt = entity.viewType;
+  const isPermitted = (action) => {
+    const ns = entity.namespaceName,
+          set = entity.setName,
+          id = entity.clusterID;
+
+    if (action.hideContextMenu)
+      return false;
+
+    if (vt === VIEW_TYPE.NAMESPACE)
+      return isAllowedOnNamespace(action, id, ns);
+
+    if (vt === VIEW_TYPE.SET)
+      return isAllowedOnSet(action, id, ns, set);
+
+    return isAllowed(action, id);
+  };
+    
+  const actions = getActions(vt);
+  return toContextMenuActions(actions, isPermitted);
 }
 
-// get default action for the user for an entity of 
+// get default action for the user for an entity to show in the context menu
+export function defaultContextMenuAction(entity) {
+  const actions = getActions(entity.viewType);
+
+  const all = contextMenuActions(entity);
+  let filtered = [];
+  all.forEach((p) => {
+    filtered = filtered.concat(p);
+  });
+
+  for (let k in actions) {
+    const { isDefault } = actions[k];
+    const i = filtered.findIndex((f) => f === k);
+
+    if (isDefault && i !== -1)
+      return k;
+  }
+
+  throw new Error('Default action not found');
+}
+
+function filterTheActions(actions, isPermitted) {
+  const filtered = [];
+  for (let k in actions) {
+    const action = actions[k];
+    if (isPermitted(action))
+      filtered.push(k);
+  }
+  return filtered;
+}
+
+// use this method for all view types except namespace and set
+function isAllowed(action, clusterID) {
+  const { dbRoles, state, amcRoles, isEnterprise } = action;
+  return canAccess(clusterID, dbRoles, state, isEnterprise, amcRoles);
+}
+
+function permittedActions(clusterID, viewType) {
+  const all = getActions(viewType);
+  const fn = (action) => isAllowed(action, clusterID);
+  return filterTheActions(all, fn);
+}
+
+// filter the actions based on the user privileges
+// NOTE: use this call for all view types except namespace or set
+export function filterActions(actions = [], clusterID, viewType) {
+  const permissible = permittedActions(clusterID, viewType);
+  return actions.filter((action) => permissible.find((p) => p === action));
+}
+
+function isAllowedOnNamespace(action, clusterID, namespace) {
+  const { dbRoles, state, amcRoles, isEnterprise } = action;
+  return canAccessNamespace(clusterID, namespace, dbRoles, state, isEnterprise, 
+            amcRoles);
+}
+
+function permittedNamespaceActions(clusterID, namespace) {
+  const all = getActions(VIEW_TYPE.NAMESPACE);
+  const fn = (action) => isAllowedOnNamespace(action, clusterID, namespace);
+  return filterTheActions(all, fn);
+}
+
+// filter the namespace actions based on the user privileges
+export function filterNamespaceActions(actions = [], clusterID, namespace) {
+  const permissible = permittedNamespaceActions(clusterID, namespace);
+  return actions.filter((action) => permissible.find((p) => p === action));
+}
+
+function isAllowedOnSet(action, clusterID, namespace, set) {
+  const { dbRoles, state, amcRoles, isEnterprise } = action;
+  return canAccessSet(clusterID, namespace, set, dbRoles, state, 
+            isEnterprise, amcRoles);
+}
+
+function permittedSetActions(clusterID, namespace, set) {
+  const all = getActions(VIEW_TYPE.SET);
+  const fn = (action) => isAllowedOnSet(action, clusterID, namespace, set);
+  return filterTheActions(all, fn);
+}
+
+// filter the set actions based on the user privileges
+export function filterSetActions(actions = [], clusterID, namespace, set) {
+  const permissible = permittedSetActions(clusterId, namespace, set);
+  return actions.filter((action) => permissible.find((p) => p === action));
+}
+
+// return true if the current user can perform the action on the entity of
 // the given view type
-export function defaultAction(viewType, entity, userRoles) {
-  let actions = viewTypeAction(viewType);
-  return getDefaultAction(actions, entity, userRoles);
+// NOTE: use this call for all view types except namespace or set
+export function isPermissibleAction(action, clusterID, viewType) {
+  const actions = permittedActions(clusterID, viewType);
+  return actions.findIndex((a) => a === action) !== -1
+}
+
+// return true if the current user can perform the action on the namespace
+export function isPermissibleNamespaceAction(action, clusterID, namespace) {
+  const actions = permittedNamespaceActions(clusterID, namespace);
+  return actions.findIndex((a) => a === action) !== -1;
+}
+
+// return true if the current user can perform the action on the set
+export function isPermissibleSetAction(action, clusterID, namespace, set) {
+  const actions = permittedSetActions(clusterID, namespace, set);
+  return actions.findIndex((a) => a === action) !== -1;
 }
 

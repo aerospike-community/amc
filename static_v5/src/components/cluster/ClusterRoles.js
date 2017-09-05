@@ -43,11 +43,15 @@ class ClusterRoles extends React.Component {
 
   renderPrivilege(role) {
     const group = groupRoles(role.roles);
-    const onRoleSelect = () => this.props.onRoleSelect(role);
+    const canSelect = typeof(this.props.onRoleSelect) === 'function';
+    const onRoleSelect = () => {
+      canSelect && this.props.onRoleSelect(role);
+    };
+
     return (
       <tr key={role.name} onClick={onRoleSelect} className="as-cursor-pointer">
         <td>
-          {role.name} <i className="fa fa-pencil fa-1x" /> 
+          {role.name} {canSelect && <i className="fa fa-pencil fa-1x" />}
         </td>
         <td>
           <ul className="list-unstyled">

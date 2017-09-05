@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
 import classNames from 'classnames';
 
+import { VIEW_TYPE } from 'classes/constants';
+import { ROLE_ACTIONS, isPermissibleAction } from 'classes/entityActions';
 import ClusterRoles from 'components/cluster/ClusterRoles';
 import EditClusterRoles from 'components/cluster/EditClusterRoles';
 
@@ -20,6 +22,10 @@ class ClusterRolesDashboard extends React.Component {
       view: LIST_VIEW,    // list, edit, create
       editRole: null,     // the role to edit
     };
+
+    const { clusterID } = props;
+    this.canCreate = isPermissibleAction(ROLE_ACTIONS.Create, clusterID, VIEW_TYPE.ROLE);
+    this.canEdit = isPermissibleAction(ROLE_ACTIONS.Edit, clusterID, VIEW_TYPE.ROLE);
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
   }
@@ -71,13 +77,15 @@ class ClusterRolesDashboard extends React.Component {
 
   renderList() {
     const { clusterID } = this.props;
+    if (!this.canEdit)
+      return <ClusterRoles clusterID={clusterID} />;
+
     const onRoleSelect = (role) => {
       this.setState({
         view: EDIT_VIEW,
         editRole: role
       });
     };
-
     return <ClusterRoles clusterID={clusterID} onRoleSelect={onRoleSelect} />
   }
 
@@ -98,7 +106,7 @@ class ClusterRolesDashboard extends React.Component {
       <div>
         <div className="as-centerpane-header">
           Roles
-          {view === LIST_VIEW &&
+          {this.canCreate && view === LIST_VIEW &&
           <Button style={{marginLeft: 10}} size="sm" color="primary" onClick={() => this.toView(CREATE_VIEW)}>
             <i className="fa fa-plus" /> Create
           </Button>

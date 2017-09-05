@@ -2,7 +2,9 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import { isPermissibleAction, INDEX_ACTIONS } from 'classes/entityActions';
 import { getIndex, deleteIndex } from 'api/index';
+import { VIEW_TYPE } from 'classes/constants';
 import IndexesTable from 'components/index/IndexesTable';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
@@ -23,9 +25,15 @@ class IndexView extends React.Component {
       deleteErrorMsg: '',
     };
 
+    this.setPermissions(props.clusterID);
+
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onDeleteIndex = this.onDeleteIndex.bind(this);
+  }
+
+  setPermissions(clusterID) {
+    this.canDelete = isPermissibleAction(INDEX_ACTIONS.Delete, clusterID, VIEW_TYPE.INDEX);
   }
 
   onShowConfirm() {
@@ -95,6 +103,7 @@ class IndexView extends React.Component {
       return;
 
     const {clusterID, indexName} = nextProps;
+    this.setPermissions(clusterID);
     this.fetchData(clusterID, indexName);
   }
 
@@ -152,10 +161,11 @@ class IndexView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Index - ${indexName}`} 
 
+            {this.canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 
               <i className="fa fa-trash"></i>
               Delete 
-            </Button>
+            </Button>}
           </div>
         </div>
 

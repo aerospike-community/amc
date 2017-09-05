@@ -29,7 +29,19 @@ export const VIEW_TYPE = Object.assign({}, LOGICAL_VIEW_TYPE, {
   UDF_OVERVIEW:       'UDF_OVERVIEW',
   UDF:                'UDF',
   START_VIEW:         'START_VIEW',
+  ROLE:               'ROLE',
+  USER:               'USER',
 });
+
+// the predefined database roles
+export const DB_ROLES = {
+  RD:        'read',
+  RW:        'read-write',
+  RWU:       'read-write-udf',
+  USR_ADMN:  'user-admin',
+  SYS_ADMN:  'sys-admin',
+  DATA_ADMN: 'data-admin',
+};
 
 // polling interval
 export const POLL_INTERVAL = 10*1000; // 10 seconds

@@ -13,7 +13,8 @@ import ClusterUsersDashboard from 'components/cluster/ClusterUsersDashboard';
 import XDRGraph from 'components/XDRGraph';
 
 import Tabs from 'components/Tabs';
-import { CLUSTER_ACTIONS } from 'classes/entityActions';
+import { CLUSTER_ACTIONS, filterActions } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 
 // ClusterDashboard handles all the views for the cluster.
 // It is also responsible for changing between different views
@@ -25,10 +26,11 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.XDR,
-                  CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, 
-                  CLUSTER_ACTIONS.Alerts];
+    const actions = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.XDR,
+                      CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, 
+                      CLUSTER_ACTIONS.Alerts];
 
+    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.CLUSTER);
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 

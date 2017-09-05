@@ -22,14 +22,14 @@ export function pollAlerts(clusterID, dispatch) {
           window.setTimeout(poll, Interval);
       });
   };
-  window.setTimeout(poll, Interval);
+  poll();
 }
 
 export function stopPollingAlerts(clusterID) {
   Clusters.delete(clusterID);
 }
 
-export function stopAllPollingOfAlerts() {
+export function stopPollingAllAlerts() {
   Clusters.forEach((clusterID) => {
     stopPollingAlerts(clusterID);
   });

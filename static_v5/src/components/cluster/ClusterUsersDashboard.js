@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
 import classNames from 'classnames';
 
+import { VIEW_TYPE } from 'classes/constants';
+import { USER_ACTIONS, isPermissibleAction } from 'classes/entityActions';
 import ClusterUsers from 'components/cluster/ClusterUsers';
 import EditClusterUser from 'components/cluster/EditClusterUser';
 
@@ -20,6 +22,10 @@ class ClusterUsersDashboard extends React.Component {
       view: LIST_VIEW,    // list, edit, create
       editUser: null,     // the user to edit
     };
+
+    const { clusterID } = props;
+    this.canCreate = isPermissibleAction(USER_ACTIONS.Create, clusterID, VIEW_TYPE.USER);
+    this.canEdit = isPermissibleAction(USER_ACTIONS.Edit, clusterID, VIEW_TYPE.USER);
   }
 
   toView(view) {
@@ -51,6 +57,9 @@ class ClusterUsersDashboard extends React.Component {
 
   renderList() {
     const { clusterID } = this.props;
+    if (!this.canEdit)
+      return <ClusterUsers clusterID={clusterID} />;
+
     const onUserSelect = (user) => {
       this.setState({
         view: EDIT_VIEW,
@@ -77,7 +86,7 @@ class ClusterUsersDashboard extends React.Component {
         <div className="as-centerpane-header">
           Users
 
-          {view === LIST_VIEW &&
+          {this.canCreate && view === LIST_VIEW &&
           <Button style={{marginLeft: 10}} size="sm" color="primary" onClick={() => this.toView(CREATE_VIEW)}>
             <i className="fa fa-plus" /> Create
           </Button>

@@ -18,7 +18,7 @@ export function init(dispatch) {
   const user = ls.get('user');
   if (jwt) {
     window.fetch = authorizedFetch(jwt, dispatch);
-    dispatch(authSuccess(user)); // TODO user roles
+    dispatch(authSuccess(user)); 
   } else {
     dispatch(logout());
   }

@@ -7,6 +7,9 @@ import AceEditor from 'react-ace';
 import 'brace/mode/lua';
 import 'brace/theme/github';
 
+import { VIEW_TYPE } from 'classes/constants';
+import { isPermissibleAction, UDF_ACTIONS } from 'classes/entityActions';
+
 import { getUDF, deleteUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
 import Spinner from 'components/Spinner';
@@ -38,6 +41,8 @@ class UDFView extends React.Component {
     this.id = 'udf_editor' + nextNumber();
     this.editor; // the ace editor instance
 
+    this.setPermissions(props.clusterID);
+
     // delete methods
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onShowDeleteModal = this.onShowDeleteModal.bind(this);
@@ -47,6 +52,11 @@ class UDFView extends React.Component {
     this.onUpdate = this.onUpdate.bind(this);
     this.onEditorLoad = this.onEditorLoad.bind(this);
     this.onEditorChange = this.onEditorChange.bind(this);
+  }
+
+  setPermissions(clusterID) {
+    this.canEdit = isPermissibleAction(UDF_ACTIONS.Edit, clusterID, VIEW_TYPE.UDF);
+    this.canDelete = isPermissibleAction(UDF_ACTIONS.Delete, clusterID, VIEW_TYPE.UDF);
   }
 
   componentDidMount() {
@@ -67,6 +77,7 @@ class UDFView extends React.Component {
         && this.props.udfName === udfName)
       return;
 
+    this.setPermissions(clusterID);
     this.fetchUDF(clusterID, udfName);
   }
 
@@ -156,6 +167,7 @@ class UDFView extends React.Component {
     const editorHeight = this.state.editorHeight + 'px';
     const { clusterID, udfName } = this.props;
     const { showDeleteModal, showUpdateSuccess, hasErrors, hasChanged, isUpdating, sourceCode } = this.state;
+    const readOnly = isUpdating || !this.canEdit;
 
     return (
       <div>
@@ -163,23 +175,25 @@ class UDFView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`UDF - ${udfName}`} 
 
+            {this.canDelete &&
             <Button className="float-right" disabled={isUpdating} 
                 color="danger" size="sm" onClick={this.onShowDeleteModal}> 
               <i className="fa fa-trash"></i>
               Delete 
-            </Button>
+            </Button>}
 
+            {this.canEdit &&
             <Button className="float-right" disabled={!hasChanged || hasErrors || isUpdating} 
                 color="primary" size="sm" onClick={this.onUpdate}> 
               <i className="fa fa-floppy-o"></i>
               Update 
-            </Button>
+            </Button>}
           </div>
         </div>
 
         <div className="as-ace-editor">
           <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" 
-            name={this.id} value={sourceCode} readOnly={isUpdating} 
+            name={this.id} value={sourceCode} readOnly={readOnly} 
             onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
         </div>
         

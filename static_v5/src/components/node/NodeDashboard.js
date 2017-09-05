@@ -8,15 +8,18 @@ import NodeLatency from 'components/node/NodeLatency';
 import NodesSummary from 'components/node/NodesSummary';
 import NodeConfigEditor from 'components/node/NodeConfigEditor';
 import JobTable from 'components/node/JobTable';
-import { NODE_ACTIONS } from 'classes/entityActions';
+import { NODE_ACTIONS, filterActions } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 
 // NodeDashboard diplays all views of a node
 class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.views = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration, 
+    const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration, 
                   NODE_ACTIONS.Jobs];
+
+    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.NODE);
     this.onViewSelect = this.onViewSelect.bind(this);
   }
 

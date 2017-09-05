@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { VIEW_TYPE } from 'classes/constants';
 import { objectPropType, nextNumber, isEntitiesEqual  } from 'classes/util';
-import { actions, defaultAction, CLUSTER_ACTIONS } from 'classes/entityActions';
+import { contextMenuActions, defaultContextMenuAction, CLUSTER_ACTIONS } from 'classes/entityActions';
 import Tree from 'components/Tree';
 
 // Display all the clusters and its entites 
@@ -35,13 +35,9 @@ class EntityTree extends React.Component {
     this.onNodeExpand = this.onNodeExpand.bind(this);
   }
 
-  getUserRoles() {
-    return []; // TODO get user roles
-  }
-
   getOptions(entity) {
-    const roles = this.getUserRoles();
-    let views =  actions(entity.viewType, entity, roles);
+    const views =  contextMenuActions(entity);
+
     let options = [];
     views.forEach((view) => {
       view.forEach((v) => {
@@ -179,8 +175,7 @@ class EntityTree extends React.Component {
   }
 
   getDefaultView(entity) {
-    const roles = this.getUserRoles();
-    return defaultAction(entity.viewType, entity, roles);
+    return defaultContextMenuAction(entity);
   }
 
   onEntitySelect(entity) {

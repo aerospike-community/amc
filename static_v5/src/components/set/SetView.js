@@ -2,6 +2,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import { isPermissibleSetAction, SET_ACTIONS } from 'classes/entityActions';
+import { VIEW_TYPE } from 'classes/constants';
 import { getSet, deleteSet } from 'api/set';
 import SetsTable from 'components/set/SetsTable';
 import Spinner from 'components/Spinner';
@@ -23,9 +25,16 @@ class SetView extends React.Component {
       deleteErrorMsg: '',
     };
 
+    const { clusterID, namespaceName, setName } = props;
+    this.setPermissions(clusterID, namespaceName, setName);
+
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onDeleteSet = this.onDeleteSet.bind(this);
+  }
+
+  setPermissions(clusterID, namespace, set) {
+    this.canDelete = isPermissibleSetAction(SET_ACTIONS.Delete, clusterID, namespace, set);
   }
 
   onShowConfirm() {
@@ -93,6 +102,7 @@ class SetView extends React.Component {
       return;
 
     const {clusterID, nodeHost, namespaceName, setName} = nextProps;
+    this.setPermissions(clusterID, namespaceName, setName);
     this.fetchData(clusterID, nodeHost, namespaceName, setName);
   }
 
@@ -150,10 +160,11 @@ class SetView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Set - ${setName}`}
 
+            {this.canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 
               <i className="fa fa-trash"></i>
               Delete 
-            </Button>
+            </Button>}
           </div>
         </div>
 

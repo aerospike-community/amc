@@ -52,7 +52,7 @@ class ClusterUsers extends React.Component {
     };
     return (
       <tr key={username} onClick={onClick} className="as-cursor-pointer">
-        <td> {username} <i className="fa fa-pencil fa-1x" /> </td>
+        <td> {username} {showEdit && <i className="fa fa-pencil fa-1x" />} </td>
         <td> {roles.join(', ')} </td>
       </tr>
     );
