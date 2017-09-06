@@ -57,6 +57,16 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("user", func() {
+		Description("Get the currently logged in user of the cluster")
+		Routing(GET(":connId/user"))
+
+		Response(OK, DBUserResponseMedia)
+		Response(BadRequest, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("connect", func() {
 		Description("Connect to the cluster and return the entity tree")
 		Routing(POST(":connId"))

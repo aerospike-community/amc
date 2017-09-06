@@ -106,8 +106,9 @@ var UserConnectionResponseMedia = MediaType("application/vnd.aerospike.amc.conne
 		Attribute("memory", ClusterResourceUsageResponseMedia, "Memory usage.")
 		Attribute("disk", ClusterResourceUsageResponseMedia, "Disk usage.")
 		Attribute("updateInterval", Integer, "Interval with which AMC fetches data from the database.")
+		Attribute("isSecurityEnabled", Boolean, "Is the cluster security enabled")
 
-		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval")
+		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval", "isSecurityEnabled")
 	})
 
 	View("default", func() {
@@ -129,8 +130,9 @@ var UserConnectionResponseMedia = MediaType("application/vnd.aerospike.amc.conne
 		Attribute("memory")
 		Attribute("disk")
 		Attribute("updateInterval")
+		Attribute("isSecurityEnabled")
 
-		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval")
+		Required("name", "connectOnLogin", "connected", "clusterBuilds", "activeRedAlertCount", "offNodes", "nodesCompatibility", "status", "namespaces", "nodes", "memory", "updateInterval", "isSecurityEnabled")
 	})
 })
 

@@ -10,6 +10,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/app"
+	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/models"
 )
 
@@ -100,6 +101,12 @@ func (c *AuthController) Authenticate(ctx *app.AuthenticateAuthContext) error {
 	// Set auth header for client retrieval
 	ctx.ResponseData.Header().Set("Authorization", "Bearer "+signedToken)
 
+	isEnterprise := common.AMCIsEnterprise()
+	res := &app.AerospikeAmcAuthResponse{
+		Roles:        user.Roles,
+		IsEnterprise: &isEnterprise,
+	}
+
 	// AuthController_Authenticate: end_implement
-	return ctx.NoContent()
+	return ctx.OK(res)
 }

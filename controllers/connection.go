@@ -241,9 +241,37 @@ func (c *ConnectionController) Show(ctx *app.ShowConnectionContext) error {
 		Status:              string(cluster.Status()),
 		UpdateInterval:      cluster.UpdateInterval(),
 		Users:               users,
+		IsSecurityEnabled:   cluster.SecurityEnabled(),
 	}
 
 	// ConnectionController_Show: end_implement
+	return ctx.OK(res)
+}
+
+// get the user logged into the cluster
+func (c *ConnectionController) User(ctx *app.UserConnectionContext) error {
+	// UserController_Get: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	res := &app.AerospikeAmcClusterUserResponse{}
+
+	if cluster.SecurityEnabled() {
+		user := cluster.User()
+		for _, u := range cluster.Users() {
+			if user != nil && u.User == *user {
+				res = &app.AerospikeAmcClusterUserResponse{
+					Username: u.User,
+					Roles:    u.Roles,
+				}
+				break
+			}
+		}
+	}
+
 	return ctx.OK(res)
 }
 
