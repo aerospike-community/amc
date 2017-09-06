@@ -30,10 +30,11 @@ var _ = Resource("auth", func() { // Resources group related API endpoints
 			Required("user", "password")
 		})
 
-		Response(NoContent, func() {
+		Response(OK, func() {
 			Headers(func() {
 				Header("Authorization", String, "Generated JWT")
 			})
+			Media(AuthResponseMedia)
 		})
 
 		Response(Unauthorized)        // auth input not match
