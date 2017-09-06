@@ -257,18 +257,27 @@ func (c *ConnectionController) User(ctx *app.UserConnectionContext) error {
 		return ctx.BadRequest(err.Error())
 	}
 
-	res := &app.AerospikeAmcClusterUserResponse{}
+	res := &app.AerospikeAmcClusterRoleResponse{}
 
 	if cluster.SecurityEnabled() {
-		user := cluster.User()
-		for _, u := range cluster.Users() {
-			if user != nil && u.User == *user {
-				res = &app.AerospikeAmcClusterUserResponse{
-					Username: u.User,
-					Roles:    u.Roles,
-				}
-				break
+		var user string
+		if p := cluster.User(); p != nil {
+			user = *p
+		}
+
+		roles := []*app.Privilege{}
+		for _, r := range cluster.CurrentUserRoles() {
+			p := &app.Privilege{
+				Privilege: r.Privilege,
+				Namespace: &r.Namespace,
+				Set:       &r.Set,
 			}
+			roles = append(roles, p)
+		}
+
+		res = &app.AerospikeAmcClusterRoleResponse{
+			Name:  user,
+			Roles: roles,
 		}
 	}
 

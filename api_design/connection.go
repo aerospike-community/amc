@@ -61,7 +61,7 @@ var _ = Resource("connection", func() {
 		Description("Get the currently logged in user of the cluster")
 		Routing(GET(":connId/user"))
 
-		Response(OK, DBUserResponseMedia)
+		Response(OK, DBRoleResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)

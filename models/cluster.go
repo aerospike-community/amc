@@ -28,6 +28,12 @@ type EntityType string
 
 type ClusterStatus string
 
+type RolePrivilege struct {
+	Privilege string
+	Namespace string
+	Set       string
+}
+
 const (
 	ClusterStatusOn  ClusterStatus = "on"
 	ClusterStatusOff ClusterStatus = "off"
@@ -79,7 +85,7 @@ type Cluster struct {
 
 	users                 common.SyncValue //[]*as.UserRoles
 	roles                 common.SyncValue //[]*as.Role
-	currentUserPrivileges common.SyncValue //[]string
+	currentUserPrivileges common.SyncValue //[]*RolePrivilege
 
 	activeBackup  common.SyncValue //*Backup
 	activeRestore common.SyncValue //*Restore
@@ -744,7 +750,7 @@ func (c *Cluster) updateUsers() error {
 	user := c.User()
 	// update current user's privileges
 	if user != nil && len(*user) > 0 {
-		currentUserPrivileges := []string{}
+		currentUserPrivileges := []*RolePrivilege{}
 
 		// this means the user do not have the privileges other than viewing its own roles
 		if u, err := client.QueryUser(nil, *user); err == nil {
@@ -755,7 +761,12 @@ func (c *Cluster) updateUsers() error {
 				}
 
 				for _, priv := range role.Privileges {
-					currentUserPrivileges = append(currentUserPrivileges, string(priv.Code))
+					rp := &RolePrivilege{
+						Privilege: string(priv.Code),
+						Namespace: priv.Namespace,
+						Set:       priv.SetName,
+					}
+					currentUserPrivileges = append(currentUserPrivileges, rp)
 				}
 			}
 
@@ -1156,8 +1167,18 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 
 }
 
+func (c *Cluster) CurrentUserRoles() []*RolePrivilege {
+	return c.currentUserPrivileges.Get().([]*RolePrivilege)
+}
+
 func (c *Cluster) CurrentUserPrivileges() []string {
-	return c.currentUserPrivileges.Get().([]string)
+	var p []string
+
+	privs := c.CurrentUserRoles()
+	for _, rp := range privs {
+		p = append(p, rp.Privilege)
+	}
+	return p
 }
 
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
