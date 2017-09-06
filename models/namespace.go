@@ -532,6 +532,9 @@ func (ns *Namespace) ObjectSize() Histogram {
 
 	cmd := objszInfoCmd(ns.name)
 	hist := parseHistogram(ns.latestInfo.TryString(cmd, ""))
+	if hist.NBuckets() == 0 {
+		return nil
+	}
 
 	rblock := 128 // default byte size of the read block
 	bwidth := rblock * ns.objszBucketWidth() / hist.NBuckets()
