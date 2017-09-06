@@ -8,6 +8,7 @@ import { VIEW_TYPE } from 'classes/constants';
 import { ROLE_ACTIONS, isPermissibleAction } from 'classes/entityActions';
 import ClusterRoles from 'components/cluster/ClusterRoles';
 import EditClusterRoles from 'components/cluster/EditClusterRoles';
+import { whenClusterHasCredentials } from 'classes/security';
 
 const LIST_VIEW = 'list';
 const EDIT_VIEW = 'edit';
@@ -21,13 +22,29 @@ class ClusterRolesDashboard extends React.Component {
     this.state = {
       view: LIST_VIEW,    // list, edit, create
       editRole: null,     // the role to edit
+
+      canCreate: false,
+      canEdit: false,
     };
 
-    const { clusterID } = props;
-    this.canCreate = isPermissibleAction(ROLE_ACTIONS.Create, clusterID, VIEW_TYPE.ROLE);
-    this.canEdit = isPermissibleAction(ROLE_ACTIONS.Edit, clusterID, VIEW_TYPE.ROLE);
-
     this.toggleCollapse = this.toggleCollapse.bind(this);
+  }
+
+  componentDidMount() {
+    const { clusterID } = this.props;
+    this.setPermissions(clusterID);
+  }
+
+  setPermissions(clusterID) {
+    whenClusterHasCredentials(clusterID, () => {
+      const canCreate = isPermissibleAction(ROLE_ACTIONS.Create, clusterID, VIEW_TYPE.ROLE);
+      const canEdit = isPermissibleAction(ROLE_ACTIONS.Edit, clusterID, VIEW_TYPE.ROLE);
+
+      this.setState({
+        canCreate: canCreate,
+        canEdit: canEdit,
+      });
+    });
   }
 
   toView(view) {
@@ -77,7 +94,8 @@ class ClusterRolesDashboard extends React.Component {
 
   renderList() {
     const { clusterID } = this.props;
-    if (!this.canEdit)
+    const { canEdit } = this.state;
+    if (!canEdit)
       return <ClusterRoles clusterID={clusterID} />;
 
     const onRoleSelect = (role) => {
@@ -90,7 +108,7 @@ class ClusterRolesDashboard extends React.Component {
   }
 
   render() {
-    const { view, isCollapsed } = this.state;
+    const { view, isCollapsed, canCreate } = this.state;
     let dashboard;
 
     if (!isCollapsed) {
@@ -106,7 +124,7 @@ class ClusterRolesDashboard extends React.Component {
       <div>
         <div className="as-centerpane-header">
           Roles
-          {this.canCreate && view === LIST_VIEW &&
+          {canCreate && view === LIST_VIEW &&
           <Button style={{marginLeft: 10}} size="sm" color="primary" onClick={() => this.toView(CREATE_VIEW)}>
             <i className="fa fa-plus" /> Create
           </Button>

@@ -8,6 +8,7 @@ import { VIEW_TYPE } from 'classes/constants';
 import { USER_ACTIONS, isPermissibleAction } from 'classes/entityActions';
 import ClusterUsers from 'components/cluster/ClusterUsers';
 import EditClusterUser from 'components/cluster/EditClusterUser';
+import { whenClusterHasCredentials } from 'classes/security';
 
 const LIST_VIEW = 'list';
 const EDIT_VIEW = 'edit';
@@ -21,11 +22,27 @@ class ClusterUsersDashboard extends React.Component {
     this.state = {
       view: LIST_VIEW,    // list, edit, create
       editUser: null,     // the user to edit
-    };
 
-    const { clusterID } = props;
-    this.canCreate = isPermissibleAction(USER_ACTIONS.Create, clusterID, VIEW_TYPE.USER);
-    this.canEdit = isPermissibleAction(USER_ACTIONS.Edit, clusterID, VIEW_TYPE.USER);
+      canCreate: false,
+      canEdit: false,
+    };
+  }
+
+  componentDidMount() {
+    const { clusterID } = this.props;
+    this.setPermissions(clusterID);
+  }
+
+  setPermissions(clusterID) {
+    whenClusterHasCredentials(clusterID, () => {
+      const canCreate = isPermissibleAction(USER_ACTIONS.Create, clusterID, VIEW_TYPE.USER);
+      const canEdit = isPermissibleAction(USER_ACTIONS.Edit, clusterID, VIEW_TYPE.USER);
+
+      this.setState({
+        canEdit: canEdit,
+        canCreate: canCreate
+      });
+    });
   }
 
   toView(view) {
@@ -57,7 +74,8 @@ class ClusterUsersDashboard extends React.Component {
 
   renderList() {
     const { clusterID } = this.props;
-    if (!this.canEdit)
+    const { canEdit } = this.state;
+    if (!canEdit)
       return <ClusterUsers clusterID={clusterID} />;
 
     const onUserSelect = (user) => {
@@ -71,7 +89,7 @@ class ClusterUsersDashboard extends React.Component {
   }
 
   render() {
-    const { view } = this.state;
+    const { view, canCreate } = this.state;
     let dashboard;
 
     if (view === CREATE_VIEW)
@@ -86,7 +104,7 @@ class ClusterUsersDashboard extends React.Component {
         <div className="as-centerpane-header">
           Users
 
-          {this.canCreate && view === LIST_VIEW &&
+          {canCreate && view === LIST_VIEW &&
           <Button style={{marginLeft: 10}} size="sm" color="primary" onClick={() => this.toView(CREATE_VIEW)}>
             <i className="fa fa-plus" /> Create
           </Button>

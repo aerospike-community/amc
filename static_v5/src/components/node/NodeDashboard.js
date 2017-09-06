@@ -10,17 +10,35 @@ import NodeConfigEditor from 'components/node/NodeConfigEditor';
 import JobTable from 'components/node/JobTable';
 import { NODE_ACTIONS, filterActions } from 'classes/entityActions';
 import { VIEW_TYPE } from 'classes/constants';
+import { whenClusterHasCredentials } from 'classes/security';
 
 // NodeDashboard diplays all views of a node
 class NodeDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, NODE_ACTIONS.Configuration, 
-                  NODE_ACTIONS.Jobs];
+    this.state = {
+      views: []
+    };
 
-    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.NODE);
     this.onViewSelect = this.onViewSelect.bind(this);
+  }
+
+  componentDidMount() {
+    this.setViews();
+  }
+
+  setViews() {
+    const { clusterID } = this.props;
+    whenClusterHasCredentials(clusterID, () => {
+      const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, 
+                       NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs];
+
+      const views = filterActions(actions, clusterID, VIEW_TYPE.NODE);
+      this.setState({
+        views: views
+      });
+    });
   }
 
   onViewSelect(view) {
@@ -30,10 +48,11 @@ class NodeDashboard extends React.Component {
   render() {
     const {clusterID, nodeHost, onViewSelect} = this.props;
     const view = this.props.view || NODE_ACTIONS.View;
+    const { views } = this.state;
 
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+        <Tabs names={views} selected={view} onSelect={this.onViewSelect}/>
 
 
         {view === NODE_ACTIONS.View && 

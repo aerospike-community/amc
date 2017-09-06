@@ -10,6 +10,8 @@ import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { selectStartView } from 'actions/currentView';
 import { isEntitiesEqual, isLogicalView } from 'classes/util';
+import { isPermissibleAction, isPermissibleSetAction, isPermissibleNamespaceAction } from 'classes/entityActions';
+import { whenClusterHasCredentials } from 'classes/security';
 
 // the latest current view
 let CurrentView;
@@ -41,8 +43,29 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onEntitySelect: (entity, defView = '') => {
-      const view = CurrentView.viewType === entity.viewType ? CurrentView.view : defView;
-      dispatch(selectEntity(entity, view));
+      if (CurrentView.viewType !== entity.viewType) {
+        dispatch(selectEntity(entity, defView));
+        return;
+      }
+
+      const vt = entity.viewType;
+      const v = CurrentView.view;
+      const { clusterID, namespaceName, setName } = entity;
+      let canAccess = false;
+      
+      whenClusterHasCredentials(clusterID, () => {
+        if (vt === VIEW_TYPE.NAMESPACE) 
+          canAccess = isPermissibleNamespaceAction(v, clusterID, namespaceName);
+        else if (vt == VIEW_TYPE.SET) 
+          canAccess = isPermissibleSetAction(v, clusterID, namespaceName, setName);
+        else 
+          canAccess = isPermissibleNamespaceAction(v, clusterID, vt);
+
+        if (canAccess)
+          dispatch(selectEntity(entity, CurrentView.view));
+        else
+          dispatch(selectEntity(entity, defView));
+      });
     },
 
     onEntityAction: (entity, action) => {

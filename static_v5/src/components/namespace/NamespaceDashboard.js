@@ -11,6 +11,7 @@ import NamespaceConfigEditor from 'components/namespace/NamespaceConfigEditor';
 import { getStatistics } from 'api/namespace';
 import { NAMESPACE_ACTIONS, filterNamespaceActions } from 'classes/entityActions';
 import { VIEW_TYPE } from 'classes/constants';
+import { whenClusterHasCredentials } from 'classes/security';
 
 class NamespaceDashboard extends React.Component {
   constructor(props) {
@@ -18,13 +19,23 @@ class NamespaceDashboard extends React.Component {
 
     this.state = {
       stat: null,
+      views: [],
     };
 
-    const actions = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, NAMESPACE_ACTIONS.Configuration];
-
-    const { clusterID, namespaceName } = props;
-    this.views = filterNamespaceActions(actions, clusterID, namespaceName);
     this.onViewSelect = this.onViewSelect.bind(this);
+  }
+
+  setViews(props) {
+    const { clusterID, namespaceName } = props;
+    whenClusterHasCredentials(clusterID, () => {
+      const actions = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, 
+                       NAMESPACE_ACTIONS.Configuration];
+
+      const views = filterNamespaceActions(actions, clusterID, namespaceName);
+      this.setState({
+        views: views
+      });
+    });
   }
 
   onViewSelect(view) {
@@ -40,11 +51,13 @@ class NamespaceDashboard extends React.Component {
 
     if (!isSame) {
       this.fetchNamespaces(nextProps);
+      this.setViews(nextProps);
     }
   }
 
   componentDidMount() {
     this.fetchNamespaces(this.props);
+    this.setViews(this.props);
   }
 
   fetchNamespaces(props) {
@@ -63,12 +76,12 @@ class NamespaceDashboard extends React.Component {
 
   render() {
     const {clusterID, nodeHost, namespaceName, onViewSelect, view} = this.props;
-    const { stat } = this.state;
+    const { stat, views } = this.state;
     const namespaces = stat ? [stat] : [];
 
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+        <Tabs names={views} selected={view} onSelect={this.onViewSelect}/>
 
         {view === NAMESPACE_ACTIONS.View &&
         <div>

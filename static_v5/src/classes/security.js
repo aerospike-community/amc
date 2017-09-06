@@ -1,62 +1,100 @@
 import { getRoles as getRolesAPI } from 'api/clusterRoles';
 import { getUsers as getUsersAPI } from 'api/clusterUsers';
+import { getConnectionDetails, getLoggedInUser } from 'api/clusterConnections';
 import { VIEW_TYPE } from 'classes/constants';
 
+let IsInitialized = false;
 // map of cluster id to the cluster properties
 let ClusterProps = {};
 // map of cluster id to the logged in user roles
 let UserRoles = {};
 // map of cluster id to the roles defined in the cluster
 let ClusterRoles = {};
-// properties of the currently running AMC
-let AmcProps = {};
+let IsAMCEnterprise = false;
 // roles of the user in AMC
 let AmcRoles = [];
 
-// secureCluster adds security functionality to the cluster
-export function secureCluster(clusterID) {
-  // TODO fetch cluster properties of the cluster
-  ClusterProps[clusterID] = {
-    isAuthenticated: true,
-    isSecure: true,
-  };
+function hasCredentials(clusterID) {
+  const id = clusterID;
+  return id in ClusterProps && 
+         id in ClusterRoles &&
+         id in UserRoles;
+}
 
-  // FIXME waiting a few seconds for the server to fetch the roles
+export function whenClusterHasCredentials(clusterID, fn) {
+  const check = () => {
+    if (hasCredentials(clusterID))
+      fn();
+    else
+      window.setTimeout(check, 200);
+  };
+  check();
+}
+
+// secureCluster adds security functionality to the cluster
+export function secureCluster(clusterID ) {
+  // waiting a few seconds for the server to fetch details about the cluster
   window.setTimeout(() => {
+    // fetch all roles of cluster
     getRolesAPI(clusterID)
       .then((roles) => {
+        if (!IsInitialized)
+          return;
+
         ClusterRoles[clusterID] = roles;
       });
 
-    // FIXME get the current users roles
-    getUsersAPI(clusterID)
-      .then((users) => {
-        let roles = [];
-        if (users.length > 0)
-          roles = users[0].roles;
-        UserRoles[clusterID] = roles;
+    // get roles of logged in user
+    getLoggedInUser(clusterID)
+      .then((user) => {
+        if (!IsInitialized)
+          return;
+
+        UserRoles[clusterID] = user.roles || [];
+      });
+
+    // get properties of cluster
+    getConnectionDetails(clusterID)
+      .then((cluster) => {
+        if (!IsInitialized)
+          return;
+
+        ClusterProps[clusterID] = {
+          isAuthenticated: true,
+          isSecure: cluster.isSecurityEnabled,
+        };
       });
   }, 5000);
 }
 
 export function removeCluster(clusterID) {
-  ClusterProps[clusterID] = {};
+  const id = clusterID;
+  delete UserRoles[id];
+  delete ClusterProps[id];
+  delete ClusterRoles[id];
+}
+
+export function removeAllClusters() {
+  IsInitialized = false;
+
+  let keys = [];
+  keys = keys.concat(Object.keys(UserRoles));
+  keys = keys.concat(Object.keys(ClusterProps));
+  keys = keys.concat(Object.keys(ClusterRoles));
+
+  keys.forEach((id) => removeCluster(id));
 }
 
 // init initializes the security for this session of the user
-export function init() {
-  // TODO get AMC properties
-  AmcProps = {
-    isEnterprise: true
-  };
-
-  // TODO get user roles in AMC
-  AmcRoles = [];
+export function init(roles, isEnterprise) {
+  IsInitialized = true;
+  IsAMCEnterprise = isEnterprise;
+  AmcRoles = roles;
 }
 
 function hasBasicAccess(clusterID, clusterProps = {}, isEnterprise = false, 
             amcRoles = []) {
-  if (isEnterprise && !AmcProps.isEnterprise)
+  if (isEnterprise && !IsAMCEnterprise)
     return false;
 
   const props = ClusterProps[clusterID] || {};

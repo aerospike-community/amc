@@ -7,16 +7,34 @@ import UDFCreate from 'components/udf/UDFCreate';
 import UDFOverview from 'components/udf/UDFOverview';
 import { filterActions, UDF_OVERVIEW_ACTIONS } from 'classes/entityActions';
 import { VIEW_TYPE } from 'classes/constants';
+import { whenClusterHasCredentials } from 'classes/security';
 
 class UDFOverviewDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const actions = [UDF_OVERVIEW_ACTIONS.Overview, UDF_OVERVIEW_ACTIONS.Create];
-    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.UDF_OVERVIEW);
+    this.state = {
+      views: []
+    };
 
     this.onViewSelect = this.onViewSelect.bind(this);
     this.onCreateSuccess = this.onCreateSuccess.bind(this);
+  }
+
+  componentDidMount() {
+    this.setViews();
+  }
+
+  setViews() {
+    const { clusterID } = this.props;
+    whenClusterHasCredentials(clusterID, () => {
+      const actions = [UDF_OVERVIEW_ACTIONS.Overview, UDF_OVERVIEW_ACTIONS.Create];
+      const views = filterActions(actions, clusterID, VIEW_TYPE.UDF_OVERVIEW);
+
+      this.setState({
+        views: views
+      });
+    });
   }
 
   onViewSelect(view) {
@@ -30,10 +48,11 @@ class UDFOverviewDashboard extends React.Component {
 
   render() {
     const { clusterID, view } = this.props;
+    const { views } = this.state;
 
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+        <Tabs names={views} selected={view} onSelect={this.onViewSelect}/>
 
         {view === UDF_OVERVIEW_ACTIONS.Overview &&
         <UDFOverview clusterID={clusterID} />

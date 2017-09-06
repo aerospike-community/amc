@@ -8,6 +8,7 @@ import { VIEW_TYPE } from 'classes/constants';
 import IndexesTable from 'components/index/IndexesTable';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { whenClusterHasCredentials } from 'classes/security';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -19,21 +20,31 @@ class IndexView extends React.Component {
     this.state = {
       data: null,
 
+      canDelete: false,
+
       deleteShowConfirm: false,
       deleteInProgress: false,
       deleteSuccessfull: null,
       deleteErrorMsg: '',
     };
 
-    this.setPermissions(props.clusterID);
-
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onDeleteIndex = this.onDeleteIndex.bind(this);
   }
 
+  componentDidMount() {
+    const { clusterID } = this.props;
+    this.setPermissions(clusterID);
+  }
+
   setPermissions(clusterID) {
-    this.canDelete = isPermissibleAction(INDEX_ACTIONS.Delete, clusterID, VIEW_TYPE.INDEX);
+    whenClusterHasCredentials(clusterID, () => {
+      const canDelete = isPermissibleAction(INDEX_ACTIONS.Delete, clusterID, VIEW_TYPE.INDEX);
+      this.setState({
+        canDelete: canDelete
+      });
+    });
   }
 
   onShowConfirm() {
@@ -150,7 +161,7 @@ class IndexView extends React.Component {
     if (this.state.data)
       indexes.push(this.state.data);
 
-    const { deleteInProgress } = this.state;
+    const { deleteInProgress, canDelete } = this.state;
     const {clusterID, indexName} = this.props;
 
     return (
@@ -161,7 +172,7 @@ class IndexView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Index - ${indexName}`} 
 
-            {this.canDelete &&
+            {canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 
               <i className="fa fa-trash"></i>
               Delete 

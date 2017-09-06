@@ -8,6 +8,7 @@ import { getSet, deleteSet } from 'api/set';
 import SetsTable from 'components/set/SetsTable';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { whenClusterHasCredentials } from 'classes/security';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -19,22 +20,31 @@ class SetView extends React.Component {
     this.state = {
       data: null,
 
+      canDelete: false,
+
       deleteShowConfirm: false,
       deleteInProgress: false,
       deleteSuccessfull: null,
       deleteErrorMsg: '',
     };
 
-    const { clusterID, namespaceName, setName } = props;
-    this.setPermissions(clusterID, namespaceName, setName);
-
     this.onShowConfirm = this.onShowConfirm.bind(this);
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onDeleteSet = this.onDeleteSet.bind(this);
   }
 
+  componentDidMount() {
+    const { clusterID, namespaceName, setName } = this.props;
+    this.setPermissions(clusterID, namespaceName, setName);
+  }
+
   setPermissions(clusterID, namespace, set) {
-    this.canDelete = isPermissibleSetAction(SET_ACTIONS.Delete, clusterID, namespace, set);
+    whenClusterHasCredentials(clusterID, () => {
+      const canDelete = isPermissibleSetAction(SET_ACTIONS.Delete, clusterID, namespace, set);
+      this.setState({
+        canDelete: canDelete
+      });
+    });
   }
 
   onShowConfirm() {
@@ -149,7 +159,7 @@ class SetView extends React.Component {
     if (this.state.data)
       sets.push(this.state.data);
 
-    const { deleteInProgress } = this.state;
+    const { deleteInProgress, canDelete } = this.state;
     const {nodeHost, namespaceName, setName} = this.props;
 
     return (
@@ -160,7 +170,7 @@ class SetView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`Set - ${setName}`}
 
-            {this.canDelete &&
+            {canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 
               <i className="fa fa-trash"></i>
               Delete 

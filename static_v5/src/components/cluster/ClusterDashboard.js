@@ -11,6 +11,7 @@ import ClusterNodesConfig from 'components/cluster/ClusterNodesConfig';
 import ClusterRolesDashboard from 'components/cluster/ClusterRolesDashboard';
 import ClusterUsersDashboard from 'components/cluster/ClusterUsersDashboard';
 import XDRGraph from 'components/XDRGraph';
+import { whenClusterHasCredentials } from 'classes/security';
 
 import Tabs from 'components/Tabs';
 import { CLUSTER_ACTIONS, filterActions } from 'classes/entityActions';
@@ -26,12 +27,35 @@ class ClusterDashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const actions = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.XDR,
-                      CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, 
-                      CLUSTER_ACTIONS.Alerts];
+    this.state = {
+      views: []
+    };
 
-    this.views = filterActions(actions, props.clusterID, VIEW_TYPE.CLUSTER);
     this.onViewSelect = this.onViewSelect.bind(this);
+  }
+
+  componentDidMount() {
+    const { clusterID } = this.props;
+    this.setViews(clusterID);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+    if (this.props.clusterID !== clusterID)
+      this.setViews(clusterID);
+  }
+
+  setViews(clusterID) {
+    whenClusterHasCredentials(clusterID, () => {
+      const actions = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.XDR,
+                        CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, 
+                        CLUSTER_ACTIONS.Alerts];
+
+      const views = filterActions(actions, clusterID, VIEW_TYPE.CLUSTER);
+      this.setState({
+        views: views
+      });
+    });
   }
 
   onViewSelect(view) {
@@ -41,6 +65,7 @@ class ClusterDashboard extends React.Component {
   render() {
     const { clusterID, view, onSelectNode }  = this.props;
     const { name, seeds } = this.props.cluster;
+    const { views } = this.state;
 
     let dashboard;
     if (view === CLUSTER_ACTIONS.Overview ) {
@@ -67,7 +92,7 @@ class ClusterDashboard extends React.Component {
 
     return (
       <div>
-        <Tabs names={this.views} selected={view} onSelect={this.onViewSelect}/>
+        <Tabs names={views} selected={view} onSelect={this.onViewSelect}/>
 
         {dashboard}
       </div>

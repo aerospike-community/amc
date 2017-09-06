@@ -63,6 +63,7 @@ const clusterActions = {
   Users: {
     state: {
       isAuthenticated: true,
+      isSecure: true,
     },
     dbRoles: [ROLES.USR_ADMN],
   },

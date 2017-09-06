@@ -16,9 +16,11 @@ const AMCUnreachable = 'Failed to fetch';
 export function init(dispatch) {
   const jwt = ls.get('jwt');
   const user = ls.get('user');
+  const roles = ls.get('roles');
+  const isEnterprise = ls.get('isEnterprise');
   if (jwt) {
     window.fetch = authorizedFetch(jwt, dispatch);
-    dispatch(authSuccess(user)); 
+    dispatch(authSuccess(user, roles, isEnterprise)); 
   } else {
     dispatch(logout());
   }
@@ -46,11 +48,12 @@ export function logout() {
   };
 }
 
-function authSuccess(user, roles = []) {
+function authSuccess(user, roles = [], isEnterprise = false) {
   return {
     type: USER_AUTHENTICATION_SUCCESS,
     user: user,
-    roles: roles, // TODO fetch the user roles,
+    roles: roles, 
+    isEnterprise: isEnterprise,
   };
 }
 
@@ -65,8 +68,14 @@ export function authenticate(credentials) {
         ls.set('jwt', jwt);
 
         const user = credentials.user;
-        ls.set('user', user);
-        dispatch(authSuccess(user));
+        response.json()
+          .then((r) => {
+            const { roles, isEnterprise } = r;
+            ls.set('user', user);
+            ls.set('roles', roles);
+            ls.set('isEnterprise', isEnterprise);
+            dispatch(authSuccess(user, roles, isEnterprise));
+          });
       })
       .catch((response) => {
         let { message } = response;

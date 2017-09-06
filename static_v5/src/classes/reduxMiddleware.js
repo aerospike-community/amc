@@ -4,7 +4,7 @@ import { LOGOUT_USER, USER_AUTHENTICATION_SUCCESS } from 'actions/authenticate';
 
 import { pollAlerts, stopPollingAlerts, stopPollingAllAlerts } from 'classes/pollAlerts';
 import { pollCluster, stopPollingCluster, stopPollingAllClusters } from 'classes/pollClusters';
-import { secureCluster, removeCluster, init as initSecurity } from 'classes/security';
+import { secureCluster, removeAllClusters, removeCluster, init as initSecurity } from 'classes/security';
 
 // handle all _META_ functionality on actions through the
 // redux middleware.
@@ -63,19 +63,22 @@ function handleSecurity(action, store) {
   let id;
   switch (action.type) {
     case USER_AUTHENTICATION_SUCCESS:
-      initSecurity();
+      initSecurity(action.roles, action.isEnterprise);
       break;
 
     case AUTHENTICATED_CLUSTER_CONNECTION:
     case CLUSTER_CONNECTION_FETCHED:
       id = action.cluster.id;
-      secureCluster(id);
+      secureCluster(id, action.cluster.clusterRoles, action.cluster.userRoles);
       break;
 
     case DISCONNECT_CLUSTER_CONNECTION:
-    case LOGOUT_USER:
       id = action.clusterID;
       removeCluster(id);
+      break;
+
+    case LOGOUT_USER:
+      removeAllClusters();
       break;
   }
 }

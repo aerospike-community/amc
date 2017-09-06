@@ -15,6 +15,7 @@ import { nextNumber, distanceToBottom } from 'classes/util';
 import Spinner from 'components/Spinner';
 import UDFDeleteModal from 'components/udf/UDFDeleteModal';
 import AlertModal from 'components/AlertModal';
+import { whenClusterHasCredentials } from 'classes/security';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -32,6 +33,9 @@ class UDFView extends React.Component {
       // delete
       showDeleteModal: false,
 
+      canEdit: false,
+      canDelete: false,
+
       // edit
       hasErrors: false, // does the source code have errors
       hasChanged: false, // has the source code changed
@@ -40,8 +44,6 @@ class UDFView extends React.Component {
 
     this.id = 'udf_editor' + nextNumber();
     this.editor; // the ace editor instance
-
-    this.setPermissions(props.clusterID);
 
     // delete methods
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
@@ -55,8 +57,15 @@ class UDFView extends React.Component {
   }
 
   setPermissions(clusterID) {
-    this.canEdit = isPermissibleAction(UDF_ACTIONS.Edit, clusterID, VIEW_TYPE.UDF);
-    this.canDelete = isPermissibleAction(UDF_ACTIONS.Delete, clusterID, VIEW_TYPE.UDF);
+    whenClusterHasCredentials(clusterID, () => {
+      const canEdit = isPermissibleAction(UDF_ACTIONS.Edit, clusterID, VIEW_TYPE.UDF);
+      const canDelete = isPermissibleAction(UDF_ACTIONS.Delete, clusterID, VIEW_TYPE.UDF);
+
+      this.setState({
+        canEdit: canEdit,
+        canDelete: canDelete
+      });
+    });
   }
 
   componentDidMount() {
@@ -68,6 +77,7 @@ class UDFView extends React.Component {
 
     const { clusterID, udfName } = this.props;
     this.fetchUDF(clusterID, udfName);
+    this.setPermissions(clusterID);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -167,7 +177,8 @@ class UDFView extends React.Component {
     const editorHeight = this.state.editorHeight + 'px';
     const { clusterID, udfName } = this.props;
     const { showDeleteModal, showUpdateSuccess, hasErrors, hasChanged, isUpdating, sourceCode } = this.state;
-    const readOnly = isUpdating || !this.canEdit;
+    const { canEdit, canDelete } = this.state;
+    const readOnly = isUpdating || !canEdit;
 
     return (
       <div>
@@ -175,14 +186,14 @@ class UDFView extends React.Component {
           <div className="col-xl-12 as-section-header">
             {`UDF - ${udfName}`} 
 
-            {this.canDelete &&
+            {canDelete &&
             <Button className="float-right" disabled={isUpdating} 
                 color="danger" size="sm" onClick={this.onShowDeleteModal}> 
               <i className="fa fa-trash"></i>
               Delete 
             </Button>}
 
-            {this.canEdit &&
+            {canEdit &&
             <Button className="float-right" disabled={!hasChanged || hasErrors || isUpdating} 
                 color="primary" size="sm" onClick={this.onUpdate}> 
               <i className="fa fa-floppy-o"></i>

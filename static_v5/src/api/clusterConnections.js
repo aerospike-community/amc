@@ -62,6 +62,12 @@ export function getOverview() {
   return get(url);
 }
 
+// get the currently logged in user
+export function getLoggedInUser(clusterID) {
+  const url = toURLPath(clusterID + '/user');
+  return get(url);
+}
+
 // get all throughput stats for all the nodes of the connection
 // from, to are in unix seconds
 export function getThroughput(clusterID, from, to) {
