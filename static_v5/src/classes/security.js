@@ -8,8 +8,6 @@ let IsInitialized = false;
 let ClusterProps = {};
 // map of cluster id to the logged in user roles
 let UserRoles = {};
-// map of cluster id to the roles defined in the cluster
-let ClusterRoles = {};
 let IsAMCEnterprise = false;
 // roles of the user in AMC
 let AmcRoles = [];
@@ -17,12 +15,14 @@ let AmcRoles = [];
 function hasCredentials(clusterID) {
   const id = clusterID;
   return id in ClusterProps && 
-         id in ClusterRoles &&
          id in UserRoles;
 }
 
 export function whenClusterHasCredentials(clusterID, fn) {
   const check = () => {
+    if (!IsInitialized)
+      return;
+
     if (hasCredentials(clusterID))
       fn();
     else
@@ -33,17 +33,12 @@ export function whenClusterHasCredentials(clusterID, fn) {
 
 // secureCluster adds security functionality to the cluster
 export function secureCluster(clusterID ) {
+  ClusterProps[clusterID] = {
+    isAuthenticated: true,
+  };
+
   // waiting a few seconds for the server to fetch details about the cluster
   window.setTimeout(() => {
-    // fetch all roles of cluster
-    getRolesAPI(clusterID)
-      .then((roles) => {
-        if (!IsInitialized)
-          return;
-
-        ClusterRoles[clusterID] = roles;
-      });
-
     // get roles of logged in user
     getLoggedInUser(clusterID)
       .then((user) => {
@@ -71,7 +66,6 @@ export function removeCluster(clusterID) {
   const id = clusterID;
   delete UserRoles[id];
   delete ClusterProps[id];
-  delete ClusterRoles[id];
 }
 
 export function removeAllClusters() {
@@ -80,7 +74,6 @@ export function removeAllClusters() {
   let keys = [];
   keys = keys.concat(Object.keys(UserRoles));
   keys = keys.concat(Object.keys(ClusterProps));
-  keys = keys.concat(Object.keys(ClusterRoles));
 
   keys.forEach((id) => removeCluster(id));
 }
@@ -120,7 +113,7 @@ export function canAccess(clusterID, dbRoles = [], clusterProps = {},
 
   const props = ClusterProps[clusterID] || {};
   if (props.isSecure) {
-    const roles = getRolesForUser(clusterID);
+    const roles = UserRoles[clusterID];
     return hasRoles(roles, dbRoles);
   }
 
@@ -136,7 +129,7 @@ export function canAccessNamespace(clusterID, namespace, dbRoles = [],
 
   const props = ClusterProps[clusterID] || {};
   if (props.isSecure) {
-    const roles = getRolesForUser(clusterID);
+    const roles = UserRoles[clusterID];
     return hasNamespaceRoles(roles, dbRoles, namespace);
   }
 
@@ -152,24 +145,11 @@ export function canAccessSet(clusterID, namespace, set, dbRoles = [],
 
   const props = ClusterProps[clusterID] || {};
   if (props.isSecure) {
-    const roles = getRolesForUser(clusterID);
+    const roles = UserRoles[clusterID];
     return hasSetRoles(roles, dbRoles, namespace, set);
   }
 
   return true;
-}
-
-function getRolesForUser(clusterID) {
-  let croles = ClusterRoles[clusterID] || [];
-  let uroles = UserRoles[clusterID] || [];
-  let roles = [];
-
-  croles.forEach((cr) => {
-    if (uroles.find((r) => r === cr.name))
-      roles.push(cr);
-  });
-
-  return roles;
 }
 
 function getPrivileges(roles, fn) {
@@ -178,11 +158,9 @@ function getPrivileges(roles, fn) {
     fn = (r) => !r.namespace && !r.set;
 
   if (roles) {
-    roles.forEach((role) => {
-      role.roles.forEach((r) => {
-        if (fn(r))
-          privileges.push(r.privilege);
-      });
+    roles.forEach((r) => {
+      if (fn(r))
+        privileges.push(r.privilege);
     });
   }
 

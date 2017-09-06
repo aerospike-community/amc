@@ -11,7 +11,6 @@ import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { selectStartView } from 'actions/currentView';
 import { isEntitiesEqual, isLogicalView } from 'classes/util';
 import { isPermissibleAction, isPermissibleSetAction, isPermissibleNamespaceAction } from 'classes/entityActions';
-import { whenClusterHasCredentials } from 'classes/security';
 
 // the latest current view
 let CurrentView;
@@ -53,19 +52,17 @@ const mapDispatchToProps = (dispatch) => {
       const { clusterID, namespaceName, setName } = entity;
       let canAccess = false;
       
-      whenClusterHasCredentials(clusterID, () => {
-        if (vt === VIEW_TYPE.NAMESPACE) 
-          canAccess = isPermissibleNamespaceAction(v, clusterID, namespaceName);
-        else if (vt == VIEW_TYPE.SET) 
-          canAccess = isPermissibleSetAction(v, clusterID, namespaceName, setName);
-        else 
-          canAccess = isPermissibleNamespaceAction(v, clusterID, vt);
+      if (vt === VIEW_TYPE.NAMESPACE) 
+        canAccess = isPermissibleNamespaceAction(v, clusterID, namespaceName);
+      else if (vt == VIEW_TYPE.SET) 
+        canAccess = isPermissibleSetAction(v, clusterID, namespaceName, setName);
+      else 
+        canAccess = isPermissibleNamespaceAction(v, clusterID, vt);
 
-        if (canAccess)
-          dispatch(selectEntity(entity, CurrentView.view));
-        else
-          dispatch(selectEntity(entity, defView));
-      });
+      if (canAccess)
+        dispatch(selectEntity(entity, CurrentView.view));
+      else
+        dispatch(selectEntity(entity, defView));
     },
 
     onEntityAction: (entity, action) => {
