@@ -57,7 +57,7 @@ const mapDispatchToProps = (dispatch) => {
       else if (vt == VIEW_TYPE.SET) 
         canAccess = isPermissibleSetAction(v, clusterID, namespaceName, setName);
       else 
-        canAccess = isPermissibleNamespaceAction(v, clusterID, vt);
+        canAccess = isPermissibleAction(v, clusterID, vt);
 
       if (canAccess)
         dispatch(selectEntity(entity, CurrentView.view));

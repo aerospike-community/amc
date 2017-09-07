@@ -154,7 +154,6 @@ class AllPropsRenderer extends React.Component {
       );
     });
 
-    console.log(row.length);
     return row;
   }
 

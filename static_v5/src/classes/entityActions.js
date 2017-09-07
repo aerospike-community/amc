@@ -51,7 +51,6 @@ const clusterActions = {
   XDR: {
     state: {
       isAuthenticated: true,
-      hasXDR: true, 
     },
   },
   Alerts: {

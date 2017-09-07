@@ -65,7 +65,7 @@ class ClusterNodesConfig extends React.Component {
   render() {
     const { show } = this.state;
     
-    if (show === null)
+    if (!show)
       return null;
 
     return (

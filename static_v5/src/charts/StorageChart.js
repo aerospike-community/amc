@@ -39,8 +39,7 @@ class StorageChart {
           .showLabels(false)
           .showLegend(false)
           .labelThreshold(0.05)
-          .donut(true)
-          .donutRatio(0.35);
+          .donut(true);
 
       if (this.title)
         chart.title(this.title);

@@ -11,6 +11,10 @@ class XDRGraph extends React.Component {
   constructor(props) {
     super();
 
+    this.state = {
+      hasXDR: true
+    };
+
     this.id = 'xdr_graph_' + nextNumber();
 
     // the overview of the clusters
@@ -23,7 +27,15 @@ class XDRGraph extends React.Component {
     getOverview()
       .then((response) => {
         this.clusters = response.data;
-        this.drawGraph();
+
+        const { links } = this.graphData();
+        if (links.length === 0) {
+          this.setState({
+            hasXDR: false
+          });
+        } else {
+          this.drawGraph();
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -86,10 +98,17 @@ class XDRGraph extends React.Component {
     const { id } = this;
     const height = this.props.height || 600;
     const style = { height: height };
+    const { hasXDR } = this.state;
 
     return (
       <div className="row">
+        {hasXDR &&
         <svg className="col-xl-12" style={style} id={id}> </svg>
+        }
+
+        {!hasXDR &&
+        <h4 className="as-main-info"> This cluster is neither an XDR source nor destination </h4>
+        }
       </div>
     );
   }
