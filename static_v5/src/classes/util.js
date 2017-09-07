@@ -270,9 +270,9 @@ export function timeout(fn, delay) {
     if (hasExecuted)
       return;
 
-    const delta = now() - calledAt - delay;
-    if (delta > 0)
-      window.setTimeout(fn, delta);
+    const elapsed = now() - calledAt;
+    if (elapsed < delay)
+      window.setTimeout(fn, delay-elapsed);
     else
       fn();
   });
