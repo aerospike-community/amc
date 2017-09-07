@@ -8,6 +8,7 @@ import { Button, Input } from 'reactstrap';
 import Tabs from 'components/Tabs';
 import AlertModal from 'components/AlertModal';
 import { nextNumber, distanceToBottom } from 'classes/util';
+import { timeout } from 'classes/util';
 
 // ConfigEditor provides a view to edit configuration
 // of a node, cluster
@@ -88,13 +89,13 @@ class ConfigEditor extends React.Component {
       .then((message) => {
         setState(true, false, message);
 
-        window.setTimeout(() => setState(false, false, ''), 2000);
+        timeout(() => setState(false, false, ''), 2000);
         this.fetchConfig();
       })
       .catch((message) => {
         setState(false, true, message);
 
-        window.setTimeout(() => setState(false, false, ''), 2000);
+        timeout(() => setState(false, false, ''), 2000);
       });
   }
 

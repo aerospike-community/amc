@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import ConfigEditor from 'components/ConfigEditor';
 import { getNodesConfig } from 'api/clusterConnections';
 import { setConfig } from 'api/node';
+import { timeout } from 'classes/util';
 
 // ClusterNodesConfig shows the configurations of the nodes of a cluster
 class ClusterNodesConfig extends React.Component {
@@ -28,7 +29,7 @@ class ClusterNodesConfig extends React.Component {
 
     // force redraw of config editor
     this.setState({show: false});
-    window.setTimeout(() => this.setState({show: true}), 200);
+    timeout(() => this.setState({show: true}), 200);
   }
 
   fetchConfig() {

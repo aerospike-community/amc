@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { getLatency as getLatencyAPI } from 'api/namespace';
 import EntityLatencyCharts from 'components/EntityLatencyCharts';
+import { timeout } from 'classes/util';
 
 // NamespaceLatency provides an overview of the namespace latency
 class NamespaceLatency extends React.Component {
@@ -22,7 +23,7 @@ class NamespaceLatency extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {

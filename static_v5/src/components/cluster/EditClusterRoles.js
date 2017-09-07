@@ -6,6 +6,7 @@ import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import { createRole, updateRole, deleteRole } from 'api/clusterRoles';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 // EditClusterRoles is a component to edit a cluster role
 class EditClusterRoles extends React.Component {
@@ -243,7 +244,7 @@ class EditClusterRoles extends React.Component {
           showSuccess: true
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.setState({
             showSuccess: false
           });
@@ -281,7 +282,7 @@ class EditClusterRoles extends React.Component {
           showDeleteSuccess: true
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.setState({
             showDeleteSuccess: false
           });

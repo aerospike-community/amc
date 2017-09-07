@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/namespace';
 import EntityThroughputCharts from 'components/EntityThroughputCharts';
+import { timeout } from 'classes/util';
 
 // NamespaceThroughput provides an overview of the namespace throughput
 class NamespaceThroughput extends React.Component {
@@ -22,7 +23,7 @@ class NamespaceThroughput extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {

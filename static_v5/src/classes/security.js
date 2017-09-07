@@ -2,6 +2,7 @@ import { getRoles as getRolesAPI } from 'api/clusterRoles';
 import { getUsers as getUsersAPI } from 'api/clusterUsers';
 import { getConnectionDetails, getLoggedInUser } from 'api/clusterConnections';
 import { VIEW_TYPE } from 'classes/constants';
+import { timeout } from 'classes/util';
 
 let IsInitialized = false;
 // map of cluster id to the cluster properties
@@ -26,7 +27,7 @@ export function whenClusterHasCredentials(clusterID, fn) {
     if (hasCredentials(clusterID))
       fn();
     else
-      window.setTimeout(check, 200);
+      timeout(check, 200);
   };
   check();
 }
@@ -38,7 +39,7 @@ export function secureCluster(clusterID ) {
   };
 
   // waiting a few seconds for the server to fetch details about the cluster
-  window.setTimeout(() => {
+  timeout(() => {
     // get roles of logged in user
     getLoggedInUser(clusterID)
       .then((user) => {

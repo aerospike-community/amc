@@ -213,3 +213,67 @@ export function svgDimensions(selector) {
     height: h
   };
 }
+
+function now() {
+  const d = new Date();
+  return d.getTime();
+}
+
+// timeout is implemented to circumvent the tab freezing when the tab is not
+// in focus.
+//
+// Problem
+// -------
+// On Chrome when a tab is out of focus _network_ calls go through but i guess
+// that all the _DOM_ manipulation is stopped. 
+//
+// In AMC for all the timeline graphs the data is continuously polled and the 
+// charts are updated. (AMC uses nvd3 to do the drawing)
+//
+// In AMC since polling is implemented through _setTimeout_ and network calls 
+// go through when tab is out of focus the data is continuously fetched but not
+// consumed by the charts since _apparently_ DOM manipulations do not go
+// through. Since this data is not garbage collected, the memory consumed by AMC
+// keeps on increasing.
+//
+// So the memory consumption keeps on increasing and if the tab is out of focus
+// for a sufficiently long time the tab freezes on focus.
+//
+// Solution
+// --------
+// Simplest solution is to make sure that AMC does not accumulate data. Since
+// data is accumulated through polling, stop polling when the tab is out of
+// focus.
+//
+// This is achieved by pausing timeout when the tab is out of focus.
+//
+export function timeout(fn, delay) {
+  const calledAt = now();
+  let hasExecuted = false;
+
+  const id = window.setTimeout(() => {
+    try {
+      fn();
+    } 
+    finally {
+      hasExecuted = true;
+    }
+  }, delay);
+
+  document.addEventListener('visibilitychange', () => {
+    // tab out of focus
+    if (document.hidden) {
+      window.clearTimeout(id);
+      return;
+    } 
+
+    if (hasExecuted)
+      return;
+
+    const delta = now() - calledAt - delay;
+    if (delta > 0)
+      window.setTimeout(fn, delta);
+    else
+      fn();
+  });
+};

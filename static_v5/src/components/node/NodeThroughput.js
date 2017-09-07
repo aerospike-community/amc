@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/node';
 import EntityThroughputCharts from 'components/EntityThroughputCharts';
+import { timeout } from 'classes/util';
 
 // NodeThroughput provides an overview of the node throughput
 class NodeThroughput extends React.Component {
@@ -23,7 +24,7 @@ class NodeThroughput extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {

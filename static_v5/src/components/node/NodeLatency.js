@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { getLatency as getLatencyAPI } from 'api/node';
 import EntityLatencyCharts from 'components/EntityLatencyCharts';
+import { timeout } from 'classes/util';
 
 // NodeLatency provides an overview of the node latency
 class NodeLatency extends React.Component {
@@ -23,7 +24,7 @@ class NodeLatency extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {

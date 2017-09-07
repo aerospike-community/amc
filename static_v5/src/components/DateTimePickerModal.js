@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import DateTimePicker from 'react-widgets/lib/DateTimePicker';
 import { Button, Form, FormGroup, Input, Label, Col, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import moment from 'moment';
+import { timeout } from 'classes/util';
 
 // DateTimePickerModal shows a modal to pick a time range
 class DateTimePickerModal extends React.Component {
@@ -103,7 +104,7 @@ class DateTimePickerModal extends React.Component {
       showFromAndTo: false,
     });
 
-    window.setTimeout(() => {
+    timeout(() => {
       this.setState({
         showFromAndTo: true
       });

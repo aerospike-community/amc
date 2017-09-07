@@ -9,6 +9,7 @@ import SetsTable from 'components/set/SetsTable';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
 import { whenClusterHasCredentials } from 'classes/security';
+import { timeout } from 'classes/util';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -69,7 +70,7 @@ class SetView extends React.Component {
           deleteInProgress: false,
           deleteSuccessfull: true
         });
-        window.setTimeout(() => this.onDeleteSuccess(), 2000);
+        timeout(() => this.onDeleteSuccess(), 2000);
       })
       .catch((msg) => {
         this.setState({

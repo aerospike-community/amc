@@ -10,6 +10,7 @@ import 'brace/theme/github';
 import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -73,7 +74,7 @@ class UDFView extends React.Component {
           success: true,
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.props.onCreateSuccess(udf.name, udf.source, udf.type);
         }, 2000);
       })

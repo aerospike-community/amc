@@ -4,6 +4,7 @@ import ThroughputData from 'charts/ThroughputData';
 import { newThroughputChart } from 'charts/charts';
 import { POLL_INTERVAL } from 'classes/constants';
 import { ThroughputGrouping } from 'charts/constants';
+import { timeout } from 'classes/util';
 
 // ThroughputCharts draws the throughput charts
 export default class ThroughputCharts {
@@ -87,10 +88,10 @@ export default class ThroughputCharts {
         this._updateCharts();
 
         if (this.poll)
-          window.setTimeout(updateData, POLL_INTERVAL);
+          timeout(updateData, POLL_INTERVAL);
       });
     };
-    window.setTimeout(updateData, POLL_INTERVAL);
+    timeout(updateData, POLL_INTERVAL);
   }
 
   // stopSync stops keeping the data in sync with the current time

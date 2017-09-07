@@ -5,6 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import ConfigEditor from 'components/ConfigEditor';
 import { getConfig, setConfig } from 'api/node';
+import { timeout } from 'classes/util';
 
 // NodeConfigEditor shows the configurations of a node
 class NodeConfigEditor extends React.Component {
@@ -43,7 +44,7 @@ class NodeConfigEditor extends React.Component {
 
     // force redraw of config editor
     this.setState({show: false});
-    window.setTimeout(() => this.setState({show: true}), 200);
+    timeout(() => this.setState({show: true}), 200);
   }
 
   onEdit(nh, configName, configValue) {

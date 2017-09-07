@@ -7,6 +7,7 @@ import { createUser, updateUser, deleteUser } from 'api/clusterUsers';
 import { getRoles } from 'api/clusterRoles';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 // EditClusterUser is a component to edit a cluster role
 class EditClusterUser extends React.Component {
@@ -112,7 +113,7 @@ class EditClusterUser extends React.Component {
           showSuccess: true
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.setState({
             showSuccess: false
           });
@@ -146,7 +147,7 @@ class EditClusterUser extends React.Component {
           showDeleteSuccess: true
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.setState({
             showDeleteSuccess: false
           });

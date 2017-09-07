@@ -16,6 +16,7 @@ import Spinner from 'components/Spinner';
 import UDFDeleteModal from 'components/udf/UDFDeleteModal';
 import AlertModal from 'components/AlertModal';
 import { whenClusterHasCredentials } from 'classes/security';
+import { timeout } from 'classes/util';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -155,7 +156,7 @@ class UDFView extends React.Component {
           showUpdateSuccess: true,
         });
 
-        window.setTimeout(() => {
+        timeout(() => {
           this.setState({
             showUpdateSuccess: false
           });

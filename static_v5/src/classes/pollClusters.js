@@ -1,4 +1,5 @@
 import { getConnectionDetails } from 'api/clusterConnections';
+import { timeout } from 'classes/util';
 
 const Clusters = new Set(); // set of clusters to poll
 const Interval = 10 * 1000; // 10 seconds
@@ -14,8 +15,8 @@ export function pollCluster(clusterID) {
       return;
 
     getConnectionDetails(clusterID)
-      .then(() =>  window.setTimeout(poll, Interval))
-      .catch(() => window.setTimeout(poll, Interval));
+      .then(() =>  timeout(poll, Interval))
+      .catch(() => timeout(poll, Interval));
   };
   poll();
 }

@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import SaveClusterConnection from 'components/cluster/SaveClusterConnection';
 import { updateConnection as updateConnectionAPI } from 'api/clusterConnections';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 // EditClusterConnectionModal shows a modal to edit a cluster connection
 class EditClusterConnectionModal extends React.Component {
@@ -39,7 +40,7 @@ class EditClusterConnectionModal extends React.Component {
         inProgress: false,
         saveSuccessful: true
       });
-      window.setTimeout(() => onUpdateConnectionSuccess(clusterID, connection), 2000);
+      timeout(() => onUpdateConnectionSuccess(clusterID, connection), 2000);
     })
     .catch((message) => {
       this.setState({

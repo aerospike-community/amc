@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { deleteUDF } from 'api/udf';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -42,7 +43,7 @@ class UDFDeleteModal extends React.Component {
           inProgress: false,
           successful: true
         });
-        window.setTimeout(() => this.onDeleteSuccess(), 2000);
+        timeout(() => this.onDeleteSuccess(), 2000);
       })
       .catch((msg) => {
         this.setState({

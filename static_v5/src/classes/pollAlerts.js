@@ -1,5 +1,6 @@
 import { getAlerts } from 'api/alerts';
 import { alertsFetched } from 'actions/alerts';
+import { timeout } from 'classes/util';
 
 const Clusters = new Set(); // set of clusters to poll
 const Interval = 10 * 1000; // 10 seconds
@@ -15,11 +16,11 @@ export function pollAlerts(clusterID, dispatch) {
         dispatch(alertsFetched(clusterID, alerts));
 
         if (Clusters.has(clusterID))
-          window.setTimeout(poll, Interval);
+          timeout(poll, Interval);
       })
       .catch(() => {
         if (Clusters.has(clusterID))
-          window.setTimeout(poll, Interval);
+          timeout(poll, Interval);
       });
   };
   poll();

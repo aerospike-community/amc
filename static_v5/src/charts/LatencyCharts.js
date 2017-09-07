@@ -3,6 +3,7 @@ import moment from 'moment';
 import LatencyData from 'charts/LatencyData';
 import { newLatencyChart } from 'charts/charts';
 import { POLL_INTERVAL } from 'classes/constants';
+import { timeout } from 'classes/util';
 
 // LatencyCharts draws the latency charts
 export default class LatencyCharts {
@@ -70,10 +71,10 @@ export default class LatencyCharts {
         this._updateCharts();
 
         if (this.poll)
-          window.setTimeout(updateData, POLL_INTERVAL);
+          timeout(updateData, POLL_INTERVAL);
       });
     };
-    window.setTimeout(updateData, POLL_INTERVAL);
+    timeout(updateData, POLL_INTERVAL);
   }
 
   // stopSync stops keeping the data in sync with the current time

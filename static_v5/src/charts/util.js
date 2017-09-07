@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { formatTimeWindow as formatWindow } from 'classes/util';
+import { timeout } from 'classes/util';
 import moment from 'moment';
 
 // watch for change in element size every interval milliseconds and if there
@@ -30,9 +31,9 @@ export function watchElementSizeChange(selector, callback, interval = 500) {
       }
 
       if (poll)
-        window.setTimeout(watch, interval);
+        timeout(watch, interval);
     };
-    window.setTimeout(watch, interval);
+    timeout(watch, interval);
 
     return () => {
       poll = false;

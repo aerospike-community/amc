@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { getThroughput as getThroughputAPI } from 'api/logicalNamespace';
 import EntityThroughputCharts from 'components/EntityThroughputCharts';
+import { timeout } from 'classes/util';
 
 // LogicalNamespaceThroughput provides an overview of the namespace throughput
 class LogicalNamespaceThroughput extends React.Component {
@@ -22,7 +23,7 @@ class LogicalNamespaceThroughput extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {

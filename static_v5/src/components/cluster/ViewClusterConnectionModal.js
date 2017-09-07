@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { deleteConnection } from 'api/clusterConnections';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
+import { timeout } from 'classes/util';
 
 // ViewClusterConnectionModal shows a view for the cluster connection
 class ViewClusterConnectionModal extends React.Component {
@@ -44,7 +45,7 @@ class ViewClusterConnectionModal extends React.Component {
           deleteInProgress: false,
           deleteSuccessfull: true
         });
-        window.setTimeout(() => this.onDeleteSuccess(), 2000);
+        timeout(() => this.onDeleteSuccess(), 2000);
       })
       .catch((msg) => {
         this.setState({

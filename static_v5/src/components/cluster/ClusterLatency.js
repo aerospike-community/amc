@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import EntityLatencyCharts from 'components/EntityLatencyCharts';
 import { getLatency as getLatencyAPI } from 'api/clusterConnections';
+import { timeout } from 'classes/util';
 
 // ClusterLatency provides an overview of the cluster latency
 class ClusterLatency extends React.Component {
@@ -23,7 +24,7 @@ class ClusterLatency extends React.Component {
       showChart: false
     });
 
-    window.setTimeout(() => this.setState({showChart: true}), 250);
+    timeout(() => this.setState({showChart: true}), 250);
   }
 
   componentWillReceiveProps(nextProps) {
