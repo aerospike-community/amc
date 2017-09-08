@@ -20,6 +20,13 @@ import 'ag-grid/dist/styles/theme-material.css';
 
 import './styles/index.scss';
 
+// whatwg-fetch needs a Promise class to be available on the window object to
+// work. To be compatible with older browsers need to add a polyfill.
+import Promise from 'bluebird';
+if (!window.Promise) {
+  window.Promise = Promise;
+}
+
 // see http://jquense.github.io/react-widgets/docs/#/i18n?_k=gqx37t
 import moment from 'moment';
 import momentLocalizer from 'react-widgets/lib/localizers/moment';
