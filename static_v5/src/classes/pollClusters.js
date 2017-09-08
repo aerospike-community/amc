@@ -15,8 +15,8 @@ export function pollCluster(clusterID) {
       return;
 
     getConnectionDetails(clusterID)
-      .then(() =>  timeout(poll, Interval))
-      .catch(() => timeout(poll, Interval));
+      .then(() =>  timeout(poll, Interval, false))
+      .catch(() => timeout(poll, Interval, false));
   };
   poll();
 }

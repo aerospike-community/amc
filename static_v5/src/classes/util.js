@@ -247,7 +247,10 @@ function now() {
 //
 // This is achieved by pausing timeout when the tab is out of focus.
 //
-export function timeout(fn, delay) {
+// pauseOnTabInactive - set to true iff the fn function does not make any
+// ui changes
+//
+export function timeout(fn, delay, pauseOnTabInactive = true) {
   const calledAt = now();
   let hasExecuted = false;
 
@@ -259,6 +262,9 @@ export function timeout(fn, delay) {
       hasExecuted = true;
     }
   }, delay);
+
+  if (!pauseOnTabInactive)
+    return;
 
   document.addEventListener('visibilitychange', () => {
     // tab out of focus
