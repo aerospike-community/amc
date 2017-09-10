@@ -90,25 +90,27 @@ type Cluster struct {
 	activeBackup  common.SyncValue //*Backup
 	activeRestore common.SyncValue //*Restore
 
-	redAlertCount common.SyncValue
+	redAlertCount        common.SyncValue
+	unresolvedAlertCount common.SyncValue
 
 	// mutex deadlock.RWMutex
 }
 
 func newCluster(observer *ObserverT, client *as.Client, alias, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
-		observer:        observer,
-		client:          common.NewSyncValue(client),
-		nodes:           common.NewSyncValue(map[as.Host]*Node{}),
-		updateInterval:  common.NewSyncValue(observer.config.AMC.UpdateInterval), //seconds
-		lastUpdate:      common.NewSyncValue(time.Time{}),                        //seconds
-		lastPing:        common.NewSyncValue(time.Time{}),                        //seconds
-		permanent:       common.NewSyncValue(false),                              //seconds
-		uuid:            uuid.NewV4().String(),
-		seeds:           common.NewSyncValue(seeds),
-		_datacenterInfo: *common.NewSyncStats(nil),
-		alerts:          common.NewAlertBucket(50),
-		redAlertCount:   common.NewSyncValue(0),
+		observer:             observer,
+		client:               common.NewSyncValue(client),
+		nodes:                common.NewSyncValue(map[as.Host]*Node{}),
+		updateInterval:       common.NewSyncValue(observer.config.AMC.UpdateInterval), //seconds
+		lastUpdate:           common.NewSyncValue(time.Time{}),                        //seconds
+		lastPing:             common.NewSyncValue(time.Time{}),                        //seconds
+		permanent:            common.NewSyncValue(false),                              //seconds
+		uuid:                 uuid.NewV4().String(),
+		seeds:                common.NewSyncValue(seeds),
+		_datacenterInfo:      *common.NewSyncStats(nil),
+		alerts:               common.NewAlertBucket(50),
+		redAlertCount:        common.NewSyncValue(0),
+		unresolvedAlertCount: common.NewSyncValue(0),
 	}
 
 	newCluster.SetAlias(alias)
@@ -691,7 +693,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateJobs()
 	c.updateUsers()
 	c.checkHealth()
-	c.updateRedAlertCount()
+	c.updateAlertCount()
 	c.updateNamespaces()
 	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
 
@@ -1399,17 +1401,26 @@ func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 	return alerts
 }
 
-func (c *Cluster) updateRedAlertCount() {
-	count := 0
+func (c *Cluster) updateAlertCount() {
+	redCount := 0
 	for _, node := range c.Nodes() {
-		count += c.alerts.RedAlertsFrom(node.Address(), 0)
+		redCount += c.alerts.RedAlertsFrom(node.Address(), 0)
 	}
 
-	c.redAlertCount.Set(count)
+	unresolvedCount := c.alerts.UnresolvedAlertCount()
+
+	c.redAlertCount.Set(redCount)
+	c.unresolvedAlertCount.Set(unresolvedCount)
 }
 
 func (c *Cluster) RedAlertCount() int {
-	return c.redAlertCount.Get().(int)
+	res := c.redAlertCount.Get().(int)
+	return res
+}
+
+func (c *Cluster) UnresolvedAlertCount() int {
+	res := c.redAlertCount.Get().(int)
+	return res
 }
 
 func (c *Cluster) Backup(

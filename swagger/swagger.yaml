@@ -997,7 +997,7 @@ definitions:
         total-bytes: 1.6052411e+18
         used-bytes: 4.6035394e+17
       name: Numquam iste aut alias dolor.
-      objsz: eb66a072-e616-43c0-b822-deea0df8363a
+      objsz: 520b073a-0b40-4f9e-8902-2e321605749f
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: eb66a072-e616-43c0-b822-deea0df8363a
+        example: 520b073a-0b40-4f9e-8902-2e321605749f
       stats:
         additionalProperties: true
         description: Namespace statistics
@@ -1072,6 +1072,65 @@ definitions:
     title: 'Mediatype identifier: application/vnd.aerospike.amc.node.config.response+json;
       view=default'
     type: object
+  AerospikeAmcNotificationResponse:
+    description: Notification (default view)
+    example:
+      notifications:
+      - connId: Doloremque voluptatem.
+        desc: Voluptatem quia dicta est eum facilis.
+        id: Voluptatibus repudiandae qui doloremque.
+        lastOccured: 1.9284218e+18
+        status: Autem est accusamus et.
+        type: Delectus molestiae aliquid a qui.
+      - connId: Doloremque voluptatem.
+        desc: Voluptatem quia dicta est eum facilis.
+        id: Voluptatibus repudiandae qui doloremque.
+        lastOccured: 1.9284218e+18
+        status: Autem est accusamus et.
+        type: Delectus molestiae aliquid a qui.
+      - connId: Doloremque voluptatem.
+        desc: Voluptatem quia dicta est eum facilis.
+        id: Voluptatibus repudiandae qui doloremque.
+        lastOccured: 1.9284218e+18
+        status: Autem est accusamus et.
+        type: Delectus molestiae aliquid a qui.
+      unresolvedCount: 6.5332547e+18
+    properties:
+      notifications:
+        description: Notifications
+        example:
+        - connId: Doloremque voluptatem.
+          desc: Voluptatem quia dicta est eum facilis.
+          id: Voluptatibus repudiandae qui doloremque.
+          lastOccured: 1.9284218e+18
+          status: Autem est accusamus et.
+          type: Delectus molestiae aliquid a qui.
+        - connId: Doloremque voluptatem.
+          desc: Voluptatem quia dicta est eum facilis.
+          id: Voluptatibus repudiandae qui doloremque.
+          lastOccured: 1.9284218e+18
+          status: Autem est accusamus et.
+          type: Delectus molestiae aliquid a qui.
+        - connId: Doloremque voluptatem.
+          desc: Voluptatem quia dicta est eum facilis.
+          id: Voluptatibus repudiandae qui doloremque.
+          lastOccured: 1.9284218e+18
+          status: Autem est accusamus et.
+          type: Delectus molestiae aliquid a qui.
+        items:
+          $ref: '#/definitions/Notification'
+        type: array
+      unresolvedCount:
+        description: UnresolvedNotification Count
+        example: 6.5332547e+18
+        format: int64
+        type: integer
+    required:
+    - unresolvedCount
+    - notifications
+    title: 'Mediatype identifier: application/vnd.aerospike.amc.notification.response+json;
+      view=default'
+    type: object
   AerospikeAmcResourceUsageResponse:
     description: Resource Usage (default view)
     example:
@@ -1105,19 +1164,19 @@ definitions:
     description: Restore object (default view)
     example:
       IgnoreGenerationNumber: true
-      MissingRecordsOnly: true
-      SSHPassword: Deserunt voluptatem modi vitae.
-      SSHUser: Provident ea nulla aut corrupti facilis est.
-      Threads: 4.3791673e+18
-      clusterId: Debitis consequatur natus rerum.
-      createDate: 8.1401e+18
-      error: Ut consectetur et non voluptatum quo eum.
-      finishDate: 2.0856779e+18
-      id: Et beatae.
-      namespace: Rerum repellat.
-      progress: 8.268388e+18
-      sourceAddress: Qui totam dolorem molestiae est facilis eum.
-      sourcePath: Omnis voluptatem ea maiores doloribus ipsam.
+      MissingRecordsOnly: false
+      SSHPassword: Voluptatem modi vitae aperiam provident.
+      SSHUser: Nulla aut corrupti facilis.
+      Threads: 3.3396984e+18
+      clusterId: In debitis consequatur natus.
+      createDate: 1.0917073e+18
+      error: Ut ut consectetur et non voluptatum.
+      finishDate: 2.3010783e+18
+      id: Quo alias et beatae autem rerum repellat.
+      namespace: Repellat qui totam dolorem.
+      progress: 6.015543e+18
+      sourceAddress: Facilis eum nemo omnis voluptatem.
+      sourcePath: Maiores doloribus ipsam.
       status: Rerum impedit autem maxime illo.
     properties:
       IgnoreGenerationNumber:
@@ -1128,59 +1187,59 @@ definitions:
       MissingRecordsOnly:
         description: Indicates whether to restore records which do not exist on the
           cluster only
-        example: true
+        example: false
         type: boolean
       SSHPassword:
         description: SSH user's password
-        example: Deserunt voluptatem modi vitae.
+        example: Voluptatem modi vitae aperiam provident.
         type: string
       SSHUser:
         description: SSH User
-        example: Provident ea nulla aut corrupti facilis est.
+        example: Nulla aut corrupti facilis.
         type: string
       Threads:
         description: Number of working threads.
-        example: 4.3791673e+18
+        example: 3.3396984e+18
         format: int64
         type: integer
       clusterId:
         description: Cluster Id
-        example: Debitis consequatur natus rerum.
+        example: In debitis consequatur natus.
         type: string
       createDate:
         description: The date when the restore was created
-        example: 8.1401e+18
+        example: 1.0917073e+18
         format: int64
         type: integer
       error:
         description: Error message in case the restore was not successful
-        example: Ut consectetur et non voluptatum quo eum.
+        example: Ut ut consectetur et non voluptatum.
         type: string
       finishDate:
         description: The date when the restore was finished
-        example: 2.0856779e+18
+        example: 2.3010783e+18
         format: int64
         type: integer
       id:
         description: Restore Id
-        example: Et beatae.
+        example: Quo alias et beatae autem rerum repellat.
         type: string
       namespace:
         description: Namespace
-        example: Rerum repellat.
+        example: Repellat qui totam dolorem.
         type: string
       progress:
         description: Restore's progress in percent
-        example: 8.268388e+18
+        example: 6.015543e+18
         format: int64
         type: integer
       sourceAddress:
         description: Host on which the backup file is located
-        example: Qui totam dolorem molestiae est facilis eum.
+        example: Facilis eum nemo omnis voluptatem.
         type: string
       sourcePath:
         description: Host on which the backup file is located
-        example: Omnis voluptatem ea maiores doloribus ipsam.
+        example: Maiores doloribus ipsam.
         type: string
       status:
         description: Restore's status
@@ -1618,6 +1677,50 @@ definitions:
     - host
     - port
     title: NodeSeed
+    type: object
+  Notification:
+    description: Notification Data type
+    example:
+      connId: Doloremque voluptatem.
+      desc: Voluptatem quia dicta est eum facilis.
+      id: Voluptatibus repudiandae qui doloremque.
+      lastOccured: 1.9284218e+18
+      status: Autem est accusamus et.
+      type: Delectus molestiae aliquid a qui.
+    properties:
+      connId:
+        description: Cluster ID
+        example: Doloremque voluptatem.
+        type: string
+      desc:
+        description: Notification Description
+        example: Voluptatem quia dicta est eum facilis.
+        type: string
+      id:
+        description: Notification ID
+        example: Voluptatibus repudiandae qui doloremque.
+        type: string
+      lastOccured:
+        description: Last Occured Time
+        example: 1.9284218e+18
+        format: int64
+        type: integer
+      status:
+        description: Status
+        example: Autem est accusamus et.
+        type: string
+      type:
+        description: Notification Type
+        example: Delectus molestiae aliquid a qui.
+        type: string
+    required:
+    - id
+    - connId
+    - desc
+    - status
+    - type
+    - lastOccured
+    title: Notification
     type: object
   Privilege:
     example:
@@ -4060,10 +4163,12 @@ paths:
         required: false
         type: integer
       produces:
-      - text/plain
+      - application/vnd.aerospike.amc.notification.response+json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/AerospikeAmcNotificationResponse'
         "400":
           description: Bad Request
         "401":

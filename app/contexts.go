@@ -4608,8 +4608,8 @@ func NewQueryNotificationContext(ctx context.Context, r *http.Request, service *
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *QueryNotificationContext) OK(r []*AerospikeAmcNotificationResponse) error {
-	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+func (ctx *QueryNotificationContext) OK(r *AerospikeAmcNotificationResponse) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.aerospike.amc.notification.response+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 

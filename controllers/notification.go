@@ -34,12 +34,13 @@ func (c *NotificationController) Query(ctx *app.QueryNotificationContext) error 
 		lastId = *ctx.LastID
 	}
 
+	unresolved := cluster.UnresolvedAlertCount()
 	alerts := common.AlertsById(cluster.AlertsFrom(int64(lastId)))
 	sort.Sort(alerts)
 
-	res := make([]*app.AerospikeAmcNotificationResponse, 0, len(alerts))
+	res := make([]*app.Notification, 0, len(alerts))
 	for _, alert := range alerts {
-		res = append(res, &app.AerospikeAmcNotificationResponse{
+		res = append(res, &app.Notification{
 			ID:          strconv.FormatInt(alert.Id, 10),
 			ConnID:      alert.ClusterId,
 			Desc:        alert.Desc,
@@ -50,5 +51,9 @@ func (c *NotificationController) Query(ctx *app.QueryNotificationContext) error 
 	}
 
 	// NotificationController_Query: end_implement
-	return ctx.OK(res)
+	return ctx.OK(
+		&app.AerospikeAmcNotificationResponse{
+			UnresolvedCount: unresolved,
+			Notifications:   res,
+		})
 }

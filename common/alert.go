@@ -261,11 +261,26 @@ func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, id int64) int {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
 
-	row := db.QueryRow("SELECT count(*) FROM alerts where Id > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", id, nodeAddress, "red")
+	row := db.QueryRow("SELECT count(*) FROM alerts where Id > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", id, nodeAddress, string(AlertStatusRed))
 
 	var count int
 	if err := row.Scan(&count); err != nil {
 		log.Errorf("Error retrieving red alert count from the database: %s", err.Error())
+		return 0
+	}
+
+	return count
+}
+
+func (ad *AlertBucket) UnresolvedAlertCount() int {
+	_dbGlobalMutex.Lock()
+	defer _dbGlobalMutex.Unlock()
+
+	row := db.QueryRow("SELECT count(*) FROM alerts WHERE Resolved IS NULL")
+
+	var count int
+	if err := row.Scan(&count); err != nil {
+		log.Errorf("Error retrieving unresolved alert count from the database: %s", err.Error())
 		return 0
 	}
 

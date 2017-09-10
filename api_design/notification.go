@@ -32,17 +32,13 @@ var _ = Resource("notification", func() {
 	// })
 
 	Action("query", func() {
-		Security(JWT, func() {
-			Scope("api:enterprise")
-		})
-
 		Description("Returns the notifications for the cluster.")
 		Routing(GET(""))
 		Params(func() {
 			Param("lastId", Integer, "Last Notification ID the client has")
 		})
 
-		Response(OK, ArrayOf(NotificationResponseMedia))
+		Response(OK, NotificationResponseMedia)
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)
@@ -50,29 +46,36 @@ var _ = Resource("notification", func() {
 
 })
 
+// Notification describes a single node connection info
+var Notification = Type("Notification", func() {
+	Description("Notification Data type")
+
+	Member("id", String, "Notification ID")
+	Member("connId", String, "Cluster ID")
+	Member("desc", String, "Notification Description")
+	Member("status", String, "Status")
+	Member("type", String, "Notification Type")
+	Member("lastOccured", Integer, "Last Occured Time")
+
+	Required("id", "connId", "desc", "status", "type", "lastOccured")
+
+})
+
 var NotificationResponseMedia = MediaType("application/vnd.aerospike.amc.notification.response+json", func() {
 	Description("Notification")
 
 	Attributes(func() {
-		Attribute("id", String, "Notification ID")
-		Attribute("connId", String, "Cluster ID")
-		Attribute("desc", String, "Notification Description")
-		Attribute("status", String, "Status")
-		Attribute("type", String, "Notification Type")
-		Attribute("lastOccured", Integer, "Last Occured Time")
+		Attribute("unresolvedCount", Integer, "UnresolvedNotification Count")
+		Attribute("notifications", ArrayOf(Notification), "Notifications")
 
-		Required("id", "connId", "desc", "status", "type", "lastOccured")
+		Required("unresolvedCount", "notifications")
 	})
 
 	View("default", func() {
-		Attribute("id", String, "Notification ID")
-		Attribute("connId", String, "Cluster ID")
-		Attribute("desc", String, "Notification Description")
-		Attribute("status", String, "Status")
-		Attribute("type", String, "Notification Type")
-		Attribute("lastOccured", Integer, "Last Occured Time")
+		Attribute("unresolvedCount")
+		Attribute("notifications")
 
-		Required("id", "connId", "desc", "status", "type", "lastOccured")
+		Required("unresolvedCount", "notifications")
 	})
 
 })

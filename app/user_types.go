@@ -85,6 +85,106 @@ func (ut *NodeSeed) Validate() (err error) {
 	return
 }
 
+// Notification Data type
+type notification struct {
+	// Cluster ID
+	ConnID *string `form:"connId,omitempty" json:"connId,omitempty" xml:"connId,omitempty"`
+	// Notification Description
+	Desc *string `form:"desc,omitempty" json:"desc,omitempty" xml:"desc,omitempty"`
+	// Notification ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Last Occured Time
+	LastOccured *int `form:"lastOccured,omitempty" json:"lastOccured,omitempty" xml:"lastOccured,omitempty"`
+	// Status
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// Notification Type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
+// Validate validates the notification type instance.
+func (ut *notification) Validate() (err error) {
+	if ut.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if ut.ConnID == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "connId"))
+	}
+	if ut.Desc == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "desc"))
+	}
+	if ut.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if ut.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+	if ut.LastOccured == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lastOccured"))
+	}
+	return
+}
+
+// Publicize creates Notification from notification
+func (ut *notification) Publicize() *Notification {
+	var pub Notification
+	if ut.ConnID != nil {
+		pub.ConnID = *ut.ConnID
+	}
+	if ut.Desc != nil {
+		pub.Desc = *ut.Desc
+	}
+	if ut.ID != nil {
+		pub.ID = *ut.ID
+	}
+	if ut.LastOccured != nil {
+		pub.LastOccured = *ut.LastOccured
+	}
+	if ut.Status != nil {
+		pub.Status = *ut.Status
+	}
+	if ut.Type != nil {
+		pub.Type = *ut.Type
+	}
+	return &pub
+}
+
+// Notification Data type
+type Notification struct {
+	// Cluster ID
+	ConnID string `form:"connId" json:"connId" xml:"connId"`
+	// Notification Description
+	Desc string `form:"desc" json:"desc" xml:"desc"`
+	// Notification ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Last Occured Time
+	LastOccured int `form:"lastOccured" json:"lastOccured" xml:"lastOccured"`
+	// Status
+	Status string `form:"status" json:"status" xml:"status"`
+	// Notification Type
+	Type string `form:"type" json:"type" xml:"type"`
+}
+
+// Validate validates the Notification type instance.
+func (ut *Notification) Validate() (err error) {
+	if ut.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if ut.ConnID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "connId"))
+	}
+	if ut.Desc == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "desc"))
+	}
+	if ut.Status == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "status"))
+	}
+	if ut.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+
+	return
+}
+
 // privilege user type.
 type privilege struct {
 	// Namespace
