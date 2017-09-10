@@ -814,9 +814,11 @@ type AerospikeAmcNodeResponse struct {
 	Disk *AerospikeAmcResourceUsageResponse `form:"disk" json:"disk" xml:"disk"`
 	// Memory Usage
 	Memory *AerospikeAmcResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
+	// All node statistics
+	RawStats map[string]interface{} `form:"rawStats,omitempty" json:"rawStats,omitempty" xml:"rawStats,omitempty"`
 	// If it belongs to the same cluster as the other nodes
 	SameCluster bool `form:"sameCluster" json:"sameCluster" xml:"sameCluster"`
-	// Node statistics
+	// Select node statistics
 	Stats map[string]interface{} `form:"stats" json:"stats" xml:"stats"`
 	// Node status
 	Status string `form:"status" json:"status" xml:"status"`

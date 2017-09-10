@@ -997,7 +997,7 @@ definitions:
         total-bytes: 1.6052411e+18
         used-bytes: 4.6035394e+17
       name: Numquam iste aut alias dolor.
-      objsz: 5ab38b62-906b-44ed-b085-c21bbfef85b7
+      objsz: eb66a072-e616-43c0-b822-deea0df8363a
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: 5ab38b62-906b-44ed-b085-c21bbfef85b7
+        example: eb66a072-e616-43c0-b822-deea0df8363a
       stats:
         additionalProperties: true
         description: Namespace statistics

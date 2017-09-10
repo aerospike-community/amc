@@ -204,6 +204,7 @@ func (c *NodeController) Show(ctx *app.ShowNodeContext) error {
 			if node.Address() == nodeName {
 				nodeResult := app.AerospikeAmcNodeResponse{
 					Stats:             node.AnyAttrs(statKeys...),
+					RawStats:          node.StatsAttrs(),
 					ClusterVisibility: string(node.VisibilityStatus()),
 					SameCluster:       true, // TODO: remove this?
 					Memory:            node.Memory(),

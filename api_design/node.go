@@ -258,7 +258,8 @@ var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+j
 		Attribute("clusterVisibility", String, "Cluster Visibility")
 		Attribute("sameCluster", Boolean, "If it belongs to the same cluster as the other nodes")
 		Attribute("status", String, "Node status")
-		Attribute("stats", HashOf(String, Any), "Node statistics")
+		Attribute("stats", HashOf(String, Any), "Select node statistics")
+		Attribute("rawStats", HashOf(String, Any), "All node statistics")
 
 		Required("memory", "disk", "clusterVisibility", "sameCluster", "status", "stats")
 	})
@@ -270,8 +271,9 @@ var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+j
 		Attribute("sameCluster")
 		Attribute("status")
 		Attribute("stats")
+		Attribute("rawStats")
 
-		Required("memory", "disk", "clusterVisibility", "sameCluster", "status", "stats")
+		Required("memory", "disk", "clusterVisibility", "sameCluster", "status", "stats", "rawStats")
 	})
 })
 
