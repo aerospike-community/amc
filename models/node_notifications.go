@@ -17,8 +17,8 @@ func (n *Node) AlertsFrom(id int64) []*common.Alert {
 func (n *Node) CheckStatus(latestState common.Stats) {
 
 	messages := common.Info{
-		"red":   "Node <strong>%s</strong> is down",
-		"green": "Node <strong>%s</strong> is up now",
+		"red":   "Node %s is down",
+		"green": "Node %s is up now",
 	}
 
 	switch n.Status() {
@@ -56,8 +56,8 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 
 	messages := common.Info{
-		"red":   "Node <strong>%s</strong> is not visible to rest of the cluster",
-		"green": "Node <strong>%s</strong> is now visible to rest of the cluster",
+		"red":   "Node %s is not visible to rest of the cluster",
+		"green": "Node %s is now visible to rest of the cluster",
 	}
 
 	switch n.VisibilityStatus() {
@@ -96,8 +96,8 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 	queueLimit := 10000
 
 	messages := common.Info{
-		"yellow": "Transactions pending in queue for node <strong>%s</strong> is greater than %s",
-		"green":  "Transactions pending in queue for node <strong>%s</strong> is less than %s now",
+		"yellow": "Transactions pending in queue for node %s is greater than %s",
+		"green":  "Transactions pending in queue for node %s is less than %s now",
 	}
 
 	queueIfc := n.StatsAttr("queue")
@@ -144,9 +144,9 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 
 func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 	messages := common.Info{
-		"red":    "Client connections to node <strong>%s</strong> above 95%% of limit",
-		"yellow": "Client connections to node <strong>%s</strong> above 90%% of limit",
-		"green":  "Client connections to node <strong>%s</strong> below 90%% of limit now",
+		"red":    "Client connections to node %s above 95%% of limit",
+		"yellow": "Client connections to node %s above 90%% of limit",
+		"green":  "Client connections to node %s below 90%% of limit now",
 	}
 
 	fdLimitIfc := n.ConfigAttr("proto-fd-max")
@@ -206,9 +206,9 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 
 func (n *Node) CheckDiskSpace(latestState common.Stats) {
 	messages := common.Info{
-		"red":    "Free disk space on node <strong>%s</strong> below 5%%",
-		"yellow": "Free disk space on node <strong>%s</strong> below 10%%",
-		"green":  "Free disk space on node <strong>%s</strong> above 10%% now",
+		"red":    "Free disk space on node %s below 5%%",
+		"yellow": "Free disk space on node %s below 10%%",
+		"green":  "Free disk space on node %s above 10%% now",
 	}
 
 	disk := n.Disk()
@@ -260,9 +260,9 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 
 func (n *Node) CheckMemory(latestState common.Stats) {
 	messages := common.Info{
-		"red":    "Free Memory on node <strong>%s</strong> below 5%%",
-		"yellow": "Free Memory on node <strong>%s</strong> below 10%%",
-		"green":  "Free Memory on node <strong>%s</strong> above 10%% now",
+		"red":    "Free Memory on node %s below 5%%",
+		"yellow": "Free Memory on node %s below 10%%",
+		"green":  "Free Memory on node %s above 10%% now",
 	}
 
 	memory := n.Memory()

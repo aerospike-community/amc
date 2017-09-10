@@ -204,8 +204,8 @@ func (b *Backup) followProgress(session *ssh.Session, reader io.Reader) {
 
 // func (b *Backup) Notify() {
 // 	messages := common.Info{
-// 		"red":   "Backup <strong>%s</strong> Failed.",
-// 		"green": "Backup <strong>%s</strong> finished successfully.",
+// 		"red":   "Backup %s Failed.",
+// 		"green": "Backup %s finished successfully.",
 // 	}
 
 // 	alert := common.Alert{

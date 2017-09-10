@@ -719,7 +719,7 @@ func (c *Cluster) SendEmailNotifications() {
 			"Title":   template.HTML(fmt.Sprintf("Alert")),
 			"Cluster": template.HTML(fmt.Sprintf("%s", clusterName)),
 			"Node":    template.HTML(fmt.Sprintf("%s", alert.NodeAddress)),
-			"Status":  template.HTML(fmt.Sprintf("<font color='%s'><strong>%s</strong></font>", alert.Status, strings.ToUpper(string(alert.Status)))),
+			"Status":  template.HTML(fmt.Sprintf("%s", alert.Status)),
 			"Message": template.HTML(fmt.Sprintf("%s", alert.Desc)),
 		}
 

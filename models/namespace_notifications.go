@@ -13,9 +13,9 @@ import (
 func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 
 	messages := common.Info{
-		"red":    "Contiguous Disk space available for new writes on namespace <strong>%s on %s</strong> below 10%%",
-		"yellow": "Contiguous Disk space available for new writes on namespace <strong>%s on %s</strong> below 20%%",
-		"green":  "Contiguous Disk space available for new writes on namespace <strong>%s on %s</strong> above 20%% now",
+		"red":    "Contiguous Disk space available for new writes on namespace %s on %s below 10%%",
+		"yellow": "Contiguous Disk space available for new writes on namespace %s on %s below 20%%",
+		"green":  "Contiguous Disk space available for new writes on namespace %s on %s above 20%% now",
 	}
 
 	availablePct := latestState.TryInt("available_pct", 100)
@@ -46,8 +46,8 @@ func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 
 	messages := common.Info{
-		"yellow": "Used disk space for namespace <strong>%s on %s</strong> above high water mark",
-		"green":  "Used disk space for namespace <strong>%s on %s</strong> below high water mark now",
+		"yellow": "Used disk space for namespace %s on %s above high water mark",
+		"green":  "Used disk space for namespace %s on %s below high water mark now",
 	}
 
 	usedDisk := 100 - latestState.TryInt("free-pct-disk", 100)
@@ -77,8 +77,8 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 
 	messages := common.Info{
-		"red":   "Used disk space for namespace <strong>%s on %s</strong> above stop writes limit",
-		"green": "Used disk space for namespace <strong>%s on %s</strong> below stop writes limit now",
+		"red":   "Used disk space for namespace %s on %s above stop writes limit",
+		"green": "Used disk space for namespace %s on %s below stop writes limit now",
 	}
 
 	stopWrites := strings.ToLower(latestState.TryString("stop-writes", "false"))
@@ -107,8 +107,8 @@ func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 
 	messages := common.Info{
-		"red":   "Used memory space for namespace <strong>%s on %s</strong> above stop writes limit",
-		"green": "Used memory space for namespace <strong>%s on %s</strong> below stop writes limit now",
+		"red":   "Used memory space for namespace %s on %s above stop writes limit",
+		"green": "Used memory space for namespace %s on %s below stop writes limit now",
 	}
 
 	usedMem := 100 - latestState.TryInt("free-pct-memory", 100)
@@ -138,8 +138,8 @@ func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 
 	messages := common.Info{
-		"yellow": "Used memory space for namespace <strong>%s on %s</strong> above high water mark",
-		"green":  "Used memory space for namespace <strong>%s on %s</strong> below high water mark now",
+		"yellow": "Used memory space for namespace %s on %s above high water mark",
+		"green":  "Used memory space for namespace %s on %s below high water mark now",
 	}
 
 	usedMem := 100 - latestState.TryInt("free-pct-memory", 100)
