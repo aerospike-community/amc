@@ -160,11 +160,11 @@ func AuthenticateAuthInternalServerError(t goatest.TInterface, ctx context.Conte
 	return rw
 }
 
-// AuthenticateAuthNoContent runs the method Authenticate of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers.
+// AuthenticateAuthOK runs the method Authenticate of the given controller with the given parameters and payload.
+// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func AuthenticateAuthNoContent(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AuthController, payload *app.AuthenticateAuthPayload) http.ResponseWriter {
+func AuthenticateAuthOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AuthController, payload *app.AuthenticateAuthPayload) (http.ResponseWriter, *app.AerospikeAmcAuthResponse) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -190,7 +190,7 @@ func AuthenticateAuthNoContent(t goatest.TInterface, ctx context.Context, servic
 			panic(err) // bug
 		}
 		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil
+		return nil, nil
 	}
 
 	// Setup request context
@@ -220,12 +220,20 @@ func AuthenticateAuthNoContent(t goatest.TInterface, ctx context.Context, servic
 	if __err != nil {
 		t.Fatalf("controller returned %+v, logs:\n%s", __err, logBuf.String())
 	}
-	if rw.Code != 204 {
-		t.Errorf("invalid response status code: got %+v, expected 204", rw.Code)
+	if rw.Code != 200 {
+		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
+	}
+	var mt *app.AerospikeAmcAuthResponse
+	if resp != nil {
+		var _ok bool
+		mt, _ok = resp.(*app.AerospikeAmcAuthResponse)
+		if !_ok {
+			t.Fatalf("invalid response media: got %+v, expected instance of app.AerospikeAmcAuthResponse", resp)
+		}
 	}
 
 	// Return results
-	return rw
+	return rw, mt
 }
 
 // AuthenticateAuthUnauthorized runs the method Authenticate of the given controller with the given parameters and payload.

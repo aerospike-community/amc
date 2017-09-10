@@ -14,6 +14,16 @@ import (
 	"github.com/goadesign/goa"
 )
 
+// AMC Server information (default view)
+//
+// Identifier: application/vnd.aerospike.amc.auth.response+json; view=default
+type AerospikeAmcAuthResponse struct {
+	// Is the AMC an enterprise version
+	IsEnterprise *bool `form:"isEnterprise,omitempty" json:"isEnterprise,omitempty" xml:"isEnterprise,omitempty"`
+	// AMC roles of the user
+	Roles []string `form:"roles,omitempty" json:"roles,omitempty" xml:"roles,omitempty"`
+}
+
 // Backup object (default view)
 //
 // Identifier: application/vnd.aerospike.amc.backup.response+json; view=default
@@ -267,6 +277,8 @@ type AerospikeAmcConnectionResponse struct {
 	Disk *AerospikeAmcClusterResourceUsageResponse `form:"disk,omitempty" json:"disk,omitempty" xml:"disk,omitempty"`
 	// Connection Id
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Is the cluster security enabled
+	IsSecurityEnabled bool `form:"isSecurityEnabled" json:"isSecurityEnabled" xml:"isSecurityEnabled"`
 	// Memory usage.
 	Memory *AerospikeAmcClusterResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
 	// Connection Name
@@ -669,6 +681,27 @@ func (mt *AerospikeAmcLatencyResponse) Validate() (err error) {
 	return
 }
 
+// Logical view of namespace end point (default view)
+//
+// Identifier: application/vnd.aerospike.amc.logical.namespace.response+json; view=default
+type AerospikeAmcLogicalNamespaceResponse struct {
+	// Namespace Name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Object size histogram
+	Objsz interface{} `form:"objsz" json:"objsz" xml:"objsz"`
+	// Time to live histogram
+	TTL interface{} `form:"ttl" json:"ttl" xml:"ttl"`
+}
+
+// Validate validates the AerospikeAmcLogicalNamespaceResponse media type instance.
+func (mt *AerospikeAmcLogicalNamespaceResponse) Validate() (err error) {
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+
+	return
+}
+
 // Node Config (default view)
 //
 // Identifier: application/vnd.aerospike.amc.namespace.config.response+json; view=default
@@ -712,10 +745,14 @@ type AerospikeAmcNamespaceResponse struct {
 	Memory *AerospikeAmcResourceUsageResponse `form:"memory" json:"memory" xml:"memory"`
 	// Namespace Name
 	Name string `form:"name" json:"name" xml:"name"`
+	// Object size histogram
+	Objsz interface{} `form:"objsz" json:"objsz" xml:"objsz"`
 	// Namespace statistics
 	Stats map[string]interface{} `form:"stats" json:"stats" xml:"stats"`
 	// Cluster/Node status
 	Status string `form:"status" json:"status" xml:"status"`
+	// Time to live histogram
+	TTL interface{} `form:"ttl" json:"ttl" xml:"ttl"`
 }
 
 // Validate validates the AerospikeAmcNamespaceResponse media type instance.
@@ -735,6 +772,7 @@ func (mt *AerospikeAmcNamespaceResponse) Validate() (err error) {
 	if mt.Stats == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "stats"))
 	}
+
 	return
 }
 

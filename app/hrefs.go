@@ -42,6 +42,13 @@ func IndexHref(connID, name interface{}) string {
 	return fmt.Sprintf("/api/v1/connections/%v/indexes/%v", paramconnID, paramname)
 }
 
+// LogicalNamespaceHref returns the resource href.
+func LogicalNamespaceHref(connID, namespace interface{}) string {
+	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })
+	paramnamespace := strings.TrimLeftFunc(fmt.Sprintf("%v", namespace), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/v1/connections/%v/logical-namespaces/%v", paramconnID, paramnamespace)
+}
+
 // ModuleHref returns the resource href.
 func ModuleHref(connID, name interface{}) string {
 	paramconnID := strings.TrimLeftFunc(fmt.Sprintf("%v", connID), func(r rune) bool { return r == '/' })

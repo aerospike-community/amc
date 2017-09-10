@@ -311,6 +311,7 @@ type ConnectionController interface {
 	SetConfig(*SetConfigConnectionContext) error
 	Show(*ShowConnectionContext) error
 	Throughput(*ThroughputConnectionContext) error
+	User(*UserConnectionContext) error
 }
 
 // MountConnectionController "mounts" a Connection resource controller on the given service.
@@ -326,6 +327,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/overview", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/user", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -571,6 +573,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("throughput", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Throughput", "route", "GET /api/v1/connections/:connId/throughput", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewUserConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.User(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/user", ctrl.MuxHandler("user", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "User", "route", "GET /api/v1/connections/:connId/user", "security", "jwt")
 }
 
 // handleConnectionOrigin applies the CORS response headers corresponding to the origin.
@@ -1138,6 +1157,101 @@ func unmarshalSaveIndexPayload(ctx context.Context, service *goa.Service, req *h
 	}
 	goa.ContextRequest(ctx).Payload = payload.Publicize()
 	return nil
+}
+
+// LogicalNamespaceController is the controller interface for the LogicalNamespace actions.
+type LogicalNamespaceController interface {
+	goa.Muxer
+	Latency(*LatencyLogicalNamespaceContext) error
+	Show(*ShowLogicalNamespaceContext) error
+	Throughput(*ThroughputLogicalNamespaceContext) error
+}
+
+// MountLogicalNamespaceController "mounts" a LogicalNamespace resource controller on the given service.
+func MountLogicalNamespaceController(service *goa.Service, ctrl LogicalNamespaceController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/logical-namespaces/:namespace/latency", ctrl.MuxHandler("preflight", handleLogicalNamespaceOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/logical-namespaces/:namespace", ctrl.MuxHandler("preflight", handleLogicalNamespaceOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/logical-namespaces/:namespace/throughput", ctrl.MuxHandler("preflight", handleLogicalNamespaceOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLatencyLogicalNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Latency(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:enterprise")
+	h = handleLogicalNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/logical-namespaces/:namespace/latency", ctrl.MuxHandler("latency", h, nil))
+	service.LogInfo("mount", "ctrl", "LogicalNamespace", "action", "Latency", "route", "GET /api/v1/connections/:connId/logical-namespaces/:namespace/latency", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowLogicalNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleLogicalNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/logical-namespaces/:namespace", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "LogicalNamespace", "action", "Show", "route", "GET /api/v1/connections/:connId/logical-namespaces/:namespace", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewThroughputLogicalNamespaceContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Throughput(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleLogicalNamespaceOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/logical-namespaces/:namespace/throughput", ctrl.MuxHandler("throughput", h, nil))
+	service.LogInfo("mount", "ctrl", "LogicalNamespace", "action", "Throughput", "route", "GET /api/v1/connections/:connId/logical-namespaces/:namespace/throughput", "security", "jwt")
+}
+
+// handleLogicalNamespaceOrigin applies the CORS response headers corresponding to the origin.
+func handleLogicalNamespaceOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "*") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			rw.Header().Set("Access-Control-Max-Age", "600")
+			rw.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+				rw.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
 }
 
 // ModuleController is the controller interface for the Module actions.
