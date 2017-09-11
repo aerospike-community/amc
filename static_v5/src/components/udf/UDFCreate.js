@@ -9,13 +9,14 @@ import 'brace/theme/github';
 
 import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
-import AlertModal from 'components/AlertModal';
 import { timeout } from 'classes/util';
+import AlertModal from 'components/AlertModal';
+import Spinner from 'components/Spinner';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
-class UDFView extends React.Component {
+class UDFCreate extends React.Component {
   constructor(props) {
     super(props);
 
@@ -97,7 +98,7 @@ class UDFView extends React.Component {
     const editor = document.getElementById(this.id);
     const height = distanceToBottom(editor);
     this.setState({
-      editorHeight: height - 80
+      editorHeight: height - 120
     });
   }
 
@@ -112,8 +113,10 @@ class UDFView extends React.Component {
           <AlertModal header="Success" message={msg} type="success" />
         }
 
-        <div className="as-centerpane-header"> 
-          Create UDF
+        <div className="row">
+          <div className="col-xl-12 as-section-header"> 
+            Create UDF
+          </div>
         </div>
         <Form>
           <FormGroup>
@@ -127,9 +130,9 @@ class UDFView extends React.Component {
               onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
           </div>
           <div>
-            {isUpdating && 
-             <span> Updating ... </span>}
             <Button disabled={hasErrors} color="primary" size="sm" onClick={this.onCreate}> Add </Button>
+            {isUpdating && 
+            <Spinner />}
           </div>
         </Form>
       </div>
@@ -137,7 +140,7 @@ class UDFView extends React.Component {
   }
 }
 
-UDFView.PropTypes = {
+UDFCreate.PropTypes = {
   clusterID: PropTypes.string,
   udfName: PropTypes.string,
   // callback when the udf is created successfully
@@ -145,7 +148,7 @@ UDFView.PropTypes = {
   onUDFCreateSuccess: PropTypes.func,
 };
 
-export default UDFView;
+export default UDFCreate;
 
 
 

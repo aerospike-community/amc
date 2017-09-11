@@ -218,7 +218,10 @@ export const INDEX_ACTIONS = extractActions(indexActions);
 const indexesOverviewActions = {
   Overview: {
     isDefault: true
-  }
+  },
+  Create: {
+    dbRoles: [ROLES.DATA_ADMN, ROLES.SYS_ADMN],
+  },
 }
 export const INDEXES_OVERVIEW_ACTIONS = extractActions(indexesOverviewActions);
 

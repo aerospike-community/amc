@@ -8,7 +8,7 @@ export default function(state = {
   //  alerts: [],      // the alerts for the cluster
   // }
   }, action) {
-  const { clusterID, poll, alerts } = action;
+  const { clusterID, alerts } = action;
   let cluster;
 
   switch (action.type) {

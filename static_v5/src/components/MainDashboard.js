@@ -11,7 +11,7 @@ import VisibleUDFOverviewDashboard from 'containers/udf/VisibleUDFOverviewDashbo
 import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
 import VisibleSetView from 'containers/set/VisibleSetView';
 import VisibleIndexView from 'containers/index/VisibleIndexView';
-import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
+import VisibleIndexesOverviewDashboard from 'containers/index/VisibleIndexesOverviewDashboard';
 
 import Welcome from 'components/Welcome';
 import NodeDashboard from 'components/node/NodeDashboard';
@@ -64,7 +64,7 @@ class MainDashboard extends React.Component {
       dashboard = <VisibleSetsOverview />
 
     } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
-      dashboard = <VisibleIndexesOverview />
+      dashboard = <VisibleIndexesOverviewDashboard />
         
     } else if (viewType === VIEW_TYPE.INDEX) {
       dashboard = <VisibleIndexView />

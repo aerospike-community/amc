@@ -12,8 +12,9 @@ export function pollAlerts(clusterID, dispatch) {
   Clusters.add(clusterID);
   const poll = () => {
     getAlerts(clusterID)
-      .then((alerts) => {
-        dispatch(alertsFetched(clusterID, alerts));
+      .then((response) => {
+        const { notifications } = response;
+        dispatch(alertsFetched(clusterID, notifications));
 
         if (Clusters.has(clusterID))
           timeout(poll, Interval);

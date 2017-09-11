@@ -5,7 +5,7 @@ import { selectStartView } from 'actions/currentView';
 import { selectClusterOnStartup, selectCluster } from 'actions/currentView';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
 import { VIEW_TYPE } from 'classes/constants';
-import { isLogicalView } from 'classes/util';
+import { isLogicalView, timeout } from 'classes/util';
 import { toPhysicalEntityTree, toLogicalEntityTree, findAncestors } from 'classes/entityTree';
 
 // ---------------------------
@@ -140,21 +140,27 @@ export function fetchClusters() {
 // ---------------------------------------
 // Delete entities from cluster
 
+function delayedFetch(dispatch, clusterID, delay = 5000) {
+  timeout(() => {
+    dispatch(getClusterEntityTree(clusterID));
+  }, delay, false);
+}
+
 export function deleteUDF(clusterID, udfName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID));
+    delayedFetch(dispatch, clusterID);
   };
 }
 
 export function deleteIndex(clusterID, namspaceName, setName, indexName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID));
+    delayedFetch(dispatch, clusterID);
   };
 }
 
 export function deleteSet(clusterID, namespaceName, setName) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID));
+    delayedFetch(dispatch, clusterID);
   };
 }
 
@@ -163,7 +169,13 @@ export function deleteSet(clusterID, namespaceName, setName) {
 
 export function addUDF(clusterID, udfName, udfType) {
   return (dispatch) => {
-    dispatch(getClusterEntityTree(clusterID));
+    delayedFetch(dispatch, clusterID);
+  };
+}
+
+export function addIndex(clusterID, indexName) {
+  return (dispatch) => {
+    delayedFetch(dispatch, clusterID);
   };
 }
 

@@ -1,5 +1,5 @@
 import { toURLConverter } from 'api/url';
-import { get, deleteAPI } from 'api/http';
+import { get, deleteAPI, postJSON } from 'api/http';
 
 const toURLPath = toURLConverter('connections');
 
@@ -45,5 +45,17 @@ export function deleteIndex(clusterID, namespaceName, setName, indexName) {
   });
 }
 
+// set - optional
+export function createIndex(clusterID, indexName, namespace, set, bin, isNumeric = false) {
+  let data = {
+    namespace: namespace,
+    setName: set,
+    indexName: indexName,
+    binName: bin,
+    type: isNumeric ? 'NUMERIC' : 'STRING',
+  };
 
+  const url = toURLPath(clusterID + '/indexes');
+  return postJSON(url, data);
+}
 

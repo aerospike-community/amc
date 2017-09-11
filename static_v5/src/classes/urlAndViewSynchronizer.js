@@ -96,7 +96,7 @@ const URLDefinitions = [{
   url: '/physical-tree/index/:clusterID/:indexName/:view',
   viewType: INDEX,
 }, {
-  url: '/physical-tree/indexes-overview/:clusterID',
+  url: '/physical-tree/indexes-overview/:clusterID/:view',
   viewType: INDEXES_OVERVIEW,
 }, {
   url: '/physical-tree/node/:clusterID/:nodeHost/:view',

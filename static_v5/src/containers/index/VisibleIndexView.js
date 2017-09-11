@@ -17,7 +17,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onDeleteSuccess: (clusterID, namespaceName, setName, indexName) => {
       dispatch(deleteIndex(clusterID, namespaceName, setName, indexName));
-      dispatch(selectIndexesOverview(clusterID, INDEXES_OVERVIEW_ACTIONS.View));
+      dispatch(selectIndexesOverview(clusterID, INDEXES_OVERVIEW_ACTIONS.Overview));
     },
   };
 }
