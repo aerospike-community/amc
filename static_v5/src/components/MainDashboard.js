@@ -12,12 +12,10 @@ import VisibleSetsOverview from 'containers/set/VisibleSetsOverview';
 import VisibleSetView from 'containers/set/VisibleSetView';
 import VisibleIndexView from 'containers/index/VisibleIndexView';
 import VisibleIndexesOverview from 'containers/index/VisibleIndexesOverview';
-import VisibleNodesOverview from 'containers/VisibleNodesOverview';
 
 import Welcome from 'components/Welcome';
 import NodeDashboard from 'components/node/NodeDashboard';
 import NamespaceDashboard from 'components/namespace/NamespaceDashboard';
-import NamespacesOverview from 'components/namespace/NamespacesOverview';
 import MainDashboardBreadcrumbs from 'components/MainDashboardBreadcrumbs';
 import LogicalNamespaceDashboard from 'components/logical-namespace/LogicalNamespaceDashboard';
 
@@ -52,9 +50,6 @@ class MainDashboard extends React.Component {
       else
         dashboard = <h4 style={{marginTop: 20}}> Please connect to {`"${clusterName}"`} </h4>;
 
-    } else if (viewType === VIEW_TYPE.NODE_OVERVIEW) {
-      dashboard = <VisibleNodesOverview />
-
     } else if (viewType === VIEW_TYPE.NODE) {
       dashboard = <NodeDashboard clusterID={clusterID} nodeHost={nodeHost} view={view} onViewSelect={this.onChangeView}/>
 
@@ -82,9 +77,6 @@ class MainDashboard extends React.Component {
 
     } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
-
-    } else if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) {
-      dashboard = <NamespacesOverview clusterID={clusterID} nodeHost={nodeHost} />
 
     } else if (viewType === VIEW_TYPE.START_VIEW) {
       dashboard = <Welcome />;

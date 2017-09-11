@@ -51,15 +51,6 @@ export function selectNode(clusterID, nodeHost, view) {
   };
 }
 
-export const SELECT_NODE_OVERVIEW = 'SELECT_NODE_OVERVIEW';
-export function selectNodeOverview(clusterID, view) {
-  return {
-    type: SELECT_NODE_OVERVIEW,
-    view: view,
-    clusterID: clusterID,
-  };
-}
-
 export const SELECT_NAMESPACE_VIEW = 'SELECT_NAMESPACE_VIEW';
 export function selectNamespace(clusterID, nodeHost, namespaceName, view) {
   return {
@@ -68,16 +59,6 @@ export function selectNamespace(clusterID, nodeHost, namespaceName, view) {
     clusterID: clusterID,
     nodeHost: nodeHost,
     namespaceName: namespaceName,
-  };
-}
-
-export const SELECT_NAMESPACE_OVERVIEW = 'SELECT_NAMESPACE_OVERVIEW';
-export function selectNamespaceOverview(clusterID, nodeHost, view) {
-  return {
-    type: SELECT_NAMESPACE_OVERVIEW,
-    view: view,
-    clusterID: clusterID,
-    nodeHost: nodeHost,
   };
 }
 
@@ -234,14 +215,8 @@ export function selectEntity(entity, view) {
   case VIEW_TYPE.NODE:
     return selectNode(clusterID, nodeHost, view);
 
-  case VIEW_TYPE.NODE_OVERVIEW:
-    return selectNodeOverview(clusterID, view);
-
   case VIEW_TYPE.NAMESPACE:
     return selectNamespace(clusterID, nodeHost, namespaceName, view);
-
-  case VIEW_TYPE.NAMESPACE_OVERVIEW:
-    return selectNamespaceOverview(clusterID, nodeHost, view);
 
   case VIEW_TYPE.SET:
     return selectSet(clusterID, nodeHost, namespaceName, setName, view);

@@ -75,7 +75,7 @@ function matchDefinition(viewType) {
 // be generated.
 
 const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
-const { NODE_OVERVIEW, NAMESPACE_OVERVIEW, SET_OVERVIEW, INDEX } = VIEW_TYPE;
+const { SET_OVERVIEW, INDEX } = VIEW_TYPE;
 const { SET, INDEXES_OVERVIEW } = VIEW_TYPE;
 const { LOGICAL_CLUSTER, LOGICAL_NAMESPACE, LOGICAL_START_VIEW } = VIEW_TYPE;
 const { LOGICAL_NAMESPACE_OVERVIEW } = VIEW_TYPE;
@@ -107,12 +107,6 @@ const URLDefinitions = [{
 }, {
   url: '/physical-tree/set/:clusterID/:nodeHost/:namespaceName/:setName/:view',
   viewType: SET, 
-}, {
-  url: '/physical-tree/node-overview/:clusterID/:view',
-  viewType: NODE_OVERVIEW, 
-}, {
-  url: '/physical-tree/namespace-overview/:clusterID/:nodeHost/:view',
-  viewType: NAMESPACE_OVERVIEW, 
 }, {
   url: '/physical-tree/set-overview/:clusterID/:nodeHost/:namespaceName/:view',
   viewType: SET_OVERVIEW, 

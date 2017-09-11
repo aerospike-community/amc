@@ -37,6 +37,7 @@
     "font-awesome-webpack": "0.0.5-beta.2",
     "history": "^4.6.1",
     "html-webpack-plugin": "^2.28.0",
+    "humanize-duration": "^3.10.1",
     "jasmine-core": "^2.5.2",
     "jasmine-enzyme": "^3.0.1",
     "jquery": "^3.2.1",

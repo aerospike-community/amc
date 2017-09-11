@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
+import { Jumbotron } from 'reactstrap';
 
 import DirectedGraph from 'charts/DirectedGraph';
 import { getOverview } from 'api/clusterConnections';
@@ -107,7 +108,11 @@ class XDRGraph extends React.Component {
         }
 
         {!hasXDR &&
-        <h4 className="as-main-info"> This cluster is neither an XDR source nor destination </h4>
+        <Jumbotron>
+          <h4> 
+            This cluster is neither an XDR source nor destination 
+          </h4>
+        </Jumbotron>
         }
       </div>
     );

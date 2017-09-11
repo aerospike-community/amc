@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import bytes from 'bytes';
 
 import BarChart from 'charts/BarChart';
-import { nextNumber } from 'classes/util';
+import { nextNumber, formatDuration } from 'classes/util';
 
 class TimeToLiveChart extends React.Component {
   constructor(props) {
@@ -49,8 +49,10 @@ class TimeToLiveChart extends React.Component {
     const values = [];
 
     ttl.forEach((o) => {
+      const label = formatDuration(o.min) + ' to ' + formatDuration(o.max);
+
       values.push({
-        label: `${o.min} - ${o.max} secs`,
+        label: label,
         value: o.count
       });
     });

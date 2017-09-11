@@ -6,10 +6,7 @@ import { isLogicalView } from 'classes/util';
 import { VIEW_TYPE as VT, LOGICAL_VIEW_TYPE as LVT } from 'classes/constants';
 
 const physicalBreadcrumbs = {
-  'Nodes Overview':     [VT.NODE_OVERVIEW],
-  ':nodeHost':          [VT.NAMESPACE, VT.NAMESPACE_OVERVIEW, VT.NODE, 
-                          VT.SET, VT.SET_OVERVIEW],
-  'Namespace Overview': [VT.NAMESPACE_OVERVIEW],
+  ':nodeHost':          [VT.NAMESPACE, VT.NODE, VT.SET, VT.SET_OVERVIEW],
   ':namespaceName':     [VT.NAMESPACE, VT.SET, VT.SET_OVERVIEW],
   'Sets Overview':      [VT.SET_OVERVIEW],
   ':setName':           [VT.SET],

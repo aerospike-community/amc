@@ -164,14 +164,6 @@ const nodeActions = {
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 
-// node overview
-const nodeOverviewActions = {
-  View: {
-    isDefault: true
-  }
-};
-export const NODE_OVERVIEW_ACTIONS = extractActions(nodeOverviewActions);
-
 // namespace
 const namespaceActions = {
   View: {
@@ -287,14 +279,8 @@ function getActions(viewType) {
   if (viewType === VIEW_TYPE.NODE) 
     return nodeActions;
 
-  if (viewType === VIEW_TYPE.NODE_OVERVIEW) 
-    return nodeOverviewActions;
-
   if (viewType === VIEW_TYPE.NAMESPACE) 
     return namespaceActions;
-
-  if (viewType === VIEW_TYPE.NAMESPACE_OVERVIEW) 
-    return namespaceOverviewActions;
 
   if (viewType === VIEW_TYPE.SET) 
     return setActions;

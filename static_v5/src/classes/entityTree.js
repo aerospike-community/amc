@@ -39,19 +39,12 @@ function toUDF(cluster) {
   return udfs;
 }
 
-function toNodes(cluster) {
-  let nodes = {
-    name: 'NODES',
-    children: [],
-    isCategory: true, // aggregator of entities
-
-    [Keys.ClusterID]: cluster.id,
-    viewType: VIEW_TYPE.NODE_OVERVIEW,
-  };
-
+// returns an array of the nodes of the cluster
+function allNodes(cluster) {
   if (!Array.isArray(cluster.nodes)) 
-    return nodes;
+    return [];
 
+  const nodes = [];
   cluster.nodes.forEach((node) => {
     let n = Object.assign({}, node, {
       children: [],
@@ -62,24 +55,17 @@ function toNodes(cluster) {
       viewType: VIEW_TYPE.NODE,
     });
     if (Array.isArray(n.namespaces))
-      n.children.push(toNamespaces(cluster, node));
+      n.children = allNamespaces(cluster, node);
 
-    nodes.children.push(n);
+    nodes.push(n);
   });
 
   return nodes;
 }
 
-function toNamespaces(cluster, node) {
-  let namespaces = {
-    name: 'NAMESPACES',
-    children: [],
-    isCategory: true, // aggregator of entities
-
-    [Keys.ClusterID]: cluster.id,
-    [Keys.Node]: node.host,
-    viewType: VIEW_TYPE.NAMESPACE_OVERVIEW,
-  };
+// returns an array of the namespaces of the node
+function allNamespaces(cluster, node) {
+  const namespaces = [];
 
   node.namespaces.forEach((namespace) => {
     let ns = Object.assign({}, namespace, {
@@ -93,8 +79,10 @@ function toNamespaces(cluster, node) {
 
     if (Array.isArray(ns.sets))
       ns.children.push(toSets(cluster, node, namespace));
-    namespaces.children.push(ns);
+
+    namespaces.push(ns);
   });
+
   return namespaces;
 }
 
@@ -213,7 +201,7 @@ export function toPhysicalEntityTree(cluster, isAuthenticated) {
     return root;
 
   let children = [];
-  children.push(toNodes(cluster));
+  children = children.concat(allNodes(cluster));
   children.push(toUDF(cluster));
   children.push(toIndexes(cluster));
 

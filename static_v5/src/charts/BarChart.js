@@ -2,6 +2,7 @@ import nv from 'nvd3';
 import d3 from 'd3';
 
 import { watchElementSizeChange } from 'charts/util';
+import { addCommasToInt } from 'classes/util';
 
 // BarChart draws a bar chart
 class BarChart {
@@ -54,10 +55,12 @@ class BarChart {
         .showXAxis(false)
         .margin({top: marginTop});
 
-      // remove decimals from y axis
-      const f = d3.format('0.0f');
+      // human readable format
       chart.yAxis
-          .tickFormat(f);
+          .tickFormat((t) => {
+            let v = Math.floor(t);
+            return addCommasToInt(v);
+          });
 
       chart.forceY([0, 100]);
 

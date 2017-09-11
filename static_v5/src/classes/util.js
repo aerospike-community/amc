@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import moment from 'moment';
+import humanizeDuration from 'humanize-duration';
 
 import { LOGICAL_VIEW_TYPE } from 'classes/constants';
 
@@ -283,3 +284,8 @@ export function timeout(fn, delay, pauseOnTabInactive = true) {
       fn();
   });
 };
+
+// see https://www.npmjs.com/package/humanize-duration
+export function formatDuration(millisecs) {
+  return humanizeDuration(millisecs, { round: true });
+}

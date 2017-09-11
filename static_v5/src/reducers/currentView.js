@@ -1,6 +1,6 @@
 import { SELECT_NODE_VIEW, SELECT_CLUSTER_VIEW, INITIALIZE_VIEW } from 'actions/currentView';
 import { SELECT_START_VIEW, SELECT_NAMESPACE_VIEW, SELECT_SET_VIEW } from 'actions/currentView';
-import { SELECT_NODE_OVERVIEW, SELECT_NAMESPACE_OVERVIEW, SELECT_SET_OVERVIEW } from 'actions/currentView';
+import { SELECT_SET_OVERVIEW } from 'actions/currentView';
 import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } from 'actions/currentView';
 import { SELECT_INDEX, SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP } from 'actions/currentView';
 import { SELECT_VIEW, SELECT_VIEW_FOR_VIEW_TYPE } from 'actions/currentView';
@@ -178,15 +178,6 @@ export default function currentView(state = InitState, action) {
       });
       break;
 
-    case SELECT_NODE_OVERVIEW:
-      updated =  updateFn({
-        view: action.view,
-
-        viewType: VIEW_TYPE.NODE_OVERVIEW,
-        clusterID: action.clusterID,
-      });
-      break;
-
     case SELECT_NAMESPACE_VIEW:
       updated = updateFn({
         view: action.view,
@@ -195,16 +186,6 @@ export default function currentView(state = InitState, action) {
         clusterID: action.clusterID,
         nodeHost: action.nodeHost,
         namespaceName: action.namespaceName,
-      });
-      break;
-
-    case SELECT_NAMESPACE_OVERVIEW:
-      updated = updateFn({
-        view: action.view, 
-
-        viewType: VIEW_TYPE.NAMESPACE_OVERVIEW,
-        clusterID: action.clusterID,
-        nodeHost: action.nodeHost,
       });
       break;
 

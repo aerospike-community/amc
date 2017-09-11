@@ -2,6 +2,7 @@ import nv from 'nvd3';
 import d3 from 'd3';
 import bytes from 'bytes';
 
+import { addCommasToInt } from 'classes/util';
 import { watchElementSizeChange } from 'charts/util';
 
 // AbstractStackedAreaChart is an abstract class that 
@@ -81,6 +82,13 @@ class AbstractStackedAreaChart {
       const f = d3.time.format('%X');
       chart.xAxis
           .tickFormat((t) => f(new Date(t)));
+
+      // human readable format
+      chart.yAxis
+          .tickFormat((t) => {
+            let v = Math.floor(t);
+            return addCommasToInt(v);
+          });
 
       // if all values are zero, nvd3 sets range of y axis to [-1, 1].
       // this sets the minimum range of y axis to be zero.

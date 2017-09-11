@@ -15,6 +15,7 @@ class NodesSummary extends React.Component {
     this.state = {
       nodesSummary: {}, // map of nodeHost to summary
       expandedNodes: new Set(), 
+      showRawStats: new Set(), // nodes to display the raw stats for
       expandAll: props.initiallyExpandAll,
     };
 
@@ -81,7 +82,7 @@ class NodesSummary extends React.Component {
   }
 
   nodes() {
-    const { expandedNodes, expandAll } = this.state;
+    const { expandedNodes, expandAll, showRawStats } = this.state;
     const nodes = this.state.nodesSummary;
     const isSelectable = typeof(this.props.onSelectNode) === 'function';
     const memory = (s) => {
@@ -91,7 +92,7 @@ class NodesSummary extends React.Component {
     let data = [];
     for (const nodeHost in nodes) {
       const node = nodes[nodeHost];
-      const { stats } = node;
+      const { stats, rawStats } = node;
       const isExpanded = expandedNodes.has(nodeHost) || expandAll;
       const style = { fontSize: 12 };
 
@@ -128,7 +129,32 @@ class NodesSummary extends React.Component {
       data.push(row);
 
       if (isExpanded) {
-        const r = renderStatsInTable(nodeHost, stats, 6);
+        const ncols = 6;
+
+        // toggle button
+        const toggle = () => {
+          const s = new Set(showRawStats);
+          if (s.has(nodeHost))
+            s.delete(nodeHost);
+          else
+            s.add(nodeHost);
+          this.setState({
+            showRawStats: s
+          });
+        };
+        const text = showRawStats.has(nodeHost) ? 'Hide Raw Stats' 
+                                                : 'Show Raw Stats';
+        data.push(
+          <tr key={nodeHost+'_raw_stats'}>
+            <td colSpan={ncols} className="as-link" onClick={toggle}>
+              {text}
+            </td>
+          </tr>
+        );
+
+        // raw stats or not
+        const props = showRawStats.has(nodeHost) ? rawStats : stats;
+        const r = renderStatsInTable(nodeHost, props, ncols);
         data = data.concat(r);
       }
     }

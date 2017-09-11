@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Table } from 'reactstrap';
 import moment from 'moment';
 import classNames from 'classnames';
+import { Jumbotron } from 'reactstrap';
 
 class ClusterAlerts extends React.Component {
   constructor(props) {
@@ -42,7 +43,9 @@ class ClusterAlerts extends React.Component {
     const { alerts } = this.props;
     if (alerts.length === 0) {
       return (
-        <h5 style={{margin: 10}}> All clear </h5>
+        <Jumbotron>
+          <h3> All clear </h3>
+        </Jumbotron>
       );
     }
 

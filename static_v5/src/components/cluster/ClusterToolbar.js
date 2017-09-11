@@ -25,7 +25,7 @@ class ClusterToolbar extends React.Component {
       icon = 'fa fa-database';
     }
 
-    const style = { marginLeft: 10 };
+    const style = { marginRight: 10 };
     return (
       <div className="float-left as-cursor-pointer" style={style}
            title={title} onClick={() => this.onToolClick(value)}> 
@@ -37,10 +37,10 @@ class ClusterToolbar extends React.Component {
   render() {
     return (
       <div className="as-toolbar">
+        {this.renderViewChanger()}
         <div className="float-left"> 
           Clusters 
         </div>
-        {this.renderViewChanger()}
         <div className="float-right" title="Hide" onClick={() => this.onToolClick('hideEntityTree')}>
           <i className="fa fa-angle-double-left"></i>
         </div>

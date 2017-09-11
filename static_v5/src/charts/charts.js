@@ -2,6 +2,7 @@ import moment from 'moment';
 
 import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
 import { ThroughputGrouping as TG } from 'charts/constants';
+import { addCommasToInt } from 'classes/util';
 
 // create a new throughput chart
 export function newThroughputChart(grouping, selector, data) {
@@ -152,11 +153,11 @@ class ThroughputNamespaceChart extends AbstractStackedAreaChart {
       // name 
       s += '<td>' + key + '</td>';
       // failed
-      s += '<td>' + failed + '</td>';
+      s += '<td>' + addCommasToInt(failed) + '</td>';
       // success
-      s += '<td>' + success + '</td>';
+      s += '<td>' + addCommasToInt(success) + '</td>';
       // total
-      s += '<td>' + (failed+success) + '</td>';
+      s += '<td>' + addCommasToInt(failed+success) + '</td>';
 
       s += '</tr>';
 
