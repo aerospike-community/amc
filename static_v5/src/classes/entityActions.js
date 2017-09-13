@@ -232,8 +232,13 @@ const logicalClusterActions = {
       isAuthenticated: false
     }
   },
-  View: {
+  Overview: {
     isDefault: true,
+  },
+  Alerts: {
+    state: {
+      isAuthenticated: true
+    },
     isEndOfGrouping: true,
   },
   Edit: {},
@@ -257,13 +262,6 @@ const logicalNamespaceActions = {
 };
 export const LOGICAL_NAMESPACE_ACTIONS = extractActions(logicalNamespaceActions);
 
-const logicalNamespaceOverviewActions = {
-  View: {
-    isDefault: true
-  }
-};
-export const LOGICAL_NAMESPACE_OVERVIEW_ACTIONS = extractActions(logicalNamespaceOverviewActions);
-
 // -----------------------------------------------------------------------------
 // Queries on the actions
 // ----------------------
@@ -273,10 +271,10 @@ function getActions(viewType) {
   if (viewType === VIEW_TYPE.CLUSTER)
     return clusterActions;
 
-  if (viewType === VIEW_TYPE.UDF) 
+  if (viewType === VIEW_TYPE.UDF || viewType === VIEW_TYPE.LOGICAL_UDF) 
     return udfActions;
 
-  if (viewType === VIEW_TYPE.UDF_OVERVIEW) 
+  if (viewType === VIEW_TYPE.UDF_OVERVIEW || viewType === VIEW_TYPE.LOGICAL_UDF_OVERVIEW) 
     return udfOverviewActions;
 
   if (viewType === VIEW_TYPE.NODE) 
@@ -291,26 +289,23 @@ function getActions(viewType) {
   if (viewType === VIEW_TYPE.SET_OVERVIEW) 
     return setOverviewActions;
 
-  if (viewType === VIEW_TYPE.INDEXES_OVERVIEW)
+  if (viewType === VIEW_TYPE.INDEXES_OVERVIEW || viewType === VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW)
     return indexesOverviewActions;
 
-  if (viewType === VIEW_TYPE.INDEX)
+  if (viewType === VIEW_TYPE.INDEX || viewType === VIEW_TYPE.LOGICAL_INDEX)
     return indexActions;
-
-  if (viewType === VIEW_TYPE.LOGICAL_CLUSTER)
-    return logicalClusterActions;
-
-  if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE)
-    return logicalNamespaceActions;
-
-  if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW)
-    return logicalNamespaceOverviewActions;
 
   if (viewType === VIEW_TYPE.ROLE)
     return roleActions;
 
   if (viewType === VIEW_TYPE.USER)
     return userActions;
+
+  if (viewType === VIEW_TYPE.LOGICAL_CLUSTER)
+    return logicalClusterActions;
+
+  if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE)
+    return logicalNamespaceActions;
 
   const msg = `Action for ${viewType} not found`;
   console.error(msg);

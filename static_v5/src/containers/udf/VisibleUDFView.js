@@ -5,9 +5,16 @@ import UDFView from 'components/udf/UDFView';
 import { UDF_ACTIONS, UDF_OVERVIEW_ACTIONS }  from 'classes/entityActions';
 import { selectUDFOverview } from 'actions/currentView';
 import { addUDF, deleteUDF } from 'actions/clusters';
+import { isLogicalView } from 'classes/util';
+import { VIEW_TYPE } from 'classes/constants';
+
+let IsLogicalView;
 
 const mapStateToProps = (state) => {
-  const { clusterID, udfName, view } = state.currentView;
+  const { clusterID, udfName, view, viewType } = state.currentView;
+
+  IsLogicalView = isLogicalView(viewType);
+
   return {
     clusterID: clusterID,
     udfName: udfName,
@@ -19,7 +26,9 @@ const mapDispatchToProps = (dispatch) => {
     onDeleteSuccess: (clusterID, udfName) => {
       dispatch(deleteUDF(clusterID, udfName));
 
-      dispatch(selectUDFOverview(clusterID, UDF_OVERVIEW_ACTIONS.Overview));
+      const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_UDF_OVERVIEW 
+                               : VIEW_TYPE.UDF_OVERVIEW;
+      dispatch(selectUDFOverview(clusterID, UDF_OVERVIEW_ACTIONS.Overview, vt));
     }
   };
 };

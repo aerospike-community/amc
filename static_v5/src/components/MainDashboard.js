@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import VisibleLogicalClusterDashboard from 'containers/cluster/VisibleLogicalClusterDashboard';
 import VisibleClusterDashboard from 'containers/cluster/VisibleClusterDashboard';
 import VisibleViewClusterConnectionModal from 'containers/cluster/VisibleViewClusterConnectionModal';
 import VisibleEditClusterConnectionModal from 'containers/cluster/VisibleEditClusterConnectionModal';
@@ -63,16 +64,20 @@ class MainDashboard extends React.Component {
     } else if (viewType === VIEW_TYPE.SET_OVERVIEW) {
       dashboard = <VisibleSetsOverview />
 
-    } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW) {
+    } else if (viewType === VIEW_TYPE.INDEXES_OVERVIEW || 
+               viewType === VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW) {
       dashboard = <VisibleIndexesOverviewDashboard />
         
-    } else if (viewType === VIEW_TYPE.INDEX) {
+    } else if (viewType === VIEW_TYPE.INDEX || 
+               viewType === VIEW_TYPE.LOGICAL_INDEX) {
       dashboard = <VisibleIndexView />
         
-    } else if (viewType === VIEW_TYPE.UDF) {
+    } else if (viewType === VIEW_TYPE.UDF || 
+               viewType === VIEW_TYPE.LOGICAL_UDF) {
       dashboard = <VisibleUDFView />
 
-    } else if (viewType === VIEW_TYPE.UDF_OVERVIEW) {
+    } else if (viewType === VIEW_TYPE.UDF_OVERVIEW ||
+               viewType === VIEW_TYPE.LOGICAL_UDF_OVERVIEW) {
       dashboard = <VisibleUDFOverviewDashboard />
 
     } else if (viewType === VIEW_TYPE.CLUSTER) {
@@ -85,6 +90,9 @@ class MainDashboard extends React.Component {
       dashboard = <LogicalNamespaceDashboard 
                     clusterID={clusterID} namespaceName={namespaceName} 
                     view={view} onViewSelect={this.onChangeView} />;
+
+    } else if (viewType === VIEW_TYPE.LOGICAL_CLUSTER) {
+      dashboard = <VisibleLogicalClusterDashboard />
 
     } else {
       let h = view ? view : '';

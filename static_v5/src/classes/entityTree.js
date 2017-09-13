@@ -11,14 +11,14 @@ const Keys = {
   UDF:       'udfName',
 };
 
-function toUDF(cluster) {
+function toUDF(cluster, isLogicalView = false) {
   let udfs = {
     name: 'UDF',
     children: [],
     isCategory: true, // aggregator of entites
 
     [Keys.ClusterID]: cluster.id,
-    viewType: VIEW_TYPE.UDF_OVERVIEW,
+    viewType: isLogicalView ? VIEW_TYPE.LOGICAL_UDF_OVERVIEW : VIEW_TYPE.UDF_OVERVIEW,
   };
 
   if (!Array.isArray(cluster.modules)) 
@@ -30,7 +30,7 @@ function toUDF(cluster) {
 
       [Keys.ClusterID]: cluster.id,
       [Keys.UDF]: udf.name,
-      viewType: VIEW_TYPE.UDF,
+      viewType: isLogicalView ? VIEW_TYPE.LOGICAL_UDF : VIEW_TYPE.UDF,
     });
 
     udfs.children.push(c);
@@ -86,14 +86,15 @@ function allNamespaces(cluster, node) {
   return namespaces;
 }
 
-function toIndexes(cluster) {
+function toIndexes(cluster, isLogicalView = false) {
   const indexes = {
     name: 'INDEXES',
     children: [],
     isCategory: true, // aggregator of entities
 
     [Keys.ClusterID]: cluster.id,
-    viewType: VIEW_TYPE.INDEXES_OVERVIEW
+    viewType: isLogicalView ? VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW 
+                            : VIEW_TYPE.INDEXES_OVERVIEW,
   };
 
   if (!Array.isArray(cluster.indexes)) 
@@ -107,7 +108,7 @@ function toIndexes(cluster) {
 
     let c = Object.assign({}, index, {
       children: [],
-      viewType: VIEW_TYPE.INDEX,
+      viewType: isLogicalView ? VIEW_TYPE.LOGICAL_INDEX : VIEW_TYPE.INDEX,
 
       [Keys.ClusterID]: cluster.id,
       [Keys.Index]: index.name,
@@ -230,14 +231,7 @@ export function findAncestors(tree, entity) {
 // LOGICAL ENTITY TREE
 
 function toLogicalNamespaces(cluster) {
-  let namespaces = {
-    name: 'NAMESPACES',
-    children: [],
-    isCategory: true, // aggregator of entities
-
-    [Keys.ClusterID]: cluster.id,
-    viewType: VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW,
-  };
+  const namespaces = [];
 
   const all = new Set();
   cluster.nodes.forEach((node) => {
@@ -256,7 +250,7 @@ function toLogicalNamespaces(cluster) {
       viewType: VIEW_TYPE.LOGICAL_NAMESPACE,
     };
 
-    namespaces.children.push(ns);
+    namespaces.push(ns);
   });
 
   return namespaces;
@@ -278,7 +272,9 @@ export function toLogicalEntityTree(cluster, isAuthenticated) {
     return root;
 
   let children = [];
-  children.push(toLogicalNamespaces(cluster));
+  children = children.concat(toLogicalNamespaces(cluster));
+  children.push(toUDF(cluster, true));
+  children.push(toIndexes(cluster, true));
 
   root.children = children;
   assignParent(root);

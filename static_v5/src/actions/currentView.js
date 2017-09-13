@@ -86,39 +86,43 @@ export function selectSetOverview(clusterID, nodeHost, namespaceName, view) {
 }
 
 export const SELECT_UDF_VIEW = 'SELECT_UDF_VIEW';
-export function selectUDF(clusterID, udfName, view) {
+export function selectUDF(clusterID, udfName, view, viewType = VIEW_TYPE.UDF) {
   return {
     type: SELECT_UDF_VIEW,
     view: view,
+    viewType: viewType,
     clusterID: clusterID,
     udfName: udfName,
   };
 }
 
 export const SELECT_UDF_OVERVIEW = 'SELECT_UDF_OVERVIEW';
-export function selectUDFOverview(clusterID, view) {
+export function selectUDFOverview(clusterID, view, viewType = VIEW_TYPE.UDF_OVERVIEW) {
   return {
     type: SELECT_UDF_OVERVIEW,
     clusterID: clusterID,
+    viewType: viewType,
     view: view
   };
 }
 
 export const SELECT_INDEXES_OVERVIEW = 'SELECT_INDEXES_OVERVIEW';
-export function selectIndexesOverview(clusterID, view) {
+export function selectIndexesOverview(clusterID, view, viewType = VIEW_TYPE.INDEXES_OVERVIEW) {
   return {
     type: SELECT_INDEXES_OVERVIEW,
     clusterID: clusterID,
+    viewType: viewType,
     view: view
   };
 }
 
 export const SELECT_INDEX = 'SELECT_INDEX';
-export function selectIndex(clusterID, indexName, view) {
+export function selectIndex(clusterID, indexName, view, viewType = VIEW_TYPE.INDEX) {
   return {
     type: SELECT_INDEX,
     clusterID: clusterID,
     indexName: indexName,
+    viewType: viewType,
     view: view,
   };
 }
@@ -138,15 +142,6 @@ export function selectLogicalNamespace(clusterID, namespaceName, view) {
     type: SELECT_LOGICAL_NAMESPACE,
     clusterID: clusterID,
     namespaceName: namespaceName,
-    view: view
-  };
-}
-
-export const SELECT_LOGICAL_NAMESPACE_OVERVIEW = 'SELECT_LOGICAL_NAMESPACE_OVERVIEW';
-export function selectLogicalNamespaceOverview(clusterID, view) {
-  return {
-    type: SELECT_LOGICAL_NAMESPACE_OVERVIEW,
-    clusterID: clusterID,
     view: view
   };
 }
@@ -198,16 +193,28 @@ export function selectEntity(entity, view) {
 
   switch (viewType) {
   case VIEW_TYPE.UDF:
-    return selectUDF(clusterID, udfName, view);
+    return selectUDF(clusterID, udfName, view, VIEW_TYPE.UDF);
+
+  case VIEW_TYPE.LOGICAL_UDF:
+    return selectUDF(clusterID, udfName, view, VIEW_TYPE.LOGICAL_UDF);
 
   case VIEW_TYPE.UDF_OVERVIEW:
-    return selectUDFOverview(clusterID, view);
+    return selectUDFOverview(clusterID, view, VIEW_TYPE.UDF_OVERVIEW);
+
+  case VIEW_TYPE.LOGICAL_UDF_OVERVIEW:
+    return selectUDFOverview(clusterID, view, VIEW_TYPE.LOGICAL_UDF_OVERVIEW);
 
   case VIEW_TYPE.INDEXES_OVERVIEW:
-    return selectIndexesOverview(clusterID, view);
+    return selectIndexesOverview(clusterID, view, VIEW_TYPE.INDEXES_OVERVIEW);
+
+  case VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW:
+    return selectIndexesOverview(clusterID, view, VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW);
 
   case VIEW_TYPE.INDEX:
-    return selectIndex(clusterID, indexName, view);
+    return selectIndex(clusterID, indexName, view, VIEW_TYPE.INDEX);
+
+  case VIEW_TYPE.LOGICAL_INDEX:
+    return selectIndex(clusterID, indexName, view, VIEW_TYPE.LOGICAL_INDEX);
 
   case VIEW_TYPE.CLUSTER:
     return selectCluster(clusterID, view);
@@ -229,9 +236,6 @@ export function selectEntity(entity, view) {
 
   case VIEW_TYPE.LOGICAL_NAMESPACE:
     return selectLogicalNamespace(clusterID, namespaceName, view);
-
-  case VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW:
-    return selectLogicalNamespaceOverview(clusterID, view);
 
   default:
     return selectStartView();

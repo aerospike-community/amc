@@ -5,7 +5,6 @@ import { SELECT_UDF_VIEW, SELECT_UDF_OVERVIEW, SHOW_LEFT_PANE, HIDE_LEFT_PANE } 
 import { SELECT_INDEX, SELECT_INDEXES_OVERVIEW, SELECT_CLUSTER_ON_STARTUP } from 'actions/currentView';
 import { SELECT_VIEW, SELECT_VIEW_FOR_VIEW_TYPE } from 'actions/currentView';
 import { SELECT_LOGICAL_NAMESPACE, SELECT_LOGICAL_CLUSTER } from 'actions/currentView';
-import { SELECT_LOGICAL_NAMESPACE_OVERVIEW } from 'actions/currentView';
 import { SELECT_LOGICAL_VIEW, SELECT_PHYSICAL_VIEW } from 'actions/currentView';
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
@@ -115,15 +114,6 @@ export default function currentView(state = InitState, action) {
       });
       break;
 
-    case SELECT_LOGICAL_NAMESPACE_OVERVIEW:
-      updated = updateFn({
-        clusterID: action.clusterID,
-        view: action.view,
-
-        viewType: VIEW_TYPE.LOGICAL_NAMESPACE_OVERVIEW,
-      });
-      break;
-
     case SELECT_VIEW:
       const nv = action.newView;
       updated = Object.assign({}, state, {
@@ -216,7 +206,7 @@ export default function currentView(state = InitState, action) {
       updated =  updateFn({
         view: action.view,
 
-        viewType: VIEW_TYPE.UDF,
+        viewType: action.viewType,
         clusterID: action.clusterID,
         udfName: action.udfName,
       });
@@ -227,7 +217,7 @@ export default function currentView(state = InitState, action) {
       updated =  updateFn({
         view: action.view, 
 
-        viewType: VIEW_TYPE.UDF_OVERVIEW,
+        viewType: action.viewType,
         clusterID: action.clusterID,
       });
       break;
@@ -236,7 +226,7 @@ export default function currentView(state = InitState, action) {
       updated =  updateFn({
         view: action.view,
         
-        viewType: VIEW_TYPE.INDEXES_OVERVIEW,
+        viewType: action.viewType,
         clusterID: action.clusterID,
       });
       break;
@@ -245,7 +235,7 @@ export default function currentView(state = InitState, action) {
       updated =  updateFn({
         view: action.view,
 
-        viewType: VIEW_TYPE.INDEX,
+        viewType: action.viewType,
         clusterID: action.clusterID,
         indexName: action.indexName
       });

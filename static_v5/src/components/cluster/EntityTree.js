@@ -6,7 +6,8 @@ import classNames from 'classnames';
 
 import { VIEW_TYPE } from 'classes/constants';
 import { objectPropType, nextNumber, isEntitiesEqual  } from 'classes/util';
-import { contextMenuActions, defaultContextMenuAction, CLUSTER_ACTIONS } from 'classes/entityActions';
+import { contextMenuActions, defaultContextMenuAction } from 'classes/entityActions';
+import { CLUSTER_ACTIONS, LOGICAL_CLUSTER_ACTIONS } from 'classes/entityActions';
 import Tree from 'components/Tree';
 
 // Display all the clusters and its entites 
@@ -59,8 +60,10 @@ class EntityTree extends React.Component {
       return null;
 
     const { alerts } = this.props;
-    const { clusterID } = entity;
-    const isCluster = entity.viewType === VIEW_TYPE.CLUSTER;
+    const { clusterID, viewType } = entity;
+    const isPhysicalCluster = viewType === VIEW_TYPE.CLUSTER;
+    const isLogicalCluster = viewType === VIEW_TYPE.LOGICAL_CLUSTER;
+    const isCluster = isPhysicalCluster || isLogicalCluster;
 
     let nalerts = 0;
     if (isCluster && alerts[clusterID])
@@ -72,7 +75,10 @@ class EntityTree extends React.Component {
     const onShowAlerts = (evt) => {
       evt.preventDefault();
       evt.stopPropagation();
-      this.props.onEntityAction(entity, CLUSTER_ACTIONS.Alerts);
+
+      const action = isLogicalCluster ? LOGICAL_CLUSTER_ACTIONS.Alerts
+                                      : CLUSTER_ACTIONS.Alerts;
+      this.props.onEntityAction(entity, action);
     };
 
     return (

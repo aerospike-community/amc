@@ -4,6 +4,8 @@ import IndexesOverviewDashboard from 'components/index/IndexesOverviewDashboard'
 import { selectIndex, selectViewForViewType } from 'actions/currentView';
 import { addIndex } from 'actions/clusters';
 import { INDEX_ACTIONS } from 'classes/entityActions';
+import { isLogicalView } from 'classes/util';
+import { VIEW_TYPE } from 'classes/constants';
 
 function extractNamespaces(entityTree) {
   const namespaces = {};
@@ -30,9 +32,12 @@ function extractNamespaces(entityTree) {
   return namespaces;
 }
 
+let IsLogicalView;
 const  mapStateToProps = (state) => {
-  const { clusterID, view } = state.currentView;
+  const { clusterID, view, viewType } = state.currentView;
   const cluster = state.clusters.items.find((c) => c.id === clusterID);
+
+  IsLogicalView = isLogicalView(viewType);
   
   return {
     clusterID: clusterID,
@@ -42,18 +47,22 @@ const  mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
+
+  const onSelectIndex = (clusterID, indexName) => {
+    const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_INDEX : VIEW_TYPE.INDEX;
+    dispatch(selectIndex(clusterID, indexName, INDEX_ACTIONS.View, vt));
+  };
+
   return {
     onViewSelect: (view) => {
       dispatch(selectViewForViewType(view));
     },
 
-    onSelectIndex: (clusterID, indexName) => {
-      dispatch(selectIndex(clusterID, indexName, INDEX_ACTIONS.View));
-    },
+    onSelectIndex: onSelectIndex,
 
     onCreateIndexSuccess: (clusterID, indexName) => {
       dispatch(addIndex(clusterID, indexName));
-      dispatch(selectIndex(clusterID, indexName, INDEX_ACTIONS.View));
+      onSelectIndex(clusterID, indexName);
     }
   };
 }

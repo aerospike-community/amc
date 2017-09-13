@@ -78,7 +78,7 @@ const { START_VIEW, CLUSTER, UDF, UDF_OVERVIEW, NODE, NAMESPACE } = VIEW_TYPE;
 const { SET_OVERVIEW, INDEX } = VIEW_TYPE;
 const { SET, INDEXES_OVERVIEW } = VIEW_TYPE;
 const { LOGICAL_CLUSTER, LOGICAL_NAMESPACE, LOGICAL_START_VIEW } = VIEW_TYPE;
-const { LOGICAL_NAMESPACE_OVERVIEW } = VIEW_TYPE;
+const { LOGICAL_UDF, LOGICAL_UDF_OVERVIEW, LOGICAL_INDEX, LOGICAL_INDEXES_OVERVIEW } = VIEW_TYPE;
 
 const URLDefinitions = [{
   url: '',
@@ -117,11 +117,20 @@ const URLDefinitions = [{
   url: '/logical-tree/cluster/:clusterID/:view',
   viewType: LOGICAL_CLUSTER,
 }, {
-  url: '/logical-tree/namespace-overview/:clusterID/:view',
-  viewType: LOGICAL_NAMESPACE_OVERVIEW,
-}, {
   url: '/logical-tree/namespace/:clusterID/:namespaceName/:view',
   viewType: LOGICAL_NAMESPACE,
+}, {
+  url: '/logical-tree/udf-overview/:clusterID/:view',
+  viewType: LOGICAL_UDF_OVERVIEW,
+}, {
+  url: '/logical-tree/udf/:clusterID/:udfName/:view',
+  viewType: LOGICAL_UDF,
+}, {
+  url: '/logical-tree/index/:clusterID/:indexName/:view',
+  viewType: LOGICAL_INDEX,
+}, {
+  url: '/logical-tree/indexes-overview/:clusterID/:view',
+  viewType: LOGICAL_INDEXES_OVERVIEW,
 }];
 
 // convert the url to a view
