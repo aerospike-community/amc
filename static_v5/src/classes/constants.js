@@ -46,3 +46,6 @@ export const DB_ROLES = {
 
 // polling interval
 export const POLL_INTERVAL = 10*1000; // 10 seconds
+
+// default time window in charts
+export const LAST_X_MINUTES = 10;

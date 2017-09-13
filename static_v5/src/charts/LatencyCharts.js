@@ -3,7 +3,7 @@ import moment from 'moment';
 import LatencyData from 'charts/LatencyData';
 import { newLatencyChart } from 'charts/charts';
 import { POLL_INTERVAL } from 'classes/constants';
-import { timeout } from 'classes/util';
+import { timeout, cancelTimeout } from 'classes/util';
 
 // LatencyCharts draws the latency charts
 export default class LatencyCharts {
@@ -18,17 +18,18 @@ export default class LatencyCharts {
 
     this.latData = new LatencyData();
     this.poll = false;
+    this.timeoutid = null;
   }
 
   // init fetches data and initializes the charts
-  init() {
-    const from = moment().subtract(10, 'minutes');
+  init(lastXMinutes) {
+    const from = moment().subtract(lastXMinutes, 'minutes');
     const to = moment();
 
     this._fetchData(from, to, (data) => {
       this.latData.setData(data);
       this._setupCharts();
-      this.keepInSync();
+      this.keepInSync(lastXMinutes);
     });
   }
 
@@ -37,7 +38,7 @@ export default class LatencyCharts {
   //
   // inSync - specifies whether the data should be polled 
   // and kept in sync with the current time
-  updateWindow(from, to, inSync = false) {
+  updateWindow(from, to, inSync = false, lastXMinutes) {
     this.stopSync();
 
     this._fetchData(from, to, (data) => {
@@ -46,7 +47,7 @@ export default class LatencyCharts {
     });
 
     if (inSync)
-      this.keepInSync();
+      this.keepInSync(lastXMinutes);
   }
 
   // destroy cleans all the data, activities of the
@@ -55,30 +56,58 @@ export default class LatencyCharts {
     this.stopSync();
   }
 
-  // keepInSync keeps the data in sync with the current time
-  keepInSync() {
+  _timeWindow(lastXMinutes) {
+    const from = this.latData.latestTimestamp();
+    const xmins = moment().subtract(lastXMinutes, 'minutes');
+    const set = {
+      isUpdate: false,
+      from: xmins
+    };
+
+    if (!from)
+      return set;
+
+    const f = moment(from);
+    if (f.isBefore(xmins))
+      return set;
+
+    return {
+      isUpdate: true,
+      from: moment(from+1000), // add a second
+    };
+  }
+
+  // keepInSync keeps the data in sync with the current time 
+  keepInSync(lastXMinutes) {
     this.poll = true;
 
     // don't use setInterval. 
     // see http://reallifejs.com/brainchunks/repeated-events-timeout-or-interval
     const updateData = () => {
-      let from = this.latData.latestTimestamp();
-      from = from && moment(from+1000); // add a second
+      const { from, isUpdate } = this._timeWindow(lastXMinutes);
       const to = null;
 
       this._fetchData(from, to, (data) => {
-        this.latData.updateWindow(data);
+        if (isUpdate)
+          this.latData.updateWindow(data);
+        else
+          this.latData.setData(data);
+
         this._updateCharts();
 
         if (this.poll)
-          timeout(updateData, POLL_INTERVAL);
+          this.timeoutid = timeout(updateData, POLL_INTERVAL);
       });
     };
-    timeout(updateData, POLL_INTERVAL);
+    this.timeoutid = timeout(updateData, POLL_INTERVAL);
   }
 
   // stopSync stops keeping the data in sync with the current time
   stopSync() {
+    const id = this.timeoutid;
+    if (id)
+      cancelTimeout(id);
+
     this.poll = false;
   }
 

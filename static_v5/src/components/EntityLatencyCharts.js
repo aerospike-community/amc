@@ -7,6 +7,7 @@ import ChartsLayout from 'components/ChartsLayout';
 import LatencyCharts from 'charts/LatencyCharts';
 import { LatencyOperations as LO } from 'charts/constants';
 import { nextNumber } from 'classes/util';
+import { LAST_X_MINUTES } from 'classes/constants';
 
 // names of the operations in the charts
 const OperationNames = {
@@ -96,11 +97,11 @@ class EntityLatencyCharts extends React.Component {
   }
 
   componentDidMount() {
-    this.latencyCharts.init();
+    this.latencyCharts.init(LAST_X_MINUTES);
   }
   
-  onUpdateTimeWindow(from, to, inSync) {
-    this.latencyCharts.updateWindow(from, to, inSync);
+  onUpdateTimeWindow(from, to, inSync, lastXMinutes) {
+    this.latencyCharts.updateWindow(from, to, inSync, lastXMinutes);
   }
 
   render() {

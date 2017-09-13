@@ -49,7 +49,9 @@ class TimeToLiveChart extends React.Component {
     const values = [];
 
     ttl.forEach((o) => {
-      const label = formatDuration(o.min) + ' to ' + formatDuration(o.max);
+      const minms = o.min*1000;
+      const maxms = o.max*1000;
+      const label = formatDuration(minms) + ' to ' + formatDuration(maxms);
 
       values.push({
         label: label,

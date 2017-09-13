@@ -220,6 +220,18 @@ function now() {
   return d.getTime();
 }
 
+function executeOnce(fn) {
+  let hasExecuted = false;
+
+  return function () {
+    if (hasExecuted)
+      return;
+
+    hasExecuted = true;
+    fn();
+  };
+}
+
 // timeout is implemented to circumvent the tab freezing when the tab is not
 // in focus.
 //
@@ -251,39 +263,47 @@ function now() {
 // pauseOnTabInactive - set to true iff the fn function does not make any
 // ui changes
 //
+// returns the id of the timeout, to cancel call cancelTimeout(id)
+const CancelledTimeouts = new Set();
 export function timeout(fn, delay, pauseOnTabInactive = true) {
   const calledAt = now();
-  let hasExecuted = false;
+  const tid = nextNumber();
 
-  const id = window.setTimeout(() => {
-    try {
-      fn();
-    } 
-    finally {
-      hasExecuted = true;
-    }
-  }, delay);
+  const onlyOnce = executeOnce(() => {
+    if (CancelledTimeouts.has(tid))
+      return;
 
-  if (!pauseOnTabInactive)
-    return;
+    document.removeEventListener('visibilitychange', visibiltyListener);
+    fn();
+  });
 
-  document.addEventListener('visibilitychange', () => {
+  if (pauseOnTabInactive)
+    document.addEventListener('visibilitychange', visibiltyListener);
+
+  // id used to maintain the current timeout identifier
+  var id = window.setTimeout(onlyOnce, delay);
+
+  return tid;
+
+  function visibiltyListener() {
     // tab out of focus
     if (document.hidden) {
       window.clearTimeout(id);
       return;
     } 
 
-    if (hasExecuted)
-      return;
-
     const elapsed = now() - calledAt;
-    if (elapsed < delay)
-      window.setTimeout(fn, delay-elapsed);
+    if (elapsed < delay) 
+      id = window.setTimeout(onlyOnce, delay-elapsed);
     else
-      fn();
-  });
+      onlyOnce();
+  }
 };
+
+// id - the id returned by timeout
+export function cancelTimeout(id) {
+  CancelledTimeouts.add(id);
+}
 
 // see https://www.npmjs.com/package/humanize-duration
 export function formatDuration(millisecs) {

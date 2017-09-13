@@ -7,6 +7,7 @@ import ChartsLayout from 'components/ChartsLayout';
 import  ThroughputCharts from 'charts/ThroughputCharts';
 import { ThroughputGrouping, ThroughputOperations as TPO } from 'charts/constants';
 import { nextNumber } from 'classes/util';
+import { LAST_X_MINUTES } from 'classes/constants';
 
 // names of the operations in the charts
 const OperationNames = {
@@ -109,11 +110,11 @@ class EntityThroughputCharts extends React.Component {
   }
 
   componentDidMount() {
-    this.tpcharts.init();
+    this.tpcharts.init(LAST_X_MINUTES);
   }
   
-  onUpdateTimeWindow(from, to, inSync) {
-    this.tpcharts.updateWindow(from, to, inSync);
+  onUpdateTimeWindow(from, to, inSync, lastXMinutes) {
+    this.tpcharts.updateWindow(from, to, inSync, lastXMinutes);
   }
 
   onOptionSelect(option) {

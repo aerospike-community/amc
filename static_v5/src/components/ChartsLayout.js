@@ -6,6 +6,7 @@ import { Input } from 'reactstrap';
 
 import { formatTimeWindow } from 'classes/util';
 import DateTimePickerModal from 'components/DateTimePickerModal';
+import { LAST_X_MINUTES } from 'classes/constants';
 
 // ChartsLayout lays out the charts as specified in the
 // layout props
@@ -17,12 +18,12 @@ class ChartsLayout extends React.Component {
       showDateTimePicker: false,
       // [from, to] time window for which
       // the throughputs are shown
-      from: moment().subtract(10, 'minutes'),
+      from: moment().subtract(LAST_X_MINUTES, 'minutes'),
       to: moment(),
 
       // the last x minutes
       // zero signifies not selected
-      lastXMinutes: 10, 
+      lastXMinutes: LAST_X_MINUTES, 
 
       option: this.props.defaultOption,
     };
@@ -74,7 +75,7 @@ class ChartsLayout extends React.Component {
     });
 
     const inSync = lastXMinutes !== 0;
-    this.props.onUpdateTimeWindow(from, to, inSync);
+    this.props.onUpdateTimeWindow(from, to, inSync, lastXMinutes);
   }
 
   onShowDateTimePicker() {
