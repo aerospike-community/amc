@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"io"
 	"strings"
+	"time"
+
+	"golang.org/x/net/websocket"
 
 	"github.com/goadesign/goa"
 
@@ -185,6 +189,42 @@ func (c *NodeController) Latency(ctx *app.LatencyNodeContext) error {
 
 	// NodeController_Latency: end_implement
 	return ctx.OK(res)
+}
+
+// GetLogs runs the get logs action.
+func (c *NodeController) GetLogs(ctx *app.GetLogsNodeContext) error {
+	c.GetLogsWSHandler(ctx).ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	return nil
+}
+
+// GetLogsWSHandler establishes a websocket connection to run the get logs action.
+func (c *NodeController) GetLogsWSHandler(ctx *app.GetLogsNodeContext) websocket.Handler {
+	return func(ws *websocket.Conn) {
+		// NodeController_GetLogs: start_implement
+
+		cluster, err := getConnectionClusterById(ctx.ConnID)
+		if err != nil {
+			return //ctx.BadRequest(err.Error())
+		}
+
+		node := cluster.FindNodeByAddress(ctx.Node)
+		if node == nil {
+			return //ctx.BadRequest("Node not found.")
+		}
+
+		r, w := io.Pipe()
+		defer w.Close()
+		defer r.Close()
+
+		node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort)
+
+		// NodeController_GetLogs: end_implement
+		for {
+			if _, err := io.Copy(ws, r); err != nil {
+				break
+			}
+		}
+	}
 }
 
 // Show runs the show action.

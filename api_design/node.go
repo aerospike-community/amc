@@ -247,6 +247,23 @@ var _ = Resource("node", func() {
 		Response(Unauthorized)
 		Response(InternalServerError)
 	})
+
+	Action("get logs", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+		Scheme("ws")
+		Description("Receive lohs via a Websocket")
+		Routing(GET(":node/logs"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+
+			Required("node")
+		})
+		Response(SwitchingProtocols)
+	})
 })
 
 var NodeResponseMedia = MediaType("application/vnd.aerospike.amc.node.response+json", func() {

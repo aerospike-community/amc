@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net"
 	"strconv"
 	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	agent "github.com/citrusleaf/amc-agent"
 
 	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
@@ -1171,4 +1173,8 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 	}
 
 	return res
+}
+
+func (n *Node) QueryLogs(protocol string, w *io.PipeWriter, timeout time.Duration, bindPort uint16) error {
+	return agent.Tail(protocol, net.JoinHostPort(n.origHost.Name, strconv.Itoa(int(bindPort))), w, timeout)
 }

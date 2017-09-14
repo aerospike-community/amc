@@ -288,4 +288,21 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("get logs", func() {
+		Security(JWT, func() {
+			Scope("api:enterprise")
+		})
+		Scheme("ws")
+		Description("Receive lohs via a Websocket")
+		Routing(GET(":connId/logs"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+		Response(SwitchingProtocols)
+	})
 })

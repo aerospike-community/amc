@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"io"
 	"sync"
+	"time"
+
+	"golang.org/x/net/websocket"
 
 	"github.com/goadesign/goa"
 
@@ -126,6 +130,41 @@ func (c *ConnectionController) Entities(ctx *app.EntitiesConnectionContext) erro
 
 	// ConnectionController_Entities: end_implement
 	return ctx.OK(et)
+}
+
+// GetLogs runs the get logs action.
+func (c *ConnectionController) GetLogs(ctx *app.GetLogsConnectionContext) error {
+	c.GetLogsWSHandler(ctx).ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	return nil
+}
+
+// GetLogsWSHandler establishes a websocket connection to run the get logs action.
+func (c *ConnectionController) GetLogsWSHandler(ctx *app.GetLogsConnectionContext) websocket.Handler {
+	return func(ws *websocket.Conn) {
+		// ConnectionController_GetLogs: start_implement
+
+		// NodeController_GetLogs: start_implement
+
+		cluster, err := getConnectionClusterById(ctx.ConnID)
+		if err != nil {
+			return //ctx.BadRequest(err.Error())
+		}
+
+		r, w := io.Pipe()
+		defer w.Close()
+		defer r.Close()
+
+		for _, node := range cluster.Nodes() {
+			node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort)
+		}
+
+		// NodeController_GetLogs: end_implement
+		for {
+			if _, err := io.Copy(ws, r); err != nil {
+				break
+			}
+		}
+	}
 }
 
 // Latency runs the latency action.

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
@@ -17,15 +16,13 @@ import (
 
 	"github.com/goadesign/goa"
 	gmiddleware "github.com/goadesign/goa/middleware"
-	gzm "github.com/goadesign/goa/middleware/gzip"
+	// gzm "github.com/goadesign/goa/middleware/gzip"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 
 	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
 	mw "github.com/citrusleaf/amc/controllers/middleware"
-	"github.com/citrusleaf/amc/controllers/middleware/sessions"
 	"github.com/citrusleaf/amc/models"
 )
 
@@ -106,129 +103,129 @@ func getAMCVersion(c echo.Context) error {
 }
 
 func ShutdownServer() {
-	_server.Shutdown(_server.ShutdownTimeout)
+	// _server.Shutdown(_server.ShutdownTimeout)
 }
 
-func Server(config *common.Config) {
-	_observer = models.New(config)
+// func Server(config *common.Config) {
+// 	_observer = models.New(config)
 
-	_defaultClientPolicy.Timeout = time.Duration(config.AMC.Timeout) * time.Second
-	if _defaultClientPolicy.Timeout <= 0 {
-		_defaultClientPolicy.Timeout = 30 * time.Second
-	}
-	_defaultClientPolicy.LimitConnectionsToQueueSize = true
-	_defaultClientPolicy.ConnectionQueueSize = 1
+// 	_defaultClientPolicy.Timeout = time.Duration(config.AMC.Timeout) * time.Second
+// 	if _defaultClientPolicy.Timeout <= 0 {
+// 		_defaultClientPolicy.Timeout = 30 * time.Second
+// 	}
+// 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
+// 	_defaultClientPolicy.ConnectionQueueSize = 1
 
-	e := echo.New()
-	// Avoid stale connections
-	e.ReadTimeout = 30 * time.Second
-	e.WriteTimeout = 30 * time.Second
+// 	e := echo.New()
+// 	// Avoid stale connections
+// 	e.ReadTimeout = 30 * time.Second
+// 	e.WriteTimeout = 30 * time.Second
 
-	store := sessions.NewCookieStore([]byte("amc-secret-key"))
-	e.Use(sessions.Sessions("amc_session", store))
+// 	store := sessions.NewCookieStore([]byte("amc-secret-key"))
+// 	e.Use(sessions.Sessions("amc_session", store))
 
-	if config.AMC.StaticPath == "" {
-		logrus.Fatalln("No static dir has been set in the config file. Quiting...")
-	}
-	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
-	e.Static("/", config.AMC.StaticPath)
-	e.Static("/static", config.AMC.StaticPath)
+// 	if config.AMC.StaticPath == "" {
+// 		logrus.Fatalln("No static dir has been set in the config file. Quiting...")
+// 	}
+// 	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
+// 	e.Static("/", config.AMC.StaticPath)
+// 	e.Static("/static", config.AMC.StaticPath)
 
-	// Middleware
-	if !common.AMCIsProd() {
-		// e.Logger.SetOutput(log.StandardLogger().Writer())
-		// e.Use(middleware.Logger())
-	} else {
-		e.Use(middleware.Recover())
-	}
+// 	// Middleware
+// 	if !common.AMCIsProd() {
+// 		// e.Logger.SetOutput(log.StandardLogger().Writer())
+// 		// e.Use(middleware.Logger())
+// 	} else {
+// 		e.Use(middleware.Recover())
+// 	}
 
-	// Basic Authentication Middleware Setup
-	basicAuthUser := os.Getenv("AMC_AUTH_USER")
-	if basicAuthUser == "" {
-		basicAuthUser = config.BasicAuth.User
-	}
+// 	// Basic Authentication Middleware Setup
+// 	basicAuthUser := os.Getenv("AMC_AUTH_USER")
+// 	if basicAuthUser == "" {
+// 		basicAuthUser = config.BasicAuth.User
+// 	}
 
-	basicAuthPassword := os.Getenv("AMC_AUTH_PASSWORD")
-	if basicAuthPassword == "" {
-		basicAuthPassword = config.BasicAuth.Password
-	}
+// 	basicAuthPassword := os.Getenv("AMC_AUTH_PASSWORD")
+// 	if basicAuthPassword == "" {
+// 		basicAuthPassword = config.BasicAuth.Password
+// 	}
 
-	if basicAuthUser != "" {
-		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) bool {
-			if username == basicAuthUser && password == basicAuthPassword {
-				return true
-			}
-			return false
-		}))
-	}
+// 	if basicAuthUser != "" {
+// 		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) bool {
+// 			if username == basicAuthUser && password == basicAuthPassword {
+// 				return true
+// 			}
+// 			return false
+// 		}))
+// 	}
 
-	e.Use(middleware.GzipWithConfig(middleware.DefaultGzipConfig))
-	// e.Use(middleware.CSRFWithConfig(middleware.DefaultCSRFConfig))
-	e.Use(middleware.SecureWithConfig(middleware.DefaultSecureConfig))
+// 	e.Use(middleware.GzipWithConfig(middleware.DefaultGzipConfig))
+// 	// e.Use(middleware.CSRFWithConfig(middleware.DefaultCSRFConfig))
+// 	e.Use(middleware.SecureWithConfig(middleware.DefaultSecureConfig))
 
-	// Routes
-	e.POST("/session-terminate", postSessionTerminate)
+// 	// Routes
+// 	e.POST("/session-terminate", postSessionTerminate)
 
-	e.GET("/aerospike/service/debug", getDebug)
-	e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
+// 	e.GET("/aerospike/service/debug", getDebug)
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
 
-	e.GET("/get_amc_version", getAMCVersion)
-	e.GET("/get_current_monitoring_clusters", sessionValidator(getCurrentMonitoringClusters))
+// 	e.GET("/get_amc_version", getAMCVersion)
+// 	e.GET("/get_current_monitoring_clusters", sessionValidator(getCurrentMonitoringClusters))
 
-	e.POST("/set-update-interval/:clusterUuid", sessionValidator(setClusterUpdateInterval))
-	e.GET("/aerospike/service/clusters/:clusterUuid", sessionValidator(getCluster))
-	e.POST("/aerospike/service/clusters/:clusterUuid/logout", postRemoveClusterFromSession)
+// 	e.POST("/set-update-interval/:clusterUuid", sessionValidator(setClusterUpdateInterval))
+// 	e.GET("/aerospike/service/clusters/:clusterUuid", sessionValidator(getCluster))
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/logout", postRemoveClusterFromSession)
 
-	e.GET("/aerospike/service/clusters/:clusterUuid/udfs", sessionValidator(getClusterUDFs))          //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/drop_udf", sessionValidator(postClusterDropUDF)) //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/add_udf", sessionValidator(postClusterAddUDF))   //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/udfs", sessionValidator(getClusterUDFs))          //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/drop_udf", sessionValidator(postClusterDropUDF)) //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/add_udf", sessionValidator(postClusterAddUDF))   //DONE
 
-	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", sessionValidator(getClusterThroughput))                //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", sessionValidator(getClusterThroughputHistory)) //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/basic", sessionValidator(getClusterBasic))
-	e.POST("/aerospike/service/clusters/:clusterUuid/add_node", sessionValidator(postAddClusterNodes)) //DONE
-	// e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", sessionValidator(getClusterNodes))
-	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", sessionValidator(getClusterNodeAllConfig)) //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", sessionValidator(setClusterNodesConfig)) //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_off", sessionValidator(postSwitchNodeOff))
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", sessionValidator(getClusterNamespaces))                              //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", sessionValidator(getClusterNamespaceNodes))              //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", sessionValidator(getClusterNamespaceAllConfig)) //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/setconfig", sessionValidator(setClusterNamespaceConfig))   //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput", sessionValidator(getClusterThroughput))                //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/throughput_history", sessionValidator(getClusterThroughputHistory)) //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/basic", sessionValidator(getClusterBasic))
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/add_node", sessionValidator(postAddClusterNodes)) //DONE
+// 	// e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes", sessionValidator(getClusterNodes))
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allconfig", sessionValidator(getClusterNodeAllConfig)) //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/setconfig", sessionValidator(setClusterNodesConfig)) //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/nodes/:node/switch_off", sessionValidator(postSwitchNodeOff))
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespaces", sessionValidator(getClusterNamespaces))                              //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:nodes", sessionValidator(getClusterNamespaceNodes))              //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allconfig", sessionValidator(getClusterNamespaceAllConfig)) //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/setconfig", sessionValidator(setClusterNamespaceConfig))   //DONE
 
-	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", sessionValidator(getClusterNodeAllStats))                                //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", sessionValidator(getClusterNamespaceNodeAllStats)) //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:port/nodes/:node/allstats", sessionValidator(getClusterXdrNodeAllStats))                   //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:node/allstats", sessionValidator(getClusterNodeAllStats))                                //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/nodes/:node/allstats", sessionValidator(getClusterNamespaceNodeAllStats)) //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/xdr/:port/nodes/:node/allstats", sessionValidator(getClusterXdrNodeAllStats))                   //DONE
 
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", sessionValidator(getClusterNamespaceSindexNodeAllStats)) //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/add_index", sessionValidator(postClusterAddIndex))                                               //DONE
-	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/drop_index", sessionValidator(postClusterDropIndex))                                             //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes/:sindex/nodes/:node/allstats", sessionValidator(getClusterNamespaceSindexNodeAllStats)) //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/add_index", sessionValidator(postClusterAddIndex))                                               //DONE
+// 	e.POST("/aerospike/service/clusters/:clusterUuid/namespace/:namespace/drop_index", sessionValidator(postClusterDropIndex))                                             //DONE
 
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", sessionValidator(getClusterNamespaceSindexes)) //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", sessionValidator(getClusterNamespaceSets))         //DONE
-	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/storage", sessionValidator(getClusterNamespaceStorage))
-	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/jobs", getClusterNodesJobs)
-	e.GET("/aerospike/service/clusters/:clusterUuid/jobs/nodes/:node", getClusterJobsNode)
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sindexes", sessionValidator(getClusterNamespaceSindexes)) //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/sets", sessionValidator(getClusterNamespaceSets))         //DONE
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/namespaces/:namespace/storage", sessionValidator(getClusterNamespaceStorage))
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/nodes/:nodes/jobs", getClusterNodesJobs)
+// 	e.GET("/aerospike/service/clusters/:clusterUuid/jobs/nodes/:node", getClusterJobsNode)
 
-	e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)
+// 	e.POST("/aerospike/service/clusters/get-cluster-id", postGetClusterId)
 
-	if registerEnterpriseAPI != nil {
-		registerEnterpriseAPI(e)
-	}
+// 	if registerEnterpriseAPI != nil {
+// 		registerEnterpriseAPI(e)
+// 	}
 
-	logrus.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
-	_server = e
-	// Start server
-	if config.AMC.CertFile != "" {
-		logrus.Infof("In HTTPS (secure) Mode")
-		// redirect all http requests to https
-		e.Pre(middleware.HTTPSRedirect())
-		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
-	} else {
-		logrus.Infof("In HTTP (insecure) Mode.")
-		e.Start(config.AMC.Bind)
-	}
-}
+// 	logrus.Infof("Starting AMC server, version: %s %s", common.AMCVersion, common.AMCEdition)
+// 	_server = e
+// 	// Start server
+// 	if config.AMC.CertFile != "" {
+// 		logrus.Infof("In HTTPS (secure) Mode")
+// 		// redirect all http requests to https
+// 		e.Pre(middleware.HTTPSRedirect())
+// 		e.StartTLS(config.AMC.Bind, config.AMC.CertFile, config.AMC.KeyFile)
+// 	} else {
+// 		logrus.Infof("In HTTP (insecure) Mode.")
+// 		e.Start(config.AMC.Bind)
+// 	}
+// }
 
 func GoaServer(config *common.Config) {
 	_observer = models.New(config)
@@ -254,7 +251,7 @@ func GoaServer(config *common.Config) {
 	service.Use(gmiddleware.RequestID())
 
 	service.Use(gmiddleware.ErrorHandler(service, true))
-	service.Use(gzm.Middleware(gzip.BestCompression))
+	// service.Use(gzm.Middleware(gzip.BestCompression))
 	service.Use(gmiddleware.LogRequest(true))
 
 	// Mount caching middleware

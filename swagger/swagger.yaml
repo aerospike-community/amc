@@ -884,7 +884,7 @@ definitions:
     example:
       jobCount: 5.985898e+18
       jobs:
-      - Voluptate et rerum molestiae.: 2010-11-15T16:57:58+01:00
+      - Voluptate et rerum molestiae.: 2010-11-15T15:57:58Z
       limit: 6.6276345e+18
       offset: 3.5456982e+17
     properties:
@@ -896,11 +896,11 @@ definitions:
       jobs:
         description: namespace
         example:
-        - Voluptate et rerum molestiae.: 2010-11-15T16:57:58+01:00
+        - Voluptate et rerum molestiae.: 2010-11-15T15:57:58Z
         items:
           additionalProperties: true
           example:
-            Voluptate et rerum molestiae.: 2010-11-15T16:57:58+01:00
+            Voluptate et rerum molestiae.: 2010-11-15T15:57:58Z
           type: object
         type: array
       limit:
@@ -997,7 +997,7 @@ definitions:
         total-bytes: 1.6052411e+18
         used-bytes: 4.6035394e+17
       name: Numquam iste aut alias dolor.
-      objsz: 520b073a-0b40-4f9e-8902-2e321605749f
+      objsz: ee5d5d82-d8d2-4d4d-94d5-7888a01dbd34
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: 520b073a-0b40-4f9e-8902-2e321605749f
+        example: ee5d5d82-d8d2-4d4d-94d5-7888a01dbd34
       stats:
         additionalProperties: true
         description: Namespace statistics
@@ -1266,14 +1266,14 @@ definitions:
     description: Set object (default view)
     example:
       set:
-        Atque quod voluptate.: 2012-11-09T01:48:34+01:00
+        Atque quod voluptate.: 2012-11-09T00:48:34Z
       status: Aut temporibus.
     properties:
       set:
         additionalProperties: true
         description: Set's Attributes
         example:
-          Atque quod voluptate.: 2012-11-09T01:48:34+01:00
+          Atque quod voluptate.: 2012-11-09T00:48:34Z
         type: object
       status:
         description: Node's Status
@@ -2993,6 +2993,32 @@ paths:
       summary: throughput logical-namespace
       tags:
       - logical-namespace
+  /api/v1/connections/{connId}/logs:
+    get:
+      description: |-
+        Receive lohs via a Websocket
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: connection#get logs
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+      schemes:
+      - ws
+      security:
+      - jwt:
+        - api:enterprise
+      summary: get logs connection
+      tags:
+      - connection
   /api/v1/connections/{connId}/modules:
     get:
       description: |-
@@ -3548,6 +3574,37 @@ paths:
       - jwt:
         - api:enterprise
       summary: latency node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/logs:
+    get:
+      description: |-
+        Receive lohs via a Websocket
+
+        Required security scopes:
+          * `api:enterprise`
+      operationId: node#get logs
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+      schemes:
+      - ws
+      security:
+      - jwt:
+        - api:enterprise
+      summary: get logs node
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/namespaces:
@@ -4968,6 +5025,8 @@ responses:
     description: No Content
   NotFound:
     description: Not Found
+  SwitchingProtocols:
+    description: Switching Protocols
   Unauthorized:
     description: Unauthorized
 schemes:

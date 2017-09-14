@@ -72,6 +72,22 @@ type Config struct {
 		PIDFile  string `toml:"pidfile"`
 	}
 
+	AGENT struct {
+		CertFile string `toml:"certfile"`
+		KeyFile  string `toml:"keyfile"`
+		BindIP   string `toml:"bind_ip"`
+		BindPort uint16 `toml:"bind_port"`
+		Protocol string `toml:"protocol"`
+		LogLevel string `toml:"loglevel"`
+		ErrorLog string `toml:"errorlog"`
+		Chdir    string `toml:"chdir"`
+		Timeout  int    `toml:"timeout"`
+		PIDFile  string `toml:"pidfile"`
+
+		AerospikeServerLogPath            string `toml:"server_log_path"`
+		AerospikeServerCurrentLogFileName string `toml:"current_log_filename"`
+	}
+
 	Mailer struct {
 		mutex sync.RWMutex
 
