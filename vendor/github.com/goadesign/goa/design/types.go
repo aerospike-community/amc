@@ -293,7 +293,7 @@ func (p Primitive) GenerateExample(r *RandomGenerator, seen []string) interface{
 	case DateTime:
 		return r.DateTime()
 	case UUID:
-		return r.UUID()
+		return r.UUID().String() // Generate string to can be JSON marshaled
 	case Any:
 		// to not make it too complicated, pick one of the primitive types
 		return anyPrimitive[r.Int()%len(anyPrimitive)].GenerateExample(r, seen)
@@ -895,7 +895,7 @@ func (m *MediaTypeDefinition) projectCollection(view string) (*MediaTypeDefiniti
 			AttributeDefinition: &AttributeDefinition{
 				Description: desc,
 				Type:        &Array{ElemType: &AttributeDefinition{Type: pe}},
-				Example:     m.Example,
+				Example:     nil,
 			},
 			TypeName: pe.TypeName + "Collection",
 		},
@@ -1029,7 +1029,7 @@ func toReflectType(dtype DataType) reflect.Type {
 		return reflect.TypeOf(int(0))
 	case NumberKind:
 		return reflect.TypeOf(float64(0))
-	case StringKind:
+	case UUIDKind, StringKind:
 		return reflect.TypeOf("")
 	case DateTimeKind:
 		return reflect.TypeOf(time.Time{})

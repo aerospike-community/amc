@@ -1,0 +1,862 @@
+Jun 23 2017 10:22:13 CEST: INFO (amcAgent): (logmanager.go:127) Following directory read successfully : log/
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (logmanager.go:136) Preparing to add file : log/temp.log
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (logfile.go:55) LogFile Object created successfully for file : log/temp.log
+Jun 23 2017 10:22:13 CEST: INFO (amcAgent): (logmanager.go:252) Following file added successfully : log/temp.log
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (logmanager.go:293) Current File Updated to log/temp.log
+Jun 23 2017 10:22:13 CEST: INFO (amcAgent): (logmanager.go:94) Log Manager successfully created.
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (tcpListener.go:25) TCP network listner created
+Jun 23 2017 10:22:13 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55156
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55157
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4202c4230}}
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:14 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4202c42a0}}
+Jun 23 2017 10:22:14 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:14 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:15 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:15 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55156
+Jun 23 2017 10:22:15 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:15 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4202c4230}}
+Jun 23 2017 10:22:15 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55157
+Jun 23 2017 10:22:15 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4202c42a0}}
+Jun 23 2017 10:22:15 CEST: INFO (amcAgent): (tail.go:147) Stopping Tail
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:163) Exiting waitForStoptail()
+Jun 23 2017 10:22:15 CEST: ERROR (amcAgent): (logfile.go:182) Error : Context has been cancelled
+Jun 23 2017 10:22:15 CEST: ERROR (amcAgent): (tail.go:63) Error while scanning lines : io: read/write on closed pipe
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (tail.go:64) Exiting lineMultiplexer()
+Jun 23 2017 10:22:15 CEST: DEBUG (amcAgent): (logfile.go:183) Exiting ReadChunk()
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55158
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55159
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4202ea0e0}}
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:16 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202c2180}
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:16 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:16 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:17 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55159
+Jun 23 2017 10:22:17 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55158
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:17 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4202ea0e0}}
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:17 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202c2180}
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:17 CEST: INFO (amcAgent): (tail.go:147) Stopping Tail
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:163) Exiting waitForStoptail()
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (logfile.go:182) Error : Context has been cancelled
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (logfile.go:183) Exiting ReadChunk()
+Jun 23 2017 10:22:17 CEST: ERROR (amcAgent): (tail.go:63) Error while scanning lines : io: read/write on closed pipe
+Jun 23 2017 10:22:17 CEST: DEBUG (amcAgent): (tail.go:64) Exiting lineMultiplexer()
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55160
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55161
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4203505b0}}
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:18 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4200c46c0}
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:18 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:18 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:18 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:19 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55161
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:19 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55160
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:19 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4200c46c0}
+Jun 23 2017 10:22:19 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4203505b0}}
+Jun 23 2017 10:22:19 CEST: INFO (amcAgent): (tail.go:147) Stopping Tail
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:163) Exiting waitForStoptail()
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (logfile.go:182) Error : Context has been cancelled
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (logfile.go:183) Exiting ReadChunk()
+Jun 23 2017 10:22:19 CEST: ERROR (amcAgent): (tail.go:63) Error while scanning lines : io: read/write on closed pipe
+Jun 23 2017 10:22:19 CEST: DEBUG (amcAgent): (tail.go:64) Exiting lineMultiplexer()
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55162
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55163
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203a4180}
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:20 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4202c5570}}
+Jun 23 2017 10:22:20 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:20 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:21 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:21 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:22 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55163
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:22 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55162
+Jun 23 2017 10:22:22 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203a4180}
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:22 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4202c5570}}
+Jun 23 2017 10:22:22 CEST: INFO (amcAgent): (tail.go:147) Stopping Tail
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (tail.go:163) Exiting waitForStoptail()
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (logfile.go:182) Error : Context has been cancelled
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (logfile.go:183) Exiting ReadChunk()
+Jun 23 2017 10:22:22 CEST: ERROR (amcAgent): (tail.go:63) Error while scanning lines : io: read/write on closed pipe
+Jun 23 2017 10:22:22 CEST: DEBUG (amcAgent): (tail.go:64) Exiting lineMultiplexer()
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55164
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55165
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4200c4900}
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:23 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc4202c56c0}}
+Jun 23 2017 10:22:23 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:24 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:23 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:25 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55164
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:25 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4200c4900}
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:25 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55165
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (operations.go:89) Received Context Cancel()
+Jun 23 2017 10:22:25 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{{0xc4202c56c0}}
+Jun 23 2017 10:22:25 CEST: INFO (amcAgent): (tail.go:147) Stopping Tail
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (tail.go:163) Exiting waitForStoptail()
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (tail.go:63) Error while scanning lines : io: read/write on closed pipe
+Jun 23 2017 10:22:25 CEST: ERROR (amcAgent): (logfile.go:182) Error : Context has been cancelled
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (tail.go:64) Exiting lineMultiplexer()
+Jun 23 2017 10:22:25 CEST: DEBUG (amcAgent): (logfile.go:183) Exiting ReadChunk()
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55168
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":null,"LogLevel":"","Keywords":null,"Command":"tail"}
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (command.go:119) Proccessed the new Unfilter Tail Command
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{{0xc420378230}}
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (operations.go:67) Registering tail no filter operation
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (tail.go:110) Starting tail the file : log/temp.log
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55169
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55170
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc42037c3c0}
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:26 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202c26c0}
+Jun 23 2017 10:22:26 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:27 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55169
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:27 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:27 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55170
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:27 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:27 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202c26c0}
+Jun 23 2017 10:22:27 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc42037c3c0}
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55171
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55172
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4200c4cc0}
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:28 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4200c4e40}
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:26 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:28 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:28 CEST: INFO (config): (cfg.c:3492) case2 (1)
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:29 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55171
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:29 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:29 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55172
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:29 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:29 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4200c4e40}
+Jun 23 2017 10:22:29 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4200c4cc0}
+Jun 23 2017 10:22:30 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:30 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:30 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55173
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55174
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc420332300}
+Jun 23 2017 10:22:30 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:30 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203a4480}
+Jun 23 2017 10:22:30 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:28 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:30 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:31 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:32 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:32 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:32 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:33 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55173
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:33 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55174
+Jun 23 2017 10:22:33 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203a4480}
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:33 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:33 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc420332300}
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:33 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55175
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55176
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202c2840}
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":null}
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:34 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202c2900}
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:31 CEST: INFO (config): (cfg.c:3492) case4 (1 logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:34 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) 1 case5, logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:35 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:36 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:36 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:36 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:37 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55175
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:37 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55176
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:37 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202c2840}
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:37 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:37 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202c2900}
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:34 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:37 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:38 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:38 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:38 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55178
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["CLUSTER-SIZE"]}
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55179
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["writes"]}
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4200c5080}
+Jun 23 2017 10:22:38 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:38 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202e8300}
+Jun 23 2017 10:22:38 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:37 CES CLUSTER-SIZE 1
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:37 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:161) No Values extracted
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:38 CES CLUSTER-SIZE 1
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:38 CES writes 1
+
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:39 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55178
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:39 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55179
+Jun 23 2017 10:22:39 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4200c5080}
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:39 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:39 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202e8300}
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:39 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:40 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:40 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:40 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55180
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["CLUSTER-SIZE"]}
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55181
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["writes"]}
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203a40c0}
+Jun 23 2017 10:22:40 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:40 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc42037c480}
+Jun 23 2017 10:22:40 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:38 CES CLUSTER-SIZE 1
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:38 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:38 CES writes 1
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:40 CES CLUSTER-SIZE 1
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:161) No Values extracted
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:41 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55181
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:41 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55180
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:41 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc42037c480}
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:41 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:41 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203a40c0}
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:40 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:41 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:42 CEST: DEBUG (amcAgent): (logmanager.go:115) Directory not updated. Aborting refreshDir()
+Jun 23 2017 10:22:42 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:42 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55182
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55183
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["CLUSTER-SIZE"]}
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["writes"]}
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203a4240}
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:42 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:42 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203663c0}
+Jun 23 2017 10:22:42 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:41 CES CLUSTER-SIZE 1
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:155) Filter Satisfied: Jun 23 2017 10:22:41 CEST: INFO (config): (cfg.c:3492) CLUSTER-SIZE 1 writes 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:165) Value extracted : Jun 23 2017 10:22:41 CES writes 1
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:43 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:43 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55183
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:43 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55182
+Jun 23 2017 10:22:43 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203a4240}
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:43 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:43 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203663c0}
+Jun 23 2017 10:22:44 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:44 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:44 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55184
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55185
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["writes"]}
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["CLUSTER-SIZE"]}
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc420366540}
+Jun 23 2017 10:22:44 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:44 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4202ec240}
+Jun 23 2017 10:22:44 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:45 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:42 CEST: DEBUG (config): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:45 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:46 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:46 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:46 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:47 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55184
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:47 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55185
+Jun 23 2017 10:22:47 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:47 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:47 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc420366540}
+Jun 23 2017 10:22:47 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4202ec240}
+Jun 23 2017 10:22:48 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:48 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:48 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55186
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (tcpListener.go:34) New Connection Accepted :127.0.0.1:55187
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["CLUSTER-SIZE"]}
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (handler.go:83) Preparing to process the new command : {"LogContexts":["config","xdr"],"LogLevel":"INFO","Keywords":["CLUSTER-SIZE","writes"],"Command":"tail","ExtractKeys":["writes"]}
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc4203a43c0}
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (command.go:131) Proccessed the new Filter Tail Command
+Jun 23 2017 10:22:48 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:48 CEST: INFO (amcAgent): (tail.go:183) Registered Tail Writer : &{0xc420366600}
+Jun 23 2017 10:22:48 CEST: DEBUG (amcAgent): (operations.go:77) Registering tail filter operation
+Jun 23 2017 10:22:49 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:44 CEST: INFO (cont): (cfg.c:3492) CLUSTER-SIZE 1 logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (logfile.go:165) Pushing the following chunk to the writer : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:29) Read the following line from scanner : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:34) Pushing the following line to Writer : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:49 CEST: DEBUG (amcAgent): (tail.go:41) Adding the following line to Pending Line : Jun 23 2017 10:22:48 CEST: INFO (config): (cfg.c:3492) logging
+
+Jun 23 2017 10:22:50 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:50 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:50 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:51 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55186
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (handler.go:57) Failed to Read from Connection. Error : EOF
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (handler.go:59) Cancelling Context
+Jun 23 2017 10:22:51 CEST: INFO (amcAgent): (handler.go:124) Closing the connection : 127.0.0.1:55187
+Jun 23 2017 10:22:51 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc4203a43c0}
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:51 CEST: DEBUG (amcAgent): (operations.go:110) Received Network Context Cancel()
+Jun 23 2017 10:22:51 CEST: INFO (amcAgent): (tail.go:209) Unregistered Tail Writer : &{0xc420366600}
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (operations.go:148) Error while copy from reader to private bufferio: read/write on closed pipe
+Jun 23 2017 10:22:51 CEST: ERROR (amcAgent): (operations.go:103) Error in Tail With filter Operation
+Jun 23 2017 10:22:52 CEST: ERROR (amcAgent): (logmanager.go:102) Failed to read stats of given Folder. Error : stat log/: no such file or directory
+Jun 23 2017 10:22:52 CEST: DEBUG (amcAgent): (logfile.go:134) Got the current size for file : log/temp.log
+Jun 23 2017 10:22:52 CEST: DEBUG (amcAgent): (logfile.go:122) Index Built successfully for file : log/temp.log

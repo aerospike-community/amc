@@ -11,6 +11,8 @@ import (
 	"github.com/goadesign/goa/dslengine"
 )
 
+// Attribute can be used in: View, Type, Attribute, Attributes
+//
 // Attribute implements the attribute definition DSL. An attribute describes a data structure
 // recursively. Attributes are used for describing request headers, parameters and payloads -
 // response bodies and headers - media types	 and types. An attribute definition is recursive:
@@ -162,6 +164,10 @@ func attributeFromRef(name string, ref design.DataType) *design.AttributeDefinit
 		if att, ok := t.ToObject()[name]; ok {
 			return design.DupAtt(att)
 		}
+	case design.Object:
+		if att, ok := t[name]; ok {
+			return design.DupAtt(att)
+		}
 	}
 	return nil
 }
@@ -235,6 +241,8 @@ func parseAttributeArgs(baseAttr *design.AttributeDefinition, args ...interface{
 	return dataType, description, dsl
 }
 
+// Header can be used in: Headers, APIKeySecurity, JWTSecurity
+//
 // Header is an alias of Attribute for the most part.
 //
 // Within an APIKeySecurity or JWTSecurity definition, Header
@@ -253,16 +261,22 @@ func Header(name string, args ...interface{}) {
 	Attribute(name, args...)
 }
 
+// Member can be used in: Payload
+//
 // Member is an alias of Attribute.
 func Member(name string, args ...interface{}) {
 	Attribute(name, args...)
 }
 
+// Param can be used in: Params
+//
 // Param is an alias of Attribute.
 func Param(name string, args ...interface{}) {
 	Attribute(name, args...)
 }
 
+// Default can be used in: Attribute
+//
 // Default sets the default value for an attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor10.
 func Default(def interface{}) {
@@ -282,6 +296,8 @@ func Default(def interface{}) {
 	}
 }
 
+// Example can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Example sets the example of an attribute to be used for the documentation:
 //
 //	Attributes(func() {
@@ -304,6 +320,8 @@ func Example(exp interface{}) {
 	}
 }
 
+// NoExample can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // NoExample sets the example of an attribute to be blank for the documentation. It is used when
 // users don't want any custom or auto-generated example
 func NoExample() {
@@ -317,6 +335,8 @@ func NoExample() {
 	}
 }
 
+// Enum can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Enum adds a "enum" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor76.
 func Enum(val ...interface{}) {
@@ -365,9 +385,12 @@ var SupportedValidationFormats = []string{
 	"ip",
 	"mac",
 	"regexp",
+	"rfc1123",
 	"uri",
 }
 
+// Format can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Format adds a "format" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor104.
 // The formats supported by goa are:
@@ -387,6 +410,8 @@ var SupportedValidationFormats = []string{
 // "cidr": RFC4632 or RFC4291 CIDR notation IP address
 //
 // "regexp": RE2 regular expression
+//
+// "rfc1123": RFC1123 date time
 func Format(f string) {
 	if a, ok := attributeDefinition(); ok {
 		if a.Type != nil && a.Type.Kind() != design.StringKind {
@@ -412,6 +437,8 @@ func Format(f string) {
 	}
 }
 
+// Pattern can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Pattern adds a "pattern" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor33.
 func Pattern(p string) {
@@ -432,6 +459,8 @@ func Pattern(p string) {
 	}
 }
 
+// Minimum can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Minimum adds a "minimum" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor21.
 func Minimum(val interface{}) {
@@ -462,6 +491,8 @@ func Minimum(val interface{}) {
 	}
 }
 
+// Maximum can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
 // Maximum adds a "maximum" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor17.
 func Maximum(val interface{}) {
@@ -492,7 +523,9 @@ func Maximum(val interface{}) {
 	}
 }
 
-// MinLength adss a "minItems" validation to the attribute.
+// MinLength can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
+// MinLength adds a "minItems" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor45.
 func MinLength(val int) {
 	if a, ok := attributeDefinition(); ok {
@@ -507,7 +540,9 @@ func MinLength(val int) {
 	}
 }
 
-// MaxLength adss a "maxItems" validation to the attribute.
+// MaxLength can be used in: Attribute, Header, Param, HashOf, ArrayOf
+//
+// MaxLength adds a "maxItems" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor42.
 func MaxLength(val int) {
 	if a, ok := attributeDefinition(); ok {
@@ -522,6 +557,8 @@ func MaxLength(val int) {
 	}
 }
 
+// Required can be used in: Attributes, Headers, Payload, Type, Params
+//
 // Required adds a "required" validation to the attribute.
 // See http://json-schema.org/latest/json-schema-validation.html#anchor61.
 func Required(names ...string) {

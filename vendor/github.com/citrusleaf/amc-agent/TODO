@@ -1,0 +1,27 @@
+Thursday May 25:
+  ☐ convert PipeWriter to io.Writer in function signatures
+  ☐ implement the tail mechanism
+    ☐ Context
+    ☐ Multiplexer
+    ☐ Register/Unregister writers
+  ☐ Write the ReadLine in LogFile
+
+Wednesday May 24:
+  ☐ Fix function return variables
+  ☐ Add constants.
+  ☐ Handle Invalid input
+  ☐ Use Logrus package for logging
+  ☐ Add code for addDir and addFile in log manager
+    ☐ Separate the concerns
+  ☐ Tail a log file
+
+
+
+-> version for commands
+-> if built index failed then it should remove that file except current file
+-> for ops =>
+wg := new(sync.WaitGroup)
+wg.Add(2)
+go f1(wg) {defer wg.Done()}
+go f2(wg) {defer wg.Done()}
+wg.Wait

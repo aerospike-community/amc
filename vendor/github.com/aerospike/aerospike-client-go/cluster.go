@@ -109,7 +109,9 @@ type Cluster struct {
 	nodesMap *SyncVal //map[string]*Node
 
 	// Active nodes in cluster.
-	nodes *SyncVal //[]*Node
+	nodes     *SyncVal              //[]*Node
+	stats     map[string]*nodeStats //host => stats
+	statsLock sync.Mutex
 
 	// Hints for best node for a partition
 	partitionWriteMap    atomic.Value //partitionMap
@@ -164,6 +166,7 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 		aliases:  NewSyncVal(make(map[Host]*Node)),
 		nodesMap: NewSyncVal(make(map[string]*Node)),
 		nodes:    NewSyncVal([]*Node{}),
+		stats:    map[string]*nodeStats{},
 
 		password: NewSyncVal(nil),
 
@@ -384,6 +387,8 @@ func (clstr *Cluster) tend() error {
 			}
 			clstr.removeNodes(removeList)
 		}
+
+		clstr.aggregateNodestats(removeList)
 	}
 
 	// Add nodes in a batch.
@@ -427,7 +432,50 @@ func (clstr *Cluster) tend() error {
 	if nodeCountBeforeTend != len(clstr.GetNodes()) {
 		Logger.Info("Tend finished. Live node count changes from %d to %d", nodeCountBeforeTend, len(clstr.GetNodes()))
 	}
+
+	clstr.aggregateNodestats(clstr.GetNodes())
+
 	return nil
+}
+
+func (clstr *Cluster) aggregateNodestats(nodeList []*Node) {
+	// update stats
+	clstr.statsLock.Lock()
+	defer clstr.statsLock.Unlock()
+
+	for _, node := range nodeList {
+		h := node.host.String()
+		if stats, exists := clstr.stats[h]; exists {
+			stats.aggregate(node.stats.getAndReset())
+		} else {
+			clstr.stats[h] = node.stats.getAndReset()
+		}
+	}
+}
+
+func (clstr *Cluster) statsCopy() map[string]nodeStats {
+	clstr.statsLock.Lock()
+	defer clstr.statsLock.Unlock()
+
+	res := make(map[string]nodeStats, len(clstr.stats))
+	for _, node := range clstr.GetNodes() {
+		h := node.host.String()
+		if stats, exists := clstr.stats[h]; exists {
+			statsCopy := stats.clone()
+			statsCopy.ConnectionsOpen = int64(node.connectionCount.Get())
+			res[h] = statsCopy
+		}
+	}
+
+	// stats for nodes which do not exist anymore
+	for h, stats := range clstr.stats {
+		if _, exists := res[h]; !exists {
+			stats.ConnectionsOpen = 0
+			res[h] = stats.clone()
+		}
+	}
+
+	return res
 }
 
 func (clstr *Cluster) peerExists(peers *peers, nodeName string) bool {
@@ -633,41 +681,33 @@ func (clstr *Cluster) findNodesToRemove(refreshCount int) []*Node {
 			continue
 		}
 
-		switch len(nodes) {
-		case 1:
-			// Single node clusters rely on whether it responded to info requests.
-			if node.failures.Get() >= 5 {
-				// Remove node.  Seeds will be tried in next cluster tend iteration.
-				removeList = append(removeList, node)
-			}
+		// Single node clusters rely on whether it responded to info requests.
+		if refreshCount == 0 && node.failures.Get() >= 5 {
+			// All node info requests failed and this node had 5 consecutive failures.
+			// Remove node.  If no nodes are left, seeds will be tried in next cluster
+			// tend iteration.
+			removeList = append(removeList, node)
+			continue
+		}
 
-		case 2:
-			// Two node clusters require at least one successful refresh before removing.
-			if refreshCount == 1 && node.referenceCount.Get() == 0 && node.failures.Get() > 0 {
-				// Node is not referenced nor did it respond.
-				removeList = append(removeList, node)
-			}
-
-		default:
-			// Multi-node clusters require at least one successful refresh before removing
-			// or alternatively, if connection to the whle cluster has been cut.
-			if (refreshCount >= 1 && node.referenceCount.Get() == 0) || (refreshCount == 0 && node.failures.Get() > 5) {
-				// Node is not referenced by other nodes.
-				// Check if node responded to info request.
-				if node.failures.Get() == 0 {
-					// Node is alive, but not referenced by other nodes.  Check if mapped.
-					if !clstr.findNodeInPartitionMap(node) {
-						// Node doesn't have any partitions mapped to it.
-						// There is no point in keeping it in the cluster.
-						removeList = append(removeList, node)
-					}
-				} else {
-					// Node not responding. Remove it.
+		// Two node clusters require at least one successful refresh before removing.
+		if refreshCount >= 1 && node.referenceCount.Get() == 0 {
+			// Node is not referenced by other nodes.
+			// Check if node responded to info request.
+			if node.failures.Get() == 0 {
+				// Node is alive, but not referenced by other nodes.  Check if mapped.
+				if !clstr.findNodeInPartitionMap(node) {
+					// Node doesn't have any partitions mapped to it.
+					// There is no point in keeping it in the cluster.
 					removeList = append(removeList, node)
 				}
+			} else {
+				// Node not responding. Remove it.
+				removeList = append(removeList, node)
 			}
 		}
 	}
+
 	return removeList
 }
 
@@ -772,8 +812,10 @@ func (clstr *Cluster) IsConnected() bool {
 	return (len(nodeArray) > 0) && !clstr.closed.Get()
 }
 
-func (clstr *Cluster) getReadNode(partition *Partition, replica ReplicaPolicy) (*Node, error) {
+func (clstr *Cluster) getReadNode(partition *Partition, replica ReplicaPolicy, seq *int) (*Node, error) {
 	switch replica {
+	case SEQUENCE:
+		return clstr.getSequenceNode(partition, seq)
 	case MASTER:
 		return clstr.getMasterNode(partition)
 	case MASTER_PROLES:
@@ -782,6 +824,23 @@ func (clstr *Cluster) getReadNode(partition *Partition, replica ReplicaPolicy) (
 		// includes case RANDOM:
 		return clstr.GetRandomNode()
 	}
+}
+
+func (clstr *Cluster) getSequenceNode(partition *Partition, seq *int) (*Node, error) {
+	pmap := clstr.getPartitions()
+	replicaArray := pmap[partition.Namespace]
+
+	if replicaArray != nil {
+		index := *seq % len(replicaArray)
+		node := replicaArray[index][partition.PartitionId]
+
+		if node != nil && node.IsActive() {
+			return node, nil
+		}
+		*seq++
+	}
+
+	return clstr.GetRandomNode()
 }
 
 func (clstr *Cluster) getMasterNode(partition *Partition) (*Node, error) {

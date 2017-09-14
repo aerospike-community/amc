@@ -1,6 +1,7 @@
 package design
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"path"
@@ -485,17 +486,24 @@ func (a *APIDefinition) IterateSets(iterator dslengine.SetIterator) {
 	}
 	iterator(securitySchemes)
 
-	// And now that we have everything the resources.  The resource
-	// lifecycle handlers dispatch to their children elements, like
-	// Actions, etc..
-	resources := make([]dslengine.Definition, len(a.Resources))
+	// And now that we have everything - the resources. The resource
+	// lifecycle handlers dispatch to their children elements, like Actions,
+	// etc.. We must process parent resources first to ensure that query
+	// string and path parameters are initialized by the time a child
+	// resource action parameters are categorized.
+	resources := make([]*ResourceDefinition, len(a.Resources))
 	i = 0
 	a.IterateResources(func(res *ResourceDefinition) error {
 		resources[i] = res
 		i++
 		return nil
 	})
-	iterator(resources)
+	sort.Sort(byParent(resources))
+	defs := make([]dslengine.Definition, len(resources))
+	for i, r := range resources {
+		defs[i] = r
+	}
+	iterator(defs)
 }
 
 // Reset sets all the API definition fields to their zero value except the default responses and
@@ -635,23 +643,31 @@ func (a *APIDefinition) Finalize() {
 	if len(a.Produces) == 0 {
 		a.Produces = DefaultEncoders
 	}
-	found := false
 	a.IterateResources(func(r *ResourceDefinition) error {
-		if found {
-			return nil
+		returnsError := func(resp *ResponseDefinition) bool {
+			if resp.MediaType == ErrorMediaIdentifier {
+				if a.MediaTypes == nil {
+					a.MediaTypes = make(map[string]*MediaTypeDefinition)
+				}
+				a.MediaTypes[CanonicalIdentifier(ErrorMediaIdentifier)] = ErrorMedia
+				return true
+			}
+			return false
+		}
+		for _, resp := range a.Responses {
+			if returnsError(resp) {
+				return errors.New("done")
+			}
+		}
+		for _, resp := range r.Responses {
+			if returnsError(resp) {
+				return errors.New("done")
+			}
 		}
 		return r.IterateActions(func(action *ActionDefinition) error {
-			if found {
-				return nil
-			}
 			for _, resp := range action.Responses {
-				if resp.MediaType == ErrorMediaIdentifier {
-					if a.MediaTypes == nil {
-						a.MediaTypes = make(map[string]*MediaTypeDefinition)
-					}
-					a.MediaTypes[CanonicalIdentifier(ErrorMediaIdentifier)] = ErrorMedia
-					found = true
-					break
+				if returnsError(resp) {
+					return errors.New("done")
 				}
 			}
 			return nil
@@ -889,6 +905,22 @@ func (r *ResourceDefinition) UserTypes() map[string]*UserTypeDefinition {
 		return nil
 	}
 	return types
+}
+
+// byParent makes it possible to sort resources - parents first the children.
+type byParent []*ResourceDefinition
+
+func (p byParent) Len() int      { return len(p) }
+func (p byParent) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p byParent) Less(i, j int) bool {
+	for k := 0; k < i; k++ {
+		// We need to inspect _all_ previous fields to see if they are a parent. Sort doesn't do this.
+		if p[i].Name == p[k].ParentName {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Context returns the generic definition name used in error messages.
@@ -1159,18 +1191,26 @@ func (a *AttributeDefinition) Merge(other *AttributeDefinition) *AttributeDefini
 	for n, v := range right {
 		left[n] = v
 	}
+	if other.Validation != nil && len(other.Validation.Required) > 0 {
+		if a.Validation == nil {
+			a.Validation = &dslengine.ValidationDefinition{}
+		}
+		for _, r := range other.Validation.Required {
+			a.Validation.Required = append(a.Validation.Required, r)
+		}
+	}
 	return a
 }
 
 // Inherit merges the properties of existing target type attributes with the argument's.
 // The algorithm is recursive so that child attributes are also merged.
-func (a *AttributeDefinition) Inherit(parent *AttributeDefinition) {
+func (a *AttributeDefinition) Inherit(parent *AttributeDefinition, seen ...map[*AttributeDefinition]struct{}) {
 	if !a.shouldInherit(parent) {
 		return
 	}
 
 	a.inheritValidations(parent)
-	a.inheritRecursive(parent)
+	a.inheritRecursive(parent, seen...)
 }
 
 // DSL returns the initialization DSL.
@@ -1178,7 +1218,19 @@ func (a *AttributeDefinition) DSL() func() {
 	return a.DSLFunc
 }
 
-func (a *AttributeDefinition) inheritRecursive(parent *AttributeDefinition) {
+func (a *AttributeDefinition) inheritRecursive(parent *AttributeDefinition, seen ...map[*AttributeDefinition]struct{}) {
+	// prevent infinite recursions
+	var s map[*AttributeDefinition]struct{}
+	if len(seen) > 0 {
+		s = seen[0]
+		if _, ok := s[parent]; ok {
+			return
+		}
+	} else {
+		s = make(map[*AttributeDefinition]struct{})
+	}
+	s[parent] = struct{}{}
+
 	if !a.shouldInherit(parent) {
 		return
 	}
@@ -1199,7 +1251,7 @@ func (a *AttributeDefinition) inheritRecursive(parent *AttributeDefinition) {
 				att.Type = patt.Type
 			} else if att.shouldInherit(patt) {
 				for _, att := range att.Type.ToObject() {
-					att.Inherit(patt.Type.ToObject()[n])
+					att.Inherit(patt.Type.ToObject()[n], s)
 				}
 			}
 			if att.Example == nil {
@@ -1739,7 +1791,14 @@ func (r *RouteDefinition) FullPath() string {
 	if r.Parent != nil && r.Parent.Parent != nil {
 		base = r.Parent.Parent.FullPath()
 	}
-	return httppath.Clean(path.Join(base, r.Path))
+
+	joinedPath := path.Join(base, r.Path)
+	if strings.HasSuffix(r.Path, "/") {
+		//add slash removed by Join back again (it may be important for routing)
+		joinedPath += "/"
+	}
+
+	return httppath.Clean(joinedPath)
 }
 
 // IsAbsolute returns true if the action path should not be concatenated to the resource and API

@@ -69,6 +69,10 @@ var (
 	// ErrNotFound is the error returned to requests that don't match a registered handler.
 	ErrNotFound = NewErrorClass("not_found", 404)
 
+	// ErrMethodNotAllowed is the error returned to requests that match the path of a registered
+	// handler but not the HTTP method.
+	ErrMethodNotAllowed = NewErrorClass("method_not_allowed", 405)
+
 	// ErrInternal is the class of error used for uncaught errors.
 	ErrInternal = NewErrorClass("internal", 500)
 )
@@ -93,6 +97,16 @@ type (
 		ResponseStatus() int
 		// Token is a unique value associated with the occurrence of the error.
 		Token() string
+	}
+
+	// ServiceMergeableError is the interface implemented by ServiceErrors that can merge
+	// another error into a combined error.
+	ServiceMergeableError interface {
+		// ServiceMergeableError extends from the ServiceError interface.
+		ServiceError
+
+		// Merge updates an error by combining another error into it.
+		Merge(other error) error
 	}
 
 	// ErrorResponse contains the details of a error response. It implements ServiceError.
@@ -235,6 +249,17 @@ func NoAuthMiddleware(schemeName string) error {
 	return ErrNoAuthMiddleware(msg, "scheme", schemeName)
 }
 
+// MethodNotAllowedError is the error produced to requests that match the path of a registered
+// handler but not the HTTP method.
+func MethodNotAllowedError(method string, allowed []string) error {
+	var plural string
+	if len(allowed) > 1 {
+		plural = " one of"
+	}
+	msg := fmt.Sprintf("Method %s must be%s %s", method, plural, strings.Join(allowed, ", "))
+	return ErrMethodNotAllowed(msg, "method", method, "allowed", strings.Join(allowed, ", "))
+}
+
 // Error returns the error occurrence details.
 func (e *ErrorResponse) Error() string {
 	msg := fmt.Sprintf("[%s] %d %s: %s", e.ID, e.Status, e.Code, e.Detail)
@@ -254,6 +279,8 @@ func (e *ErrorResponse) Token() string { return e.ID }
 // ServiceError if not already one - producing an internal error in that case. The merge algorithm
 // is:
 //
+// * If any of e or other implements ServiceMergableError, it is handled by it's Merge method.
+//
 // * If any of e or other is an internal error then the result is an internal error
 //
 // * If the status or code of e and other don't match then the result is a 400 "bad_request"
@@ -269,11 +296,20 @@ func MergeErrors(err, other error) error {
 		if other == nil {
 			return nil
 		}
-		return asErrorResponse(other)
+		return asServiceError(other)
 	}
 	if other == nil {
-		return asErrorResponse(err)
+		return asServiceError(err)
 	}
+
+	// If either error is a mergable error.
+	if me, ok := err.(ServiceMergeableError); ok {
+		return me.Merge(other)
+	}
+	if mo, ok := other.(ServiceMergeableError); ok {
+		return mo.Merge(err)
+	}
+
 	e := asErrorResponse(err)
 	o := asErrorResponse(other)
 	switch {
@@ -293,6 +329,14 @@ func MergeErrors(err, other error) error {
 	}
 	for k, v := range o.Meta {
 		e.Meta[k] = v
+	}
+	return e
+}
+
+func asServiceError(err error) ServiceError {
+	e, ok := err.(ServiceError)
+	if !ok {
+		return asErrorResponse(err)
 	}
 	return e
 }
