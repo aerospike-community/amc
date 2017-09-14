@@ -246,6 +246,9 @@ class ProgressRenderer extends React.Component {
   }
 
   render() {
+    if (!this.props.data)
+      return null;
+    
     const job = this.props.data;
     const progress = job['job-progress'];
     const { status } = job;
@@ -308,6 +311,9 @@ class PriorityEditor extends React.Component {
 
 class AllPropsRenderer extends React.Component {
   renderData() {
+    if (!this.props.data)
+      return null;
+
     const { data } = this.props;
     const keys = Object.keys(data);
 
