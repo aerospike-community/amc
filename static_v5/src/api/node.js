@@ -1,5 +1,5 @@
 import { toURLConverter } from 'api/url';
-import { get, postJSON } from 'api/http';
+import { get, postJSON, deleteAPI } from 'api/http';
 
 const toURLPath = toURLConverter('connections');
 
@@ -73,4 +73,26 @@ export function getJobs(clusterID, nodeHost, status, offset = 0, limit = 100, so
 
   const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs', query);
   return get(url);
+}
+
+// set priority of a job
+// priority - one of 'low', 'medium', 'high'
+export function setJobPriority(clusterID, nodeHost, module, trid, priority) {
+  const query = {
+    module: module,
+    priority: priority,
+  };
+
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs/' + trid, query);
+  return postJSON(url, {});
+}
+
+// kill a job
+export function killJob(clusterID, nodeHost, module, trid) {
+  const query = {
+    module: module,
+  };
+
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs/' + trid, query);
+  return deleteAPI(url);
 }
