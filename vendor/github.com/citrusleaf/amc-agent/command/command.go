@@ -21,6 +21,7 @@ type Parameters struct {
 	Keywords    []string
 	Command     CommandType
 	ExtractKeys []string
+	Version     string
 }
 
 type Command struct {
@@ -38,12 +39,14 @@ type LogTime struct {
 var errNoDataReceived = errors.New("No data received")
 var errInvalidCommandParameter = errors.New("Invalid Command Parameter")
 var errNoWriterPassed = errors.New("Output writer has not been passed")
+var errVersionNotSupported = errors.New("Command Version is not supported")
 
 type CommandType string
 
 const (
-	TAIL  CommandType = "tail"
-	QUERY CommandType = "query"
+	TAIL           CommandType = "tail"
+	QUERY          CommandType = "query"
+	currentVersion             = "1.0"
 )
 
 func (lt *LogTime) UnmarshalJSON(data []byte) error {
@@ -79,6 +82,11 @@ func NewCommand(writer io.Writer, data []byte) (*Command, error) {
 	if err != nil {
 		util.Log.Error("Error in Json Parsing. Error : " + err.Error())
 		return nil, err
+	}
+
+	if cmd.params.Version != currentVersion {
+		util.Log.Error("Error : " + err.Error())
+		return nil, errVersionNotSupported
 	}
 
 	return cmd, nil

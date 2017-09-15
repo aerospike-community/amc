@@ -15,70 +15,70 @@
 			"revisionTime": "2017-08-22T13:27:46Z"
 		},
 		{
-			"checksumSHA1": "uK6S44AHKJGLIy5I7D+Yv1l8UCs=",
+			"checksumSHA1": "/ZSGf5Z6pEuFFEYkB39efgOUns8=",
 			"path": "github.com/aerospike/aerospike-client-go",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "d4xK10eJLsaYKsmmAjoafc0puhg=",
 			"path": "github.com/aerospike/aerospike-client-go/internal/lua",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "XbQ7dIXjGH+/wl5UyVWosqpuoys=",
 			"path": "github.com/aerospike/aerospike-client-go/internal/lua/resources",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "wGou8ehkc2gw/zWdteA/aq1/fOA=",
 			"path": "github.com/aerospike/aerospike-client-go/logger",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "W19k/UVPrMdsV1KM0VgDRLv1EvU=",
 			"path": "github.com/aerospike/aerospike-client-go/pkg/bcrypt",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "HbzUx5DlBO8erbGl2h2/55xzue8=",
 			"path": "github.com/aerospike/aerospike-client-go/pkg/ripemd160",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "YXD/8mq9CMfBpO7QF5T6SsaxgZg=",
 			"path": "github.com/aerospike/aerospike-client-go/types",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "YJnWn4k4P1TnSZ897is1OANjzhw=",
 			"path": "github.com/aerospike/aerospike-client-go/types/atomic",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "1xmzaXT3uA8K5FL92TNw/PfG0TU=",
 			"path": "github.com/aerospike/aerospike-client-go/types/particle_type",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "cXow2vGzsUtayrJuhz57vCDb2w0=",
 			"path": "github.com/aerospike/aerospike-client-go/types/rand",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "BdxmIb2XgZufRGpQSlE8R9UEqWc=",
 			"path": "github.com/aerospike/aerospike-client-go/utils/buffer",
-			"revision": "e8bbe11f79743d76a521385f3d9399a9fdf2975e",
-			"revisionTime": "2017-09-13T08:19:01Z"
+			"revision": "e2ae6e351e02b8e570c7261c0eb83892313cda59",
+			"revisionTime": "2017-09-15T11:46:41Z"
 		},
 		{
 			"checksumSHA1": "0et4hA6AYqZCgYiY+c6Z17t3k3k=",
@@ -89,44 +89,68 @@
 		{
 			"checksumSHA1": "Y9sm/MXtHx95xo2BoYsIhwTPW7c=",
 			"path": "github.com/citrusleaf/amc-agent",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
-			"checksumSHA1": "DaBNWfdaUPUJbM4pce/AaZHA6SU=",
+			"checksumSHA1": "YgVDQS3VZRmqXzSAQpF70irjaL8=",
 			"path": "github.com/citrusleaf/amc-agent/command",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
 			"checksumSHA1": "akLMvOXTC4WGyax/K3GnBc6cHDU=",
 			"path": "github.com/citrusleaf/amc-agent/logfile",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
 			"checksumSHA1": "Nf43ezcLcBR0aSZy3m19TwO1ZxU=",
 			"path": "github.com/citrusleaf/amc-agent/logmanager",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
 			"checksumSHA1": "gcSTKY1qViDlE0bDgidbRxfNRLQ=",
 			"path": "github.com/citrusleaf/amc-agent/network",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
 			"checksumSHA1": "rcdPxu2ODQk+hbIbMr+6fZ0v5Wo=",
 			"path": "github.com/citrusleaf/amc-agent/operations",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
 		},
 		{
 			"checksumSHA1": "XP1jIddXmNCx0f2hHo99wVZIkvY=",
 			"path": "github.com/citrusleaf/amc-agent/util",
-			"revision": "a4f43c82be0a0a7864855965ef3d89a3bfdec042",
-			"revisionTime": "2017-06-29T11:03:21Z"
+			"revision": "63796513e77b8791fc21e1e23d6a97556869548f",
+			"revisionTime": "2017-09-14T00:28:55Z"
+		},
+		{
+			"checksumSHA1": "KejOug6B8Xr0JM0B3rS1bE7lFmU=",
+			"path": "github.com/citrusleaf/khosql/parser",
+			"revision": "9661304c7330b88dfe5275a614213eea3c68bac7",
+			"revisionTime": "2017-09-15T18:55:12Z"
+		},
+		{
+			"checksumSHA1": "B8dLuyWR3h0On/9v+vy6ryhJiFU=",
+			"path": "github.com/citrusleaf/khosql/setup",
+			"revision": "9661304c7330b88dfe5275a614213eea3c68bac7",
+			"revisionTime": "2017-09-15T18:55:12Z"
+		},
+		{
+			"checksumSHA1": "e2LOIWpZGqm8kNACvFSiZ2w+1qU=",
+			"path": "github.com/citrusleaf/khosql/types",
+			"revision": "9661304c7330b88dfe5275a614213eea3c68bac7",
+			"revisionTime": "2017-09-15T18:55:12Z"
+		},
+		{
+			"checksumSHA1": "sNazt471muDkPvdwv9ZRGLBhIyU=",
+			"path": "github.com/citrusleaf/khosql/types/atomic",
+			"revision": "9661304c7330b88dfe5275a614213eea3c68bac7",
+			"revisionTime": "2017-09-15T18:55:12Z"
 		},
 		{
 			"checksumSHA1": "ATs3+0ulN1kwSFm7YcI3SGj5DLc=",
@@ -375,10 +399,22 @@
 			"revisionTime": "2017-03-22T23:44:13Z"
 		},
 		{
+			"checksumSHA1": "DdH3xAkzAWJ4B/LGYJyCeRsly2I=",
+			"path": "github.com/mattn/go-runewidth",
+			"revision": "d6bea18f789704b5f83375793155289da36a3c7f",
+			"revisionTime": "2016-03-15T04:07:12Z"
+		},
+		{
 			"checksumSHA1": "wf7QK5pRmd4/NORvkMK7uflvcO0=",
 			"path": "github.com/mcuadros/go-version",
 			"revision": "257f7b9a7d87427c8d7f89469a5958d57f8abd7c",
 			"revisionTime": "2016-11-05T18:36:18Z"
+		},
+		{
+			"checksumSHA1": "txj5yUDiaSATtBLDlT0f6uaiIP8=",
+			"path": "github.com/olekukonko/tablewriter",
+			"revision": "cca8bbc0798408af109aaaa239cbd2634846b340",
+			"revisionTime": "2016-01-15T11:10:02Z"
 		},
 		{
 			"checksumSHA1": "G7au1p5gEg5hLbYzfLDqd8+YFMY=",
