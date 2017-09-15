@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -41,6 +43,47 @@ func (c *ConnectionController) AddNode(ctx *app.AddNodeConnectionContext) error 
 
 	// ConnectionController_AddNode: end_implement
 	return ctx.NoContent()
+}
+
+// Aql runs the aql action.
+func (c *ConnectionController) Aql(ctx *app.AqlConnectionContext) error {
+	// ConnectionController_Aql: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	if !cluster.AQLEnabled() {
+		return ctx.NotAcceptable("AQL is currently disabled and not allowed.")
+	}
+
+	buf := new(bytes.Buffer)
+	if _, err = cluster.ExecAQL(buf, ctx.Payload.Aql); err != nil {
+		return ctx.NotAcceptable(err.Error())
+	}
+
+	fmt.Println("=================================================================", string(buf.Bytes()))
+
+	// ConnectionController_Aql: end_implement
+	return ctx.OK(string(buf.Bytes()))
+}
+
+// CheckAqlUDF runs the check aql UDF action.
+func (c *ConnectionController) CheckAqlUDF(ctx *app.CheckAqlUDFConnectionContext) error {
+	// ConnectionController_CheckAqlUDF: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	if !cluster.AQLEnabled() {
+		return ctx.OK(false)
+	}
+
+	// ConnectionController_CheckAqlUDF: end_implement
+	return ctx.OK(true)
 }
 
 // Config runs the config action.
@@ -221,6 +264,42 @@ func (c *ConnectionController) Query(ctx *app.QueryConnectionContext) error {
 
 	// ConnectionController_Query: end_implement
 	return ctx.OK(res)
+}
+
+// RegisterAqlUDFonTheServer runs the register aql UDF on the server action.
+func (c *ConnectionController) RegisterAqlUDFonTheServer(ctx *app.RegisterAqlUDFonTheServerConnectionContext) error {
+	// ConnectionController_RegisterAqlUDFonTheServer: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	nodes := cluster.Nodes()
+
+	errMap := make(map[string]string, len(nodes))
+	var wg sync.WaitGroup
+	var l sync.Mutex
+	wg.Add(len(nodes))
+	for _, node := range nodes {
+		go func(n *models.Node) {
+			defer wg.Done()
+			if err := n.RegisterAQLAPI(); err != nil {
+				l.Lock()
+				errMap[n.Host()] = err.Error()
+				l.Unlock()
+			}
+		}(node)
+	}
+
+	wg.Wait()
+
+	// ConnectionController_RegisterAqlUDFonTheServer: end_implement
+	if len(errMap) > 0 {
+		return ctx.NotAcceptable(errMap)
+	}
+
+	return ctx.OK("v1.0.0")
 }
 
 // Save runs the save action.

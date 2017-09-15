@@ -293,7 +293,7 @@ var _ = Resource("connection", func() {
 			Scope("api:enterprise")
 		})
 		Scheme("ws")
-		Description("Receive lohs via a Websocket")
+		Description("Receive logs via a Websocket")
 		Routing(GET(":connId/logs"))
 		Params(func() {
 			Param("connId", String, "Connection Id", func() {
@@ -305,4 +305,66 @@ var _ = Resource("connection", func() {
 		})
 		Response(SwitchingProtocols)
 	})
+
+	Action("aql", func() {
+		Description("Send an AQL command to server and get the results")
+		Routing(POST(":connId/aql"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("connId")
+		})
+
+		Payload(func() {
+			Member("aql", String, "AQL command", func() { Example("SELECT * FROM test.test") })
+			Required("aql")
+		})
+
+		Response(OK, String)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("check aql UDF", func() {
+		Description("Check if the AQL UDF is registered on the server.")
+		Routing(GET(":connId/aql/isset"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+
+		Response(OK, Boolean)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
+	Action("register aql UDF on the server", func() {
+		Description("Register the AQL UDF on the server.")
+		Routing(GET(":connId/aql/register"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+
+			Required("connId")
+		})
+
+		Response(OK, String)
+		Response(BadRequest, String)
+		Response(NotAcceptable, HashOf(String, String))
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 })

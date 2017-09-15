@@ -599,6 +599,160 @@ func (ctx *AddNodeConnectionContext) InternalServerError() error {
 	return nil
 }
 
+// AqlConnectionContext provides the connection aql action context.
+type AqlConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Payload *AqlConnectionPayload
+}
+
+// NewAqlConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller aql action.
+func NewAqlConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*AqlConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := AqlConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// aqlConnectionPayload is the connection aql action payload.
+type aqlConnectionPayload struct {
+	// AQL command
+	Aql *string `form:"aql,omitempty" json:"aql,omitempty" xml:"aql,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *aqlConnectionPayload) Validate() (err error) {
+	if payload.Aql == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "aql"))
+	}
+	return
+}
+
+// Publicize creates AqlConnectionPayload from aqlConnectionPayload
+func (payload *aqlConnectionPayload) Publicize() *AqlConnectionPayload {
+	var pub AqlConnectionPayload
+	if payload.Aql != nil {
+		pub.Aql = *payload.Aql
+	}
+	return &pub
+}
+
+// AqlConnectionPayload is the connection aql action payload.
+type AqlConnectionPayload struct {
+	// AQL command
+	Aql string `form:"aql" json:"aql" xml:"aql"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *AqlConnectionPayload) Validate() (err error) {
+	if payload.Aql == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "aql"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *AqlConnectionContext) OK(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *AqlConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *AqlConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *AqlConnectionContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *AqlConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// CheckAqlUDFConnectionContext provides the connection check aql UDF action context.
+type CheckAqlUDFConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewCheckAqlUDFConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller check aql UDF action.
+func NewCheckAqlUDFConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*CheckAqlUDFConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := CheckAqlUDFConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *CheckAqlUDFConnectionContext) OK(r bool) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *CheckAqlUDFConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *CheckAqlUDFConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *CheckAqlUDFConnectionContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *CheckAqlUDFConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
 // ConfigConnectionContext provides the connection config action context.
 type ConfigConnectionContext struct {
 	context.Context
@@ -1114,6 +1268,64 @@ func (ctx *QueryConnectionContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *QueryConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// RegisterAqlUDFonTheServerConnectionContext provides the connection register aql UDF on the server action context.
+type RegisterAqlUDFonTheServerConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewRegisterAqlUDFonTheServerConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller register aql UDF on the server action.
+func NewRegisterAqlUDFonTheServerConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*RegisterAqlUDFonTheServerConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := RegisterAqlUDFonTheServerConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *RegisterAqlUDFonTheServerConnectionContext) OK(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *RegisterAqlUDFonTheServerConnectionContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *RegisterAqlUDFonTheServerConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *RegisterAqlUDFonTheServerConnectionContext) NotAcceptable(r map[string]string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *RegisterAqlUDFonTheServerConnectionContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

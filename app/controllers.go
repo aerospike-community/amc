@@ -299,6 +299,8 @@ func unmarshalCreateBackupPayload(ctx context.Context, service *goa.Service, req
 type ConnectionController interface {
 	goa.Muxer
 	AddNode(*AddNodeConnectionContext) error
+	Aql(*AqlConnectionContext) error
+	CheckAqlUDF(*CheckAqlUDFConnectionContext) error
 	Config(*ConfigConnectionContext) error
 	Connect(*ConnectConnectionContext) error
 	Delete(*DeleteConnectionContext) error
@@ -308,6 +310,7 @@ type ConnectionController interface {
 	Namespaces(*NamespacesConnectionContext) error
 	Overview(*OverviewConnectionContext) error
 	Query(*QueryConnectionContext) error
+	RegisterAqlUDFonTheServer(*RegisterAqlUDFonTheServerConnectionContext) error
 	Save(*SaveConnectionContext) error
 	SetConfig(*SetConfigConnectionContext) error
 	Show(*ShowConnectionContext) error
@@ -320,6 +323,8 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/add-node", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/aql", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/aql/isset", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/config", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/entity-tree", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
@@ -328,6 +333,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/overview", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/aql/register", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/throughput", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/user", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 
@@ -353,6 +359,46 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("POST", "/api/v1/connections/:connId/add-node", ctrl.MuxHandler("add-node", h, unmarshalAddNodeConnectionPayload))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "AddNode", "route", "POST /api/v1/connections/:connId/add-node", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewAqlConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*AqlConnectionPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Aql(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/aql", ctrl.MuxHandler("aql", h, unmarshalAqlConnectionPayload))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Aql", "route", "POST /api/v1/connections/:connId/aql", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewCheckAqlUDFConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.CheckAqlUDF(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/aql/isset", ctrl.MuxHandler("check aql UDF", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "CheckAqlUDF", "route", "GET /api/v1/connections/:connId/aql/isset", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -519,6 +565,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 			return err
 		}
 		// Build the context
+		rctx, err := NewRegisterAqlUDFonTheServerConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.RegisterAqlUDFonTheServer(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/aql/register", ctrl.MuxHandler("register aql UDF on the server", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "RegisterAqlUDFonTheServer", "route", "GET /api/v1/connections/:connId/aql/register", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
 		rctx, err := NewSaveConnectionContext(ctx, req, service)
 		if err != nil {
 			return err
@@ -641,6 +704,21 @@ func handleConnectionOrigin(h goa.Handler) goa.Handler {
 // unmarshalAddNodeConnectionPayload unmarshals the request body into the context request data Payload field.
 func unmarshalAddNodeConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &addNodeConnectionPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalAqlConnectionPayload unmarshals the request body into the context request data Payload field.
+func unmarshalAqlConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &aqlConnectionPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}

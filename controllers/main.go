@@ -235,7 +235,8 @@ func GoaServer(config *common.Config) {
 		_defaultClientPolicy.Timeout = 30 * time.Second
 	}
 	_defaultClientPolicy.LimitConnectionsToQueueSize = true
-	_defaultClientPolicy.ConnectionQueueSize = 1
+	_defaultClientPolicy.ConnectionQueueSize = 4 // for AQL
+	_defaultClientPolicy.IdleTimeout = 30 * time.Second
 
 	rand.Seed(time.Now().UnixNano())
 

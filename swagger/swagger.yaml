@@ -997,7 +997,7 @@ definitions:
         total-bytes: 1.6052411e+18
         used-bytes: 4.6035394e+17
       name: Numquam iste aut alias dolor.
-      objsz: ee5d5d82-d8d2-4d4d-94d5-7888a01dbd34
+      objsz: d177ed76-c13b-4d59-9899-cd3654e8fb9e
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: ee5d5d82-d8d2-4d4d-94d5-7888a01dbd34
+        example: d177ed76-c13b-4d59-9899-cd3654e8fb9e
       stats:
         additionalProperties: true
         description: Namespace statistics
@@ -1409,6 +1409,18 @@ definitions:
     - latestVersion
     title: 'Mediatype identifier: application/vnd.aerospike.amc.version.info.response+json;
       view=default'
+    type: object
+  AqlConnectionPayload:
+    example:
+      aql: SELECT * FROM test.test
+    properties:
+      aql:
+        description: AQL command
+        example: SELECT * FROM test.test
+        type: string
+    required:
+    - aql
+    title: AqlConnectionPayload
     type: object
   AuthenticateAuthPayload:
     example:
@@ -2359,6 +2371,122 @@ paths:
       summary: add-node connection
       tags:
       - connection
+  /api/v1/connections/{connId}/aql:
+    post:
+      description: |-
+        Send an AQL command to server and get the results
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#aql
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/AqlConnectionPayload'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: aql connection
+      tags:
+      - connection
+  /api/v1/connections/{connId}/aql/isset:
+    get:
+      description: |-
+        Check if the AQL UDF is registered on the server.
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#check aql UDF
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: check aql UDF connection
+      tags:
+      - connection
+  /api/v1/connections/{connId}/aql/register:
+    get:
+      description: |-
+        Register the AQL UDF on the server.
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#register aql UDF on the server
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: register aql UDF on the server connection
+      tags:
+      - connection
   /api/v1/connections/{connId}/backups:
     get:
       description: |-
@@ -2996,7 +3124,7 @@ paths:
   /api/v1/connections/{connId}/logs:
     get:
       description: |-
-        Receive lohs via a Websocket
+        Receive logs via a Websocket
 
         Required security scopes:
           * `api:enterprise`

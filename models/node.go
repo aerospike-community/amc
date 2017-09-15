@@ -13,6 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	agent "github.com/citrusleaf/amc-agent"
+	"github.com/citrusleaf/khosql/setup"
 
 	"github.com/citrusleaf/amc/app"
 	"github.com/citrusleaf/amc/common"
@@ -50,6 +51,7 @@ type Node struct {
 	visible common.SyncValue //NodeVisibilityStatus
 
 	namespaces common.SyncValue //map[string]*Namespace
+	aqlUDF     common.SyncValue //bool
 
 	// latestInfo, oldInfo common.SyncInfo
 	latestInfo        common.SyncInfo
@@ -98,6 +100,7 @@ func newNode(cluster *Cluster, origNode *as.Node) *Node {
 		origHost:        host,
 		status:          common.NewSyncValue(nodeStatus.On),
 		namespaces:      common.NewSyncValue(map[string]*Namespace{}),
+		aqlUDF:          common.NewSyncValue(false),
 		latencyHistory:  lh,
 		_alertStates:    *common.NewSyncStats(common.Stats{}),
 		serverTimeDelta: common.NewSyncValue(time.Duration(0)),
@@ -165,6 +168,7 @@ func (n *Node) update() error {
 
 	stats := common.Info(info).ToInfo("statistics").ToStats()
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
+	n.updateAQLRegistered()
 
 	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats.TryInt("objects", 0), time.Since(tm))
 
@@ -1177,4 +1181,30 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 
 func (n *Node) QueryLogs(protocol string, w *io.PipeWriter, timeout time.Duration, bindPort uint16) error {
 	return agent.Tail(protocol, net.JoinHostPort(n.origHost.Name, strconv.Itoa(int(bindPort))), w, timeout)
+}
+
+func (n *Node) updateAQLRegistered() {
+	ul, err := n.cluster.origClient().ListUDF(nil)
+	if err != nil {
+		log.Errorln("Error occurred while listing the AQL", err)
+		return
+	}
+
+	for _, u := range ul {
+		if u.Filename == "aqlAPI.lua" {
+			n.aqlUDF.Set(true)
+			return
+		}
+	}
+
+	n.aqlUDF.Set(false)
+}
+
+func (n *Node) AQLRegistered() bool {
+	res := n.aqlUDF.Get().(bool)
+	return res
+}
+
+func (n *Node) RegisterAQLAPI() error {
+	return setup.SetupDB(n.cluster.origClient())
 }

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"io"
 	// "strconv"
 	"encoding/base64"
 	"errors"
@@ -17,6 +18,7 @@ import (
 	"github.com/kennygrant/sanitize"
 	"github.com/mcuadros/go-version"
 	// "github.com/sasha-s/go-deadlock"
+	"github.com/citrusleaf/khosql/parser"
 	"github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/app"
@@ -53,6 +55,7 @@ type Cluster struct {
 	client     common.SyncValue // *as.Client
 	nodes      common.SyncValue // map[as.Host]*Node
 	namespaces common.SyncValue // map[namespace]*LogicalNamespace
+	aqlParser  common.SyncValue // *parser.AQLParser
 
 	// last time updated
 	lastUpdate common.SyncValue //time.Time
@@ -111,6 +114,7 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 		alerts:               common.NewAlertBucket(50),
 		redAlertCount:        common.NewSyncValue(0),
 		unresolvedAlertCount: common.NewSyncValue(0),
+		aqlParser:            common.NewSyncValue(aql.NewParser(client)),
 	}
 
 	newCluster.SetAlias(alias)
@@ -639,7 +643,13 @@ func (c *Cluster) close() {
 	if cl := c.origClient(); cl != nil {
 		cl.Close()
 		c.client.Set(nil)
+		c.getAQLParser().Close()
+		c.aqlParser.Set(nil)
 	}
+}
+
+func (c *Cluster) getAQLParser() *aql.AQLParser {
+	return c.aqlParser.Get().(*aql.AQLParser)
 }
 
 func (c *Cluster) IsSet() bool {
@@ -1471,6 +1481,17 @@ func (c *Cluster) CurrentBackup() *Backup {
 	return c.activeBackup.Get().(*Backup)
 }
 
+func (c *Cluster) AQLEnabled() bool {
+	nodes := c.Nodes()
+	for _, node := range nodes {
+		if !node.AQLRegistered() {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (c *Cluster) Restore(
 	Namespace string,
 	DestinationAddress string,
@@ -1595,4 +1616,23 @@ func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResp
 	}
 
 	return resp, nil
+}
+
+func (c *Cluster) ExecAQL(output io.Writer, aql string) (int, error) {
+	ch := make(chan *as.Result, 100)
+	parser := c.getAQLParser()
+	err := parser.WriteString(aql)
+	if err != nil {
+		fmt.Fprintln(output, err)
+		return 0, err
+	}
+
+	stmt, err := parser.ParseSQL()
+	if err != nil {
+		fmt.Fprintln(output, err)
+		return 0, err
+	}
+
+	go stmt.Execute(ch)
+	return printResult(output, ch, stmt)
 }
