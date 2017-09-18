@@ -92,7 +92,7 @@ export default class DirectedGraph {
     const n = this.nodes.length;
     const w = this._width();
     const h = this._height();
-    const m = 50; // margin of the graph
+    const m = 100; // margin of the graph
     const xy = coord(n, w, h, m);
 
     for (let i = 0; i < n; i++) {

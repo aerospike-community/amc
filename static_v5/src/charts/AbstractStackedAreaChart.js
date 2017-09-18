@@ -40,6 +40,12 @@ class AbstractStackedAreaChart {
 
   // update the chart with new data
   update(data) {
+    // see https://github.com/krispo/angular-nvd3/issues/287
+    this.data.forEach((d, i) => {
+        if (d.disabled)
+          data[i].disabled = true;
+    });
+
     this.data = data;
     this.chartData
       .datum(data)

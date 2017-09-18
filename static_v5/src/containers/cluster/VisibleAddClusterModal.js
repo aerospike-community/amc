@@ -2,16 +2,21 @@ import { connect } from 'react-redux';
 import AddClusterModal from 'components/cluster/AddClusterModal';
 import { initClusters, displayAddClusterConnection } from 'actions/clusters';
 
+let CurrentView;
+
+const mapStateToProps = (state) => {
+  CurrentView = state.currentView;
+  return null;
+};
+
 const mapDispatchToProps = (dispatch) => {
   return {
     // on connection success
     onConnectionAddSuccess: (connection) => {
       // close modal
       dispatch(displayAddClusterConnection(false));
-      // FIXME connection should be a success response
-      // from the server
       // refetch clusters
-      dispatch(initClusters());
+      dispatch(initClusters(CurrentView));
     },
 
     // cancel the view
@@ -22,7 +27,7 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 const VisibleAddClusterModal = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(AddClusterModal);
 
