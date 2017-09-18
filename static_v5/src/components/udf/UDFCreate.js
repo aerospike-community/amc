@@ -126,7 +126,9 @@ class UDFCreate extends React.Component {
           </FormGroup>
 
           <div className="as-ace-editor">
-            <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
+            <AceEditor width={'100%'} height={editorHeight} fontSize={16}
+              mode="lua" theme="github" 
+              name={this.id} value={this.state.sourceCode} readOnly={this.state.isUpdating}
               onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
           </div>
           <div>

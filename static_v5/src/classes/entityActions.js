@@ -235,6 +235,12 @@ const logicalClusterActions = {
   Overview: {
     isDefault: true,
   },
+  Query: {
+    state: {
+      isAuthenticated: true,
+    },
+    isEndOfGrouping: true,
+  },
   Alerts: {
     state: {
       isAuthenticated: true

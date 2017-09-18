@@ -104,3 +104,55 @@ export function getNodesConfig(clusterID) {
   const url = toURLPath(clusterID + '/config');
   return get(url);
 }
+
+// isAQLSet returns true iff aql is enabled on the connection
+export function isAQLSet(clusterID) {
+  const url = toURLPath(clusterID + '/aql/isset');
+  return new Promise((resolve, reject) => {
+    get(url, false)
+      .then((response) => {
+        response.text().then((text) => {
+          text = text.trim();
+          if (text.indexOf('true') !== -1)
+            resolve(true);
+          else
+            resolve(false);
+        });
+      })
+      .catch((msg) => reject(msg));
+  });
+}
+
+// register the aql at the cluster
+export function registerAQL(clusterID) {
+  const url = toURLPath(clusterID + '/aql/register');
+  return get(url);
+}
+
+// execute the query on the cluster
+export function executeQuery(clusterID, query) {
+  const url = toURLPath(clusterID + '/aql');
+
+  const data = {
+    aql: query
+  };
+
+  return new Promise((resolve, reject) => {
+    postJSON(url, data, false)
+      .then((response) => {
+        response.text().then((text) => {
+          text = text.trim();
+
+          // remove quotes
+          if (text.length > 0) {
+            const i = text.length-1;
+            if (text[0] === '"' && text[i] === '"')
+              text = text.slice(1, -1);
+          }
+
+          resolve(text);
+        });
+      })
+      .catch((msg) => reject(msg));
+  });
+}

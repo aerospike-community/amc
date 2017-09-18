@@ -309,3 +309,13 @@ export function cancelTimeout(id) {
 export function formatDuration(millisecs) {
   return humanizeDuration(millisecs, { round: true });
 }
+
+// toHTML converts the plain text to html
+export function toHTML(text) {
+  if (typeof(text) !== 'string' || text.length === 0)
+    return '';
+
+  let s = text.replace(/ /g, '&nbsp;');
+  s = s.replace(/\\n/g, '<br>');
+  return s;
+}

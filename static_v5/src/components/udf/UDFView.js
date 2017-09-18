@@ -204,7 +204,8 @@ class UDFView extends React.Component {
         </div>
 
         <div className="as-ace-editor">
-          <AceEditor width={'100%'} height={editorHeight} mode="lua" theme="github" 
+          <AceEditor width={'100%'} height={editorHeight} fontSize={16}
+            mode="lua" theme="github" 
             name={this.id} value={sourceCode} readOnly={readOnly} 
             onLoad={this.onEditorLoad} onChange={this.onEditorChange}/>
         </div>
