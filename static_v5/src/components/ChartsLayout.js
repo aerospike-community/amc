@@ -102,12 +102,13 @@ class ChartsLayout extends React.Component {
       const all = [];
       charts.forEach((chart) => {
         const { name, id } = chart;
+        const style = {height: height};
 
         all.push(
           <div className={className} key={name}>
             <div className="row as-chart-title"> {name} </div>
             <div className="row">
-              <svg style={{height: height}} id={id}> </svg>
+              <svg style={style} id={id}> </svg>
             </div>
           </div>
         );

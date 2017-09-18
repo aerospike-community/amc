@@ -6,6 +6,8 @@ export const ThroughputOperations = {
   Scan:  'Scan',
   UDF:   'UDF',
   Write: 'Write',
+  XDR_Write: 'XDR_Write',
+  XDR_Read: 'XDR_Read',
 };
 
 // the grouping in the throughput charts

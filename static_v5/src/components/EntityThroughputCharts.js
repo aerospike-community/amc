@@ -11,12 +11,14 @@ import { LAST_X_MINUTES } from 'classes/constants';
 
 // names of the operations in the charts
 const OperationNames = {
-  [TPO.Batch]: 'Batch',
-  [TPO.Query]: 'Query',
-  [TPO.Read]:  'Reads per second',
-  [TPO.Scan]:  'Scan',
-  [TPO.UDF]:   'UDF',
-  [TPO.Write]: 'Writes per second',
+  [TPO.Batch]:     'Batch',
+  [TPO.Query]:     'Query',
+  [TPO.Read]:      'Reads per second',
+  [TPO.Scan]:      'Scan',
+  [TPO.UDF]:       'UDF',
+  [TPO.Write]:     'Writes per second',
+  [TPO.XDR_Write]: 'XDR Writes',
+  [TPO.XDR_Read]:  'XDR Reads',
 };
 
 // the default chart layout 
@@ -25,7 +27,11 @@ const DefaultLayout = [{
   height: 350,
   header: '', // optional
 }, {
-  operations: [TPO.Batch, TPO.Query, TPO.Scan, TPO.UDF],
+  operations: [TPO.Batch, TPO.Query, TPO.Scan],
+  header: '', // optional
+  height: 200, 
+}, {
+  operations: [TPO.UDF, TPO.XDR_Read, TPO.XDR_Write],
   header: '', // optional
   height: 200, 
 }];

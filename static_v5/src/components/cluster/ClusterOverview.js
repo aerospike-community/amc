@@ -2,12 +2,11 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import ClusterStorage from 'components/cluster/ClusterStorage';
-import ClusterSummary from 'components/cluster/ClusterSummary';
 import ClusterThroughput from 'components/cluster/ClusterThroughput';
 import ClusterNamespaces from 'components/cluster/ClusterNamespaces';
 import NodesSummary from 'components/node/NodesSummary';
 import Spinner from 'components/Spinner';
+import XDRGraph from 'components/XDRGraph';
 
 import { getConnectionDetails } from 'api/clusterConnections';
 
@@ -67,47 +66,6 @@ class ClusterOverview extends React.Component {
         }
         {!this.state.isFetching && 
           <div>
-            <div className="row">
-              <div className="col-xl-4 as-section">
-                <div className="row">
-                  <div className="col-xl-12 as-section-header">
-                    Disk
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-xl-12">
-                    <ClusterStorage name={'Disk'} storage={co.disk} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-xl-4 as-section">
-                <div className="row">
-                  <div className="col-xl-12 as-section-header">
-                    RAM
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-xl-12">
-                    <ClusterStorage name={'RAM'} storage={co.memory} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-xl-4 as-section">
-                <div className="row">
-                  <div className="col-xl-12 as-section-header">
-                    Summary
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-xl-12">
-                    <ClusterSummary clusterOverview={co} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="row">
               <div className="col-xl-12 as-section">
                 <ClusterThroughput clusterID={clusterID} />

@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import VisibleClusterAlerts from 'containers/VisibleClusterAlerts';
+import ClusterOverview from 'components/cluster/ClusterOverview';
 import { whenClusterHasCredentials } from 'classes/security';
 
 import Tabs from 'components/Tabs';
@@ -60,7 +61,7 @@ class LogicalClusterDashboard extends React.Component {
 
     let dashboard;
     if (view === LOGICAL_CLUSTER_ACTIONS.Overview ) {
-      dashboard = <h1> Cluster Overview </h1>
+      dashboard = <ClusterOverview clusterID={clusterID} />;
 
     } else if (view === CLUSTER_ACTIONS.Alerts) {
       dashboard = <VisibleClusterAlerts />

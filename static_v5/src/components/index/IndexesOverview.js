@@ -7,6 +7,7 @@ import { renderStatsInTable } from 'classes/renderUtil';
 import { getIndexes as getIndexesAPI } from 'api/index';
 import IndexesTable from 'components/index/IndexesTable';
 import Spinner from 'components/Spinner';
+import { Jumbotron } from 'reactstrap';
 
 // IndexesOverview provides an overview of the indexes of a cluster
 class IndexesOverview extends React.Component {
@@ -63,7 +64,7 @@ class IndexesOverview extends React.Component {
     if (isFetching)
       return <div> <Spinner /> Loading ... </div>;
 
-    const header = `Indexes - ${this.props.clusterID}`;
+    const header = `Indexes`;
     return (
       <div>
         <div className="row">
@@ -77,7 +78,9 @@ class IndexesOverview extends React.Component {
         }
 
         {indexes.length === 0 &&
-        <h4 style={{margin: 10}}> No indexes present. </h4>
+        <Jumbotron>
+          <h4 > No indexes present </h4>
+        </Jumbotron>
         }
 
       </div>

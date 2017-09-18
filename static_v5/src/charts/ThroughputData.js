@@ -3,12 +3,14 @@ import { ThroughputGrouping, ThroughputOperations as TPO } from 'charts/constant
 // map of throughput operation to the
 // key in the data
 const OperationKey = {
-  [TPO.Batch]: 'batch_read_tps',
-  [TPO.Query]: 'query_tps',
-  [TPO.Read]:  'read_tps',
-  [TPO.Scan]:  'scan_tps',
-  [TPO.UDF]:   'udf_tps',
-  [TPO.Write]: 'write_tps',
+  [TPO.Batch]:     'batch_read_tps',
+  [TPO.Query]:     'query_tps',
+  [TPO.Read]:      'read_tps',
+  [TPO.Scan]:      'scan_tps',
+  [TPO.UDF]:       'udf_tps',
+  [TPO.Write]:     'write_tps',
+  [TPO.XDR_Write]: 'xdr_write_tps',
+  [TPO.XDR_Read]:  'xdr_read_tps',
 };
 
 // ThroughputData handles all the functionality of
