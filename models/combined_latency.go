@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-type NamespaceLatency map[string]map[string]Latencies // map[op][nodehost]Latencies
+type CombinedLatency map[string]map[string]Latencies // map[op][nodehost]Latencies
 
 // group the latencies by ops
 func _byops(stats []map[string]common.Stats) map[string][]common.Stats {
@@ -20,7 +20,27 @@ func _byops(stats []map[string]common.Stats) map[string][]common.Stats {
 	return m
 }
 
-func newNamespaceLatency(lns *LogicalNamespace, from, to time.Time) NamespaceLatency {
+func newCombinedClusterLatency(cluster *Cluster, from, to time.Time) CombinedLatency {
+	m := map[string]map[string]Latencies{} // map[op][nodehost]Latencies
+
+	// fetch latencies from all the nodes
+	for _, nd := range cluster.Nodes() {
+		if arr := nd.Latency(from, to); arr != nil {
+			for op, stats := range _byops(arr) {
+				if _, ok := m[op]; !ok {
+					m[op] = make(map[string]Latencies, 0)
+				}
+
+				id := nd.Address()
+				m[op][id] = newLatencies(stats)
+			}
+		}
+	}
+
+	return CombinedLatency(m)
+}
+
+func newCombinedNamespaceLatency(lns *LogicalNamespace, from, to time.Time) CombinedLatency {
 	m := map[string]map[string]Latencies{} // map[op][nodehost]Latencies
 
 	// fetch latencies from all the namespaces
@@ -37,21 +57,21 @@ func newNamespaceLatency(lns *LogicalNamespace, from, to time.Time) NamespaceLat
 		}
 	}
 
-	return NamespaceLatency(m)
+	return CombinedLatency(m)
 }
 
-func (ns NamespaceLatency) ops() []string {
+func (cl CombinedLatency) ops() []string {
 	var ops []string
-	for op, _ := range ns {
+	for op, _ := range cl {
 		ops = append(ops, op)
 	}
 	return ops
 }
 
 // mergeLatency merges the latency from all nodes for the operation
-func (ns NamespaceLatency) mergeLatency(op string) Latencies {
+func (cl CombinedLatency) mergeLatency(op string) Latencies {
 	var all []Latencies
-	for _, lats := range ns[op] {
+	for _, lats := range cl[op] {
 		all = append(all, lats)
 	}
 
@@ -65,11 +85,11 @@ func (ns NamespaceLatency) mergeLatency(op string) Latencies {
 }
 
 // merge the latencies from all the nodes
-func (ns NamespaceLatency) merge() []map[string]common.Stats {
+func (cl CombinedLatency) merge() []map[string]common.Stats {
 	m := map[string]Latencies{} // m[op]Latencies
 
-	for op, _ := range ns {
-		m[op] = ns.mergeLatency(op)
+	for op, _ := range cl {
+		m[op] = cl.mergeLatency(op)
 	}
 
 	// it might be the case that the latencies for different operations might
@@ -108,21 +128,20 @@ func (ns NamespaceLatency) merge() []map[string]common.Stats {
 		}
 	}
 
-	ns.outliers()
 	return arr
 }
 
-func (ns NamespaceLatency) hasOutliers() bool {
-	m := ns.outliers()
+func (cl CombinedLatency) hasOutliers() bool {
+	m := cl.outliers()
 	return len(m) > 0
 }
 
 // outliers returns all the nodes which are outliers for the operations
 // map[op] = []string // nodehosts
-func (ns NamespaceLatency) outliers() map[string][]string {
+func (cl CombinedLatency) outliers() map[string][]string {
 	m := map[string][]string{}
-	for op, _ := range ns {
-		if l := ns.outlier(op); len(l) > 0 {
+	for op, _ := range cl {
+		if l := cl.outlier(op); len(l) > 0 {
 			m[op] = l
 		}
 	}
@@ -130,9 +149,9 @@ func (ns NamespaceLatency) outliers() map[string][]string {
 }
 
 // returns node hosts which are outliers for the given operation
-func (ns NamespaceLatency) outlier(op string) []string {
+func (cl CombinedLatency) outlier(op string) []string {
 	var avgs []float64
-	for _, lat := range ns[op] {
+	for _, lat := range cl[op] {
 		x := lat.avgLatency()
 		avgs = append(avgs, x)
 	}
@@ -141,7 +160,7 @@ func (ns NamespaceLatency) outlier(op string) []string {
 	isOutlier := normOutlier(avgs)
 
 	var nodes []string
-	for id, lat := range ns[op] {
+	for id, lat := range cl[op] {
 		avg := lat.avgLatency()
 		if isOutlier(avg) {
 			nodes = append(nodes, id)

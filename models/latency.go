@@ -9,6 +9,7 @@ import (
 )
 
 // -------------------------------------------
+
 // Latency is a stat of a single operation
 type Latency common.Stats
 
@@ -86,6 +87,7 @@ func (lat Latency) timestampUnix() int64 {
 }
 
 //----------------------------
+
 type Latencies []Latency
 
 func newLatencies(stats []common.Stats) Latencies {

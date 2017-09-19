@@ -291,6 +291,12 @@ func (c *Cluster) Disk() *app.AerospikeAmcClusterResourceUsageResponse {
 	return result
 }
 
+// Latency returns the latency of the cluster.
+func (c *Cluster) Latency(from, to time.Time) []map[string]common.Stats {
+	n := newCombinedClusterLatency(c, from, to)
+	return n.merge()
+}
+
 func (c *Cluster) Memory() *app.AerospikeAmcClusterResourceUsageResponse {
 	result := &app.AerospikeAmcClusterResourceUsageResponse{
 		UsedBytes: int(c.aggNodeCalcStats.TryInt("used-bytes-memory", 0)),

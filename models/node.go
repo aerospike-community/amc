@@ -1090,6 +1090,9 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 		if nstats := nodeStats[op]; nstats == nil {
 			nodeStats[op] = stats
 		} else {
+			// make a copy, since it is referred in nodeStats
+			nstats = _cloneLatency(nstats)
+
 			if timestamp > nstats.TryString("timestamp", "") {
 				nstats["timestamp"] = timestamp
 			}
@@ -1111,6 +1114,25 @@ func (n *Node) parseLatencyInfo(s string) (map[string]map[string]common.Stats, m
 	}
 
 	return res, nodeStats
+}
+
+func _cloneLatency(m common.Stats) common.Stats {
+	vb, _ := m["valBuckets"].([]float64)
+	valBuckets := make([]float64, len(vb))
+	for i, v := range vb {
+		valBuckets[i] = v
+	}
+
+	c := common.Stats{
+		"tps":            m["tps"],
+		"timestamp":      m["timestamp"],
+		"timestamp_unix": m["timestamp_unix"],
+		"buckets":        m["buckets"],
+		"valBuckets":     valBuckets,
+	}
+
+	topct(c)
+	return c
 }
 
 func topct(stat common.Stats) {

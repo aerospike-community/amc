@@ -60,7 +60,7 @@ func (ns *LogicalNamespace) Name() string {
 
 // Latency returns the latency of the namespace.
 func (ns *LogicalNamespace) Latency(from, to time.Time) []map[string]common.Stats {
-	n := newNamespaceLatency(ns, from, to)
+	n := newCombinedNamespaceLatency(ns, from, to)
 	return n.merge()
 }
 
