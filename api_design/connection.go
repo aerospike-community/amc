@@ -219,7 +219,7 @@ var _ = Resource("connection", func() {
 			Required("connId")
 		})
 
-		Response(OK, HashOf(String, LatencyResponseMedia))
+		Response(OK, ArrayOf(Any))
 		Response(BadRequest, String)
 		Response(Unauthorized)
 		Response(InternalServerError)

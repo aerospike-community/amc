@@ -1029,9 +1029,15 @@ func (c *Cluster) Throughput(from, to time.Time) map[string]map[string][]*common
 				res[statName] = valueMap
 			} else {
 				for k, v := range valueMap {
-					res[statName][k] = v
+					res[statName][k] = append(res[statName][k], v...)
 				}
 			}
+		}
+	}
+
+	for statName, valueMap := range res {
+		for ns, vals := range valueMap {
+			res[statName][ns] = aggregateThroughputs(vals)
 		}
 	}
 

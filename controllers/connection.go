@@ -210,6 +210,16 @@ func (c *ConnectionController) GetLogsWSHandler(ctx *app.GetLogsConnectionContex
 	}
 }
 
+// Stub to satisfy the latencyEntity interface
+type clusterlat struct {
+	c *models.Cluster
+}
+
+func (lat *clusterlat) LatestLatency() map[string]common.Stats { return nil }
+func (lat *clusterlat) Latency(from, to time.Time) []map[string]common.Stats {
+	return lat.c.Latency(from, to)
+}
+
 // Latency runs the latency action.
 func (c *ConnectionController) Latency(ctx *app.LatencyConnectionContext) error {
 	// ConnectionController_Latency: start_implement
@@ -219,14 +229,11 @@ func (c *ConnectionController) Latency(ctx *app.LatencyConnectionContext) error 
 		return ctx.BadRequest(err.Error())
 	}
 
-	nodes := cluster.Nodes()
-	res := make(map[string]*app.AerospikeAmcLatencyResponse, len(nodes))
-	for _, node := range nodes {
-		res[node.Address()] = &app.AerospikeAmcLatencyResponse{
-			Status:  string(node.Status()),
-			Latency: latency(node, ctx.From, ctx.Until),
-		}
+	clat := &clusterlat{
+		c: cluster,
 	}
+
+	res := latency(clat, ctx.From, ctx.Until)
 
 	// ConnectionController_Latency: end_implement
 	return ctx.OK(res)
