@@ -1,4 +1,5 @@
 import {  authConnection as authConnectionAPI, listConnections, getClusterEntityTree as getClusterEntityTreeAPI } from 'api/clusterConnections';
+import { logoutOfCluster } from 'api/clusterConnections';
 
 import { expandEntityNode } from 'actions/entityTree';
 import { selectStartView } from 'actions/currentView';
@@ -229,6 +230,8 @@ function authFailed(errorMsg) {
 
 export const DISCONNECT_CLUSTER_CONNECTION = 'DISCONNECT_CLUSTER_CONNECTION';
 export function disconnectCluster(clusterID) {
+  logoutOfCluster(clusterID);
+
   return {
     type: DISCONNECT_CLUSTER_CONNECTION,
     clusterID: clusterID

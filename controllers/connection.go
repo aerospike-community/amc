@@ -134,6 +134,13 @@ func (c *ConnectionController) Connect(ctx *app.ConnectConnectionContext) error 
 	return ctx.OK(et)
 }
 
+// Logout of the cluster
+func (c *ConnectionController) Logout(ctx *app.LogoutConnectionContext) error {
+	sessionId := ctx.Value("sessionId").(string)
+	removeClusterById(sessionId, ctx.ConnID)
+	return ctx.NoContent()
+}
+
 // Overview runs the overview action.
 func (c *ConnectionController) Overview(ctx *app.OverviewConnectionContext) error {
 	// ConnectionController_Overview: start_implement

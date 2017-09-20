@@ -90,6 +90,19 @@ func getConnectionClusterById(connId string) (*models.Cluster, error) {
 	return nil, ErrClusterNotFound
 }
 
+func removeClusterById(sessionId, connId string) {
+	c, err := getConnectionClusterById(connId)
+	if err != nil {
+		return
+	}
+
+	connections.m.Lock()
+	defer connections.m.Unlock()
+
+	delete(connections.conns, connId)
+	_observer.RemoveCluster(sessionId, c)
+}
+
 func connectionIsConnected(connId string) bool {
 	connections.m.Lock()
 	defer connections.m.Unlock()

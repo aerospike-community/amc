@@ -91,6 +91,23 @@ var _ = Resource("connection", func() {
 		Response(InternalServerError)
 	})
 
+	Action("logout", func() {
+		Description("Logout from the connection")
+		Routing(POST(":connId/logout"))
+		Params(func() {
+			Param("connId", String, "Connection Id", func() {
+				Example("70f01ba5-b14f-47d9-8d69-c5b4e960d88b")
+				Pattern(uuidv4Regex)
+			})
+			Required("connId")
+		})
+
+		Response(NoContent)
+		Response(Unauthorized)
+		Response(NotFound)
+		Response(InternalServerError)
+	})
+
 	Action("entities", func() {
 		Description("Return the cluster's entity tree")
 		Routing(GET(":connId/entity-tree"))

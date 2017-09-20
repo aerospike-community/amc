@@ -68,6 +68,12 @@ export function getLoggedInUser(clusterID) {
   return get(url);
 }
 
+// logout of the cluster connection
+export function logoutOfCluster(clusterID) {
+  const url = toURLPath(clusterID + '/logout');
+  return postJSON(url);
+}
+
 // get all throughput stats for all the nodes of the connection
 // from, to are in unix seconds
 export function getThroughput(clusterID, from, to) {

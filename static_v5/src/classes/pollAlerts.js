@@ -11,17 +11,18 @@ export function pollAlerts(clusterID, dispatch) {
 
   Clusters.add(clusterID);
   const poll = () => {
+    if (!Clusters.has(clusterID))
+      return;
+
     getAlerts(clusterID)
       .then((response) => {
         const { notifications } = response;
         dispatch(alertsFetched(clusterID, notifications));
 
-        if (Clusters.has(clusterID))
-          timeout(poll, Interval);
+        timeout(poll, Interval);
       })
       .catch(() => {
-        if (Clusters.has(clusterID))
-          timeout(poll, Interval);
+        timeout(poll, Interval);
       });
   };
   poll();
