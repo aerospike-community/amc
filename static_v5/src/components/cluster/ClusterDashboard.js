@@ -46,6 +46,10 @@ class ClusterDashboard extends React.Component {
   }
 
   setViews(clusterID) {
+    this.setState({
+      views: []
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const actions = [CLUSTER_ACTIONS.Overview, CLUSTER_ACTIONS.Latency, CLUSTER_ACTIONS.XDR,
                         CLUSTER_ACTIONS.Configuration, CLUSTER_ACTIONS.Roles, CLUSTER_ACTIONS.Users, 

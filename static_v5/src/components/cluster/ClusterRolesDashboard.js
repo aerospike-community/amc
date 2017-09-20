@@ -35,7 +35,18 @@ class ClusterRolesDashboard extends React.Component {
     this.setPermissions(clusterID);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+    if (this.props.clusterID !== clusterID)
+      this.setPermissions(clusterID);
+  }
+
   setPermissions(clusterID) {
+    this.setState({
+      canCreate: false,
+      canEdit: false,
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const canCreate = isPermissibleAction(ROLE_ACTIONS.Create, clusterID, VIEW_TYPE.ROLE);
       const canEdit = isPermissibleAction(ROLE_ACTIONS.Edit, clusterID, VIEW_TYPE.ROLE);

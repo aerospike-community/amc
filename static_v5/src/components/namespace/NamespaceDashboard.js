@@ -26,6 +26,10 @@ class NamespaceDashboard extends React.Component {
   }
 
   setViews(props) {
+    this.setState({
+      views: []
+    });
+
     const { clusterID, namespaceName } = props;
     whenClusterHasCredentials(clusterID, () => {
       const actions = [NAMESPACE_ACTIONS.View, NAMESPACE_ACTIONS.Latency, 

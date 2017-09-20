@@ -25,11 +25,21 @@ class NodeDashboard extends React.Component {
   }
 
   componentDidMount() {
-    this.setViews();
+    const { clusterID } = this.props;
+    this.setViews(clusterID);
   }
 
-  setViews() {
-    const { clusterID } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+    if (this.props.clusterID !== clusterID)
+      this.setViews(clusterID);
+  }
+
+  setViews(clusterID) {
+    this.setState({
+      views: []
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, 
                        NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs];

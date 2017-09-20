@@ -58,6 +58,11 @@ class UDFView extends React.Component {
   }
 
   setPermissions(clusterID) {
+    this.setState({
+      canEdit: false,
+      canDelete: false,
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const canEdit = isPermissibleAction(UDF_ACTIONS.Edit, clusterID, VIEW_TYPE.UDF);
       const canDelete = isPermissibleAction(UDF_ACTIONS.Delete, clusterID, VIEW_TYPE.UDF);

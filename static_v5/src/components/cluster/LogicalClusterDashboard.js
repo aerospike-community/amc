@@ -41,6 +41,10 @@ class LogicalClusterDashboard extends React.Component {
   }
 
   setViews(clusterID) {
+    this.setState({
+      views: []
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const actions = [LOGICAL_CLUSTER_ACTIONS.Overview, 
                        LOGICAL_CLUSTER_ACTIONS.Query,

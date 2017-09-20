@@ -33,7 +33,18 @@ class ClusterUsersDashboard extends React.Component {
     this.setPermissions(clusterID);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { clusterID } = nextProps;
+    if (this.props.clusterID !== clusterID)
+      this.setPermissions(clusterID);
+  }
+
   setPermissions(clusterID) {
+    this.setState({
+      canCreate: false,
+      canEdit: false,
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const canCreate = isPermissibleAction(USER_ACTIONS.Create, clusterID, VIEW_TYPE.USER);
       const canEdit = isPermissibleAction(USER_ACTIONS.Edit, clusterID, VIEW_TYPE.USER);

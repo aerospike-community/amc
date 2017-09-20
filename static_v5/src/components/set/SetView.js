@@ -40,6 +40,10 @@ class SetView extends React.Component {
   }
 
   setPermissions(clusterID, namespace, set) {
+    this.setState({
+      canDelete: false
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const canDelete = isPermissibleSetAction(SET_ACTIONS.Delete, clusterID, namespace, set);
       this.setState({

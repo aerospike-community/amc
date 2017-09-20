@@ -40,6 +40,10 @@ class IndexView extends React.Component {
   }
 
   setPermissions(clusterID) {
+    this.setState({
+      canDelete: false
+    });
+
     whenClusterHasCredentials(clusterID, () => {
       const canDelete = isPermissibleAction(INDEX_ACTIONS.Delete, clusterID, VIEW_TYPE.INDEX);
       this.setState({
@@ -171,7 +175,7 @@ class IndexView extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 as-section-header">
-            {`Index - ${indexName}`} 
+            {`Index`} 
 
             {canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 

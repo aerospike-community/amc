@@ -39,14 +39,7 @@ class ClusterLatency extends React.Component {
   getLatency(from, to) {
     const { clusterID } = this.props;
     const p = getLatencyAPI(clusterID, from, to)
-                .then((r) => {
-                  // FIXME when the API changes
-                  // right now showing any node's latency
-                  let nodes = Object.keys(r);
-                  if (nodes.length > 0)
-                    return r[nodes[0]].latency
-                  return {};
-                });
+                .then((latency) => latency || []);
     return p;
   }
   
