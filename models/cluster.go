@@ -1082,7 +1082,7 @@ func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 }
 
 func (c *Cluster) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcClusterNamespaceResponse {
-	res := make(map[*Namespace]common.Stats, len(namespaces))
+	res := make(map[string]common.Stats, len(namespaces))
 	nodes := c.Nodes()
 	for _, node := range nodes {
 		for _, nsName := range namespaces {
@@ -1091,7 +1091,7 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAm
 				continue
 			}
 
-			nsStats := res[ns]
+			nsStats := res[nsName]
 			stats := ns.Stats()
 			if nsStats == nil {
 				nsStats = stats
@@ -1118,7 +1118,7 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAm
 			nsStats["least_available_pct"] = leastDiskPct
 			nsStats["cluster_status"] = c.Status()
 
-			res[ns] = nsStats
+			res[nsName] = nsStats
 		}
 	}
 
@@ -1127,9 +1127,9 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAm
 	}
 
 	out := make(map[string]*app.AerospikeAmcClusterNamespaceResponse, len(namespaces))
-	for ns, stats := range res {
-		out[ns.name] = &app.AerospikeAmcClusterNamespaceResponse{
-			Name:              ns.name,
+	for nsName, stats := range res {
+		out[nsName] = &app.AerospikeAmcClusterNamespaceResponse{
+			Name:              nsName,
 			Memory:            toSystemResource(stats, "memory"),
 			Disk:              toSystemResource(stats, "disk"),
 			Stats:             stats,

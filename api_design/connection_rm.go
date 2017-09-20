@@ -23,9 +23,9 @@ var ResourceUsageResponseMedia = MediaType("application/vnd.aerospike.amc.resour
 	Description("Resource Usage")
 
 	Attributes(func() {
-		Attribute("used-bytes", Integer, "Used Bytes")
-		Attribute("free-bytes", Integer, "Free Bytes")
-		Attribute("total-bytes", Integer, "Total Bytes")
+		Attribute("used-bytes", Number, "Used Bytes")
+		Attribute("free-bytes", Number, "Free Bytes")
+		Attribute("total-bytes", Number, "Total Bytes")
 
 		Required("used-bytes", "free-bytes", "total-bytes")
 	})

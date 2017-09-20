@@ -724,8 +724,8 @@ func (n *Node) Build() string {
 
 func (n *Node) Disk() *app.AerospikeAmcResourceUsageResponse {
 	result := &app.AerospikeAmcResourceUsageResponse{
-		UsedBytes: int(n.nsAggCalcStats.TryInt("used-bytes-disk", 0)),
-		FreeBytes: int(n.nsAggCalcStats.TryInt("free-bytes-disk", 0)),
+		UsedBytes: n.nsAggCalcStats.TryFloat("used-bytes-disk", 0),
+		FreeBytes: n.nsAggCalcStats.TryFloat("free-bytes-disk", 0),
 	}
 
 	result.TotalBytes = result.UsedBytes + result.FreeBytes
@@ -734,8 +734,8 @@ func (n *Node) Disk() *app.AerospikeAmcResourceUsageResponse {
 
 func (n *Node) Memory() *app.AerospikeAmcResourceUsageResponse {
 	result := &app.AerospikeAmcResourceUsageResponse{
-		UsedBytes: int(n.nsAggCalcStats.TryInt("used-bytes-memory", 0)),
-		FreeBytes: int(n.nsAggCalcStats.TryInt("free-bytes-memory", 0)),
+		UsedBytes: n.nsAggCalcStats.TryFloat("used-bytes-memory", 0),
+		FreeBytes: n.nsAggCalcStats.TryFloat("free-bytes-memory", 0),
 	}
 
 	result.TotalBytes = result.UsedBytes + result.FreeBytes
