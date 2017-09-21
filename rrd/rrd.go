@@ -70,18 +70,29 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 	}
 
 	// protect against values set in the past
-	if timestamp < *b.beginTime {
+	if timestamp < *b.beginTime ||
+		(b.lastTimestamp != nil && timestamp < *b.lastTimestamp) {
 		return
 	}
 
-	var newOffset int64 = (timestamp - *b.beginTime) / int64(b.resolution)
+	var newOffset, delta int64
+	var emptyTicks int
+	if b.lastTimestamp != nil {
+		delta = timestamp - *b.lastTimestamp
+
+		emptyTicks = int(delta / int64(b.resolution))
+		newOffset = int64(b.offset + emptyTicks)
+	} else {
+		delta = timestamp - *b.beginTime
+
+		newOffset = delta / int64(b.resolution)
+		emptyTicks = int(newOffset) - b.offset
+	}
 
 	// if same value is sent for the same timestamp, don't add it up for rolling totals
 	if newOffset == int64(b.offset) && val == *b.lastValue && b.rollingTotal {
 		return
 	}
-
-	emptyTicks := int(newOffset) - b.offset
 
 	if !b.rollingTotal {
 		if emptyTicks >= b.Size() {
@@ -94,13 +105,11 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 			}
 		}
 	} else {
-		// val is a rolling total
-		// it should be converted to a delta: val - lastVal
-		// if there are empty ticks, all will be filled with the delta
-		if emptyTicks > 1 {
-			val = math.Floor(((val - *b.lastValue) / float64(emptyTicks)))
+		if delta != 0 {
+			// spread the values across the time window
+			val = (val - *b.lastValue) / float64(delta) * float64(b.resolution)
 		} else {
-			val = val - *b.lastValue
+			val = (val - *b.lastValue)
 		}
 
 		if val < 0 {
@@ -112,8 +121,9 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 				b.values[i] = &val
 			}
 		} else if emptyTicks > 1 {
-			for i := b.offset; i <= emptyTicks; i++ {
-				b.values[i%b.Size()] = &val
+			for i := 0; i < emptyTicks; i++ {
+				j := (b.offset + 1 + i) % b.Size()
+				b.values[j] = &val
 			}
 		}
 	}
