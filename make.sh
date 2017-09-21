@@ -37,7 +37,7 @@ case $platform in
 		mkdir -p $BASE_DIR/opt/amc
 		mkdir -p $BASE_DIR/etc/amc
 
-    mkdir $BASE_DIR/opt/amc/static
+    mkdir -p $BASE_DIR/opt/amc/static
     cp static_v5/index.html $BASE_DIR/opt/amc/static
     cp -R static_v5/src/images $BASE_DIR/opt/amc/static
 		cp -R static_v5/build $BASE_DIR/opt/amc/static
@@ -77,9 +77,10 @@ case $platform in
 		rm -rf $BASE_DIR/static
 		rm -rf $BASE_DIR/mailer
 
-    cp static_v5/index.html $BASE_DIR/
-    cp -R static_v5/src/images $BASE_DIR/
-		cp -R static_v5/build $BASE_DIR/
+    mkdir -p $BASE_DIR/static
+    cp static_v5/index.html $BASE_DIR/static
+    cp -R static_v5/src/images $BASE_DIR/static
+		cp -R static_v5/build $BASE_DIR/static
 		mkdir -p $BASE_DIR/mailer
 		cp -R mailer/templates $BASE_DIR/mailer/
 
