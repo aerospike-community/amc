@@ -121,8 +121,9 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 				b.values[i] = &val
 			}
 		} else if emptyTicks > 1 {
-			for i := b.offset; i <= emptyTicks; i++ {
-				b.values[i%b.Size()] = &val
+			for i := 0; i < emptyTicks; i++ {
+				j := (b.offset + 1 + i) % b.Size()
+				b.values[j] = &val
 			}
 		}
 	}
