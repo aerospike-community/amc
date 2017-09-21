@@ -18,14 +18,12 @@ echo "sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
 # version=`git describe --tags $(git rev-list --tags --max-count=1)`
-version=`git describe`
+version=5.0-alpha
 
 # build content
-rm -rf build/static
-cd static
-npm install
-grunt
-
+cd static_v5
+rm -rf build/*
+npm run buildprod
 cd ..
 
 case $platform in
@@ -39,7 +37,10 @@ case $platform in
 		mkdir -p $BASE_DIR/opt/amc
 		mkdir -p $BASE_DIR/etc/amc
 
-		cp -R build/static $BASE_DIR/opt/amc/
+    mkdir $BASE_DIR/opt/amc/static
+    cp static_v5/index.html $BASE_DIR/opt/amc/static
+    cp -R static_v5/src/images $BASE_DIR/opt/amc/static
+		cp -R static_v5/build $BASE_DIR/opt/amc/static
 		mkdir -p $BASE_DIR/opt/amc/mailer
 		cp -R mailer/templates $BASE_DIR/opt/amc/mailer/
 
@@ -76,7 +77,9 @@ case $platform in
 		rm -rf $BASE_DIR/static
 		rm -rf $BASE_DIR/mailer
 
-		cp -R build/static $BASE_DIR/
+    cp static_v5/index.html $BASE_DIR/
+    cp -R static_v5/src/images $BASE_DIR/
+		cp -R static_v5/build $BASE_DIR/
 		mkdir -p $BASE_DIR/mailer
 		cp -R mailer/templates $BASE_DIR/mailer/
 

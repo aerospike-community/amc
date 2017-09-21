@@ -15,7 +15,6 @@ var _ = Resource("public", func() {
 	Origin("*", func() {
 		Methods("GET", "OPTIONS")
 	})
-	Files("/static/*filepath", "static_v5/")
 	Files("/*filepath", "static_v5/")
 })
 

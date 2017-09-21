@@ -268,10 +268,15 @@ func GoaServer(config *common.Config) {
 	authCtl := NewAuthController(service)
 	app.MountAuthController(service, authCtl)
 
+	if config.AMC.StaticPath == "" {
+		log.Fatalln("No static dir has been set in the config file. Quiting...")
+	}
+	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
+	app.MountPublicController(service, NewPublicController(service), config.AMC.StaticPath)
+
 	// Mount "amc" controller
 	app.MountAmcController(service, NewAmcController(service))
 	app.MountSwaggerController(service, NewSwaggerController(service))
-	app.MountPublicController(service, NewPublicController(service))
 
 	app.MountUserController(service, NewUserController(service))
 	app.MountConnectionController(service, NewConnectionController(service))
@@ -286,11 +291,6 @@ func GoaServer(config *common.Config) {
 	app.MountNotificationController(service, NewNotificationController(service))
 	app.MountDbRoleController(service, NewDbRoleController(service))
 	app.MountDbUserController(service, NewDbUserController(service))
-
-	if config.AMC.StaticPath == "" {
-		log.Fatalln("No static dir has been set in the config file. Quiting...")
-	}
-	logrus.Infoln("Static files path is being set to:" + config.AMC.StaticPath)
 
 	// Middleware
 	if !common.AMCIsProd() {
