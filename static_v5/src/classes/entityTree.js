@@ -60,6 +60,7 @@ function allNodes(cluster) {
     nodes.push(n);
   });
 
+  nodes.sort(nameSort);
   return nodes;
 }
 
@@ -254,6 +255,7 @@ function toLogicalNamespaces(cluster) {
     namespaces.push(ns);
   });
 
+  namespaces.sort(nameSort);
   return namespaces;
 }
 
