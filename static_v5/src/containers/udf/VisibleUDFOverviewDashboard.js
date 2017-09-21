@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import UDFOverviewDashboard from 'components/udf/UDFOverviewDashboard';
 import { UDF_ACTIONS }  from 'classes/entityActions';
 import { selectViewForViewType, selectUDF } from 'actions/currentView';
-import { addUDF } from 'actions/clusters';
 import { isLogicalView } from 'classes/util';
 import { VIEW_TYPE } from 'classes/constants';
 
@@ -28,8 +27,6 @@ const mapDispatchToProps = (dispatch) => {
     },
 
     onUDFCreateSuccess: (clusterID, udfName, udfType) => {
-      dispatch(addUDF(clusterID, udfName, udfType));
-
       const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_UDF : VIEW_TYPE.UDF;
       dispatch(selectUDF(clusterID, udfName, UDF_ACTIONS.View, vt));
     },

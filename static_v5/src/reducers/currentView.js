@@ -8,10 +8,15 @@ import { SELECT_LOGICAL_NAMESPACE, SELECT_LOGICAL_CLUSTER } from 'actions/curren
 import { SELECT_LOGICAL_VIEW, SELECT_PHYSICAL_VIEW } from 'actions/currentView';
 import { VIEW_TYPE } from 'classes/constants';
 import { updateURL } from 'classes/urlAndViewSynchronizer';
+import { LOGICAL_CLUSTER_ACTIONS, CLUSTER_ACTIONS } from 'classes/entityActions';
 
 // store the previous physical, logical state between view changes
 let PhysicalState = {};
 let LogicalState = {};
+
+function isNotSet(obj) {
+  return obj === undefined || obj === null || Object.keys(obj).length === 0;
+}
 
 function getViewState(state) {
   const props = ['viewType', 'view', 'clusterID', 'nodeHost', 'namespaceName', 
@@ -72,11 +77,20 @@ export default function currentView(state = InitState, action) {
 
   switch (action.type) {
     case SELECT_PHYSICAL_VIEW:
-      // restore previous physical view
-      w = Object.assign({}, {
-        viewType: VIEW_TYPE.START_VIEW,
-        view: null,
-      }, PhysicalState);
+      if (isNotSet(PhysicalState) && state.clusterID) {
+        // select physical overview of corresponding cluster
+        w = {
+          viewType: VIEW_TYPE.CLUSTER,
+          view: CLUSTER_ACTIONS.Overview,
+          clusterID: state.clusterID,
+        };
+      } else {
+        // restore previous physical view
+        w = Object.assign({}, {
+          viewType: VIEW_TYPE.START_VIEW,
+          view: null,
+        }, PhysicalState);
+      }
       updated = updateFn(w);
 
       // save current logical view
@@ -84,11 +98,19 @@ export default function currentView(state = InitState, action) {
       break;
 
     case SELECT_LOGICAL_VIEW:
-      // restore previous logical view
-      w = Object.assign({}, {
-        viewType: VIEW_TYPE.LOGICAL_START_VIEW,
-        view: null,
-      }, LogicalState);
+      if (isNotSet(LogicalState) && state.clusterID) {
+        // select logical overview of corresponding cluster
+        w = {
+          viewType: VIEW_TYPE.LOGICAL_CLUSTER,
+          view: LOGICAL_CLUSTER_ACTIONS.Overview,
+          clusterID: state.clusterID,
+        };
+      } else { // restore previous logical view
+        w = Object.assign({}, {
+          viewType: VIEW_TYPE.LOGICAL_START_VIEW,
+          view: null,
+        }, LogicalState);
+      }
       updated = updateFn(w);
 
       // save current physical view

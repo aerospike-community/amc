@@ -82,7 +82,7 @@ function clusters(state, action) {
       });
 
     case AUTHENTICATED_CLUSTER_CONNECTION:
-      id = state.authConnection.clusterID;
+      id = action.cluster.id;
       update = Object.assign({}, action.cluster, {
         isAuthenticated: true
       });

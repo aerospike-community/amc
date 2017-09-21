@@ -8,7 +8,6 @@ import { displayAuthClusterConnection, displayViewClusterConnection, disconnectC
 import { toPhysicalEntityTree, toLogicalEntityTree } from 'classes/entityTree';
 import { VIEW_TYPE } from 'classes/constants';
 import { CLUSTER_ACTIONS } from 'classes/entityActions';
-import { selectStartView } from 'actions/currentView';
 import { isEntitiesEqual, isLogicalView } from 'classes/util';
 import { isPermissibleAction, isPermissibleSetAction, isPermissibleNamespaceAction } from 'classes/entityActions';
 
@@ -74,7 +73,6 @@ const mapDispatchToProps = (dispatch) => {
           return;
         } 
         if (action === CLUSTER_ACTIONS.Disconnect) {
-          dispatch(selectStartView());
           dispatch(disconnectCluster(clusterID));
           return;
         }

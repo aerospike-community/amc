@@ -1,10 +1,11 @@
-import { getConnectionDetails } from 'api/clusterConnections';
+import {  getClusterEntityTree } from 'api/clusterConnections';
+import { clusterDetails } from 'actions/clusters';
 import { timeout } from 'classes/util';
 
 const Clusters = new Set(); // set of clusters to poll
-const Interval = 10 * 1000; // 10 seconds
+const Interval = 4 * 1000; 
 
-export function pollCluster(clusterID) {
+export function pollCluster(clusterID, dispatch) {
   if (Clusters.has(clusterID))
     return;
 
@@ -14,8 +15,11 @@ export function pollCluster(clusterID) {
     if (!Clusters.has(clusterID))
       return;
 
-    getConnectionDetails(clusterID)
-      .then(() =>  timeout(poll, Interval, false))
+    getClusterEntityTree(clusterID)
+      .then((cluster) =>  {
+        dispatch(clusterDetails(cluster));
+        timeout(poll, Interval, false);
+      })
       .catch(() => timeout(poll, Interval, false));
   };
   poll();

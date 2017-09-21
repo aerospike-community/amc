@@ -83,7 +83,7 @@ class ClusterAlerts extends React.Component {
         const row = (
           <tr key={id} className={cn}>
             <td> 
-              {time.format('h:mm a Do MMM')} 
+              {time.format('MMM Do hh:mm a')} 
               <span style={{marginLeft: 10}}> {desc} </span> 
             </td>
           </tr>

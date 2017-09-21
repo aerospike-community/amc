@@ -83,7 +83,8 @@ class MainDashboard extends React.Component {
     } else if (viewType === VIEW_TYPE.CLUSTER) {
       dashboard = <VisibleClusterDashboard />
 
-    } else if (viewType === VIEW_TYPE.START_VIEW) {
+    } else if (viewType === VIEW_TYPE.START_VIEW || 
+               viewType === VIEW_TYPE.LOGICAL_START_VIEW) {
       dashboard = <Welcome />;
 
     } else if (viewType === VIEW_TYPE.LOGICAL_NAMESPACE) {

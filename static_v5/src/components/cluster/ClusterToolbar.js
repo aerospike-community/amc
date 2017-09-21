@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types'
 
-import { Button } from 'reactstrap';
+import { Button, Input } from 'reactstrap';
 
 class ClusterToolbar extends React.Component {
   constructor(props) {
@@ -14,22 +14,25 @@ class ClusterToolbar extends React.Component {
   }
 
   renderViewChanger() {
-    let title, value, icon;
-    if (this.props.isLogicalView) {
-      title = 'To Physical View';
-      value = 'toPhysicalView';
-      icon = 'fa fa-server';
-    } else {
-      title = 'To Logical View';
-      value = 'toLogicalView';
-      icon = 'fa fa-database';
-    }
+    const { isLogicalView } = this.props;
+    const view = isLogicalView ? 'logical' : 'physical'
+
+    const onViewChange = (evt) => {
+      const to = evt.target.value;
+      if (to === view)
+        return;
+
+      const item = to === 'logical' ? 'toLogicalView' : 'toPhysicalView';
+      this.onToolClick(item);
+    };
 
     const style = { marginRight: 10 };
     return (
-      <div className="float-left as-cursor-pointer" style={style}
-           title={title} onClick={() => this.onToolClick(value)}> 
-        <i className={icon}></i>
+      <div>
+        <Input type="select" value={view} onChange={onViewChange}>
+          <option key={"logical"} value={"logical"}> Logical View </option>
+          <option key={"physical"} value={"physical"}> Node View </option>
+        </Input>
       </div>
     );
   }
@@ -37,9 +40,8 @@ class ClusterToolbar extends React.Component {
   render() {
     return (
       <div className="as-toolbar">
-        {this.renderViewChanger()}
         <div className="float-left"> 
-          Clusters 
+          {this.renderViewChanger()}
         </div>
         <div className="float-right" title="Hide" onClick={() => this.onToolClick('hideEntityTree')}>
           <i className="fa fa-angle-double-left"></i>

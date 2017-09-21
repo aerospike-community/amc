@@ -90,7 +90,7 @@ class IndexCreate extends React.Component {
 
         timeout(() => {
           this.props.onCreateIndexSuccess(clusterID, indexName);
-        }, 4000);
+        }, 2000);
       })
       .catch((err) => {
         this.setState({

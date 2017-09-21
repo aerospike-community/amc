@@ -208,6 +208,7 @@ export function toPhysicalEntityTree(cluster, isAuthenticated) {
 
   root.children = children;
 
+  sortTree(root);
   assignParent(root);
   return root;
 }
@@ -277,7 +278,27 @@ export function toLogicalEntityTree(cluster, isAuthenticated) {
   children.push(toIndexes(cluster, true));
 
   root.children = children;
+
+  sortTree(root);
   assignParent(root);
   return root;
 }
+
+function sortTree(root) {
+  const vt = root.viewType;
+  if (vt !== VIEW_TYPE.CLUSTER && vt !== VIEW_TYPE.LOGICAL_CLUSTER) {
+    root.children.sort(nameSort);
+  }
+  root.children.forEach((c) => sortTree(c));
+}
+
+function nameSort(a, b) {
+  const an = a.name, bn = b.name;
+  if (an < bn)
+    return -1;
+  if (an > bn)
+    return 1;
+  return 0;
+}
+
 

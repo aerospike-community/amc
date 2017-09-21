@@ -1,9 +1,8 @@
 import { connect } from 'react-redux';
 
 import IndexesOverviewDashboard from 'components/index/IndexesOverviewDashboard';
-import { selectIndex, selectViewForViewType } from 'actions/currentView';
-import { addIndex } from 'actions/clusters';
-import { INDEX_ACTIONS } from 'classes/entityActions';
+import { selectIndex, selectViewForViewType, selectIndexesOverview } from 'actions/currentView';
+import { INDEX_ACTIONS, INDEXES_OVERVIEW_ACTIONS } from 'classes/entityActions';
 import { isLogicalView } from 'classes/util';
 import { VIEW_TYPE } from 'classes/constants';
 
@@ -47,22 +46,20 @@ const  mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-
-  const onSelectIndex = (clusterID, indexName) => {
-    const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_INDEX : VIEW_TYPE.INDEX;
-    dispatch(selectIndex(clusterID, indexName, INDEX_ACTIONS.View, vt));
-  };
-
   return {
     onViewSelect: (view) => {
       dispatch(selectViewForViewType(view));
     },
 
-    onSelectIndex: onSelectIndex,
+    onSelectIndex: (clusterID, indexName) => {
+      const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_INDEX : VIEW_TYPE.INDEX;
+      dispatch(selectIndex(clusterID, indexName, INDEX_ACTIONS.View, vt));
+    },
 
     onCreateIndexSuccess: (clusterID, indexName) => {
-      dispatch(addIndex(clusterID, indexName));
-      onSelectIndex(clusterID, indexName);
+      const vt = IsLogicalView ? VIEW_TYPE.LOGICAL_INDEXES_OVERVIEW 
+                               : VIEW_TYPE.INDEXES_OVERVIEW;
+      dispatch(selectIndexesOverview(clusterID, INDEXES_OVERVIEW_ACTIONS.Overview, vt));
     }
   };
 }

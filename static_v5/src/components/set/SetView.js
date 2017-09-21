@@ -147,7 +147,8 @@ class SetView extends React.Component {
         <ModalBody>  Delete {this.props.setName} </ModalBody>
         <ModalFooter>
           {!deleteInProgress && deleteSuccessfull === false &&
-            errorMsg}
+            <span className="as-error-text"> {deleteErrorMsg} </span>
+          }
           {deleteInProgress &&
            <span> <Spinner /> Deleting ... </span>}
           <Button disabled={disabled} color="danger" onClick={this.onDeleteSet}>Confirm</Button>

@@ -93,6 +93,9 @@ class UDFView extends React.Component {
         && this.props.udfName === udfName)
       return;
 
+    this.setState({
+      hasChanged: false
+    });
     this.setPermissions(clusterID);
     this.fetchUDF(clusterID, udfName);
   }

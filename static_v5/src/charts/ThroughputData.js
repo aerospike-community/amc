@@ -184,8 +184,8 @@ function toChartData(opdata) {
 function toTotal(opdata) {
   const nspaces = Object.keys(opdata);
   const total = {
+    successful: [],
     failed: [],
-    successful: []
   };
 
   const len = opdata[nspaces[0]].length;

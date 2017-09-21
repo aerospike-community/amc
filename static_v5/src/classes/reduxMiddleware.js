@@ -12,8 +12,8 @@ const pollingMiddleware = store => next => action => {
   const { dispatch } = store;
 
   handleAlertPolling(action, dispatch);
+  handleClusterPollers(action, dispatch);
   handleSecurity(action);
-  handleClusterPollers(action);
 
   return next(action);
 };
@@ -37,13 +37,13 @@ function handleAlertPolling(action, dispatch) {
 }
 
 // ---- polling of clusters
-function handleClusterPollers(action) {
+function handleClusterPollers(action, dispatch) {
   let id;
   switch (action.type) {
     case AUTHENTICATED_CLUSTER_CONNECTION:
     case CLUSTER_CONNECTION_FETCHED:
       id = action.cluster.id;
-      pollCluster(id);
+      pollCluster(id, dispatch);
       break;
       
     case DISCONNECT_CLUSTER_CONNECTION:

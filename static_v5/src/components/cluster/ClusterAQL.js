@@ -134,7 +134,7 @@ class ClusterAQL extends React.Component {
           <Form className="col-xl-12">
             <FormGroup>
               <Label> Query </Label>
-              <Input type="textarea" name="query" value={query} 
+              <Input type="textarea" rows="6" name="query" value={query} 
                 onChange={this.onInputChange} 
                 disabled={isFetching}/>
             </FormGroup>
@@ -148,11 +148,13 @@ class ClusterAQL extends React.Component {
           </Form>
         </div>
 
+        {result.length > 0 &&
         <div className="row" style={pstyle}>
           <div className="col-xl-12 as-terminal" style={style} id={this.id}
             dangerouslySetInnerHTML={html}> 
           </div>
         </div>
+        }
       </div>
     );
   }
