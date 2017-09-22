@@ -55,6 +55,8 @@ class SetView extends React.Component {
   onShowConfirm() {
     this.setState({
       deleteShowConfirm: true,
+      deleteInProgress: false,
+      deleteErrorMsg: '',
     });
   }
 
@@ -126,7 +128,10 @@ class SetView extends React.Component {
 
     const onCancelModal = () => {
       this.setState({
-        deleteShowConfirm: false
+        deleteShowConfirm: false,
+        deleteInProgress: false,
+        deleteSuccessfull: null,
+        deleteErrorMsg: '',
       });
     };
 
@@ -174,7 +179,7 @@ class SetView extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 as-section-header">
-            {`Set - ${setName}`}
+            Set
 
             {canDelete &&
             <Button className="float-right" disabled={deleteInProgress} color="danger" size="sm" onClick={this.onShowConfirm}> 

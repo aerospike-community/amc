@@ -31,7 +31,7 @@ class ClusterToolbar extends React.Component {
       <div>
         <Input type="select" value={view} onChange={onViewChange}>
           <option key={"logical"} value={"logical"}> Logical View </option>
-          <option key={"physical"} value={"physical"}> Node View </option>
+          <option key={"physical"} value={"physical"}> Physical View </option>
         </Input>
       </div>
     );

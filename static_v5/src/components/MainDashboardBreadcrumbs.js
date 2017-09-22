@@ -31,7 +31,7 @@ class MainDashboardBreadcrumbs extends React.Component {
     const cv = this.props.currentView;
     const vt = cv.viewType;
 
-    const view = isLogicalView(vt) ? 'Logical View' : 'Node View';
+    const view = isLogicalView(vt) ? 'Logical View' : 'Physical View';
     const items = [view, clusterName];
 
     const bc = isLogicalView(vt) ? logicalBreadcrumbs : physicalBreadcrumbs;
