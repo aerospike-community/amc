@@ -55,6 +55,8 @@ class IndexView extends React.Component {
   onShowConfirm() {
     this.setState({
       deleteShowConfirm: true,
+      deleteSuccessfull: false,
+      deleteErrorMsg: '',
     });
   }
 
@@ -68,7 +70,9 @@ class IndexView extends React.Component {
     const { namespace, set } = this.state.data;
 
     this.setState({
-      deleteInProgress: true
+      deleteInProgress: true,
+      deleteSuccessfull: false,
+      deleteErrorMsg: '',
     });
     deleteIndex(clusterID, namespace, set, indexName)
       .then(() => {
@@ -149,7 +153,8 @@ class IndexView extends React.Component {
         <ModalBody>  Delete {this.props.indexName} ?  </ModalBody>
         <ModalFooter>
           {!deleteInProgress && deleteSuccessfull === false &&
-            deleteErrorMsg}
+          <span className="as-error-text"> {deleteErrorMsg} </span>
+          }
           {deleteInProgress &&
            <span> <Spinner /> Deleting ... </span>}
           <Button disabled={disabled} color="danger" onClick={this.onDeleteIndex}>Confirm</Button>

@@ -4,7 +4,6 @@ import { getConnectionDetails, getLoggedInUser } from 'api/clusterConnections';
 import { VIEW_TYPE } from 'classes/constants';
 import { timeout } from 'classes/util';
 
-let IsInitialized = false;
 // map of cluster id to the cluster properties
 let ClusterProps = {};
 // map of cluster id to the logged in user roles
@@ -21,9 +20,6 @@ function hasCredentials(clusterID) {
 
 export function whenClusterHasCredentials(clusterID, fn) {
   const check = () => {
-    if (!IsInitialized)
-      return;
-
     if (hasCredentials(clusterID))
       fn();
     else
@@ -34,6 +30,9 @@ export function whenClusterHasCredentials(clusterID, fn) {
 
 // secureCluster adds security functionality to the cluster
 export function secureCluster(clusterID ) {
+  if (hasCredentials(clusterID))
+    return;
+
   ClusterProps[clusterID] = {
     isAuthenticated: true,
   };
@@ -43,18 +42,12 @@ export function secureCluster(clusterID ) {
     // get roles of logged in user
     getLoggedInUser(clusterID)
       .then((user) => {
-        if (!IsInitialized)
-          return;
-
         UserRoles[clusterID] = user.roles || [];
       });
 
     // get properties of cluster
     getConnectionDetails(clusterID)
       .then((cluster) => {
-        if (!IsInitialized)
-          return;
-
         ClusterProps[clusterID] = {
           isAuthenticated: true,
           isSecure: cluster.isSecurityEnabled,
@@ -70,8 +63,6 @@ export function removeCluster(clusterID) {
 }
 
 export function removeAllClusters() {
-  IsInitialized = false;
-
   let keys = [];
   keys = keys.concat(Object.keys(UserRoles));
   keys = keys.concat(Object.keys(ClusterProps));
@@ -81,7 +72,6 @@ export function removeAllClusters() {
 
 // init initializes the security for this session of the user
 export function init(roles, isEnterprise) {
-  IsInitialized = true;
   IsAMCEnterprise = isEnterprise;
   AmcRoles = roles;
 }
@@ -100,6 +90,23 @@ function hasBasicAccess(clusterID, clusterProps = {}, isEnterprise = false,
 
   return true;
 }
+
+function checkAccess(clusterID, dbRoles = [], clusterProps = {}, 
+                      isEnterprise = false, amcRoles = [], checkfn) {
+  if (!hasBasicAccess(clusterID, clusterProps, isEnterprise, amcRoles))
+      return false;
+  
+  if (!hasCredentials(clusterID))
+      return dbRoles.length === 0;
+
+  const props = ClusterProps[clusterID] || {};
+  if (props.isSecure) {
+    return checkfn();
+  }
+
+  return true;
+}
+
 // returns true iff the current user satisfies the privileges for the cluster
 // as specified in the arguments.
 //
@@ -109,48 +116,36 @@ function hasBasicAccess(clusterID, clusterProps = {}, isEnterprise = false,
 // amcRoles - the roles the amc user should have
 export function canAccess(clusterID, dbRoles = [], clusterProps = {},
                   isEnterprise = false, amcRoles = []) {
-  if (!hasBasicAccess(clusterID, clusterProps, isEnterprise, amcRoles))
-      return false;
-
-  const props = ClusterProps[clusterID] || {};
-  if (props.isSecure) {
+  const checkfn = () => {
     const roles = UserRoles[clusterID];
     return hasRoles(roles, dbRoles);
-  }
+  };
 
-  return true;
+  return checkAccess(clusterID, dbRoles, clusterProps, isEnterprise, amcRoles, checkfn);
 }
 
 // returns true iff the current user satisfies the privileges for the namespace
 // as specified in the arguments.
 export function canAccessNamespace(clusterID, namespace, dbRoles = [], 
                     clusterProps = {}, isEnterprise = false, amcRoles = []) {
-  if (!hasBasicAccess(clusterID, clusterProps, isEnterprise, amcRoles))
-      return false;
-
-  const props = ClusterProps[clusterID] || {};
-  if (props.isSecure) {
+  const checkfn = () => {
     const roles = UserRoles[clusterID];
     return hasNamespaceRoles(roles, dbRoles, namespace);
   }
 
-  return true;
+  return checkAccess(clusterID, dbRoles, clusterProps, isEnterprise, amcRoles, checkfn);
 }
 
 // returns true iff the current user satisfies the privileges for the set
 // as specified in the arguments.
 export function canAccessSet(clusterID, namespace, set, dbRoles = [],
                     clusterProps = {}, isEnterprise = false, amcRoles = []) {
-  if (!hasBasicAccess(clusterID, clusterProps, isEnterprise, amcRoles))
-      return false;
-
-  const props = ClusterProps[clusterID] || {};
-  if (props.isSecure) {
+  const checkfn = () => {
     const roles = UserRoles[clusterID];
     return hasSetRoles(roles, dbRoles, namespace, set);
   }
 
-  return true;
+  return checkAccess(clusterID, dbRoles, clusterProps, isEnterprise, amcRoles, checkfn);
 }
 
 function getPrivileges(roles, fn) {

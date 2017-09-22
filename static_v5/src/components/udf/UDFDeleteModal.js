@@ -16,6 +16,7 @@ class UDFDeleteModal extends React.Component {
     this.state = {
       inProgress: false,
       successful: false,
+      failure: false,
       errorMsg: '',
     };
 
@@ -35,8 +36,12 @@ class UDFDeleteModal extends React.Component {
   onDeleteUDF() {
     const { clusterID, udfName } = this.props;
     this.setState({
-      inProgress: true
+      inProgress: true,
+      successful: false,
+      failed: false,
+      errorMsg: ''
     });
+
     deleteUDF(clusterID, udfName)
       .then(() => {
         this.setState({
@@ -49,13 +54,14 @@ class UDFDeleteModal extends React.Component {
         this.setState({
           inProgress: false,
           successful: false,
+          failure: true,
           errorMsg: msg || 'Failed to delete UDF'
         });
       });
   }
 
   render() {
-    const { inProgress, successful, errorMsg } = this.state;
+    const { inProgress, successful, failure, errorMsg } = this.state;
 
     const disabled = inProgress || successful;
     if (!inProgress && successful) {
@@ -70,8 +76,9 @@ class UDFDeleteModal extends React.Component {
         <ModalHeader className="alert-danger"> Confirm </ModalHeader>
         <ModalBody>  Delete {this.props.udfName}  </ModalBody>
         <ModalFooter>
-          {!inProgress && successful &&
-            errorMsg}
+          {!inProgress && failure &&
+          <span className="as-error-text"> {errorMsg} </span>
+          }
           {inProgress &&
            <span> <Spinner /> Deleting ... </span>}
           <Button disabled={disabled} color="danger" onClick={this.onDeleteUDF}>Confirm</Button>
