@@ -68,7 +68,6 @@ class ClusterDashboard extends React.Component {
 
   render() {
     const { clusterID, view, onSelectNode }  = this.props;
-    const { name, seeds } = this.props.cluster;
     const { views } = this.state;
 
     let dashboard;
@@ -106,8 +105,6 @@ class ClusterDashboard extends React.Component {
 
 ClusterDashboard.PropTypes = {
   clusterID: PropTypes.string.isRequired,
-  // the selected cluster
-  cluster: PropTypes.object, 
   // the view of the cluster
   view: PropTypes.string,
 

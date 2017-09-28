@@ -7,10 +7,8 @@ import { updateConnection } from 'actions/clusters';
 
 const mapStateToProps = (state) => {
   const { clusterID, view } = state.currentView;
-  const cluster = state.clusters.items.find((i) => i.id === clusterID);
   return {
     clusterID: clusterID,
-    cluster: cluster,
     view: view
   };
 };

@@ -18,13 +18,17 @@ class TimeToLiveChart extends React.Component {
     let isEqual = true;
 
     const ttl = nextProps.timeToLive;
-    this.props.timeToLive.forEach((p, i) => {
-      const q = ttl[i];
-      ['min', 'max', 'count'].forEach((v) => {
-          if (p[v] !== q[v])
-            isEqual = false;
+    if (this.props.timeToLive) {
+      this.props.timeToLive.forEach((p, i) => {
+        const q = ttl[i];
+        ['min', 'max', 'count'].forEach((v) => {
+            if (p[v] !== q[v])
+              isEqual = false;
+        });
       });
-    });
+    } else if (ttl) {
+      isEqual = false;
+    }
 
     if (!isEqual) {
       this.barChart.destroy();
@@ -47,6 +51,7 @@ class TimeToLiveChart extends React.Component {
 
   toChartData(ttl) {
     const values = [];
+    ttl = ttl || [];
 
     ttl.forEach((o) => {
       const minms = o.min*1000;

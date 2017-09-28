@@ -16,7 +16,7 @@ import Spinner from 'components/Spinner';
 import UDFDeleteModal from 'components/udf/UDFDeleteModal';
 import AlertModal from 'components/AlertModal';
 import { whenClusterHasCredentials } from 'classes/security';
-import { timeout } from 'classes/util';
+import { timeout, cancelTimeout } from 'classes/util';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
@@ -46,6 +46,8 @@ class UDFView extends React.Component {
     this.id = 'udf_editor' + nextNumber();
     this.editor; // the ace editor instance
 
+    this.timeoutid;
+
     // delete methods
     this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
     this.onShowDeleteModal = this.onShowDeleteModal.bind(this);
@@ -74,6 +76,35 @@ class UDFView extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    const id = this.timeoutid;
+    if (id)
+      cancelTimeout(id);
+  }
+
+  pollErrors() {
+    const interval = 50; 
+    const fn = () => {
+      this.setState({
+        hasErrors: this.hasErrors(),
+      });
+
+      this.timeoutid = timeout(fn, interval);
+    };
+
+    this.timeoutid = timeout(fn, interval);
+  }
+
+  hasErrors() {
+    let hasErrors = false;
+    if (this.editor) {
+      const annotations = this.editor.getSession().getAnnotations();
+      hasErrors = annotations.find((a) => a.type === 'error');
+    }
+
+    return hasErrors;
+  }
+
   componentDidMount() {
     const editor = document.getElementById(this.id);
     const height = distanceToBottom(editor);
@@ -84,6 +115,8 @@ class UDFView extends React.Component {
     const { clusterID, udfName } = this.props;
     this.fetchUDF(clusterID, udfName);
     this.setPermissions(clusterID);
+
+    this.pollErrors();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -138,17 +171,15 @@ class UDFView extends React.Component {
 
   onEditorChange(value, evt) {
     const annotations = this.editor.getSession().getAnnotations();
-    const hasErrors = annotations.find((a) => a.type === 'error');
 
     this.setState({
       hasChanged: true,
       sourceCode: value,
-      hasErrors: hasErrors,
     });
   }
 
   onUpdate() {
-    if (!this.state.hasChanged || this.state.hasErrors)
+    if (!this.state.hasChanged || this.hasErrors())
       return;
 
     this.setState({

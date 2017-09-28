@@ -9,7 +9,7 @@ import 'brace/theme/github';
 
 import { getUDF, saveUDF } from 'api/udf';
 import { nextNumber, distanceToBottom } from 'classes/util';
-import { timeout } from 'classes/util';
+import { timeout, cancelTimeout } from 'classes/util';
 import AlertModal from 'components/AlertModal';
 import Spinner from 'components/Spinner';
 
@@ -33,33 +33,55 @@ class UDFCreate extends React.Component {
     this.id = 'udf_editor' + nextNumber();
     this.editor; // the ace editor instance
 
+    this.timeoutid;
+
     this.onNameChange = this.onNameChange.bind(this);
     this.onCreate = this.onCreate.bind(this);
     this.onEditorLoad = this.onEditorLoad.bind(this);
     this.onEditorChange = this.onEditorChange.bind(this);
   }
 
+  componentWillUnmount() {
+    const id = this.timeoutid;
+    if (id)
+      cancelTimeout(id);
+  }
+
   onEditorLoad(editor) {
     this.editor = editor;
   }
 
+  pollErrors() {
+    const interval = 50; 
+    const fn = () => {
+      this.setState({
+        hasErrors: this.hasErrors(),
+      });
+
+      this.timeoutid = timeout(fn, interval);
+    };
+
+    this.timeoutid = timeout(fn, interval);
+  }
+
   hasErrors() {
-    const annotations = this.editor.getSession().getAnnotations();
-    const hasErrors = annotations.find((a) => a.type === 'error');
-    if (hasErrors || this.state.udfName.length === 0)
-      return true;
-    return false;
+    let hasErrors = false;
+    if (this.editor) {
+      const annotations = this.editor.getSession().getAnnotations();
+      hasErrors = annotations.find((a) => a.type === 'error');
+    }
+
+    return hasErrors || this.state.udfName.length === 0;
   }
 
   onEditorChange(value, evt) {
     this.setState({
       sourceCode: value,
-      hasErrors: this.hasErrors(),
     });
   }
 
   onCreate() {
-    if (this.state.hasErrors)
+    if (this.hasErrors())
       return;
 
     this.setState({
@@ -100,6 +122,7 @@ class UDFCreate extends React.Component {
     this.setState({
       editorHeight: height - 120
     });
+    this.pollErrors();
   }
 
   render() {
