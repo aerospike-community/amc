@@ -1230,3 +1230,7 @@ func (n *Node) AQLRegistered() bool {
 func (n *Node) RegisterAQLAPI() error {
 	return setup.SetupDB(n.cluster.origClient())
 }
+
+func (n *Node) ExecAQL(output io.Writer, aql string) (int, error) {
+	return n.cluster.ExecAQL(n.origNode(), output, aql)
+}

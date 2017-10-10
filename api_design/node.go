@@ -76,6 +76,28 @@ var _ = Resource("node", func() {
 		Response(InternalServerError)
 	})
 
+	Action("aql", func() {
+		Description("Send an AQL command to server and get the results")
+		Routing(GET(":node/aql"))
+		Params(func() {
+			Param("node", String, "Node Address", func() {
+				Example("127.0.0.1:3000")
+			})
+			Required("node")
+		})
+
+		Payload(func() {
+			Member("aql", String, "AQL command", func() { Example("SELECT * FROM test.test") })
+			Required("aql")
+		})
+
+		Response(OK)
+		Response(BadRequest, String)
+		Response(NotAcceptable, String)
+		Response(Unauthorized)
+		Response(InternalServerError)
+	})
+
 	Action("jobs", func() {
 		// Security(JWT, func() {
 		// 	Scope("api:enterprise")

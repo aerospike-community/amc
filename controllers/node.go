@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"io"
 	"strings"
 	"time"
@@ -21,6 +22,33 @@ type NodeController struct {
 // NewNodeController creates a node controller.
 func NewNodeController(service *goa.Service) *NodeController {
 	return &NodeController{Controller: service.NewController("NodeController")}
+}
+
+// Aql runs the aql action.
+func (c *NodeController) Aql(ctx *app.AqlNodeContext) error {
+	// NodeController_Aql: start_implement
+
+	cluster, err := getConnectionClusterById(ctx.ConnID)
+	if err != nil {
+		return ctx.BadRequest(err.Error())
+	}
+
+	if !cluster.AQLEnabled() {
+		return ctx.NotAcceptable("AQL is currently disabled and not allowed.")
+	}
+
+	node := cluster.FindNodeByAddress(ctx.Node)
+	if node == nil {
+		return ctx.BadRequest("Node not found.")
+	}
+
+	buf := new(bytes.Buffer)
+	if _, err = node.ExecAQL(buf, ctx.Payload.Aql); err != nil {
+		return ctx.NotAcceptable(err.Error())
+	}
+
+	// NodeController_Aql: end_implement
+	return ctx.OK(buf.Bytes())
 }
 
 // Config runs the config action.

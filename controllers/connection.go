@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -59,14 +58,12 @@ func (c *ConnectionController) Aql(ctx *app.AqlConnectionContext) error {
 	}
 
 	buf := new(bytes.Buffer)
-	if _, err = cluster.ExecAQL(buf, ctx.Payload.Aql); err != nil {
+	if _, err = cluster.ExecAQL(nil, buf, ctx.Payload.Aql); err != nil {
 		return ctx.NotAcceptable(err.Error())
 	}
 
-	fmt.Println("=================================================================", string(buf.Bytes()))
-
 	// ConnectionController_Aql: end_implement
-	return ctx.OK(string(buf.Bytes()))
+	return ctx.OK(buf.Bytes())
 }
 
 // CheckAqlUDF runs the check aql UDF action.

@@ -666,9 +666,11 @@ func (payload *AqlConnectionPayload) Validate() (err error) {
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *AqlConnectionContext) OK(r string) error {
+func (ctx *AqlConnectionContext) OK(resp []byte) error {
 	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
-	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+	ctx.ResponseData.WriteHeader(200)
+	_, err := ctx.ResponseData.Write(resp)
+	return err
 }
 
 // BadRequest sends a HTTP response with status code 400.
@@ -1111,7 +1113,7 @@ func NewLatencyConnectionContext(ctx context.Context, r *http.Request, service *
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *LatencyConnectionContext) OK(r map[string]*AerospikeAmcLatencyResponse) error {
+func (ctx *LatencyConnectionContext) OK(r []interface{}) error {
 	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
@@ -1130,6 +1132,58 @@ func (ctx *LatencyConnectionContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *LatencyConnectionContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// LogoutConnectionContext provides the connection logout action context.
+type LogoutConnectionContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID string
+}
+
+// NewLogoutConnectionContext parses the incoming request URL and body, performs validations and creates the
+// context used by the connection controller logout action.
+func NewLogoutConnectionContext(ctx context.Context, r *http.Request, service *goa.Service) (*LogoutConnectionContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := LogoutConnectionContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	return &rctx, err
+}
+
+// NoContent sends a HTTP response with status code 204.
+func (ctx *LogoutConnectionContext) NoContent() error {
+	ctx.ResponseData.WriteHeader(204)
+	return nil
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *LogoutConnectionContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *LogoutConnectionContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *LogoutConnectionContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }
@@ -4010,6 +4064,110 @@ func (ctx *ThroughputNamespaceContext) Unauthorized() error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *ThroughputNamespaceContext) InternalServerError() error {
+	ctx.ResponseData.WriteHeader(500)
+	return nil
+}
+
+// AqlNodeContext provides the node aql action context.
+type AqlNodeContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	ConnID  string
+	Node    string
+	Payload *AqlNodePayload
+}
+
+// NewAqlNodeContext parses the incoming request URL and body, performs validations and creates the
+// context used by the node controller aql action.
+func NewAqlNodeContext(ctx context.Context, r *http.Request, service *goa.Service) (*AqlNodeContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := AqlNodeContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramConnID := req.Params["connId"]
+	if len(paramConnID) > 0 {
+		rawConnID := paramConnID[0]
+		rctx.ConnID = rawConnID
+		if ok := goa.ValidatePattern(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`, rctx.ConnID); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`connId`, rctx.ConnID, `[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`))
+		}
+	}
+	paramNode := req.Params["node"]
+	if len(paramNode) > 0 {
+		rawNode := paramNode[0]
+		rctx.Node = rawNode
+	}
+	return &rctx, err
+}
+
+// aqlNodePayload is the node aql action payload.
+type aqlNodePayload struct {
+	// AQL command
+	Aql *string `form:"aql,omitempty" json:"aql,omitempty" xml:"aql,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *aqlNodePayload) Validate() (err error) {
+	if payload.Aql == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "aql"))
+	}
+	return
+}
+
+// Publicize creates AqlNodePayload from aqlNodePayload
+func (payload *aqlNodePayload) Publicize() *AqlNodePayload {
+	var pub AqlNodePayload
+	if payload.Aql != nil {
+		pub.Aql = *payload.Aql
+	}
+	return &pub
+}
+
+// AqlNodePayload is the node aql action payload.
+type AqlNodePayload struct {
+	// AQL command
+	Aql string `form:"aql" json:"aql" xml:"aql"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *AqlNodePayload) Validate() (err error) {
+	if payload.Aql == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "aql"))
+	}
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *AqlNodeContext) OK(resp []byte) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	ctx.ResponseData.WriteHeader(200)
+	_, err := ctx.ResponseData.Write(resp)
+	return err
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *AqlNodeContext) BadRequest(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// Unauthorized sends a HTTP response with status code 401.
+func (ctx *AqlNodeContext) Unauthorized() error {
+	ctx.ResponseData.WriteHeader(401)
+	return nil
+}
+
+// NotAcceptable sends a HTTP response with status code 406.
+func (ctx *AqlNodeContext) NotAcceptable(r string) error {
+	ctx.ResponseData.Header().Set("Content-Type", "")
+	return ctx.ResponseData.Service.Send(ctx.Context, 406, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *AqlNodeContext) InternalServerError() error {
 	ctx.ResponseData.WriteHeader(500)
 	return nil
 }

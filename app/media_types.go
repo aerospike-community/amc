@@ -892,11 +892,11 @@ func (mt *AerospikeAmcNotificationResponse) Validate() (err error) {
 // Identifier: application/vnd.aerospike.amc.resource.usage.response+json; view=default
 type AerospikeAmcResourceUsageResponse struct {
 	// Free Bytes
-	FreeBytes int `form:"free-bytes" json:"free-bytes" xml:"free-bytes"`
+	FreeBytes float64 `form:"free-bytes" json:"free-bytes" xml:"free-bytes"`
 	// Total Bytes
-	TotalBytes int `form:"total-bytes" json:"total-bytes" xml:"total-bytes"`
+	TotalBytes float64 `form:"total-bytes" json:"total-bytes" xml:"total-bytes"`
 	// Used Bytes
-	UsedBytes int `form:"used-bytes" json:"used-bytes" xml:"used-bytes"`
+	UsedBytes float64 `form:"used-bytes" json:"used-bytes" xml:"used-bytes"`
 }
 
 // Validate validates the AerospikeAmcResourceUsageResponse media type instance.

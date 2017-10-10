@@ -136,9 +136,9 @@ definitions:
       free-bytes: 5.5738824e+18
       nodeDetails:
         Ducimus quam eaque ullam.:
-          free-bytes: 3.4936504e+17
-          total-bytes: 1.6052411e+18
-          used-bytes: 4.6035394e+17
+          free-bytes: 0.037878234
+          total-bytes: 0.17404059
+          used-bytes: 0.049911674
       total-bytes: 5.532981e+18
       used-bytes: 2.34265e+18
     properties:
@@ -152,9 +152,9 @@ definitions:
         description: Resource usage details.
         example:
           Ducimus quam eaque ullam.:
-            free-bytes: 3.4936504e+17
-            total-bytes: 1.6052411e+18
-            used-bytes: 4.6035394e+17
+            free-bytes: 0.037878234
+            total-bytes: 0.17404059
+            used-bytes: 0.049911674
         type: object
       total-bytes:
         description: Total Bytes
@@ -279,9 +279,9 @@ definitions:
         free-bytes: 5.5738824e+18
         nodeDetails:
           Ducimus quam eaque ullam.:
-            free-bytes: 3.4936504e+17
-            total-bytes: 1.6052411e+18
-            used-bytes: 4.6035394e+17
+            free-bytes: 0.037878234
+            total-bytes: 0.17404059
+            used-bytes: 0.049911674
         total-bytes: 5.532981e+18
         used-bytes: 2.34265e+18
       id: 70f01ba5-b14f-47d9-8d69-c5b4e960d88b
@@ -290,9 +290,9 @@ definitions:
         free-bytes: 5.5738824e+18
         nodeDetails:
           Ducimus quam eaque ullam.:
-            free-bytes: 3.4936504e+17
-            total-bytes: 1.6052411e+18
-            used-bytes: 4.6035394e+17
+            free-bytes: 0.037878234
+            total-bytes: 0.17404059
+            used-bytes: 0.049911674
         total-bytes: 5.532981e+18
         used-bytes: 2.34265e+18
       name: Payments Cluster
@@ -989,15 +989,15 @@ definitions:
     description: Namespace End Point (default view)
     example:
       disk:
-        free-bytes: 3.4936504e+17
-        total-bytes: 1.6052411e+18
-        used-bytes: 4.6035394e+17
+        free-bytes: 0.037878234
+        total-bytes: 0.17404059
+        used-bytes: 0.049911674
       memory:
-        free-bytes: 3.4936504e+17
-        total-bytes: 1.6052411e+18
-        used-bytes: 4.6035394e+17
+        free-bytes: 0.037878234
+        total-bytes: 0.17404059
+        used-bytes: 0.049911674
       name: Numquam iste aut alias dolor.
-      objsz: d177ed76-c13b-4d59-9899-cd3654e8fb9e
+      objsz: b933c4d3-33e3-44bb-baaf-426ee316ba0b
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: d177ed76-c13b-4d59-9899-cd3654e8fb9e
+        example: b933c4d3-33e3-44bb-baaf-426ee316ba0b
       stats:
         additionalProperties: true
         description: Namespace statistics
@@ -1134,25 +1134,25 @@ definitions:
   AerospikeAmcResourceUsageResponse:
     description: Resource Usage (default view)
     example:
-      free-bytes: 3.4936504e+17
-      total-bytes: 1.6052411e+18
-      used-bytes: 4.6035394e+17
+      free-bytes: 0.037878234
+      total-bytes: 0.17404059
+      used-bytes: 0.049911674
     properties:
       free-bytes:
         description: Free Bytes
-        example: 3.4936504e+17
-        format: int64
-        type: integer
+        example: 0.037878234
+        format: double
+        type: number
       total-bytes:
         description: Total Bytes
-        example: 1.6052411e+18
-        format: int64
-        type: integer
+        example: 0.17404059
+        format: double
+        type: number
       used-bytes:
         description: Used Bytes
-        example: 4.6035394e+17
-        format: int64
-        type: integer
+        example: 0.049911674
+        format: double
+        type: number
     required:
     - used-bytes
     - free-bytes
@@ -1421,6 +1421,18 @@ definitions:
     required:
     - aql
     title: AqlConnectionPayload
+    type: object
+  AqlNodePayload:
+    example:
+      aql: SELECT * FROM test.test
+    properties:
+      aql:
+        description: AQL command
+        example: SELECT * FROM test.test
+        type: string
+    required:
+    - aql
+    title: AqlNodePayload
     type: object
   AuthenticateAuthPayload:
     example:
@@ -3121,6 +3133,39 @@ paths:
       summary: throughput logical-namespace
       tags:
       - logical-namespace
+  /api/v1/connections/{connId}/logout:
+    post:
+      description: |-
+        Logout from the connection
+
+        Required security scopes:
+          * `api:general`
+      operationId: connection#logout
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: logout connection
+      tags:
+      - connection
   /api/v1/connections/{connId}/logs:
     get:
       description: |-
@@ -3380,6 +3425,53 @@ paths:
       - jwt:
         - api:general
       summary: show node
+      tags:
+      - node
+  /api/v1/connections/{connId}/nodes/{node}/aql:
+    get:
+      description: |-
+        Send an AQL command to server and get the results
+
+        Required security scopes:
+          * `api:general`
+      operationId: node#aql
+      parameters:
+      - description: Connection Id
+        in: path
+        name: connId
+        pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+        required: true
+        type: string
+      - description: Node Address
+        in: path
+        name: node
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/AqlNodePayload'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "406":
+          description: Not Acceptable
+        "500":
+          description: Internal Server Error
+      schemes:
+      - http
+      - https
+      security:
+      - jwt:
+        - api:general
+      summary: aql node
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/config:
@@ -5153,6 +5245,8 @@ responses:
     description: No Content
   NotFound:
     description: Not Found
+  OK:
+    description: OK
   SwitchingProtocols:
     description: Switching Protocols
   Unauthorized:

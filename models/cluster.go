@@ -1630,9 +1630,10 @@ func (c *Cluster) EntityTree(connId string) (*app.AerospikeAmcConnectionTreeResp
 	return resp, nil
 }
 
-func (c *Cluster) ExecAQL(output io.Writer, aql string) (int, error) {
+func (c *Cluster) ExecAQL(node *as.Node, output io.Writer, aql string) (int, error) {
 	ch := make(chan *as.Result, 100)
 	parser := c.getAQLParser()
+	parser.Reset()
 	err := parser.WriteString(aql)
 	if err != nil {
 		fmt.Fprintln(output, err)
@@ -1645,6 +1646,6 @@ func (c *Cluster) ExecAQL(output io.Writer, aql string) (int, error) {
 		return 0, err
 	}
 
-	go stmt.Execute(ch)
+	go stmt.Execute(ch, node)
 	return printResult(output, ch, stmt)
 }

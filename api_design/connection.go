@@ -339,7 +339,7 @@ var _ = Resource("connection", func() {
 			Required("aql")
 		})
 
-		Response(OK, String)
+		Response(OK)
 		Response(BadRequest, String)
 		Response(NotAcceptable, String)
 		Response(Unauthorized)

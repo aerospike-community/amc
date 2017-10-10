@@ -307,6 +307,7 @@ type ConnectionController interface {
 	Entities(*EntitiesConnectionContext) error
 	GetLogs(*GetLogsConnectionContext) error
 	Latency(*LatencyConnectionContext) error
+	Logout(*LogoutConnectionContext) error
 	Namespaces(*NamespacesConnectionContext) error
 	Overview(*OverviewConnectionContext) error
 	Query(*QueryConnectionContext) error
@@ -330,6 +331,7 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/entity-tree", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/logs", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/logout", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/namespaces", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/overview", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections", ctrl.MuxHandler("preflight", handleConnectionOrigin(cors.HandlePreflight()), nil))
@@ -507,6 +509,23 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 	h = handleConnectionOrigin(h)
 	service.Mux.Handle("GET", "/api/v1/connections/:connId/latency", ctrl.MuxHandler("latency", h, nil))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "Latency", "route", "GET /api/v1/connections/:connId/latency", "security", "jwt")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewLogoutConnectionContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Logout(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleConnectionOrigin(h)
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/logout", ctrl.MuxHandler("logout", h, nil))
+	service.LogInfo("mount", "ctrl", "Connection", "action", "Logout", "route", "POST /api/v1/connections/:connId/logout", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -1677,6 +1696,7 @@ func unmarshalSetConfigNamespacePayload(ctx context.Context, service *goa.Servic
 // NodeController is the controller interface for the Node actions.
 type NodeController interface {
 	goa.Muxer
+	Aql(*AqlNodeContext) error
 	Config(*ConfigNodeContext) error
 	GetLogs(*GetLogsNodeContext) error
 	Jobs(*JobsNodeContext) error
@@ -1693,6 +1713,7 @@ type NodeController interface {
 func MountNodeController(service *goa.Service, ctrl NodeController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/aql", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/config", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/logs", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/jobs", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
@@ -1701,6 +1722,29 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/xdr", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/v1/connections/:connId/nodes/:node/throughput", ctrl.MuxHandler("preflight", handleNodeOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewAqlNodeContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*AqlNodePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Aql(rctx)
+	}
+	h = handleSecurity("jwt", h, "api:general")
+	h = handleNodeOrigin(h)
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/aql", ctrl.MuxHandler("aql", h, unmarshalAqlNodePayload))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Aql", "route", "GET /api/v1/connections/:connId/nodes/:node/aql", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -1910,6 +1954,21 @@ func handleNodeOrigin(h goa.Handler) goa.Handler {
 
 		return h(ctx, rw, req)
 	}
+}
+
+// unmarshalAqlNodePayload unmarshals the request body into the context request data Payload field.
+func unmarshalAqlNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &aqlNodePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
 }
 
 // unmarshalSetConfigNodePayload unmarshals the request body into the context request data Payload field.
