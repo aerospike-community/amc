@@ -62,7 +62,7 @@ func (stmt *ExitStatement) Validate() error {
 }
 
 // Execute executes the statement.
-func (stmt *ExitStatement) Execute(ch chan *as.Result) error {
+func (stmt *ExitStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	if ch != nil {
 		defer close(ch)
 	}

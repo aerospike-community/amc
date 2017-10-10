@@ -1,9 +1,9 @@
 package lua
 
 import (
+	"context"
 	"fmt"
 	"github.com/yuin/gopher-lua/parse"
-	"golang.org/x/net/context"
 	"io"
 	"math"
 	"os"
@@ -1110,8 +1110,7 @@ func (ls *LState) Remove(index int) {
 /* object allocation {{{ */
 
 func (ls *LState) NewTable() *LTable {
-	// TODO change size
-	return newLTable(32, 32)
+	return newLTable(defaultArrayCap, defaultHashCap)
 }
 
 func (ls *LState) CreateTable(acap, hcap int) *LTable {
@@ -1576,6 +1575,8 @@ func (ls *LState) PCall(nargs, nret int, errfunc *LFunction) (err error) {
 			} else if len(err.(*ApiError).StackTrace) == 0 {
 				err.(*ApiError).StackTrace = ls.stackTrace(0)
 			}
+			ls.stack.SetSp(sp)
+			ls.currentFrame = ls.stack.Last()
 			ls.reg.SetTop(base)
 		}
 		ls.stack.SetSp(sp)

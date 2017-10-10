@@ -97,7 +97,7 @@ func (stmt *ShowStatement) Validate() error {
 }
 
 // Parse parses a SQL SHOW statement.
-func (stmt *ShowStatement) Execute(ch chan *as.Result) error {
+func (stmt *ShowStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	defer close(ch)
 
 	binMaps, err := stmt.queryInfo()

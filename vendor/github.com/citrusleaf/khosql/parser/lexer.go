@@ -166,6 +166,8 @@ func (l *Lexer) scanNextAsIdent(avoidKeywords bool) (tok Token, lit string) {
 			return GROUP, buf.String()
 		case "BY":
 			return BY, buf.String()
+		case "LIMIT":
+			return LIMIT, buf.String()
 		case "FOR":
 			return FOR, buf.String()
 		case "SUM":

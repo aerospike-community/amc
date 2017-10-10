@@ -85,18 +85,18 @@ func (stmt *DeleteStatement) Validate() error {
 }
 
 // Execute executes the SQL DELETE statement.
-func (stmt *DeleteStatement) Execute(ch chan *as.Result) error {
+func (stmt *DeleteStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	if ch != nil {
 		defer close(ch)
 	}
 
-	err := stmt.execute(ch)
+	err := stmt.execute(ch, node)
 	stmt.wg.Wait()
 
 	return err
 }
 
-func (stmt *DeleteStatement) execute(ch chan *as.Result) error {
+func (stmt *DeleteStatement) execute(ch chan *as.Result, node *as.Node) error {
 	keys := make(chan *as.Key, 100)
 	defer close(keys)
 
@@ -144,7 +144,13 @@ func (stmt *DeleteStatement) execute(ch chan *as.Result) error {
 
 		stm.SetAggregateFunction("aqlAPI", "query_digests", []as.Value{as.NewValue(functionArgsMap)}, true)
 
-		recordset, err := stmt.parser.Client.Query(SelectQueryPolicy, stm)
+		var recordset *as.Recordset
+		var err error
+		if node != nil {
+			recordset, err = stmt.parser.Client.QueryNode(SelectQueryPolicy, node, stm)
+		} else {
+			recordset, err = stmt.parser.Client.Query(SelectQueryPolicy, stm)
+		}
 		if err != nil {
 			// ch <- &as.Result{Err: err}
 			return err

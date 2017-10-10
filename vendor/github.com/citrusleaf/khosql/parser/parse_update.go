@@ -115,18 +115,18 @@ func (stmt *UpdateStatement) NumVars() int {
 }
 
 // Execute executes the SQL UPDATE statement.
-func (stmt *UpdateStatement) Execute(ch chan *as.Result) error {
+func (stmt *UpdateStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	if ch != nil {
 		defer close(ch)
 	}
 
-	err := stmt.execute(ch)
+	err := stmt.execute(ch, node)
 	stmt.wg.Wait()
 
 	return err
 }
 
-func (stmt *UpdateStatement) execute(ch chan *as.Result) error {
+func (stmt *UpdateStatement) execute(ch chan *as.Result, node *as.Node) error {
 	keys := make(chan *as.Key, 100)
 	defer close(keys)
 
@@ -171,7 +171,13 @@ func (stmt *UpdateStatement) execute(ch chan *as.Result) error {
 		stm := as.NewStatement(stmt.NamespaceName, stmt.SetName)
 		stm.Addfilter(idx)
 
-		updateTask, err := stmt.parser.Client.ExecuteUDF(nil, stm, "aqlAPI", "update_record", as.NewValue(functionArgsMap))
+		var updateTask *as.ExecuteTask
+		var err error
+		if node != nil {
+			updateTask, err = stmt.parser.Client.ExecuteUDFNode(nil, node, stm, "aqlAPI", "update_record", as.NewValue(functionArgsMap))
+		} else {
+			updateTask, err = stmt.parser.Client.ExecuteUDF(nil, stm, "aqlAPI", "update_record", as.NewValue(functionArgsMap))
+		}
 		if err != nil {
 			ch <- &as.Result{Err: err}
 			return err

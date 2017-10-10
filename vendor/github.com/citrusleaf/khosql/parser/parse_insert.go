@@ -183,7 +183,7 @@ func (stmt *InsertStatement) Validate() error {
 }
 
 // Execute executes the SQL INSERT statement.
-func (stmt *InsertStatement) Execute(ch chan *as.Result) error {
+func (stmt *InsertStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	if ch != nil {
 		defer close(ch)
 	}

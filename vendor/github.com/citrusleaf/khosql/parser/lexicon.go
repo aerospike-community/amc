@@ -64,6 +64,7 @@ const (
 	VALUES
 	GROUP
 	BY
+	LIMIT
 
 	SUM
 	COUNT

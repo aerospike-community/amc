@@ -17,6 +17,7 @@ package aql
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	as "github.com/aerospike/aerospike-client-go"
@@ -46,6 +47,8 @@ type SelectStatement struct {
 
 	isComplex       bool // if there are statements in fields
 	IncludeAllField bool // there's an asterisk in the field list
+
+	Limit int64 // limit the number of records read from the database
 }
 
 // Parse parses a SQL SELECT statement.
@@ -56,6 +59,7 @@ func (p *AQLParser) ParseSelect() (stmt *SelectStatement, err error) {
 		FieldAliases:    map[string][]string{},
 		AggregateFields: types.NewStringSet(4),
 		GroupByFields:   types.NewStringSet(4),
+		Limit:           1000,
 	}
 	// First token should be a "SELECT" keyword.
 	if tok, lit := p.nextToken(); tok != SELECT {
@@ -148,6 +152,16 @@ L:
 		p.unscan()
 	}
 
+	// optional limit clause
+	if tok, _ := p.nextToken(); tok == LIMIT {
+		p.unscan()
+		if err := p.parseLimitClause(stmt); err != nil {
+			return nil, err
+		}
+	} else {
+		p.unscan()
+	}
+
 	// Must read an EOF
 	if err := p.expectEOC(); err != nil {
 		return nil, err
@@ -193,6 +207,25 @@ func (p *AQLParser) parseGroupByClause(stmt *SelectStatement) error {
 	return nil
 }
 
+func (p *AQLParser) parseLimitClause(stmt *SelectStatement) error {
+	if tok, lit := p.nextToken(); tok != LIMIT {
+		return fmt.Errorf("found %q, expected LIMIT", lit)
+	}
+
+	// Read a field.
+	tok, lit := p.nextToken()
+	if tok != INTEGER {
+		return fmt.Errorf("found %q, expected an integer", lit)
+	}
+
+	limit, err := strconv.ParseInt(string(lit), 10, 64)
+	if err != nil {
+		return err
+	}
+	stmt.Limit = limit
+	return nil
+}
+
 func (stmt *SelectStatement) FieldList() []string {
 	return stmt.Fields
 }
@@ -221,18 +254,18 @@ func (stmt *SelectStatement) PostExecute() {
 }
 
 // Parse parses a SQL SELECT statement.
-func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
+func (stmt *SelectStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	defer close(ch)
 
 	// fmt.Printf("STATEMENT: %#v\n", stmt)
-	fmt.Printf("STATEMENT -Fields: %#v\n", stmt.Fields)
-	fmt.Printf("STATEMENT -Field Aliases %#v\n", stmt.FieldAliases)
-	for _, f := range stmt.Filters {
-		fmt.Printf("STATEMENT -Filters: %#v\n", f.LuaFuncString())
-	}
-	fmt.Printf("STATEMENT -GroupBy: %#v\n", stmt.GroupByFields.Contents())
-	fmt.Printf("STATEMENT -Agg Fields %#v\n", stmt.AggregateFields.Contents())
-	fmt.Printf("STATEMENT -FieldExpressions %#v\n", stmt.FieldExprs)
+	// fmt.Printf("STATEMENT -Fields: %#v\n", stmt.Fields)
+	// fmt.Printf("STATEMENT -Field Aliases %#v\n", stmt.FieldAliases)
+	// for _, f := range stmt.Filters {
+	// 	fmt.Printf("STATEMENT -Filters: %#v\n", f.LuaFuncString())
+	// }
+	// fmt.Printf("STATEMENT -GroupBy: %#v\n", stmt.GroupByFields.Contents())
+	// fmt.Printf("STATEMENT -Agg Fields %#v\n", stmt.AggregateFields.Contents())
+	// fmt.Printf("STATEMENT -FieldExpressions %#v\n", stmt.FieldExprs)
 
 	if !stmt.isComplex && !stmt.isAggregate() && len(stmt.Filters) == 0 {
 		if stmt.PKFilter != nil {
@@ -266,8 +299,8 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 
 				ch <- &as.Result{Record: rec, Err: err}
 				stmt.RecordCount++
-			}
 
+			}
 		} else {
 			// it is a scan
 			// setup statement
@@ -287,7 +320,12 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 				stm.Addfilter(f)
 			}
 
-			recordset, err := stmt.parser.Client.Query(SelectQueryPolicy, stm)
+			var recordset *as.Recordset
+			if node != nil {
+				recordset, err = stmt.parser.Client.QueryNode(SelectQueryPolicy, node, stm)
+			} else {
+				recordset, err = stmt.parser.Client.Query(SelectQueryPolicy, stm)
+			}
 			defer recordset.Close()
 
 			if err != nil {
@@ -301,6 +339,10 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 				}
 				ch <- result
 				stmt.RecordCount++
+				if stmt.RecordCount >= stmt.Limit {
+					recordset.Close()
+					break
+				}
 			}
 		}
 	} else {
@@ -356,7 +398,12 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 			stm.SetAggregateFunction("aqlAPI", "select_records", []as.Value{as.NewValue(functionArgsMap)}, true)
 		}
 
-		recordset, err := stmt.parser.Client.Query(SelectQueryPolicy, stm)
+		var recordset *as.Recordset
+		if node != nil {
+			recordset, err = stmt.parser.Client.QueryNode(SelectQueryPolicy, node, stm)
+		} else {
+			recordset, err = stmt.parser.Client.Query(SelectQueryPolicy, stm)
+		}
 		defer recordset.Close()
 
 		if err != nil {
@@ -372,7 +419,7 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 				return result.Err
 			}
 
-			fmt.Println(result.Record.Bins)
+			// fmt.Println(result.Record.Bins)
 			// continue
 
 			if binResults, exists := result.Record.Bins["SUCCESS"]; exists {
@@ -389,6 +436,10 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 					stmt.setAliases(result.Record)
 					ch <- result
 					stmt.RecordCount++
+					if stmt.RecordCount >= stmt.Limit {
+						recordset.Close()
+						break
+					}
 				} else {
 					bins := binResults.(map[interface{}]interface{})
 
@@ -425,6 +476,9 @@ func (stmt *SelectStatement) Execute(ch chan *as.Result) error {
 
 				ch <- &as.Result{Record: rec}
 				stmt.RecordCount++
+				if stmt.RecordCount >= stmt.Limit {
+					break
+				}
 			}
 		}
 	}

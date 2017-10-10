@@ -22,7 +22,7 @@ import (
 )
 
 type SQLStatement interface {
-	Execute(chan *as.Result) error
+	Execute(chan *as.Result, *as.Node) error
 	PostExecute()
 
 	Validate() error
@@ -54,6 +54,7 @@ func (p *AQLParser) WriteString(sql string) error {
 }
 
 func (p *AQLParser) Reset() error {
+	p.lexer.rdr.Reset(p.rw)
 	p.rw.Reset()
 	p.buf = parserBuffer{}
 	return nil

@@ -65,7 +65,7 @@ func (stmt *HelpStatement) NumVars() int {
 }
 
 // Execute executes the SQL DELETE statement.
-func (stmt *HelpStatement) Execute(ch chan *as.Result) error {
+func (stmt *HelpStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	defer close(ch)
 
 	fmt.Println(`COMMANDS

@@ -84,7 +84,7 @@ func (stmt *ExplainStatement) Validate() error {
 }
 
 // Parse parses a SQL EXPLAIN statement.
-func (stmt *ExplainStatement) Execute(ch chan *as.Result) error {
+func (stmt *ExplainStatement) Execute(ch chan *as.Result, node *as.Node) error {
 	if ch != nil {
 		defer close(ch)
 	}
