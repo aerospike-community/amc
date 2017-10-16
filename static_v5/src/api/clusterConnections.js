@@ -145,20 +145,22 @@ export function executeQuery(clusterID, query) {
 
   return new Promise((resolve, reject) => {
     postJSON(url, data, false)
-      .then((response) => {
-        response.text().then((text) => {
-          text = text.trim();
-
-          // remove quotes
-          if (text.length > 0) {
-            const i = text.length-1;
-            if (text[0] === '"' && text[i] === '"')
-              text = text.slice(1, -1);
-          }
-
-          resolve(text);
-        });
-      })
+      .then((response) => processQueryResponse(response, resolve))
       .catch((msg) => reject(msg));
+  });
+}
+
+export function processQueryResponse(response, callback) {
+  response.text().then((text) => {
+    text = text.trim();
+
+    // remove quotes
+    if (text.length > 0) {
+      const i = text.length-1;
+      if (text[0] === '"' && text[i] === '"')
+        text = text.slice(1, -1);
+    }
+
+    callback(text);
   });
 }

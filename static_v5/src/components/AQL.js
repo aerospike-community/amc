@@ -5,11 +5,12 @@ import PropTypes from 'prop-types';
 import { Form, FormGroup, Input, Button, Label, Jumbotron } from 'reactstrap';
 
 import { isAQLSet, registerAQL, executeQuery } from 'api/clusterConnections';
+import { executeNodeQuery } from 'api/node';
 import { toHTML, distanceToBottom, nextNumber, timeout } from 'classes/util';
 import Spinner from 'components/Spinner';
 import AlertModal from 'components/AlertModal';
 
-class ClusterAQL extends React.Component {
+class AQL extends React.Component {
   constructor(props) {
     super(props);
 
@@ -92,13 +93,23 @@ class ClusterAQL extends React.Component {
       });
   }
 
-  onExecuteQuery() {
+  queryFn() {
     const { query } = this.state;
-    const { clusterID } = this.props;
+    const { clusterID, nodeHost } = this.props;
+
+    if (nodeHost) {
+      return () => executeNodeQuery(clusterID, nodeHost, query);
+    } else {
+      return () => executeQuery(clusterID, query);
+    }
+  }
+
+  onExecuteQuery() {
+    const queryFn = this.queryFn();
 
     this.setState({isFetching: true});
 
-    executeQuery(clusterID, query)
+    queryFn()
       .then((result) => {
         const html = toHTML(result);
         this.setState({
@@ -196,11 +207,14 @@ class ClusterAQL extends React.Component {
   }
 }
 
-ClusterAQL.PropTypes = {
+AQL.PropTypes = {
   clusterID: PropTypes.string.isRequired,
+
+  // optional
+  nodeHost: PropTypes.string,
 };
 
-export default ClusterAQL;
+export default AQL;
 
 
 

@@ -78,7 +78,7 @@ var _ = Resource("node", func() {
 
 	Action("aql", func() {
 		Description("Send an AQL command to server and get the results")
-		Routing(GET(":node/aql"))
+		Routing(POST(":node/aql"))
 		Params(func() {
 			Param("node", String, "Node Address", func() {
 				Example("127.0.0.1:3000")

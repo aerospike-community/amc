@@ -1,5 +1,6 @@
 import { toURLConverter } from 'api/url';
 import { get, postJSON, deleteAPI } from 'api/http';
+import { processQueryResponse } from 'api/clusterConnections';
 
 const toURLPath = toURLConverter('connections');
 
@@ -95,4 +96,19 @@ export function killJob(clusterID, nodeHost, module, trid) {
 
   const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/jobs/' + trid, query);
   return deleteAPI(url);
+}
+
+// execute the query only on the node
+export function executeNodeQuery(clusterID, nodeHost, query) {
+  const url = toURLPath(clusterID + '/nodes/' + nodeHost + '/aql');
+
+  const data = {
+    aql: query
+  };
+
+  return new Promise((resolve, reject) => {
+    postJSON(url, data, false)
+      .then((response) => processQueryResponse(response, resolve))
+      .catch((msg) => reject(msg));
+  });
 }

@@ -157,10 +157,10 @@ const nodeActions = {
   View: {
     isDefault: true
   },
-  Configuration: {
-  },
+  Configuration: {},
   Latency: {},
   Jobs: {},
+  Query: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
+import AQL from 'components/AQL';
 import Tabs from 'components/Tabs';
 import NodeThroughput from 'components/node/NodeThroughput';
 import NodeLatency from 'components/node/NodeLatency';
@@ -42,7 +43,8 @@ class NodeDashboard extends React.Component {
 
     whenClusterHasCredentials(clusterID, () => {
       const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, 
-                       NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs];
+                       NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs,
+                       NODE_ACTIONS.Query];
 
       const views = filterActions(actions, clusterID, VIEW_TYPE.NODE);
       this.setState({
@@ -82,6 +84,10 @@ class NodeDashboard extends React.Component {
 
         {view === NODE_ACTIONS.Jobs &&
         <JobTable clusterID={clusterID} nodeHost={nodeHost} />
+        }
+
+        {view === NODE_ACTIONS.Query &&
+        <AQL clusterID={clusterID} nodeHost={nodeHost} />
         }
 
       </div>

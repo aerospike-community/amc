@@ -316,6 +316,6 @@ export function toHTML(text) {
     return '';
 
   let s = text.replace(/ /g, '&nbsp;');
-  s = s.replace(/\\n/g, '<br>');
+  s = s.replace(/\n/g, '<br>');
   return s;
 }
