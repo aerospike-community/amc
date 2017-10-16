@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
-import ConfigEditor from 'components/ConfigEditor';
+import ConfigEditorWithGraph from 'components/ConfigEditorWithGraph';
 import { getConfig, setConfig } from 'api/node';
 import { timeout } from 'classes/util';
 
@@ -70,7 +70,8 @@ class NodeConfigEditor extends React.Component {
 
     return (
       <div>
-        <ConfigEditor fetchConfig={this.fetchConfig} onEdit={this.onEdit} isEditable={true} />
+        <ConfigEditorWithGraph 
+          fetchConfig={this.fetchConfig} onEdit={this.onEdit} isEditable={true} />
       </div>
     );
   }

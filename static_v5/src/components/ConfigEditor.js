@@ -29,10 +29,12 @@ class ConfigEditor extends React.Component {
     };
 
     this.id = 'config_editor_' + nextNumber();
+    this.cellClickTime = (new Date()).getTime(); // to differentiate single and double clicks
 
     this.fetchConfig = this.fetchConfig.bind(this);
     this.onEdit = this.onEdit.bind(this);
     this.onContextTabSelect = this.onContextTabSelect.bind(this);
+    this.onCellClicked = this.onCellClicked.bind(this);
   }
 
   onContextTabSelect(context) {
@@ -137,7 +139,8 @@ class ConfigEditor extends React.Component {
             return;
 
           this.onEdit(nodeHost, config, newValue);
-        }
+        },
+        onCellClicked: (cell) => this.onCellClicked(cell),
       });
     });
 
@@ -177,6 +180,27 @@ class ConfigEditor extends React.Component {
     return context;
   }
 
+  onCellClicked(cell) {
+    const prev = this.cellClickTime;
+    this.cellClickTime = (new Date()).getTime();
+
+    const wait = 200; // time window within which it is considered a double click
+    if (this.cellClickTime - prev >= wait) { // is not a double click
+      return; 
+    }
+
+    const { onCellClicked } = this.props;
+    const now = (new Date()).getTime();
+
+    if (typeof(onCellClicked) === 'function') {
+      const nodeHost = cell.colDef.nodeHost;
+      const configName = cell.data.name;
+      const value = cell.data[cell.colDef.field];
+
+      onCellClicked(nodeHost, configName, value);
+    }
+  }
+
   render() {
     const { config, height, editSuccessful, editFailed, editMessage } = this.state;
 
@@ -187,7 +211,10 @@ class ConfigEditor extends React.Component {
       const rowData = this.toRowData(config, context);
       const columnDefs = this.toColumnDefs(config);
 
-      grid = <AgGridReact columnDefs={columnDefs} rowData={rowData} rowHeight="40" suppressScrollOnNewData enableColResize />;
+      grid = <AgGridReact 
+                columnDefs={columnDefs} rowData={rowData} rowHeight="40" 
+                singleClickEdit={true}
+                suppressScrollOnNewData enableColResize />
     }
 
     return (
@@ -217,6 +244,10 @@ ConfigEditor.PropTypes = {
   // onEdit(nodeHost, configName, configValue)
   // should return a promise
   onEdit: PropTypes.func.isRequired,
+
+  // (optional) callback when a cell is clicked
+  // onCellClicked(nodeHost, configName)
+  onCellClicked: PropTypes.func,
 
   // callback to fetch the configs
   // fetchConfig() should return a promise

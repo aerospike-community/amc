@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-import ConfigEditor from 'components/ConfigEditor';
+import ConfigEditorWithGraph from 'components/ConfigEditorWithGraph';
 import { getNodesConfig } from 'api/clusterConnections';
 import { setConfig } from 'api/node';
 import { timeout } from 'classes/util';
@@ -71,7 +71,8 @@ class ClusterNodesConfig extends React.Component {
 
     return (
       <div>
-        <ConfigEditor fetchConfig={this.fetchConfig} onEdit={this.onEdit} isEditable={true} />
+        <ConfigEditorWithGraph multipleNodes={true}
+          fetchConfig={this.fetchConfig} onEdit={this.onEdit} isEditable={true} />
       </div>
     );
   }

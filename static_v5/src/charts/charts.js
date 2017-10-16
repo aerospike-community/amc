@@ -1,6 +1,7 @@
 import moment from 'moment';
 
 import AbstractStackedAreaChart from 'charts/AbstractStackedAreaChart';
+import AbstractLineChart from 'charts/AbstractLineChart';
 import { ThroughputGrouping as TG } from 'charts/constants';
 import { addCommasToInt } from 'classes/util';
 
@@ -166,3 +167,30 @@ class ThroughputNamespaceChart extends AbstractStackedAreaChart {
   }
 }
 
+// ConfigChart draws a time series chart for the configs
+//
+// selector - selects an svg element
+// data - [{
+//  key: 'Max TTL',
+//  values: [{
+//    timestamp: 1496807162727,
+//    value: 2345678,
+//  }]
+// }]
+export class ConfigChart extends AbstractLineChart {
+  constructor(selector, data, tooltip = null) {
+    super(selector, data);
+
+    this.tooltip = tooltip;
+  }
+
+  // x value of data point
+  x(d) {
+    return d.timestamp;
+  }
+
+  // y value of data point
+  y(d) {
+    return d.value;
+  }
+}
