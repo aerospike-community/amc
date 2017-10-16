@@ -112,3 +112,10 @@ export function executeNodeQuery(clusterID, nodeHost, query) {
       .catch((msg) => reject(msg));
   });
 }
+
+// return a websocket for the logs
+export function streamLogs(clusterID, nodeHost) {
+  const host = document.location.host;
+  const url = `ws://${host}/api/v1/connections/${clusterID}/nodes/${nodeHost}/logs`;
+  return new WebSocket(url);
+}

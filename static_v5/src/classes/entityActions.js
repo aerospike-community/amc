@@ -161,6 +161,7 @@ const nodeActions = {
   Latency: {},
   Jobs: {},
   Query: {},
+  Logs: {},
 };
 export const NODE_ACTIONS = extractActions(nodeActions);
 

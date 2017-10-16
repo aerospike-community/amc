@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 
 import AQL from 'components/AQL';
 import Tabs from 'components/Tabs';
-import NodeThroughput from 'components/node/NodeThroughput';
+import NodeLogs from 'components/node/NodeLogs';
 import NodeLatency from 'components/node/NodeLatency';
 import NodesSummary from 'components/node/NodesSummary';
+import NodeThroughput from 'components/node/NodeThroughput';
 import NodeConfigEditor from 'components/node/NodeConfigEditor';
 import JobTable from 'components/node/JobTable';
 import { NODE_ACTIONS, filterActions } from 'classes/entityActions';
@@ -44,7 +45,7 @@ class NodeDashboard extends React.Component {
     whenClusterHasCredentials(clusterID, () => {
       const actions = [NODE_ACTIONS.View, NODE_ACTIONS.Latency, 
                        NODE_ACTIONS.Configuration, NODE_ACTIONS.Jobs,
-                       NODE_ACTIONS.Query];
+                       NODE_ACTIONS.Query, NODE_ACTIONS.Logs];
 
       const views = filterActions(actions, clusterID, VIEW_TYPE.NODE);
       this.setState({
@@ -88,6 +89,10 @@ class NodeDashboard extends React.Component {
 
         {view === NODE_ACTIONS.Query &&
         <AQL clusterID={clusterID} nodeHost={nodeHost} />
+        }
+
+        {view === NODE_ACTIONS.Logs &&
+        <NodeLogs clusterID={clusterID} nodeHost={nodeHost} />
         }
 
       </div>
