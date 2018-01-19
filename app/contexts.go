@@ -1037,7 +1037,8 @@ type GetLogsConnectionContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID string
+	ConnID  string
+	Payload *GetLogsConnectionPayload
 }
 
 // NewGetLogsConnectionContext parses the incoming request URL and body, performs validations and creates the
@@ -1058,6 +1059,64 @@ func NewGetLogsConnectionContext(ctx context.Context, r *http.Request, service *
 		}
 	}
 	return &rctx, err
+}
+
+// getLogsConnectionPayload is the connection get logs action payload.
+type getLogsConnectionPayload struct {
+	// Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+	Contexts []string `form:"contexts,omitempty" json:"contexts,omitempty" xml:"contexts,omitempty"`
+	// Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL
+	Severity *string `form:"severity,omitempty" json:"severity,omitempty" xml:"severity,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *getLogsConnectionPayload) Validate() (err error) {
+	for _, e := range payload.Contexts {
+		if ok := goa.ValidatePattern(`misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`, e); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.contexts[*]`, e, `misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`))
+		}
+	}
+	if payload.Severity != nil {
+		if ok := goa.ValidatePattern(`CRITICAL|WARNING|INFO|DEBUG|DETAIL`, *payload.Severity); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.severity`, *payload.Severity, `CRITICAL|WARNING|INFO|DEBUG|DETAIL`))
+		}
+	}
+	return
+}
+
+// Publicize creates GetLogsConnectionPayload from getLogsConnectionPayload
+func (payload *getLogsConnectionPayload) Publicize() *GetLogsConnectionPayload {
+	var pub GetLogsConnectionPayload
+	if payload.Contexts != nil {
+		pub.Contexts = payload.Contexts
+	}
+	if payload.Severity != nil {
+		pub.Severity = payload.Severity
+	}
+	return &pub
+}
+
+// GetLogsConnectionPayload is the connection get logs action payload.
+type GetLogsConnectionPayload struct {
+	// Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+	Contexts []string `form:"contexts,omitempty" json:"contexts,omitempty" xml:"contexts,omitempty"`
+	// Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL
+	Severity *string `form:"severity,omitempty" json:"severity,omitempty" xml:"severity,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *GetLogsConnectionPayload) Validate() (err error) {
+	for _, e := range payload.Contexts {
+		if ok := goa.ValidatePattern(`misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`, e); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.contexts[*]`, e, `misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`))
+		}
+	}
+	if payload.Severity != nil {
+		if ok := goa.ValidatePattern(`CRITICAL|WARNING|INFO|DEBUG|DETAIL`, *payload.Severity); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.severity`, *payload.Severity, `CRITICAL|WARNING|INFO|DEBUG|DETAIL`))
+		}
+	}
+	return
 }
 
 // LatencyConnectionContext provides the connection latency action context.
@@ -4241,8 +4300,9 @@ type GetLogsNodeContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	ConnID string
-	Node   string
+	ConnID  string
+	Node    string
+	Payload *GetLogsNodePayload
 }
 
 // NewGetLogsNodeContext parses the incoming request URL and body, performs validations and creates the
@@ -4268,6 +4328,64 @@ func NewGetLogsNodeContext(ctx context.Context, r *http.Request, service *goa.Se
 		rctx.Node = rawNode
 	}
 	return &rctx, err
+}
+
+// getLogsNodePayload is the node get logs action payload.
+type getLogsNodePayload struct {
+	// Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+	Contexts []string `form:"contexts,omitempty" json:"contexts,omitempty" xml:"contexts,omitempty"`
+	// Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL
+	Severity *string `form:"severity,omitempty" json:"severity,omitempty" xml:"severity,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *getLogsNodePayload) Validate() (err error) {
+	for _, e := range payload.Contexts {
+		if ok := goa.ValidatePattern(`misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`, e); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.contexts[*]`, e, `misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`))
+		}
+	}
+	if payload.Severity != nil {
+		if ok := goa.ValidatePattern(`CRITICAL|WARNING|INFO|DEBUG|DETAIL`, *payload.Severity); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.severity`, *payload.Severity, `CRITICAL|WARNING|INFO|DEBUG|DETAIL`))
+		}
+	}
+	return
+}
+
+// Publicize creates GetLogsNodePayload from getLogsNodePayload
+func (payload *getLogsNodePayload) Publicize() *GetLogsNodePayload {
+	var pub GetLogsNodePayload
+	if payload.Contexts != nil {
+		pub.Contexts = payload.Contexts
+	}
+	if payload.Severity != nil {
+		pub.Severity = payload.Severity
+	}
+	return &pub
+}
+
+// GetLogsNodePayload is the node get logs action payload.
+type GetLogsNodePayload struct {
+	// Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+	Contexts []string `form:"contexts,omitempty" json:"contexts,omitempty" xml:"contexts,omitempty"`
+	// Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL
+	Severity *string `form:"severity,omitempty" json:"severity,omitempty" xml:"severity,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *GetLogsNodePayload) Validate() (err error) {
+	for _, e := range payload.Contexts {
+		if ok := goa.ValidatePattern(`misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`, e); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.contexts[*]`, e, `misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr`))
+		}
+	}
+	if payload.Severity != nil {
+		if ok := goa.ValidatePattern(`CRITICAL|WARNING|INFO|DEBUG|DETAIL`, *payload.Severity); !ok {
+			err = goa.MergeErrors(err, goa.InvalidPatternError(`raw.severity`, *payload.Severity, `CRITICAL|WARNING|INFO|DEBUG|DETAIL`))
+		}
+	}
+	return
 }
 
 // JobsNodeContext provides the node jobs action context.

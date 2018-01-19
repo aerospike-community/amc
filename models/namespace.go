@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
+	"github.com/Cistern/catena"
 	as "github.com/aerospike/aerospike-client-go"
 	ast "github.com/aerospike/aerospike-client-go/types"
 
@@ -32,6 +34,14 @@ var _recordedNamespaceStats = []string{
 	"udf_success", "udf_reqs",
 }
 
+type latestFetch struct {
+	throughput    map[string]float64
+	throughputTPS map[string]float64
+	// latency    map[string]float64
+
+	time time.Time
+}
+
 type Namespace struct {
 	node *Node
 
@@ -43,27 +53,36 @@ type Namespace struct {
 	calcStats    common.SyncStats
 	latencystats common.SyncValue
 
-	statsHistory   map[string]*rrd.Bucket
+	latestFetch common.SyncValue // *latestFetch
+	// throughputStats common.SyncValue // map[string]float64
+	// lastFetch       common.SyncValue // time.Time - unix timestamp
+
+	// statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
 }
 
 func NewNamespace(node *Node, name string) *Namespace {
 	ns := &Namespace{
-		node:           node,
-		name:           name,
-		statsHistory:   map[string]*rrd.Bucket{},
+		node: node,
+		name: name,
+		// statsHistory:   map[string]*rrd.Bucket{},
 		latencyHistory: rrd.NewSimpleBucket(5, 3600),
+		latestFetch:    common.NewSyncValue(nil),
 	}
 
-	for _, stat := range _recordedNamespaceStats {
-		ns.statsHistory[stat] = rrd.NewBucket(ns.node.cluster.UpdateInterval(), 3600, true)
-	}
+	// for _, stat := range _recordedNamespaceStats {
+	// 	ns.statsHistory[stat] = rrd.NewBucket(ns.node.cluster.UpdateInterval(), 3600, true)
+	// }
 
 	return ns
 }
 
 func (ns *Namespace) Name() string {
 	return ns.name
+}
+
+func (ns *Namespace) URI() string {
+	return fmt.Sprintf("//aerospike.com/amc/%s/%s/%s", ns.node.cluster.Id(), ns.node.origHost.String(), ns.Name())
 }
 
 func (ns *Namespace) Drop() error {
@@ -107,6 +126,17 @@ func (ns *Namespace) ServerTime() time.Time {
 	return time.Time{}
 }
 
+func (ns *Namespace) ServerDelta() int64 {
+	if lf := ns.latestFetch.Get(); lf == nil {
+		return -1
+	}
+
+	oldT := ns.latestFetch.Get().(*latestFetch).time.Unix()
+	newT := ns.ServerTime().Unix()
+
+	return newT - oldT
+}
+
 func (ns *Namespace) update(info common.Info) error {
 	defer ns.notifyAboutChanges()
 
@@ -139,6 +169,32 @@ func (ns *Namespace) updateLatencyInfo(latStats map[string]common.Stats) {
 	}
 	ns.latencystats.Set(latStats)
 }
+
+// func (ns *Namespace) updateThroughputInfo(timestamp int64, throughputStats map[string]float64) {
+// 	if len(throughputStats) == 0 {
+// 		ns.throughputStats.Set(nil)
+// 		return
+// 	}
+// 	ns.throughputStats.Set(throughputStats)
+
+// 	uri := ns.URI()
+// 	db := common.TSDB()
+
+// 	// persist throughput
+// 	for op, stat := range throughputStats {
+// 		db.InsertRows([]catena.Row{
+// 			catena.Row{
+// 				Source: uri,
+// 				Metric: op,
+// 				Point: catena.Point{
+// 					Timestamp: timestamp,
+// 					Value:     stat,
+// 				},
+// 			},
+// 		},
+// 		)
+// 	}
+// }
 
 func (ns *Namespace) setInfo(stats common.Info) {
 	ns.latestInfo.SetInfo(stats)
@@ -226,10 +282,46 @@ func (ns *Namespace) IndexStats(name string) common.Stats {
 func (ns *Namespace) updateHistory() {
 	tm := ns.ServerTime().Unix()
 
+	serverDelta := ns.ServerDelta()
+	throughputStats := make(map[string]float64, len(_recordedNamespaceStats))
+	throughputTPS := make(map[string]float64, len(_recordedNamespaceStats))
+	oldStats := ns.latestFetch.Get()
+
+	// persist throughput
+	uri := ns.URI()
+	db := common.TSDB()
 	for _, stat := range _recordedNamespaceStats {
-		bucket := ns.statsHistory[stat]
-		bucket.Add(tm, ns.calcStats.TryFloat(stat, 0))
+		val := ns.calcStats.TryFloat(stat, 0)
+		throughputStats[stat] = val
+		if oldStats != nil {
+			val -= oldStats.(*latestFetch).throughput[stat]
+		}
+
+		// only persist if serverDelta is >= 1
+		if serverDelta >= 1 {
+			throughputTPS[stat] = math.Ceil(val / float64(serverDelta))
+			db.InsertRows([]catena.Row{
+				catena.Row{
+					Source: uri,
+					Metric: stat,
+					Point: catena.Point{
+						Timestamp: tm,
+						Value:     math.Ceil(val / float64(serverDelta)),
+					},
+				},
+			},
+			)
+		}
 	}
+
+	// update the node's latest throughput stats
+	latestFetch := &latestFetch{
+		throughput:    throughputStats,
+		throughputTPS: throughputTPS,
+
+		time: ns.ServerTime(),
+	}
+	ns.latestFetch.Set(latestFetch)
 
 	if ll := ns.LatestLatency(); ll != nil {
 		ns.latencyHistory.Add(tm, ll)
@@ -472,21 +564,29 @@ func (ns *Namespace) updateNotifications() error {
 
 func (ns *Namespace) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
-	res := make(map[string]map[string]*common.SinglePointValue, len(ns.statsHistory))
-	zeroVal := float64(0)
-	for name, bucket := range ns.statsHistory {
+	if ns.latestFetch.Get() == nil {
+		return nil
+	}
+
+	ts := ns.latestFetch.Get().(*latestFetch).throughputTPS
+	res := make(map[string]map[string]*common.SinglePointValue, len(ts))
+	// zeroVal := float64(0)
+
+	tm := ns.latestFetch.Get().(*latestFetch).time.Unix()
+	for name, val := range ts {
 		if ns.node.valid() {
-			val := bucket.LastValue()
-			if val == nil {
-				tm := ns.node.ServerTime().Unix()
-				val = common.NewSinglePointValue(&tm, &zeroVal)
-			}
-			res[name] = map[string]*common.SinglePointValue{ns.name: val}
-		} else {
-			tm := ns.node.ServerTime().Unix()
-			val := common.NewSinglePointValue(&tm, &zeroVal)
-			res[name] = map[string]*common.SinglePointValue{ns.name: val}
+			// if val == nil {
+			// 	tm := ns.node.ServerTime().Unix()
+			// 	val = common.NewSinglePointValue(&tm, &zeroVal)
+			// }
+			spVal := common.NewSinglePointValue(&tm, &val)
+			res[name] = map[string]*common.SinglePointValue{ns.name: spVal}
 		}
+		// else {
+		// 	tm := ns.node.ServerTime().Unix()
+		// 	spVal := common.NewSinglePointValue(&tm, &zeroVal)
+		// 	res[name] = map[string]*common.SinglePointValue{ns.name: spVal}
+		// }
 	}
 
 	return res
@@ -502,11 +602,37 @@ func (ns *Namespace) Throughput(from, to time.Time) map[string]map[string][]*com
 	}
 
 	// statsHistory is not written to, so it doesn't need synchronization
-	res := make(map[string]map[string][]*common.SinglePointValue, len(ns.statsHistory))
+	res := make(map[string]map[string][]*common.SinglePointValue, len(_recordedNamespaceStats))
 	zeroVal := float64(0)
 	st := ns.node.ServerTime().Unix()
-	for name, bucket := range ns.statsHistory {
-		vs := bucket.ValuesBetween(from, to)
+
+	uri := ns.URI()
+	db := common.TSDB()
+
+	for _, name := range _recordedNamespaceStats {
+		it, err := db.NewIterator(uri, name)
+		if err != nil {
+			res[name] = map[string][]*common.SinglePointValue{
+				ns.name: []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)},
+			}
+			continue
+		}
+		defer it.Close()
+
+		if err := it.Seek(from.Unix()); err != nil {
+			return res
+		}
+
+		var vs []*common.SinglePointValue
+		for {
+			if err := it.Next(); err != nil {
+				break
+			}
+
+			point := it.Point()
+			vs = append(vs, common.NewSinglePointValue(&point.Timestamp, &point.Value))
+		}
+
 		if len(vs) == 0 {
 			vs = []*common.SinglePointValue{common.NewSinglePointValue(&st, &zeroVal)}
 		}

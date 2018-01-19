@@ -6,10 +6,12 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 	"sync"
 
 	"github.com/BurntSushi/toml"
+	"github.com/Cistern/catena"
 	log "github.com/Sirupsen/logrus"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
 
@@ -27,9 +29,14 @@ type _db struct {
 }
 
 var db _db
+var tsdb *catena.DB // timeseries database
 
 func DB() *_db {
 	return &db
+}
+
+func TSDB() *catena.DB {
+	return tsdb
 }
 
 func AMCIsProd() bool {
@@ -53,7 +60,8 @@ type Config struct {
 		// BackupHostPassword string `toml:"backup_host_password"`
 		BackupHostKeyFile string `toml:"backup_host_public_key_file"`
 
-		Database string `toml:"database"`
+		Database           string `toml:"database"`
+		TimeSeriesDatabase string `toml:"timeseries_database"`
 
 		Clusters map[string]struct {
 			Host     string `toml:"host"`
@@ -263,6 +271,49 @@ func InitConfig(configFile, configDir string, config *Config) {
 	aslog.Logger.SetLogger(log.StandardLogger())
 
 	setLogLevel(config.AMC.LogLevel)
+}
+
+func SetupTSDatabase(datadir string) {
+	datadir = path.Clean(path.Join(datadir, "timeseries"))
+	if _, err := os.Stat(datadir); os.IsNotExist(err) {
+		tsdb, err = catena.NewDB(datadir, 3600*24, 365) // TODO: use config for the parameters
+		if err != nil {
+			log.Fatalf("Error connecting to the database: %s", err.Error())
+		}
+
+		log.Infoln("Created the timeseries database...")
+	} else {
+		tsdb, err = catena.OpenDB(datadir, 3600*24, 365)
+		if err != nil {
+			log.Fatalf("Error connecting to the database: %s", err.Error())
+		}
+
+		log.Infoln("Opened the timeseries database...")
+	}
+
+	// // print everything out
+	// log.Println(tsdb.Sources(math.MinInt64, math.MaxInt64))
+
+	// for _, source := range tsdb.Sources(math.MinInt64, math.MaxInt64) {
+	// 	log.Println(tsdb.Metrics(source, math.MinInt64, math.MaxInt64))
+	// 	log.Println(">>>>>>>", source)
+	// 	for _, metric := range tsdb.Metrics(source, math.MinInt64, math.MaxInt64) {
+	// 		log.Println("\t\t\t", metric)
+	// 		it, err := tsdb.NewIterator(source, metric)
+	// 		if err != nil {
+	// 			log.Fatalln(err)
+	// 		}
+
+	// 		if err := it.Next(); err != nil {
+	// 			log.Println(err)
+	// 			continue
+	// 		} else {
+	// 			log.Println("\t\t\t\t\t\t", it.Point().Timestamp, "=>", it.Point().Value)
+	// 		}
+	// 	}
+	// }
+
+	// panic("DONE")
 }
 
 func SetupDatabase(filepath string) {

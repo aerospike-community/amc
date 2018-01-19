@@ -997,7 +997,7 @@ definitions:
         total-bytes: 0.17404059
         used-bytes: 0.049911674
       name: Numquam iste aut alias dolor.
-      objsz: b933c4d3-33e3-44bb-baaf-426ee316ba0b
+      objsz: f4e994b4-9fb0-4dc9-b5c2-f89b46bdcf89
       stats:
         Tenetur tenetur quibusdam sit rem.: true
       status: Quos est odit beatae.
@@ -1013,7 +1013,7 @@ definitions:
         type: string
       objsz:
         description: Object size histogram
-        example: b933c4d3-33e3-44bb-baaf-426ee316ba0b
+        example: f4e994b4-9fb0-4dc9-b5c2-f89b46bdcf89
       stats:
         additionalProperties: true
         description: Namespace statistics
@@ -1676,6 +1676,54 @@ definitions:
     - namespace
     - setName
     title: DropIndexPayload
+    type: object
+  GetLogsConnectionPayload:
+    example:
+      contexts:
+      - sindex
+      - xdr
+      severity: DEBUG
+    properties:
+      contexts:
+        description: 'Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr'
+        example:
+        - sindex
+        - xdr
+        items:
+          example: arenax
+          pattern: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+          type: string
+        type: array
+      severity:
+        description: 'Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL'
+        example: DEBUG
+        pattern: CRITICAL|WARNING|INFO|DEBUG|DETAIL
+        type: string
+    title: GetLogsConnectionPayload
+    type: object
+  GetLogsNodePayload:
+    example:
+      contexts:
+      - sindex
+      - xdr
+      severity: DEBUG
+    properties:
+      contexts:
+        description: 'Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr'
+        example:
+        - sindex
+        - xdr
+        items:
+          example: udf
+          pattern: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr
+          type: string
+        type: array
+      severity:
+        description: 'Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL'
+        example: DEBUG
+        pattern: CRITICAL|WARNING|INFO|DEBUG|DETAIL
+        type: string
+    title: GetLogsNodePayload
     type: object
   NodeSeed:
     example:
@@ -3181,6 +3229,11 @@ paths:
         pattern: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
         required: true
         type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/GetLogsConnectionPayload'
       responses:
         "101":
           description: Switching Protocols
@@ -3428,7 +3481,7 @@ paths:
       tags:
       - node
   /api/v1/connections/{connId}/nodes/{node}/aql:
-    get:
+    post:
       description: |-
         Send an AQL command to server and get the results
 
@@ -3816,6 +3869,11 @@ paths:
         name: node
         required: true
         type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/GetLogsNodePayload'
       responses:
         "101":
           description: Switching Protocols

@@ -368,6 +368,10 @@ func (s Info) ToStats() Stats {
 	return res
 }
 
+func (s Stats) Len() int {
+	return len(s)
+}
+
 func (s Stats) Clone() Stats {
 	res := make(Stats, len(s))
 	for k, v := range s {

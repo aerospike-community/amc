@@ -63,7 +63,7 @@ func AqlNodeBadRequest(t goatest.TInterface, ctx context.Context, service *goa.S
 	u := &url.URL{
 		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/aql", connID, node),
 	}
-	req, _err := http.NewRequest("GET", u.String(), nil)
+	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
 		panic("invalid test " + _err.Error()) // bug
 	}
@@ -133,7 +133,7 @@ func AqlNodeInternalServerError(t goatest.TInterface, ctx context.Context, servi
 	u := &url.URL{
 		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/aql", connID, node),
 	}
-	req, _err := http.NewRequest("GET", u.String(), nil)
+	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
 		panic("invalid test " + _err.Error()) // bug
 	}
@@ -203,7 +203,7 @@ func AqlNodeNotAcceptable(t goatest.TInterface, ctx context.Context, service *go
 	u := &url.URL{
 		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/aql", connID, node),
 	}
-	req, _err := http.NewRequest("GET", u.String(), nil)
+	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
 		panic("invalid test " + _err.Error()) // bug
 	}
@@ -273,7 +273,7 @@ func AqlNodeOK(t goatest.TInterface, ctx context.Context, service *goa.Service, 
 	u := &url.URL{
 		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/aql", connID, node),
 	}
-	req, _err := http.NewRequest("GET", u.String(), nil)
+	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
 		panic("invalid test " + _err.Error()) // bug
 	}
@@ -343,7 +343,7 @@ func AqlNodeUnauthorized(t goatest.TInterface, ctx context.Context, service *goa
 	u := &url.URL{
 		Path: fmt.Sprintf("/api/v1/connections/%v/nodes/%v/aql", connID, node),
 	}
-	req, _err := http.NewRequest("GET", u.String(), nil)
+	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
 		panic("invalid test " + _err.Error()) // bug
 	}

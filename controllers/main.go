@@ -329,6 +329,16 @@ func GoaServer(config *common.Config) {
 		},
 	}
 
+	// close the databases on Exit
+	defer func() {
+		if common.TSDB() != nil {
+			common.TSDB().Close()
+		}
+		if common.DB() != nil {
+			common.DB().Close()
+		}
+	}()
+
 	// Start server
 	if config.AMC.CertFile != "" {
 		logrus.Infof("In HTTPS (secure) Mode")

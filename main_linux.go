@@ -112,6 +112,7 @@ func setupServer() {
 		defer cntxt.Release()
 
 		common.SetupDatabase(config.AMC.Database)
+		common.SetupTSDatabase(config.AMC.TimeSeriesDatabase)
 		log.Infoln("Starting AMC daemon...")
 		controllers.GoaServer(&config)
 		// go controllers.Server(&config)
@@ -124,6 +125,7 @@ func setupServer() {
 		log.Println("daemon terminated.")
 	} else {
 		common.SetupDatabase(config.AMC.Database)
+		common.SetupTSDatabase(config.AMC.TimeSeriesDatabase)
 		controllers.GoaServer(&config)
 	}
 }

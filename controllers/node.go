@@ -244,7 +244,11 @@ func (c *NodeController) GetLogsWSHandler(ctx *app.GetLogsNodeContext) websocket
 		defer w.Close()
 		defer r.Close()
 
-		node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort)
+		severity := ""
+		if ctx.Payload.Severity != nil {
+			severity = *ctx.Payload.Severity
+		}
+		node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort, ctx.Payload.Contexts, severity)
 
 		// NodeController_GetLogs: end_implement
 		for {

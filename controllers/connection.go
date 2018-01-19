@@ -201,8 +201,13 @@ func (c *ConnectionController) GetLogsWSHandler(ctx *app.GetLogsConnectionContex
 		defer w.Close()
 		defer r.Close()
 
+		severity := ""
+		if ctx.Payload.Severity != nil {
+			severity = *ctx.Payload.Severity
+		}
+
 		for _, node := range cluster.Nodes() {
-			node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort)
+			node.QueryLogs("tcp", w, 10*time.Second, _observer.Config().AGENT.BindPort, ctx.Payload.Contexts, severity)
 		}
 
 		// NodeController_GetLogs: end_implement

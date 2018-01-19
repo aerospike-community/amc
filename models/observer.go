@@ -50,7 +50,7 @@ func New(config *common.Config) *ObserverT {
 
 	// Add Monitoring servers to the cluster
 	// These clusters do not belong to any sessions, but will
-	for _, server := range config.AMC.Clusters {
+	for confId, server := range config.AMC.Clusters {
 		cp := as.NewClientPolicy()
 		cp.User = server.User
 		cp.Password = server.Password
@@ -59,7 +59,7 @@ func New(config *common.Config) *ObserverT {
 		host.TLSName = server.TLSName
 		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
 		if cluster == nil {
-			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User, " Pass: ", server.Password)
+			log.Warn("Adding host `", server.Host, ":", server.Port, "` user: `", server.User, "`")
 			host := as.NewHost(server.Host, int(server.Port))
 			host.TLSName = server.TLSName
 			cluster, err = o.Register("automatic", cp, server.Alias, host)
@@ -71,6 +71,8 @@ func New(config *common.Config) *ObserverT {
 		}
 		// mark it so it won't be removed automatically
 		cluster.setPermanent(true)
+		// give predefined databases a persistent id
+		cluster.uuid = fmt.Sprintf("%s.%s:%v.%s", confId, server.Host, server.Port, server.Alias)
 	}
 
 	return o

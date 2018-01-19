@@ -28,7 +28,7 @@ type jsonCommand struct {
 	ExtractKeys []string
 }
 
-func Tail(protocol, host string, w *io.PipeWriter, timeout time.Duration) error {
+func Tail(protocol, host string, w *io.PipeWriter, timeout time.Duration, contexts []string, severity string) error {
 	tconn, err := net.DialTimeout(protocol, host, 15*time.Second)
 	if err != nil {
 		util.Log.Errorln(err.Error())
@@ -37,8 +37,8 @@ func Tail(protocol, host string, w *io.PipeWriter, timeout time.Duration) error 
 
 	cmd := jsonCommand{
 		Command:     "tail",
-		LogContexts: nil,
-		LogLevel:    "",
+		LogContexts: contexts,
+		LogLevel:    severity,
 		Keywords:    nil,
 		ExtractKeys: nil,
 	}

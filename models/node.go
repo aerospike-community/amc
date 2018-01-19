@@ -54,9 +54,10 @@ type Node struct {
 	aqlUDF     common.SyncValue //bool
 
 	// latestInfo, oldInfo common.SyncInfo
-	latestInfo        common.SyncInfo
-	latestConfig      common.SyncStats
-	latestNodeLatency common.SyncValue //map[string]common.SyncStats
+	latestInfo           common.SyncInfo
+	latestConfig         common.SyncStats
+	latestNodeLatency    common.SyncValue //map[string]common.SyncStats
+	latestNodeThroughput common.SyncValue //map[string]float64
 
 	stats, nsAggStats common.SyncStats
 	nsAggCalcStats    common.SyncStats
@@ -121,6 +122,7 @@ func (n *Node) valid() bool {
 }
 
 func (n *Node) update() error {
+
 	defer n.notifyAboutChanges()
 	defer n.updateHistory() // always update the stats; when node is down, the stats will be zero
 
@@ -517,6 +519,7 @@ func (n *Node) infoKeys() []string {
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
 		"sindex", "udf-list", "latency:", "get-config:", "cluster-name", "service",
+		"throughput:",
 	}
 
 	if n.Enterprise() {
@@ -1201,8 +1204,8 @@ func (n *Node) NamespaceInfo(namespaces []string) map[string]*app.AerospikeAmcNa
 	return res
 }
 
-func (n *Node) QueryLogs(protocol string, w *io.PipeWriter, timeout time.Duration, bindPort uint16) error {
-	return agent.Tail(protocol, net.JoinHostPort(n.origHost.Name, strconv.Itoa(int(bindPort))), w, timeout)
+func (n *Node) QueryLogs(protocol string, w *io.PipeWriter, timeout time.Duration, bindPort uint16, context []string, severity string) error {
+	return agent.Tail(protocol, net.JoinHostPort(n.origHost.Name, strconv.Itoa(int(bindPort))), w, timeout, context, severity)
 }
 
 func (n *Node) updateAQLRegistered() {
@@ -1233,4 +1236,73 @@ func (n *Node) RegisterAQLAPI() error {
 
 func (n *Node) ExecAQL(output io.Writer, aql string) (int, error) {
 	return n.cluster.ExecAQL(n.origNode(), output, aql)
+}
+
+func (n *Node) parseThroughputInfo(s string) (map[string]map[string]float64, map[string]float64) {
+	ip := common.NewInfoParser(s)
+
+	//typical format is {test}-read:15:43:18-GMT,ops/sec;15:43:28,0.0;
+
+	nodeStats := map[string]float64{}
+	res := map[string]map[string]float64{}
+	for {
+		if err := ip.Expect("{"); err != nil {
+			// it's an error string, read to next section
+			if _, err := ip.ReadUntil(';'); err != nil {
+				break
+			}
+			continue
+		}
+
+		ns, err := ip.ReadUntil('}')
+		if err != nil {
+			break
+		}
+
+		if err := ip.Expect("-"); err != nil {
+			break
+		}
+
+		op, err := ip.ReadUntil(':')
+		if err != nil {
+			break
+		}
+
+		// first timestamo
+		if _, err := ip.ReadUntil(','); err != nil {
+			break
+		}
+
+		// ops/sec
+		if _, err := ip.ReadUntil(';'); err != nil {
+			break
+		}
+
+		// second timestamp
+		if _, err = ip.ReadUntil(','); err != nil {
+			break
+		}
+
+		opsCount, err := ip.ReadFloat(';')
+		if err != nil {
+			break
+		}
+
+		if res[ns] == nil {
+			res[ns] = map[string]float64{
+				op: opsCount,
+			}
+		} else {
+			res[ns][op] = opsCount
+		}
+
+		// calc totals
+		for _, mp := range res {
+			for op, tps := range mp {
+				nodeStats[op] += tps
+			}
+		}
+	}
+
+	return res, nodeStats
 }

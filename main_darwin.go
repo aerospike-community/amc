@@ -48,5 +48,6 @@ func main() {
 	common.InitConfig(*configFile, *configDir, &config)
 
 	common.SetupDatabase(config.AMC.Database)
+	common.SetupTSDatabase(config.AMC.TimeSeriesDatabase)
 	controllers.GoaServer(&config)
 }

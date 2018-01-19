@@ -320,6 +320,22 @@ var _ = Resource("connection", func() {
 
 			Required("connId")
 		})
+
+		Payload(func() {
+			var LogContext = ArrayOf(String, func() {
+				Pattern("misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr") // Validate bottle names
+			})
+
+			Member("contexts", LogContext, "Log context: misc|alloc|arenax|hardware|jem|msg|rbuffer|socket|tls|aggr|as|batch|bin|config|clustering|compression|demarshal|drv_ssd|exchange|fabric|geo|hb|hlc|index|info|info-port|job|ldt|migrate|mon|namespace|nsup|particle|partition|paxos|predexp|proto|proxy|query|record|rw|scan|security|sindex|smd|storage|truncate|tsvc|udf|xdr", func() {
+				Example([]string{"sindex", "xdr"})
+			})
+
+			Member("severity", String, "Log severity (level): CRITICAL|WARNING|INFO|DEBUG|DETAIL", func() {
+				Example("DEBUG")
+				Pattern("CRITICAL|WARNING|INFO|DEBUG|DETAIL")
+			})
+		})
+
 		Response(SwitchingProtocols)
 	})
 

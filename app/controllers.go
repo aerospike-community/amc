@@ -486,11 +486,17 @@ func MountConnectionController(service *goa.Service, ctrl ConnectionController) 
 		if err != nil {
 			return err
 		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*GetLogsConnectionPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
 		return ctrl.GetLogs(rctx)
 	}
 	h = handleSecurity("jwt", h, "api:enterprise")
 	h = handleConnectionOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/logs", ctrl.MuxHandler("get logs", h, nil))
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/logs", ctrl.MuxHandler("get logs", h, unmarshalGetLogsConnectionPayload))
 	service.LogInfo("mount", "ctrl", "Connection", "action", "GetLogs", "route", "GET /api/v1/connections/:connId/logs", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
@@ -753,6 +759,21 @@ func unmarshalAqlConnectionPayload(ctx context.Context, service *goa.Service, re
 // unmarshalConnectConnectionPayload unmarshals the request body into the context request data Payload field.
 func unmarshalConnectConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &connectConnectionPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalGetLogsConnectionPayload unmarshals the request body into the context request data Payload field.
+func unmarshalGetLogsConnectionPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &getLogsConnectionPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}
@@ -1743,8 +1764,8 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 	}
 	h = handleSecurity("jwt", h, "api:general")
 	h = handleNodeOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/aql", ctrl.MuxHandler("aql", h, unmarshalAqlNodePayload))
-	service.LogInfo("mount", "ctrl", "Node", "action", "Aql", "route", "GET /api/v1/connections/:connId/nodes/:node/aql", "security", "jwt")
+	service.Mux.Handle("POST", "/api/v1/connections/:connId/nodes/:node/aql", ctrl.MuxHandler("aql", h, unmarshalAqlNodePayload))
+	service.LogInfo("mount", "ctrl", "Node", "action", "Aql", "route", "POST /api/v1/connections/:connId/nodes/:node/aql", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -1773,11 +1794,17 @@ func MountNodeController(service *goa.Service, ctrl NodeController) {
 		if err != nil {
 			return err
 		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*GetLogsNodePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
 		return ctrl.GetLogs(rctx)
 	}
 	h = handleSecurity("jwt", h, "api:enterprise")
 	h = handleNodeOrigin(h)
-	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/logs", ctrl.MuxHandler("get logs", h, nil))
+	service.Mux.Handle("GET", "/api/v1/connections/:connId/nodes/:node/logs", ctrl.MuxHandler("get logs", h, unmarshalGetLogsNodePayload))
 	service.LogInfo("mount", "ctrl", "Node", "action", "GetLogs", "route", "GET /api/v1/connections/:connId/nodes/:node/logs", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
@@ -1959,6 +1986,21 @@ func handleNodeOrigin(h goa.Handler) goa.Handler {
 // unmarshalAqlNodePayload unmarshals the request body into the context request data Payload field.
 func unmarshalAqlNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &aqlNodePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalGetLogsNodePayload unmarshals the request body into the context request data Payload field.
+func unmarshalGetLogsNodePayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &getLogsNodePayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}
