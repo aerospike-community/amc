@@ -318,7 +318,7 @@ func (ns *Namespace) setAliases() {
 	calcStats["prole-objects"] = stats.TryInt("prole_objects", 0)
 	calcStats["prole-sub-objects"] = stats.TryInt("prole_sub_objects", 0)
 	calcStats["set-deleted-objects"] = stats.TryInt("set_deleted_objects", 0)
-	calcStats["stop-writes"] = stats.TryInt("stop_writes", 0)
+	calcStats["stop-writes"] = stats.TryString("stop_writes", "false") != "false"
 	calcStats["defrag-lwm-pct"] = stats.TryFloat("storage-engine.defrag-lwm-pct", 0)
 	calcStats["defrag-queue-min"] = stats.TryInt("storage-engine.defrag-queue-min", 0)
 	calcStats["defrag-sleep"] = stats.TryInt("storage-engine.defrag-sleep", 0)
