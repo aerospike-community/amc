@@ -68,12 +68,13 @@ type Config struct {
 	Mailer struct {
 		mutex sync.RWMutex
 
-		TemplatePath string   `toml:"template_path"`
-		Host         string   `toml:"host"`
-		Port         uint16   `toml:"port"`
-		User         string   `toml:"user"`
-		Password     string   `toml:"password"`
-		SendTo       []string `toml:"send_to"`
+		TemplatePath      string   `toml:"template_path"`
+		Host              string   `toml:"host"`
+		Port              uint16   `toml:"port"`
+		User              string   `toml:"user"`
+		Password          string   `toml:"password"`
+		SendTo            []string `toml:"send_to"`
+		AcceptInvalidCert bool     `toml:"accept_invalid_cert"`
 	} `toml:"mailer"`
 
 	BasicAuth struct {

@@ -2,11 +2,12 @@ package mailer
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"html/template"
 
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/gomail.v2"
+	gomail "gopkg.in/gomail.v2"
 
 	"github.com/citrusleaf/amc/common"
 )
@@ -45,6 +46,14 @@ func SendMail(config *common.Config, tplName, subject string, context interface{
 	msg.SetBody("text/html", string(body))
 
 	mailer := gomail.NewDialer(config.Mailer.Host, int(config.Mailer.Port), config.Mailer.User, config.Mailer.Password)
+	// Allow invalid/self-signed certs if requested by user
+	if config.Mailer.AcceptInvalidCert {
+		if mailer.TLSConfig != nil {
+			mailer.TLSConfig.InsecureSkipVerify = true
+		} else {
+			mailer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		}
+	}
 	if err := mailer.DialAndSend(msg); err != nil {
 		return err
 	}

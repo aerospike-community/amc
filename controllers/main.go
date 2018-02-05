@@ -239,9 +239,9 @@ func Server(config *common.Config) {
 				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
 				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 			}
-			tlsConfig.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
 		}
 
+		e.TLSServer.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
 		e.TLSServer.TLSConfig = tlsConfig
 		e.TLSServer.Addr = config.AMC.Bind
 		// redirect all http requests to https

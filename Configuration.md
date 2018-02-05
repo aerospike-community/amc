@@ -148,12 +148,13 @@ Configuration used by AMC to send out email alerts for the monitored clusters.
 
 ```
 [mailer]
-template_path = "/home/amc/mailer/templates"
-host          = "smtp.outlook.com"
-port          = 587
-user          = "user"
-password      = "user123"
-send_to       = ["monitorone@gmail.com", "monitortwo@yahoo.com"]
+template_path       = "/home/amc/mailer/templates"
+host                = "smtp.outlook.com"
+port                = 587
+user                = "user"
+password            = "user123"
+send_to             = ["monitorone@gmail.com", "monitortwo@yahoo.com"]
+accept_invalid_cert = false
 ```
 
 
