@@ -319,7 +319,7 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
             {name: 'stat_recs_shipped', width: 100, align: 'center', resizable: false, sortable: false, title: 'Number of deletes shipped'},
             {name: 'cur_throughput', width: 100, align: 'center', resizable: false, sortable: false, title: 'Number of partitions pending to be migrated out of the node'},
         ],
-        namespaceColumnNames: ['Host', 'Total Objects', 'Master</br> (Objects, Tombstones)', 'Replica</br> (Objects, Tombstones)', 'Repl\'n Factor', /*'Least Avail%'*/'Avail%','Disk </br>Used, HWM', 'RAM </br>Used, HWM, Stop Writes'/*, 'RAM'*/, 'Expired Objects', 'Evicted Objects'],
+        namespaceColumnNames: ['Host', 'Total Objects', 'Master</br> (Objects / Tombstones)', 'Replica</br> (Objects / Tombstones)', 'Repl\'n Factor', /*'Least Avail%'*/'Avail%','Disk </br>Used, HWM', 'RAM </br>Used, HWM, Stop Writes'/*, 'RAM'*/, 'Expired Objects', 'Evicted Objects'],
         namespaceListColumn: [
             {name: 'node', width: 136, align: 'center', resizable: false, sortable: false, title: 'Host Name'},
             {name: 'objects-num', width: 86, align: 'center', resizable: false, sortable: false, title: 'Total number of Master objects + Replica objects in the cluster'},
@@ -334,7 +334,7 @@ define(['jquery', 'underscore', 'backbone', 'd3'], function($, _, Backbone, D3) 
             {name: 'expired-objects-num', width: 56, align: 'center', resizable: false, sortable: false, title: 'Total number of records expired for the namespace in the cluster'},
             {name: 'evicted-objects-num', width: 56, align: 'center', resizable: false, sortable: false, title: 'Total number of records evicted for the namespace in the cluster'}
         ],
-        namespaceClusterWideColumnNames: ['Namespace', 'Total Objects', 'Master</br> (Objects, Tombstones)', 'Replica</br> (Objects, Tombstones)', 'Repl\'n Factor', /*'Least Avail%'*/'Avail%', 'Disk', 'RAM', 'Expired Objects', 'Evicted Objects'],
+        namespaceClusterWideColumnNames: ['Namespace', 'Total Objects', 'Master</br> (Objects / Tombstones)', 'Replica</br> (Objects / Tombstones)', 'Repl\'n Factor', /*'Least Avail%'*/'Avail%', 'Disk', 'RAM', 'Expired Objects', 'Evicted Objects'],
         namespaceClusterWideListColumn: [
             {name: 'name', width: 150, align: 'center', resizable: false, sortable: false, title: 'Namespace Name'},
             {name: 'objects', width: 80, align: 'center', resizable: false, sortable: false, title: 'Total number of Master objects + Replica objects in the cluster'},
