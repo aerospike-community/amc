@@ -49,12 +49,13 @@ type Config struct {
 		Database string `toml:"database"`
 
 		Clusters map[string]struct {
-			Host     string `toml:"host"`
-			TLSName  string `toml:"tls_name"`
-			Port     uint16 `toml:"port"`
-			User     string `toml:"user"`
-			Password string `toml:"password"`
-			Alias    string `toml:"alias"`
+			Host                 string `toml:"host"`
+			TLSName              string `toml:"tls_name"`
+			Port                 uint16 `toml:"port"`
+			User                 string `toml:"user"`
+			Password             string `toml:"password"`
+			Alias                string `toml:"alias"`
+			UseServicesAlternate bool   `toml:"use_services_alternate"`
 		} `toml:"clusters"`
 
 		Bind     string `toml:"bind"`

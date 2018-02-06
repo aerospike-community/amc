@@ -25,14 +25,15 @@ import (
 
 func postGetClusterId(c echo.Context) error {
 	form := struct {
-		SeedNode     string `form:"seed_node"`
-		TLSName      string `form:"tls_name"`
-		CertFile     string `form:"cert_file"`
-		KeyFile      string `form:"key_file"`
-		Username     string `form:"username"`
-		Password     string `form:"password"`
-		ClusterAlias string `form:"cluster_name"`
-		EncryptOnly  bool   `form:"encrypt_only"`
+		SeedNode             string `form:"seed_node"`
+		TLSName              string `form:"tls_name"`
+		CertFile             string `form:"cert_file"`
+		KeyFile              string `form:"key_file"`
+		Username             string `form:"username"`
+		Password             string `form:"password"`
+		ClusterAlias         string `form:"cluster_name"`
+		EncryptOnly          bool   `form:"encrypt_only"`
+		UseServicesAlternate bool   `form:"use_services_alternate"`
 	}{}
 
 	c.Bind(&form)
@@ -59,9 +60,10 @@ func postGetClusterId(c echo.Context) error {
 		_observer.AppendCluster(sid, cluster)
 	} else {
 		clientPolicy := *_defaultClientPolicy
+		clientPolicy.UseServicesAlternate = form.UseServicesAlternate
 
 		if common.AMCIsEnterprise() {
-			clientPolicy.User = form.Username
+			clientPolicy.User = strings.Trim(form.Username, " \t")
 			clientPolicy.Password = form.Password
 
 			if len(form.TLSName) > 0 || form.EncryptOnly == true {

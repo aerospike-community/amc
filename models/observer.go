@@ -50,16 +50,18 @@ func New(config *common.Config) *ObserverT {
 	// These clusters do not belong to any sessions, but will
 	for _, server := range config.AMC.Clusters {
 		cp := as.NewClientPolicy()
-		cp.User = server.User
-		cp.Password = server.Password
+		cp.UseServicesAlternate = server.UseServicesAlternate
 
 		host := as.NewHost(server.Host, int(server.Port))
-		host.TLSName = server.TLSName
+		if common.AMCIsEnterprise() {
+			cp.User = server.User
+			cp.Password = server.Password
+			host.TLSName = server.TLSName
+		}
+
 		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
 		if cluster == nil {
-			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User, " Pass: ", server.Password)
-			host := as.NewHost(server.Host, int(server.Port))
-			host.TLSName = server.TLSName
+			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User)
 			cluster, err = o.Register("automatic", cp, server.Alias, host)
 			if err != nil {
 				log.Error("Error while trying to add database from config file for monitoring: ", err.Error())

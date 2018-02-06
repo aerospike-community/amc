@@ -169,7 +169,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
 
         /**********************************/
 
-        that.getClusterID = function(ip, port, callback, clusterName, multiclusterview, tls) {
+        that.getClusterID = function(ip, port, callback, clusterName, multiclusterview, useServicesAlternate, tls) {
             var that = this;
 
             if (!is_valid_port(port)) {
@@ -182,7 +182,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             }
             var getClusterIdUrl = AppConfig.baseUrl + "get-cluster-id";
             var msgStr = "error";
-            var clusterInfo = {seed_node : seedNode};
+            var clusterInfo = {seed_node : seedNode, use_services_alternate: useServicesAlternate};
 
             if(clusterName != null && ( clusterName = clusterName.trim() ) != "")
                 clusterInfo.cluster_name = clusterName;
@@ -368,6 +368,13 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                                         "<span>:</span>" +
                                         "<input id='port_dialog' class='dialog_input' type='number' style='width: 55px;' maxlength='5' placeholder='PORT' value='" + port + "'/>" +
                                         "<div><input type='text' style='width: 200px; text-align:center;' placeholder='Cluster Label (OPTIONAL)' class='dialog_input' value='' id='cluster_name_dialog'/></div>"+
+                                        "<div id='servicesalternate_check_view'" +
+                                          "<label class='dialog_input'>" +
+                                            "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
+                                              "title='Use Alternate Services check' name='alternateservices_check' id='alternateservices_check'>" +
+                                            "Use 'services_alternate' For Cluster Discovery" +
+                                          "</label>" +
+                                        "</div>"+
                                         "<div id='multicluster_check_view' style='display: none'>" +
                                           "<label class='dialog_input'>" +
                                             "<input type='checkbox' style='width: auto; box-shadow: none;position: relative;vertical-align: middle;bottom: 1px;'" +
@@ -408,6 +415,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                  var portNumber = $("#port_dialog").val().trim();
                  var clusterName = $("#cluster_name_dialog").val().trim();
                  var multiclusterviewCheck = is_checked("multiclusterview_check");
+                 var useAlternateServicesCheck = is_checked("alternateservices_check");
                  var tls = null;
                  // var certFiles = document.getElementById('tls_certificate').files;
                  // var keyFiles = document.getElementById('tls_key').files;
@@ -438,7 +446,7 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                        Util.hideModalDialog();
                        connectCallback && connectCallback(response, multiclusterviewCheck);
                      }
-                   }, clusterName, multiclusterviewCheck, tls);
+                   }, clusterName, multiclusterviewCheck, useAlternateServicesCheck, tls);
                  }
             }
 

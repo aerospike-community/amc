@@ -98,20 +98,22 @@ List of Aerospike clusters that are always monitored by AMC.
 [amc.clusters]
 
 [clusterone] // unused
-host     = "192.168.121.121"         
-port     = 3000
-tls_name = "clusteronetls"   // optional
-user     = "admin"           // optional
-password = "admin123"        // optional 
-alias    = "clusterone"      // optional
+host     				= "192.168.121.121"         
+port     				= 3000
+tls_name 				= "clusteronetls"   // optional
+user     				= "admin"           // optional
+password 				= "admin123"        // optional 
+alias    				= "clusterone"      // optional
+use_services_alternate 	= true      		// optional
 
 [clustertwo] // unused
-host     = "192.168.121.122"
-port     = 3000
-tls_name = "clustertwotls"   // optional
-user     = "admin"           // optional
-password = "admin123"        // optional 
-alias    = "clustertwo"      // optional
+host     				= "192.168.121.122"
+port     				= 3000
+tls_name 				= "clustertwotls"   // optional
+user     				= "admin"           // optional
+password 				= "admin123"        // optional 
+alias    				= "clustertwo"      // optional
+use_services_alternate 	= false      		// optional
 ```
 
 Each cluster has the following configurations
@@ -139,6 +141,12 @@ Warning - the tls certificate needs to be part of the system cert pool or needs
 to be specified as a configuration to AMC
 ```
 tls_name = "clusteronetls"
+```
+
+*use_services_alternate* (optional) - Allows the use of services_alternate on the
+server to be able to connect from a public netword to the cluster.
+```
+use_services_alternate = true
 ```
 
 ### Mail Configuration 
