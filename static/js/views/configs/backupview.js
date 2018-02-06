@@ -190,7 +190,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
                     that.model.backupPoller.start();
                     that.model.currentBackupId = data.backup_id;
                     that.setRenderStatus('Backup initiated');
-                } else if (data.status === 'Failure') {
+                } else if (data.status === 'failure') {
                     that.setRenderStatus(data.error);
                 } else {
                     that.setRenderStatus('unknown error');
@@ -226,7 +226,8 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             });
 
             for (var i = 0; i < inputBoxs.length; i++) {
-                if ($(inputBoxs[i]).val() === "" && $(inputBoxs[i]).attr("name") !== "sets" && $(inputBoxs[i]).attr("name") !== "username" && $(inputBoxs[i]).attr("name") !== "password") {
+                if ($(inputBoxs[i]).val() === "" && $(inputBoxs[i]).attr("name") !== "sets" && $(inputBoxs[i]).attr("name") !== "username" && $(inputBoxs[i]).attr("name") !== "password" && 
+                    $(inputBoxs[i]).attr("name") !== "modified_after" && $(inputBoxs[i]).attr("name") !== "modified_before") {
                     backupStatusMessageEL.text("Please fill in highlighted details!").addClass("error").css("display", "block");
                     return false;
                 }
@@ -294,7 +295,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
                         spanClass = "status";
                     } else if (jobs[backupID].progress.status === "Success") {
                         spanClass = "success";
-                    } else if (jobs[backupID].progress.status === "Failure") {
+                    } else if (jobs[backupID].progress.status === "failure") {
                         spanClass = "error";
                     }
 

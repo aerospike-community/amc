@@ -13,9 +13,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/kennygrant/sanitize"
-	"github.com/mcuadros/go-version"
+	version "github.com/mcuadros/go-version"
 	// "github.com/sasha-s/go-deadlock"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/citrusleaf/amc/common"
 	"github.com/citrusleaf/amc/mailer"
@@ -1280,6 +1280,8 @@ func (c *Cluster) Backup(
 	Sets string,
 	MetadataOnly bool,
 	TerminateOnChange bool,
+	ModifiedBefore string,
+	ModifiedAfter string,
 	ScanPriority int) (*Backup, error) {
 
 	if c.CurrentBackup() != nil && c.CurrentBackup().Status == common.BackupStatusInProgress {
@@ -1299,6 +1301,8 @@ func (c *Cluster) Backup(
 			MetadataOnly,
 			TerminateOnChange,
 			ScanPriority,
+			ModifiedBefore,
+			ModifiedAfter,
 			common.BackupStatusInProgress,
 		),
 
@@ -1316,7 +1320,10 @@ func (c *Cluster) Backup(
 }
 
 func (c *Cluster) CurrentBackup() *Backup {
-	return c.activeBackup.Get().(*Backup)
+	if c.activeBackup.Get() != nil {
+		return c.activeBackup.Get().(*Backup)
+	}
+	return nil
 }
 
 func (c *Cluster) Restore(
@@ -1346,6 +1353,8 @@ func (c *Cluster) Restore(
 			false,
 			false,
 			2,
+			"",
+			"",
 			common.BackupStatusInProgress,
 		),
 
@@ -1367,6 +1376,9 @@ func (c *Cluster) Restore(
 }
 
 func (c *Cluster) CurrentRestore() *Restore {
-	return c.activeRestore.Get().(*Restore)
+	if c.activeRestore.Get() != nil {
+		return c.activeRestore.Get().(*Restore)
+	}
+	return nil
 
 }

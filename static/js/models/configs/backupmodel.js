@@ -59,7 +59,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
                             }
                             delete response.attributes[backupID];
                             response.view.updateProgress(container, "Success", "100%");
-                        } else if(response.attributes[backupID].progress.status === "Failure" && !that.waitForInitiationResponse){
+                        } else if(response.attributes[backupID].progress.status === "failure" && !that.waitForInitiationResponse){
                             if(backupID === that.currentBackupId){
                                 that.set('renderStatus',response.attributes[backupID].progress.error);
                                 that.currentBackupId = null;

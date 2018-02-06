@@ -3,10 +3,12 @@ package common
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func SplitHostPort(addr string) (host string, port int, err error) {
@@ -130,4 +132,23 @@ func MaxInt64(a, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+// parseTimeStrict parses a formatted string and returns the time value it
+// represents. The output is identical to time.Parse except it returns an
+// error for strings that don't format to the input value.
+//
+// An example where the output differs from time.Parse would be:
+// parseTimeStrict("1/2/06", "11/31/15")
+//	- time.Parse returns "2015-12-01 00:00:00 +0000 UTC"
+//	- parseTimeStrict returns an error
+func ParseTimeStrict(layout, value string) (time.Time, error) {
+	t, err := time.Parse(layout, value)
+	if err != nil {
+		return t, fmt.Errorf("invalid date time: %q. Must follow the pattern %s", value, layout)
+	}
+	if t.Format(layout) != value {
+		return t, fmt.Errorf("invalid date time: %q. Must follow the pattern %s", value, layout)
+	}
+	return t, nil
 }

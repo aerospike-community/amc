@@ -57,6 +57,12 @@ func (b *Backup) Execute() error {
 	if b.TerminateOnClusterChange {
 		optionalArgs += " -c "
 	}
+	if len(b.ModifiedBefore) > 0 {
+		optionalArgs += " --modified-before " + b.ModifiedBefore
+	}
+	if len(b.ModifiedAfter) > 0 {
+		optionalArgs += " --modified-after " + b.ModifiedAfter
+	}
 	if b.ScanPriority != 2 {
 		optionalArgs += fmt.Sprintf(" -f %d ", b.ScanPriority)
 	}

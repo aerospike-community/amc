@@ -312,7 +312,7 @@ define(["jquery", "helper/util","config/app-config","helper/AjaxManager"], funct
 				 if(data.status === 'Success'){
 				 		countDown = 120;
 						startRowRefresh();
-					}else if(data.status === 'Failure' /* && data.error.indexOf('Authentication') != -1 */ && typeof credentials === 'undefined'){
+					}else if(data.status === 'failure' /* && data.error.indexOf('Authentication') != -1 */ && typeof credentials === 'undefined'){
 						rowView.alertQueue[nodeAddress] = that.destroyToast(rowView.alertQueue[nodeAddress]);
 						console.info("here");
 						that.showToggleDialog(button,nodeAddress, toggleToState, rowView, toggleFor);

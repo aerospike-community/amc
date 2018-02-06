@@ -284,7 +284,11 @@ func SetupDatabase(filepath string) {
 		`CREATE INDEX IF NOT EXISTS idxBackupsId ON backups (Id);`,
 		`CREATE TABLE IF NOT EXISTS migrations (
 			Version      int64
-		);`,
+		);
+		BEGIN TRANSACTION;
+			ALTER TABLE backups ADD ModifiedBefore string;
+			ALTER TABLE backups ADD ModifiedAfter string;
+		COMMIT;`,
 	}
 
 	log.Infof("Database path is: %s", filepath)

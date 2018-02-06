@@ -9,7 +9,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -28,6 +28,8 @@ var (
 		"Created",
 		"Finished",
 		"Status",
+		"ModifiedBefore",
+		"ModifiedAfter",
 	}
 )
 
@@ -64,6 +66,9 @@ type BackupRestore struct {
 	Finished                 NullTime
 	Status                   BackupRestoreStatus
 
+	ModifiedBefore string
+	ModifiedAfter  string
+
 	Progress int
 	Error    string
 
@@ -84,6 +89,8 @@ func NewBackupRestore(
 	MetadataOnly bool,
 	TerminateOnClusterChange bool,
 	ScanPriority int,
+	ModifiedBefore string,
+	ModifiedAfter string,
 	Status BackupRestoreStatus) *BackupRestore {
 
 	return &BackupRestore{
@@ -101,7 +108,11 @@ func NewBackupRestore(
 		TerminateOnClusterChange: TerminateOnClusterChange,
 		ScanPriority:             ScanPriority,
 		Created:                  time.Now(),
-		Status:                   Status,
+
+		ModifiedBefore: ModifiedBefore,
+		ModifiedAfter:  ModifiedAfter,
+
+		Status: Status,
 
 		_persisted: false,
 	}
@@ -123,8 +134,8 @@ func (br *BackupRestore) Save() error {
 
 	if !br._persisted {
 		if _, err := tx.Exec(
-			fmt.Sprintf("INSERT INTO backups (%s) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)", strings.Join(_backupFields[:], ", ")),
-			string(br.Type), br.Id, br.ClusterId, br.Namespace, br.DestinationAddress, br.Username, br.DestinationPath, br.Sets, br.MetadataOnly, br.TerminateOnClusterChange, br.ScanPriority, br.Created, br.Finished, string(br.Status),
+			fmt.Sprintf("INSERT INTO backups (%s) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)", strings.Join(_backupFields[:], ", ")),
+			string(br.Type), br.Id, br.ClusterId, br.Namespace, br.DestinationAddress, br.Username, br.DestinationPath, br.Sets, br.MetadataOnly, br.TerminateOnClusterChange, br.ScanPriority, br.Created, br.Finished, string(br.Status), br.ModifiedBefore, br.ModifiedAfter,
 		); err != nil {
 			log.Errorf("Error registering the %s in the DB: %s", br.Type, err.Error())
 			return err
@@ -139,7 +150,7 @@ func (br *BackupRestore) Save() error {
 
 		if _, err := tx.Exec(
 			fmt.Sprintf("UPDATE backups SET %s", strings.Join(fields, ", ")),
-			string(br.Type), br.Id, br.ClusterId, br.Namespace, br.DestinationAddress, br.Username, br.DestinationPath, br.Sets, br.MetadataOnly, br.TerminateOnClusterChange, br.ScanPriority, br.Created, br.Finished, string(br.Status),
+			string(br.Type), br.Id, br.ClusterId, br.Namespace, br.DestinationAddress, br.Username, br.DestinationPath, br.Sets, br.MetadataOnly, br.TerminateOnClusterChange, br.ScanPriority, br.Created, br.Finished, string(br.Status), br.ModifiedBefore, br.ModifiedAfter,
 			string(br.Id),
 		); err != nil {
 			log.Errorf("Error registering the %s in the DB: %s", br.Type, err.Error())
@@ -257,7 +268,7 @@ func backupRestoreFromSQLRows(rows *sql.Rows) ([]*BackupRestore, error) {
 	res := []*BackupRestore{}
 	for rows.Next() {
 		br := BackupRestore{_persisted: true}
-		if err := rows.Scan(&br.Type, &br.Id, &br.ClusterId, &br.Namespace, &br.DestinationAddress, &br.Username, &br.DestinationPath, &br.Sets, &br.MetadataOnly, &br.TerminateOnClusterChange, &br.ScanPriority, &br.Created, &br.Finished, &br.Status); err != nil {
+		if err := rows.Scan(&br.Type, &br.Id, &br.ClusterId, &br.Namespace, &br.DestinationAddress, &br.Username, &br.DestinationPath, &br.Sets, &br.MetadataOnly, &br.TerminateOnClusterChange, &br.ScanPriority, &br.Created, &br.Finished, &br.Status, &br.ModifiedBefore, &br.ModifiedAfter); err != nil {
 			return res, err
 		}
 		res = append(res, &br)

@@ -32,6 +32,8 @@ func postInitiateBackup(c echo.Context) error {
 		OnlyMetadata           bool   `form:"only_metadata"`
 		TerminateOnChange      bool   `form:"terminate_on_change"`
 		ScanPriority           int    `form:"scan_priority"`
+		ModifiedBefore         string `form:"modified_before"`
+		ModifiedAfter          string `form:"modified_after"`
 	}{}
 
 	c.Bind(&form)
@@ -47,6 +49,18 @@ func postInitiateBackup(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid DestinationLocation"))
 	}
 
+	if len(form.ModifiedBefore) > 0 {
+		if _, err := common.ParseTimeStrict("2006-01-02_15:04:05", form.ModifiedBefore); err != nil {
+			return c.JSON(http.StatusOK, errorMap("Invalid Modified Before Date: "+err.Error()))
+		}
+	}
+
+	if len(form.ModifiedAfter) > 0 {
+		if _, err := common.ParseTimeStrict("2006-01-02_15:04:05", form.ModifiedAfter); err != nil {
+			return c.JSON(http.StatusOK, errorMap("Invalid Modified After Date: "+err.Error()))
+		}
+	}
+
 	backup, err := cluster.Backup(
 		form.Namespace,
 		form.DestinationNodeAddress,
@@ -56,6 +70,8 @@ func postInitiateBackup(c echo.Context) error {
 		form.Sets,
 		form.OnlyMetadata,
 		form.TerminateOnChange,
+		form.ModifiedBefore,
+		form.ModifiedAfter,
 		form.ScanPriority)
 	if err != nil {
 		return c.JSON(http.StatusOK, errorMap(err.Error()))
@@ -63,7 +79,7 @@ func postInitiateBackup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"backup_id": backup.Id,
-		"status":    backup.Status,
+		"status":    strings.ToLower(string(backup.Status)),
 	})
 }
 
@@ -86,7 +102,7 @@ func getBackupProgress(c echo.Context) error {
 			"namespace":                backup.Namespace,
 			"progress": map[string]interface{}{
 				"percentage": fmt.Sprintf("%d%%", backup.Progress),
-				"status":     string(backup.Status),
+				"status":     strings.ToLower(string(backup.Status)),
 			},
 		},
 	})
@@ -195,7 +211,7 @@ func postInitiateRestore(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": restore.Status,
+		"status": strings.ToLower(string(restore.Status)),
 	})
 }
 
@@ -212,6 +228,6 @@ func getRestoreProgress(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": restore.Status,
+		"status": strings.ToLower(string(restore.Status)),
 	})
 }

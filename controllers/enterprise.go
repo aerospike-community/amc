@@ -488,7 +488,7 @@ func postSwitchNodeOff(c echo.Context) error {
 	nodeAddr := c.Param("node")
 	res := map[string]interface{}{
 		"address": nodeAddr,
-		"status":  "Failure",
+		"status":  "failure",
 	}
 
 	clusterUuid := c.Param("clusterUuid")

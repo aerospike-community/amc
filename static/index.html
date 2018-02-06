@@ -528,6 +528,15 @@ under the License.
                                             <label class="nav-halign">
                                                 <input name="scan_priority" title="Scan Priority : High" value=3 type="radio" style="width: auto;">High</label>
                                         </div>
+
+                                        <div class="keyValueBinder">
+                                            <label for="modifiedAfter">Modified After (OPTIONAL)</label>
+                                            <input id="modifiedAfter" name="modified_after" placeholder='YYYY-MM-DD_HH:MM:SS' class="input_textbox" title="For Incremental Back: Only backup records Last Updated After the Specified Date Time" type="text">
+                                        </div>
+                                        <div class="keyValueBinder">
+                                            <label for="modifiedBefore">Modified Before (OPTIONAL)</label>
+                                            <input id="modifiedBefore" name="modified_before" placeholder='YYYY-MM-DD_HH:MM:SS' class="input_textbox" title="For Incremental Back: Only backup records Last Updated Before the Specified Date Time" type="text">
+                                        </div>
                                     </div>
 
                                     <span class="status_message" id="backupStatusMessage" style="display:none"></span>

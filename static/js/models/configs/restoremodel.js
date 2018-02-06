@@ -32,7 +32,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
 			}
 			var that = response;
 			var data = response.attributes;
-			if(data.status === "Failure"){
+			if(data.status === "failure"){
                 that.set('restoreMessage', data.error);
             	delete data.error;
 			} else if(data.status === "Success"){

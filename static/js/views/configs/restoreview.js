@@ -14,7 +14,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
             this.model.on("change:restoreStatus", function(model){
                 var restoreStatus = model.get('restoreStatus');
                 if(restoreStatus && restoreStatus !== ''){
-                    if(restoreStatus === 'Failure'){
+                    if(restoreStatus === 'failure'){
                         that.renderFailure("Error", model.get('restoreMessage'));
                     } else if (restoreStatus === 'Success'){
                         $("#restoreStatusMessage").text(model.get('restoreMessage')).removeClass("status").removeClass("error").addClass("success").css("display","block");
@@ -290,7 +290,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
 						that.model.restorePoller.start();
 						that.model.polling = true;
 						that.renderInProgress();
-                  }else if(data.status === 'Failure'){
+                  }else if(data.status === 'failure'){
 						that.renderFailure("Error",data.error);					
                   }else {
 						that.renderFailure("Error","unknown error");		
@@ -305,7 +305,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
 		fillAvailableBackupsList : function(asynchronous, callback){
 			var that = this;
 			var availableBackups = null;
-			var status = "Failure";
+			var status = "failure";
 			var formdata = this.getFormData();
 			$("#restoreFilename").val("");
 			AjaxManager.sendRequest(AppConfig.baseUrl + window.AMCGLOBALS.persistent.clusterID + AppConfig.restore.availableBackups,
@@ -353,7 +353,7 @@ define(["jquery", "underscore", "backbone", "config/view-config", "config/app-co
 				$("#backupListLoading").css("display","none");
 				$("#restoreFilename").css("display","none");
 				$("#backupListGet").css("display","inline-block");
-				status = "Failure";
+				status = "failure";
 			}
 			
 
