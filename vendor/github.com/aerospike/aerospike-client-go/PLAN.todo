@@ -1,3 +1,10 @@
+ShizAli1332?
+
+inner part of the island, valetta, north
+
+mjar
+
+
 move msgpack stuff to internal, mark the client v2
 
 the issue of buffer allocation
@@ -6,6 +13,13 @@ the issue of non-accessible nodes (which are in the peer list, but only via loca
 the issue of remving nodes in big clusters: we don't remove all nodes, so the seed will not be tried again
 
 add TLS CLI params to tests so that we can test them
+
+ ☐ collectinfo in Go to include in the agent
+ ☐ mesh/multicast seed nodes info commands
+ ☐ migration stats for source -> dest
+ ☐ migration time stats
+ ☐ network and other stats XDR info commands
+ ☐ realtime processing of logs to track events like migrations, database crashes, etc. (Tejas wants to do it)
 
 
 1.19:
@@ -36,8 +50,8 @@ add TLS CLI params to tests so that we can test them
     ☐ Site Docs for all newer API
     ☐ More Examples
   ☐ Bug fixes
-    ☐ Retry Logic
-    ☐ Node Validator
+    ✔ Retry Logic @done (17-10-13 11:22)
+    ✔ Node Validator @done (17-10-13 11:22)
     ☐ Jobs Checking for UDF, Index, ...
   ☐ Blog:
     ☐ Multiplexing

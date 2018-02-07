@@ -15,10 +15,10 @@
 			"revisionTime": "2016-12-02T02:35:07Z"
 		},
 		{
-			"checksumSHA1": "wQNAfMRaksaB9ZyBKKrFAkuiMyg=",
+			"checksumSHA1": "KiG4y3WN5+583rUfA2hC601V8zQ=",
 			"path": "github.com/aerospike/aerospike-client-go",
-			"revision": "7b252b7fb8a411eeddd0488233768f23b8145d96",
-			"revisionTime": "2017-04-28T13:56:54Z"
+			"revision": "63872df3fb627cfa46aeb60e2281eea723de678d",
+			"revisionTime": "2018-02-07T15:57:21Z"
 		},
 		{
 			"checksumSHA1": "d4xK10eJLsaYKsmmAjoafc0puhg=",

@@ -36,6 +36,7 @@ type Node struct {
 	name    string
 	host    *Host
 	aliases atomic.Value //[]*Host
+	stats   nodeStats
 
 	// tendConn reserves a connection for tend so that it won't have to
 	// wait in queue for connections, since that will cause starvation
@@ -89,6 +90,10 @@ func newNode(cluster *Cluster, nv *nodeValidator) *Node {
 
 	newNode.aliases.Store(nv.aliases)
 
+	// this will reset to zero on first aggregation on the cluster,
+	// therefore will only be counted once.
+	atomic.AddInt64(&newNode.stats.NodeAdded, 1)
+
 	return newNode
 }
 
@@ -97,6 +102,8 @@ func (nd *Node) Refresh(peers *peers) error {
 	if !nd.active.Get() {
 		return nil
 	}
+
+	atomic.AddInt64(&nd.stats.TendsTotal, 1)
 
 	// Close idleConnections
 	defer nd.dropIdleConnections()
@@ -151,6 +158,7 @@ func (nd *Node) Refresh(peers *peers) error {
 	nd.failures.Set(0)
 	peers.refreshCount.IncrementAndGet()
 	nd.referenceCount.IncrementAndGet()
+	atomic.AddInt64(&nd.stats.TendsSuccessful, 1)
 
 	return nil
 }
@@ -320,11 +328,13 @@ func (nd *Node) refreshPartitions(peers *peers) {
 		nd.partitionMap = parser.getPartitionMap()
 		nd.partitionChanged.Set(true)
 		nd.partitionGeneration.Set(parser.getGeneration())
+		atomic.AddInt64(&nd.stats.PartitionMapUpdates, 1)
 	}
 }
 
 func (nd *Node) refreshFailed(e error) {
 	nd.failures.IncrementAndGet()
+	atomic.AddInt64(&nd.stats.TendsFailed, 1)
 
 	// Only log message if cluster is still active.
 	if nd.cluster.IsConnected() {
@@ -394,24 +404,33 @@ func (nd *Node) getConnectionWithHint(timeout time.Duration, hint byte) (conn *C
 		// if connection count is limited and enough connections are already created, don't create a new one
 		if nd.cluster.clientPolicy.LimitConnectionsToQueueSize && cc > nd.cluster.clientPolicy.ConnectionQueueSize {
 			nd.connectionCount.DecrementAndGet()
+			atomic.AddInt64(&nd.stats.ConnectionsPoolEmpty, 1)
 			return nil, ErrConnectionPoolEmpty
 		}
 
+		atomic.AddInt64(&nd.stats.ConnectionsAttempts, 1)
 		if conn, err = NewSecureConnection(&nd.cluster.clientPolicy, nd.host); err != nil {
 			nd.connectionCount.DecrementAndGet()
+			atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
 			return nil, err
 		}
 		conn.node = nd
 
 		// need to authenticate
 		if err = conn.Authenticate(nd.cluster.user, nd.cluster.Password()); err != nil {
+			atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
+
 			// Socket not authenticated. Do not put back into pool.
 			conn.Close()
 			return nil, err
 		}
+
+		atomic.AddInt64(&nd.stats.ConnectionsSuccessful, 1)
 	}
 
 	if err = conn.SetTimeout(timeout); err != nil {
+		atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
+
 		// Do not put back into pool.
 		conn.Close()
 		return nil, err
@@ -486,6 +505,7 @@ func (nd *Node) addAlias(aliasToAdd *Host) {
 // Close marks node as inactive and closes all of its pooled connections.
 func (nd *Node) Close() {
 	nd.active.Set(false)
+	atomic.AddInt64(&nd.stats.NodeRemoved, 1)
 	nd.closeConnections()
 }
 
@@ -498,6 +518,13 @@ func (nd *Node) closeConnections() {
 	for conn := nd.connections.Poll(0); conn != nil; conn = nd.connections.Poll(0) {
 		// conn.(*Connection).Close()
 		conn.Close()
+	}
+
+	// close the tend connection
+	nd.tendConnLock.Lock()
+	defer nd.tendConnLock.Unlock()
+	if nd.tendConn != nil {
+		nd.tendConn.Close()
 	}
 }
 
@@ -566,12 +593,33 @@ func (nd *Node) initTendConn(timeout time.Duration) error {
 	return nd.tendConn.SetTimeout(timeout)
 }
 
+// requestInfoWithRetry gets info values by name from the specified database server node.
+// It will try at least N times before returning an error.
+func (nd *Node) requestInfoWithRetry(n int, name ...string) (res map[string]string, err error) {
+	for i := 0; i < n; i++ {
+		if res, err = nd.requestInfo(10*time.Second, name...); err == nil {
+			return res, nil
+		}
+
+		Logger.Error("Error occured while fetching info from the server node %s: %s", nd.host.String(), err.Error())
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	// return the last error
+	return nil, err
+}
+
 // RequestInfo gets info values by name from the specified database server node.
 func (nd *Node) RequestInfo(name ...string) (map[string]string, error) {
+	return nd.requestInfo(nd.cluster.clientPolicy.Timeout, name...)
+}
+
+// RequestInfo gets info values by name from the specified database server node.
+func (nd *Node) requestInfo(timeout time.Duration, name ...string) (map[string]string, error) {
 	nd.tendConnLock.Lock()
 	defer nd.tendConnLock.Unlock()
 
-	if err := nd.initTendConn(nd.cluster.clientPolicy.Timeout); err != nil {
+	if err := nd.initTendConn(timeout); err != nil {
 		return nil, err
 	}
 
