@@ -61,6 +61,12 @@ func NewNamespace(node *Node, name string) *Namespace {
 	return ns
 }
 
+func (ns *Namespace) setUpdateInterval(val int) {
+	for _, b := range ns.statsHistory {
+		b.SetResolution(val)
+	}
+}
+
 func (ns *Namespace) ServerTime() time.Time {
 	if v := ns.latestStats.TryInt("current_time", 0); v != 0 {
 		return time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)

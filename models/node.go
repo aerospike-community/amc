@@ -114,6 +114,16 @@ func (n *Node) valid() bool {
 	return origNode != nil && origNode.(*as.Node).IsActive()
 }
 
+func (n *Node) setUpdateInterval(val int) {
+	for _, b := range n.statsHistory {
+		b.SetResolution(val)
+	}
+
+	for _, ns := range n.Namespaces() {
+		ns.setUpdateInterval(val)
+	}
+}
+
 func (n *Node) update() error {
 	defer n.notifyAboutChanges()
 	defer n.updateHistory() // always update the stats; when node is down, the stats will be zero

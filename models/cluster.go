@@ -188,6 +188,10 @@ func (c *Cluster) UpdateInterval() int {
 
 func (c *Cluster) SetUpdateInterval(val int) {
 	c.updateInterval.Set(val)
+
+	for _, node := range c.Nodes() {
+		node.setUpdateInterval(val)
+	}
 }
 
 func (c *Cluster) OffNodes() []string {

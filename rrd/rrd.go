@@ -1,7 +1,6 @@
 package rrd
 
 import (
-	"math"
 	"sync"
 	"time"
 
@@ -9,166 +8,105 @@ import (
 	// log "github.com/Sirupsen/logrus"
 
 	"github.com/citrusleaf/amc/common"
+	timeseries "github.com/khaf/go-time-series"
 )
 
 type Bucket struct {
 	// this flag determines if the values passed to the bucket are total counts,
 	// and should be converted to deltas
-	rollingTotal      bool
-	lastValue         *float64
-	lastHistoricValue *float64
-	lastTimestamp     *int64
+	rollingTotal bool
 
-	resolution int // secs
+	lastValue        *float64
+	lastRollingValue *float64
+	lastTimestamp    *int64
 
-	beginTime *int64
+	resolution float64
 
-	values []*float64
-	offset int // determines the offset from beginTime in resolution steps
+	ts *timeseries.TimeSeries
 
 	mutex sync.RWMutex
 }
 
 func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
-	if !common.AMCIsProd() {
-		// log.Info("creating bucket...")
+	ts, err := timeseries.NewTimeSeries(timeseries.TSTypeSum,
+		timeseries.WithGranularities(
+			[]timeseries.Granularity{
+				{Granularity: time.Second, Count: 1800}, // half an hour every second
+				// {Granularity: time.Minute, Count: 60 * 24}, // then 60 mins summed on minute
+				// {Granularity: time.Hour, Count: 24 * 90},   // 24 hours grouped by hour
+				// {Granularity: time.Hour * 24, Count: 31}, // 31 days hourly average
+			}))
+	if err != nil {
+		panic(err)
 	}
+
 	return &Bucket{
 		rollingTotal: rollingTotal,
-		resolution:   resolution,
-		values:       make([]*float64, size),
+		resolution:   float64(resolution),
+		ts:           ts,
 	}
-}
-
-func (b *Bucket) Size() int {
-	return len(b.values)
-}
-
-func (b *Bucket) Resolution() int {
-	return b.resolution
 }
 
 func (b *Bucket) Add(timestamp int64, val float64) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	// don't add out of order timestamps
-	if b.lastTimestamp != nil && *b.lastTimestamp > timestamp {
-		return
-	}
-
-	originalVal := val
-
-	if b.beginTime == nil && b.lastValue == nil {
+	if b.lastValue == nil {
 		b.lastValue = &val
-		return
-	} else if b.beginTime == nil {
-		b.beginTime = &timestamp
-	} else if b.rollingTotal && b.lastValue != nil && *b.lastValue > val {
-		*b.lastValue = val
-		return
+		v := 0.0
+		b.lastRollingValue = &v
+
+		if b.rollingTotal {
+			return
+		}
 	}
 
-	// protect against values set in the past
-	if timestamp < *b.beginTime {
-		return
-	}
+	b.lastTimestamp = &timestamp
 
-	var newOffset int64 = (timestamp - *b.beginTime) / int64(b.resolution)
-
-	// if same value is sent for the same timestamp, don't add it up for rolling totals
-	if newOffset == int64(b.offset) && val == *b.lastValue && b.rollingTotal {
-		return
-	}
-
-	emptyTicks := int(newOffset) - b.offset
-
-	if !b.rollingTotal {
-		if emptyTicks >= b.Size() {
-			for i := range b.values {
-				b.values[i] = nil
-			}
-		} else if emptyTicks > 1 {
-			for i := 1; i < emptyTicks; i++ {
-				b.values[(b.offset-i)%b.Size()] = nil
-			}
+	if b.rollingTotal {
+		if val >= *b.lastValue {
+			v := (val - *b.lastValue) / b.resolution
+			b.ts.IncreaseAtTime(v, time.Unix(timestamp, 0))
+			*b.lastRollingValue = v
+		} else {
+			// the count on the server side must have been reset; add the value and substitute
+			v := val / b.resolution
+			b.ts.IncreaseAtTime(v, time.Unix(timestamp, 0))
+			*b.lastRollingValue = v
 		}
 	} else {
-		// val is a rolling total
-		// it should be converted to a delta: val - lastVal
-		// if there are empty ticks, all will be filled with the delta
-		if emptyTicks > 1 {
-			val = math.Floor(((val - *b.lastValue) / float64(emptyTicks)))
-		} else {
-			val = val - *b.lastValue
-		}
-
-		if val < 0 {
-			val = 0
-		}
-
-		if emptyTicks >= b.Size() {
-			for i := range b.values {
-				b.values[i] = &val
-			}
-		} else if emptyTicks > 1 {
-			for i := b.offset; i <= emptyTicks; i++ {
-				b.values[i%b.Size()] = &val
-			}
-		}
+		// otherwise add the value to the timeseries bucket
+		b.ts.IncreaseAtTime(val/b.resolution, time.Unix(timestamp, 0))
 	}
 
-	b.offset = int(newOffset)
-	b.values[b.offset%b.Size()] = &val
-	b.lastValue = &originalVal
-	b.lastHistoricValue = &val
-	b.lastTimestamp = &timestamp
+	*b.lastValue = val
 }
 
 func (b *Bucket) Skip(tm int64) {
-	if b.lastValue != nil {
-		b.Add(tm, *b.lastValue)
-	}
+	// nothing to do
+}
+
+func (b *Bucket) SetResolution(resolution int) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	b.resolution = float64(resolution)
 }
 
 func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
-	// if map is empty,
-	if b.offset == -1 || b.beginTime == nil {
-		if b.LastValue() != nil {
-			return []*common.SinglePointValue{b.LastValue()}
-		}
+	tsr, err := b.ts.RangeValues(tm, time.Now())
+	if err != nil {
 		return []*common.SinglePointValue{}
 	}
 
-	if tm.Unix() < *b.beginTime {
-		tm = time.Unix(*b.beginTime, 0)
-	}
-	count := int(math.Ceil(float64((*b.beginTime+int64(b.offset*b.resolution))-tm.Unix()) / float64(b.resolution)))
-
-	if count <= 0 {
-		return []*common.SinglePointValue{}
-	}
-
-	if count > b.Size() {
-		count = b.Size()
-	}
-
-	if count > b.offset {
-		count = b.offset + 1
-	}
-
-	res := make([]*common.SinglePointValue, 0, count)
-	for i := b.offset - count + 1; i <= b.offset; i++ {
-		tm := *b.beginTime + int64(i*b.resolution)
-		if b.values[i%b.Size()] != nil {
-			v := math.Floor(*b.values[i%b.Size()] / float64(b.resolution))
-			res = append(res, common.NewSinglePointValue(&tm, &v))
-			// } else {
-			// 	res = append(res, common.NewSinglePointValue(&tm, nil))
-		}
+	res := make([]*common.SinglePointValue, 0, len(tsr))
+	for i := range tsr {
+		t := tsr[i].Time.Unix()
+		v := tsr[i].Value
+		res = append(res, common.NewSinglePointValue(&t, &v))
 	}
 
 	return res
@@ -178,12 +116,15 @@ func (b *Bucket) LastValue() *common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
-	// if bucket is empty,
-	if b.lastTimestamp == nil {
-		return nil
+	if b.lastTimestamp != nil {
+		if !b.rollingTotal {
+			t := *b.lastTimestamp
+			v := *b.lastValue / b.resolution
+			return common.NewSinglePointValue(&t, &v)
+		}
+		t := *b.lastTimestamp
+		v := *b.lastRollingValue
+		return common.NewSinglePointValue(&t, &v)
 	}
-
-	tm := *b.lastTimestamp
-	val := float64(*b.lastHistoricValue) / float64(b.resolution)
-	return common.NewSinglePointValue(&tm, &val)
+	return nil
 }

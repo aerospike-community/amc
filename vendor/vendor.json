@@ -213,6 +213,12 @@
 			"revisionTime": "2016-10-14T09:42:49Z"
 		},
 		{
+			"checksumSHA1": "uHCNiQXcCTVPjX3/8CqHHBvXEqo=",
+			"path": "github.com/khaf/go-time-series",
+			"revision": "4dcd2561e548f22baddda265e123db910ac5036a",
+			"revisionTime": "2018-02-07T18:29:58Z"
+		},
+		{
 			"checksumSHA1": "vfzz7zTL9TZLpFO7NC1H6/Du3+s=",
 			"path": "github.com/klauspost/compress/flate",
 			"revision": "e3b7981a12dd3cab49afa1d3a50e715846f23732",
