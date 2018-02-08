@@ -36,13 +36,28 @@ func postClusterFireCmd(c echo.Context) error {
 }
 
 func getCurrentMonitoringClusters(c echo.Context) error {
+	// UI clusters only
+	autoClusters := _observer.AutoClusters()
+
 	sid, err := sessionId(c)
-	if err != nil {
-		invalidateSession(c)
-		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+	if err != nil || !_observer.SessionExists(sid) {
+		if len(autoClusters) == 0 {
+			invalidateSession(c)
+			return c.JSON(http.StatusUnauthorized, errorMap("invalid session : None"))
+		} else {
+			// there are auto clusters; validate and create a new session
+			// update the session cookie
+			sid = manageSession(c)
+		}
 	}
 
 	clusters, _ := _observer.MonitoringClusters(sid)
+
+	// add auto clusters to the mix
+	for _, ac := range autoClusters {
+		clusters = append(clusters, ac)
+	}
+
 	result := make([]map[string]interface{}, len(clusters))
 	for i, cluster := range clusters {
 		result[i] = map[string]interface{}{
@@ -60,8 +75,14 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 func getMultiClusterView(c echo.Context) error {
 	sid, err := sessionId(c)
 	if err != nil {
-		invalidateSession(c)
-		return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+		autoClusters := _observer.AutoClusters()
+		if len(autoClusters) <= 0 {
+			invalidateSession(c)
+			return c.JSON(http.StatusOK, errorMap("invalid session : None"))
+		} else {
+			// there are auto clusters; automatically create a session
+			sid = manageSession(c)
+		}
 	}
 
 	return c.JSON(http.StatusOK, _observer.DatacenterInfo(sid))

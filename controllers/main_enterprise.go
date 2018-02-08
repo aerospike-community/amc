@@ -20,7 +20,7 @@ func registerEnterprise(e *echo.Echo) {
 	e.POST("/alert-emails", sessionValidator(postAlertEmails))
 	e.POST("/delete-alert-emails", sessionValidator(deleteAlertEmails))
 
-	e.GET("/aerospike/get_multicluster_view/:port", sessionValidator(getMultiClusterView))
+	e.GET("/aerospike/get_multicluster_view/:port", getMultiClusterView)
 
 	e.POST("/aerospike/service/clusters/:clusterUuid/fire_cmd", sessionValidator(postClusterFireCmd))
 	e.GET("/aerospike/service/clusters/:clusterUuid/get_all_users", sessionValidator(getClusterAllUsers))

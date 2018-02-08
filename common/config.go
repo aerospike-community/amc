@@ -56,6 +56,7 @@ type Config struct {
 			Password             string `toml:"password"`
 			Alias                string `toml:"alias"`
 			UseServicesAlternate bool   `toml:"use_services_alternate"`
+			ShowInUI             bool   `toml:"show_in_ui"`
 		} `toml:"clusters"`
 
 		Bind     string `toml:"bind"`

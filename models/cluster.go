@@ -53,6 +53,10 @@ type Cluster struct {
 	// They will not removed automatically after a period of inactivity
 	permanent common.SyncValue //bool
 
+	// if set to True, the cluster will show up in the UI
+	// used only for the permanent clusters
+	showInUI common.SyncValue //bool
+
 	alerts *common.AlertBucket
 
 	users                 common.SyncValue //[]*as.UserRoles
@@ -76,6 +80,7 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 		lastUpdate:      common.NewSyncValue(time.Time{}),                        //seconds
 		lastPing:        common.NewSyncValue(time.Time{}),                        //seconds
 		permanent:       common.NewSyncValue(false),                              //seconds
+		showInUI:        common.NewSyncValue(false),
 		uuid:            uuid.NewV4().String(),
 		seeds:           common.NewSyncValue(seeds),
 		_datacenterInfo: *common.NewSyncStats(nil),
@@ -104,6 +109,10 @@ func newCluster(observer *ObserverT, client *as.Client, alias, user, password st
 
 func (c *Cluster) setPermanent(v bool) {
 	c.permanent.Set(v)
+}
+
+func (c *Cluster) ShowInUI() bool {
+	return c.showInUI.Get().(bool)
 }
 
 func (c *Cluster) origClient() *as.Client {

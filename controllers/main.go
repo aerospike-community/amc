@@ -167,7 +167,7 @@ func Server(config *common.Config) {
 	e.POST("/aerospike/service/clusters/:clusterUuid/debug", postDebug) // cluster does not matter here
 
 	e.GET("/get_amc_version", getAMCVersion)
-	e.GET("/get_current_monitoring_clusters", sessionValidator(getCurrentMonitoringClusters))
+	e.GET("/get_current_monitoring_clusters", getCurrentMonitoringClusters)
 
 	e.POST("/set-update-interval/:clusterUuid", sessionValidator(setClusterUpdateInterval))
 	e.GET("/aerospike/service/clusters/:clusterUuid", sessionValidator(getCluster))

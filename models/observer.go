@@ -71,6 +71,7 @@ func New(config *common.Config) *ObserverT {
 		}
 		// mark it so it won't be removed automatically
 		cluster.setPermanent(true)
+		cluster.showInUI.Set(server.ShowInUI)
 	}
 
 	return o
@@ -311,6 +312,22 @@ func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
 	return clusters.([]*Cluster), sessionExists
 }
 
+func (o *ObserverT) AutoClusters() []*Cluster {
+	clusters := []*Cluster{}
+
+	// Add automatic clusters which have been required to show up in the UI
+	autoClusters := o.sessions.Get("automatic")
+	if autoClusters != nil {
+		for _, c := range autoClusters.([]*Cluster) {
+			if c.ShowInUI() {
+				clusters = append(clusters, c)
+			}
+		}
+	}
+
+	return clusters
+}
+
 func (o *ObserverT) FindClusterById(id string) *Cluster {
 	for _, cluster := range o.clustersRef() {
 		if cluster.Id() == id {
@@ -380,6 +397,11 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	res := map[string]common.Stats{}
 	for _, cluster := range o.sessionClusters(sessionId) {
+		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
+	}
+
+	// Add auto clusters to the mix
+	for _, cluster := range o.AutoClusters() {
 		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
 	}
 
