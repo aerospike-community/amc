@@ -35,11 +35,11 @@ define(["jquery","underscore","config/app-config","helper/AjaxManager","helper/n
  		setLoggedInUserRoles : function(roleList){
  			var serviceList = [];
  			if(!roleList || roleList.length === 0 ){
- 				window.AMCGLOBALS.persistent.roleList = [];
- 			} else {
- 				window.AMCGLOBALS.persistent.roleList = roleList;
- 				serviceList = this._getUniqueServicesForRoles(roleList);
-			}
+       	 	    roleList = ['read'];
+ 			}
+
+			window.AMCGLOBALS.persistent.roleList = roleList;
+			serviceList = this._getUniqueServicesForRoles(roleList);
 
  			this._setLoggedInUserServices(serviceList);
  			
