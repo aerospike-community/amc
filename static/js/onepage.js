@@ -630,33 +630,28 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
             window.$("#headerButtons .button.active").trigger("click");
 
             Util.showCurrentlyMonitoringCluster(false, true, function(clusterExist){
+                var clusters, cluster;
+
                 if(!clusterExist){
                     addCluster(false, "default", addCluster);
-                } else {
-                    //window.$.event.trigger("view:multiclusterDestroy","Stop multicluster polling");
-                    setTimeout(function(){
-                        if(!$("#changeClusterButton").hasClass("active")){
-                            $("#changeClusterButton").trigger("click");
-                        }
-                        $(AppConfig.header.subHeader).slideUp(0);
-                    }, 250);
+                    return;
+                } 
 
-                    //$("#multiple-cluster-list-container").trigger("panel:activate");
-                    // openMulticlusterView();
-                    /*$("#addAnotherClusterBtn").parent()
-                        .off("mousedown")
-                        .on("mousedown", function(event){
-                            event.preventDefault();
-                            $("#addAnotherClusterBtn").parent().off("mousedown");
-                            addCluster(true, "default", newClusterConnect);
-                        });
-
-                    $(".cluster-list-modal .cluster_link").on("click", function(){
-                        $(".cluster-list-modal .cluster_link").off("click");
-                        $("#addAnotherClusterBtn").parent().off("mousedown");
-                        $(AppConfig.header.multipleClusterListContainer).dialog("destroy");
-                    });*/
-                }
+                // redirect the user to any of the clusters
+                clusters = window.AMCGLOBALS.persistent.currentlyMonitoringCluster;
+                if (clusters !== null && clusters.length > 0) {
+                    cluster = clusters[0];
+                    window.location.hash = "dashboard/" + cluster.seed_node;
+                    return;
+                } 
+                
+                // show the multicluster view
+                setTimeout(function(){
+                    if(!$("#changeClusterButton").hasClass("active")){
+                        $("#changeClusterButton").trigger("click");
+                    }
+                    $(AppConfig.header.subHeader).slideUp(0);
+                }, 250);
             });
         }
 
