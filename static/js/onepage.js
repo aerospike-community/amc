@@ -637,9 +637,9 @@ define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", 
                     return;
                 } 
 
-                // redirect the user to any of the clusters
+                // redirect the user to one of the clusters
                 clusters = window.AMCGLOBALS.persistent.currentlyMonitoringCluster;
-                if (clusters !== null && clusters.length > 0) {
+                if (_.isArray(clusters) && clusters.length > 0) {
                     cluster = clusters[0];
                     window.location.hash = "dashboard/" + cluster.seed_node;
                     return;
