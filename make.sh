@@ -34,6 +34,7 @@ case $platform in
 
 		rm -rf $BASE_DIR/opt/amc/static
 		rm -rf $BASE_DIR/opt/amc/mailer
+		rm -rf $BASE_DIR/etc/init.d
 
 		mkdir -p $BASE_DIR/var/log
 		mkdir -p $BASE_DIR/opt/amc
@@ -46,27 +47,46 @@ case $platform in
 		# build binary
 		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
 
-		# rpm
-		rm -f $BASE_DIR/etc/init.d/*
+		# rpm systemd
+		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
+		fpm --rpm-os linux --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		mv aerospike-amc-${edition}-`echo $version | tr - _`-1.x86_64.rpm aerospike-amc-${edition}-`echo $version | tr - _`-1.x86_64.systemd.rpm
+		rm $BASE_DIR/opt/amc/amc.service
+
+		# rpm init.d
+		mkdir -p $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.rpm $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
-		fpm -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --rpm-os linux -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
 
-		# deb
-		rm -f $BASE_DIR/etc/init.d/*
+		# deb for init.d
 		cp -f deployment/common/amc.deb $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
 		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		## deb download need to be renamed from _ to -
 		mv aerospike-amc-${edition}_${version}_amd64.deb aerospike-amc-${edition}-${version}_amd64.deb
 
-		# zip, for all others
-		rm -f $BASE_DIR/etc/init.d/*
+		# deb for systemd
+		rm -rf $BASE_DIR/etc/init.d
+		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
+		fpm --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		## deb download need to be renamed from _ to -
+		mv aerospike-amc-${edition}_${version}_amd64.deb aerospike-amc-${edition}-${version}_amd64.systemd.deb
+
+		# zip, for all others with init.d
+		mkdir $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.other.sh $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
 		fpm -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		gzip "aerospike-amc-$edition.tar"
 		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-linux.tar.gz"
+
+		# zip, for all other with systemd
+		rm -rf $BASE_DIR/etc/init.d
+		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
+		fpm -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		gzip "aerospike-amc-$edition.tar"
+		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-linux.systemd.tar.gz"
 		;;
 	'darwin')
 		BASE_DIR="deployment/release/darwin/amc"

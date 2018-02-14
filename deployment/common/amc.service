@@ -1,0 +1,13 @@
+[Unit]
+Description=Aerospike Management Console
+After=syslog.target network.target local-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/amc
+ExecStart=/opt/amc/amc
+Restart=on-failure
+LimitNOFILE=10000
+
+[Install]
+WantedBy=multi-user.target
