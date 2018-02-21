@@ -32,7 +32,7 @@ type Cluster struct {
 	//pinged by user
 	lastPing common.SyncValue //time.Time
 
-	_datacenterInfo                      common.SyncStats
+	// _datacenterInfo                      common.SyncStats
 	aggNodeStats, aggNodeCalcStats       common.SyncStats
 	aggNsStats, aggNsCalcStats           common.SyncValue //map[string]common.Stats
 	aggTotalNsStats, aggTotalNsCalcStats common.SyncStats
@@ -73,19 +73,19 @@ type Cluster struct {
 
 func newCluster(observer *ObserverT, client *as.Client, alias, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
-		observer:        observer,
-		client:          common.NewSyncValue(client),
-		nodes:           common.NewSyncValue(map[as.Host]*Node{}),
-		updateInterval:  common.NewSyncValue(observer.config.AMC.UpdateInterval), //seconds
-		lastUpdate:      common.NewSyncValue(time.Time{}),                        //seconds
-		lastPing:        common.NewSyncValue(time.Time{}),                        //seconds
-		permanent:       common.NewSyncValue(false),                              //seconds
-		showInUI:        common.NewSyncValue(false),
-		uuid:            uuid.NewV4().String(),
-		seeds:           common.NewSyncValue(seeds),
-		_datacenterInfo: *common.NewSyncStats(nil),
-		alerts:          common.NewAlertBucket(50),
-		redAlertCount:   common.NewSyncValue(0),
+		observer:       observer,
+		client:         common.NewSyncValue(client),
+		nodes:          common.NewSyncValue(map[as.Host]*Node{}),
+		updateInterval: common.NewSyncValue(observer.config.AMC.UpdateInterval), //seconds
+		lastUpdate:     common.NewSyncValue(time.Time{}),                        //seconds
+		lastPing:       common.NewSyncValue(time.Time{}),                        //seconds
+		permanent:      common.NewSyncValue(false),                              //seconds
+		showInUI:       common.NewSyncValue(false),
+		uuid:           uuid.NewV4().String(),
+		seeds:          common.NewSyncValue(seeds),
+		// _datacenterInfo: *common.NewSyncStats(nil),
+		alerts:        common.NewAlertBucket(50),
+		redAlertCount: common.NewSyncValue(0),
 	}
 
 	newCluster.SetAlias(alias)
@@ -625,7 +625,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateUsers()
 	c.checkHealth()
 	c.updateRedAlertCount()
-	log.Debugf("Updating stats for cluster took: %s", time.Since(t))
+	log.Debugf("Updating stats for cluster %s took: %s", c.Id(), time.Since(t))
 
 	c.setUpdatedAt(time.Now())
 
@@ -1223,12 +1223,12 @@ func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.S
 	for _, nodeAddr := range dc["Nodes"].([]string) {
 		host, port, err := common.SplitHostPort(nodeAddr)
 		if err != nil {
-			return nil
+			continue
 		}
 		if c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr) == nil {
 			return common.Stats{
 				"dc_name":      []string{dc["DC_Name"].(string)},
-				"discovery":    "secured", // TODO: think about this
+				"discovery":    "available", // TODO: think about this
 				"seednode":     nodeAddr,
 				"xdr_info":     common.Stats{},
 				"cluster_name": nil,

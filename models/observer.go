@@ -34,6 +34,8 @@ type ObserverT struct {
 	mutex    sync.RWMutex
 
 	notifyCloseChan chan struct{}
+
+	xdrSeeds chan string
 }
 
 func New(config *common.Config) *ObserverT {
@@ -43,6 +45,7 @@ func New(config *common.Config) *ObserverT {
 		clusters: common.NewSyncValue([]*Cluster{}),
 		config:   config,
 		debug:    common.NewSyncValue(DebugStatus{}),
+		xdrSeeds: make(chan string, 128),
 	}
 	go o.observe(config)
 
@@ -394,6 +397,16 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 	return nil
 }
 
+func (o *ObserverT) findClusterBySeedOnly(seed as.Host) *Cluster {
+	for _, cluster := range o.Clusters() {
+		clusterNodes := cluster.nodesCopy()
+		if node := clusterNodes[seed]; node != nil {
+			return cluster
+		}
+	}
+	return nil
+}
+
 func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	res := map[string]common.Stats{}
 	for _, cluster := range o.sessionClusters(sessionId) {
@@ -510,6 +523,58 @@ func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 			}
 		}
 	}
+
+	go func() {
+		// try adding the newly discovered clusters to the mix in the observer
+		for seed, _ := range res {
+			o.xdrSeeds <- seed
+		}
+		o.xdrSeeds <- ""
+	}()
+
+	go func() {
+		for {
+			select {
+			case seed := <-o.xdrSeeds:
+				if seed == "" {
+					// one round complete
+					o.updateClusters()
+					return
+				}
+
+				host, port, err := common.SplitHostPort(seed)
+				if err != nil {
+					continue
+				}
+
+				c := o.findClusterBySeedOnly(*as.NewHost(host, port))
+				if c != nil {
+					continue
+				}
+
+				seedHost := as.NewHost(host, port)
+				clientPolicy := as.NewClientPolicy()
+				clientPolicy.Timeout = time.Duration(10) * time.Second
+				clientPolicy.LimitConnectionsToQueueSize = true
+				clientPolicy.ConnectionQueueSize = 1
+
+				c, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				if err == nil {
+					// c.update(nil)
+					continue
+				}
+
+				clientPolicy.UseServicesAlternate = true
+				c, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				if err == nil {
+					// c.update(nil)
+					continue
+				}
+
+				log.Warn("Automatic host discovery via XDR failed for ", host, ":", port)
+			}
+		}
+	}()
 
 	return common.Stats{
 		"status": "success",
