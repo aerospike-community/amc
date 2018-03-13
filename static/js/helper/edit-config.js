@@ -29,7 +29,8 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                     'write-commit-level-override', 'min-avail-pct', 'conflict-resolution-policy', 'tomb-raider-eligible-age',
                     'tomb-raider-period', 'tomb-raider-sleep', 'set-stop-writes-count', 'xdr-remote-datacenter',
                     'si-gc-period', 'si-gc-max-units', 'si-tracing', 'sets-enable-xdr', 'set-enable-xdr', 
-                    'defrag-period', 'defrag-max-blocks', 'set-evict-hwm-count', 'set-stop-write-count'],
+                    'defrag-period', 'defrag-max-blocks', 'set-evict-hwm-count', 'set-stop-write-count',
+                    'storage-engine.commit-to-device', 'strong-consistency-allow-expunge'],
 
         node:      ['cluster-name', 'proto-fd-max', 'transaction-threads-per-queue', 'nsup-delete-sleep', 
                     'nsup-period', 'migrate-threads', 'migrate-max-num-incoming', 'transaction-retry-ms', 

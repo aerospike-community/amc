@@ -586,7 +586,7 @@ func (n *Node) SetServerConfig(context string, config map[string]string) error {
 
 	errMsg, exists := res[cmd]
 	if exists && strings.ToLower(errMsg) == "ok" {
-		return nil
+		return n.update()
 	}
 
 	return errors.New(errMsg)

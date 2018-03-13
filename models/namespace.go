@@ -404,7 +404,7 @@ func (ns *Namespace) SetConfig(config common.Info) error {
 
 	errMsg, exists := res[cmd]
 	if exists && strings.ToLower(errMsg) == "ok" {
-		return nil
+		return ns.node.update()
 	}
 
 	return errors.New(errMsg)
