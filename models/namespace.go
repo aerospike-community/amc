@@ -338,6 +338,8 @@ func (ns *Namespace) setAliases() {
 	calcStats["write-block-size"] = stats.TryInt("storage-engine.write-block-size", 0)
 	calcStats["sub-objects"] = stats.TryInt("sub_objects", 0)
 
+	calcStats["repl-factor"] = stats.TryInt("replication-factor", stats.TryInt("repl-factor", 0))
+
 	ns.calcStats.SetStats(calcStats)
 }
 
