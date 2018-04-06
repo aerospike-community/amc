@@ -55,6 +55,13 @@ func main() {
 	config := common.Config{}
 	common.InitConfig(*configFile, *configDir, &config)
 
+	// close the log file on exit
+	defer func() {
+		if config.LogFile != nil {
+			config.LogFile.Close()
+		}
+	}()
+
 	/*
 
 		manage daemon

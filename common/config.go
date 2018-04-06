@@ -94,6 +94,8 @@ type Config struct {
 
 	serverPool *x509.CertPool
 	clientPool []tls.Certificate
+
+	LogFile *os.File
 }
 
 func (c *Config) AppendAlertEmails(emails []string) error {
@@ -204,7 +206,7 @@ func InitConfig(configFile, configDir string, config *Config) {
 	}
 
 	if AMCIsProd() {
-		setLogFile(config.AMC.ErrorLog)
+		config.LogFile = setLogFile(config.AMC.ErrorLog)
 	}
 
 	// Try to load system CA certs, otherwise just make an empty pool
@@ -320,12 +322,14 @@ func SetupDatabase(filepath string) {
 	}
 }
 
-func setLogFile(filepath string) {
+func setLogFile(filepath string) *os.File {
 	out, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
 	log.SetOutput(out)
+
+	return out
 }
 
 func setLogLevel(level string) {
