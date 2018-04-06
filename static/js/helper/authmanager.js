@@ -390,8 +390,8 @@ define(["jquery","underscore","backbone", "config/app-config", "models/common/Po
 
 	        _isUserEnterValidData : function() {
 	        	this._hideMessage("#loginDialogMsg");
-	           	if($("#loginUsername").val().trim().length === 0 || $('#loginPassword').val().trim().length === 0){
-	        		this._showMesssge('#loginDialogMsg', "Username or password can't be empty");
+	           	if($("#loginUsername").val().trim().length === 0 /*|| $('#loginPassword').val().trim().length === 0*/){
+	        		this._showMesssge('#loginDialogMsg', "Username can't be empty");
 	        		return false;
 	        	}
 	        	return true;
