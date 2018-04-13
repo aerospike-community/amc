@@ -1333,8 +1333,8 @@ func (c *Cluster) Backup(
 }
 
 func (c *Cluster) CurrentBackup() *Backup {
-	if c.activeBackup.Get() != nil {
-		return c.activeBackup.Get().(*Backup)
+	if b := c.activeBackup.Get(); b != nil {
+		return b.(*Backup)
 	}
 	return nil
 }
@@ -1389,8 +1389,8 @@ func (c *Cluster) Restore(
 }
 
 func (c *Cluster) CurrentRestore() *Restore {
-	if c.activeRestore.Get() != nil {
-		return c.activeRestore.Get().(*Restore)
+	if r := c.activeRestore.Get(); r != nil {
+		return r.(*Restore)
 	}
 	return nil
 
