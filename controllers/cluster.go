@@ -51,7 +51,18 @@ func postGetClusterId(c echo.Context) error {
 
 	seedHost := as.NewHost(host, port)
 	if common.AMCIsEnterprise() {
-		seedHost.TLSName = form.TLSName
+		if form.TLSName != "" {
+			seedHost.TLSName = form.TLSName
+		} else {
+			// handles the case when the user first logs in and there is an auto
+			// monitored cluster configured with tls.
+			cfg := _observer.Config()
+			for _, server := range cfg.AMC.Clusters {
+				if server.Host == host && server.Port == uint16(port) {
+					seedHost.TLSName = server.TLSName
+				}
+			}
+		}
 	}
 
 	cluster := _observer.FindClusterBySeed(sid, seedHost, form.Username, form.Password)
@@ -66,7 +77,7 @@ func postGetClusterId(c echo.Context) error {
 			clientPolicy.User = strings.Trim(form.Username, " \t")
 			clientPolicy.Password = form.Password
 
-			if len(form.TLSName) > 0 || form.EncryptOnly == true {
+			if len(seedHost.TLSName) > 0 || form.EncryptOnly == true {
 				// Setup TLS Config
 				tlsConfig := &tls.Config{
 					Certificates:             _observer.Config().ClientPool(),
