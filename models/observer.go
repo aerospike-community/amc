@@ -1,6 +1,7 @@
 package models
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"runtime/debug"
@@ -60,6 +61,14 @@ func New(config *common.Config) *ObserverT {
 			cp.User = server.User
 			cp.Password = server.Password
 			host.TLSName = server.TLSName
+
+			tc := &tls.Config{
+				Certificates:             config.ClientPool(),
+				RootCAs:                  config.ServerPool(),
+				PreferServerCipherSuites: true,
+			}
+			tc.BuildNameToCertificate()
+			cp.TlsConfig = tc
 		}
 
 		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
@@ -70,7 +79,6 @@ func New(config *common.Config) *ObserverT {
 				log.Error("Error while trying to add database from config file for monitoring: ", err.Error())
 				continue
 			}
-
 		}
 		// mark it so it won't be removed automatically
 		cluster.setPermanent(true)
