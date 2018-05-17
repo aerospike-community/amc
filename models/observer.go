@@ -60,8 +60,10 @@ func New(config *common.Config) *ObserverT {
 		if common.AMCIsEnterprise() {
 			cp.User = server.User
 			cp.Password = server.Password
-			if server.TLSName != "" {
-				host.TLSName = server.TLSName
+
+			tlsName := strings.TrimSpace(server.TLSName)
+			if len(tlsName) > 0 {
+				host.TLSName = tlsName
 
 				tc := &tls.Config{
 					Certificates:             config.ClientPool(),
