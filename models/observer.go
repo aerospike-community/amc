@@ -60,15 +60,17 @@ func New(config *common.Config) *ObserverT {
 		if common.AMCIsEnterprise() {
 			cp.User = server.User
 			cp.Password = server.Password
-			host.TLSName = server.TLSName
+			if server.TLSName != "" {
+				host.TLSName = server.TLSName
 
-			tc := &tls.Config{
-				Certificates:             config.ClientPool(),
-				RootCAs:                  config.ServerPool(),
-				PreferServerCipherSuites: true,
+				tc := &tls.Config{
+					Certificates:             config.ClientPool(),
+					RootCAs:                  config.ServerPool(),
+					PreferServerCipherSuites: true,
+				}
+				tc.BuildNameToCertificate()
+				cp.TlsConfig = tc
 			}
-			tc.BuildNameToCertificate()
-			cp.TlsConfig = tc
 		}
 
 		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
