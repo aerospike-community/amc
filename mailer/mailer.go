@@ -40,7 +40,7 @@ func SendMail(config *common.Config, tplName, subject string, context interface{
 	}
 
 	msg := gomail.NewMessage(gomail.SetEncoding(gomail.Unencoded))
-	msg.SetHeader("From", fmt.Sprintf("AMC <%s>", config.Mailer.User))
+	msg.SetHeader("From", fmt.Sprintf("AMC <%s>", config.FromAddress()))
 	msg.SetHeader("To", config.AlertEmails()...)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/html", string(body))

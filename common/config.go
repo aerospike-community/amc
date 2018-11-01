@@ -75,6 +75,7 @@ type Config struct {
 		Port              uint16   `toml:"port"`
 		User              string   `toml:"user"`
 		Password          string   `toml:"password"`
+		FromAddress       string   `toml:"from_address"`
 		SendTo            []string `toml:"send_to"`
 		AcceptInvalidCert bool     `toml:"accept_invalid_cert"`
 	} `toml:"mailer"`
@@ -145,6 +146,21 @@ func (c *Config) AlertEmails() []string {
 	copy(res, c.Mailer.SendTo)
 
 	return res
+}
+
+func (c *Config) FromAddress() string {
+	c.Mailer.mutex.RLock()
+	defer c.Mailer.mutex.RUnlock()
+
+	fromUser := c.Mailer.FromAddress
+	if len(fromUser) == 0 {
+		fromUser = c.Mailer.User
+	}
+	if !strings.Contains(fromUser, "@") {
+		fromUser += "@local"
+	}
+
+	return fromUser
 }
 
 func (c *Config) ServerPool() *x509.CertPool {

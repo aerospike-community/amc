@@ -73,7 +73,7 @@ func New(config *common.Config) *ObserverT {
 
 		cluster := o.FindClusterBySeed("automatic", host, server.User, server.Password)
 		if cluster == nil {
-			log.Warn("Adding host", server.Host, ":", server.Port, " user: ", server.User)
+			log.Warn("Adding host ", server.Host, ":", server.Port, " user: ", server.User)
 			cluster, err = o.Register("automatic", cp, server.Alias, host)
 			if err != nil {
 				log.Error("Error while trying to add database from config file for monitoring: ", err.Error())
