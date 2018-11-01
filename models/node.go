@@ -469,7 +469,8 @@ func (n *Node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "get-config:", "cluster-name", "service",
+		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
+		"service", "service-clear-std", "service-tls-std",
 	}
 
 	if n.Enterprise() {
@@ -612,6 +613,24 @@ func (n *Node) InfoAttr(name string) string {
 	if res != nil {
 		return res.(string)
 	}
+	return common.NOT_AVAILABLE
+}
+
+func (n *Node) InfoAttrFirstValidValueAmong(names ...string) string {
+	for _, name := range names {
+		res := n.latestInfo.Get(name)
+		if res != nil {
+			val, _ := res.(string)
+			if strings.HasPrefix(strings.ToUpper(val), "ERROR") {
+				continue
+			}
+
+			if len(val) > 0 {
+				return val
+			}
+		}
+	}
+
 	return common.NOT_AVAILABLE
 }
 
@@ -773,7 +792,7 @@ func (n *Node) UDFs() map[string]common.Stats {
 }
 
 func (n *Node) Address() string {
-	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		return s
 	}
 	h := *n.origHost
@@ -781,7 +800,7 @@ func (n *Node) Address() string {
 }
 
 func (n *Node) Host() string {
-	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		host, _, err := common.SplitHostPort(s)
 		if err == nil && len(host) > 0 {
 			return host
@@ -793,7 +812,7 @@ func (n *Node) Host() string {
 }
 
 func (n *Node) Port() uint16 {
-	if s := n.InfoAttr("service"); s != common.NOT_AVAILABLE {
+	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		_, port, err := common.SplitHostPort(s)
 		if err == nil {
 			return uint16(port)
