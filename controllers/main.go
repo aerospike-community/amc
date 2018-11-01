@@ -248,9 +248,9 @@ func Server(config *common.Config) {
 		e.Pre(middleware.HTTPSRedirect())
 
 		// starts a listener for normal http port to support http -> https redirect
-		e.StartServer(e.TLSServer)
+		log.Errorln(e.StartServer(e.TLSServer))
 	} else {
 		log.Infof("In HTTP (insecure) Mode.")
-		e.Start(config.AMC.Bind)
+		log.Errorln(e.Start(config.AMC.Bind))
 	}
 }
