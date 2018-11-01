@@ -17,8 +17,8 @@ echo "platform is ${platform}"
 echo "sysname is ${sysname}"
 
 build=`date -u +%Y%m%d.%H%M%S`
-# version=`git describe --tags $(git rev-list --tags --max-count=1)`
-version=`git describe`
+version=`git describe --tags $(git rev-list --tags --max-count=1)`
+# version=`git describe`
 
 # build content
 rm -rf build/static
