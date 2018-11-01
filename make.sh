@@ -49,7 +49,7 @@ case $platform in
 
 		# rpm systemd
 		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
-		fpm --rpm-os linux --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc --rpm-os linux --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		mv aerospike-amc-${edition}-`echo $version | tr - _`-1.x86_64.rpm aerospike-amc-${edition}-`echo $version | tr - _`-1.x86_64.systemd.rpm
 		rm $BASE_DIR/opt/amc/amc.service
 
@@ -57,19 +57,19 @@ case $platform in
 		mkdir -p $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.rpm $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
-		fpm --rpm-os linux -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc --rpm-os linux -f -s dir -t rpm -n "aerospike-amc-$edition" -v $version -C $BASE_DIR -m "$maintainer" --description "$description" --vendor "Aerospike" .
 
 		# deb for init.d
 		cp -f deployment/common/amc.deb $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
-		fpm -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		## deb download need to be renamed from _ to -
 		mv aerospike-amc-${edition}_${version}_amd64.deb aerospike-amc-${edition}-${version}_amd64.deb
 
 		# deb for systemd
 		rm -rf $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
-		fpm --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc --after-install "deployment/common/systemd_after_install.sh" -f -s dir -t deb -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		## deb download need to be renamed from _ to -
 		mv aerospike-amc-${edition}_${version}_amd64.deb aerospike-amc-${edition}-${version}_amd64.systemd.deb
 
@@ -77,14 +77,14 @@ case $platform in
 		mkdir $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.other.sh $BASE_DIR/etc/init.d/amc
 		chmod +x $BASE_DIR/etc/init.d/amc
-		fpm -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		gzip "aerospike-amc-$edition.tar"
 		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-linux.tar.gz"
 
 		# zip, for all other with systemd
 		rm -rf $BASE_DIR/etc/init.d
 		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
-		fpm -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
+		fpm --config-files /etc/amc -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C $BASE_DIR  -m "$maintainer" --description "$description" --vendor "Aerospike" .
 		gzip "aerospike-amc-$edition.tar"
 		mv "aerospike-amc-$edition.tar.gz" "aerospike-amc-$edition-$version-linux.systemd.tar.gz"
 		;;
