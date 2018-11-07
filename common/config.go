@@ -227,7 +227,7 @@ func InitConfig(configFile, configDir string, config *Config) {
 
 	// Try to load system CA certs, otherwise just make an empty pool
 	serverPool, err := x509.SystemCertPool()
-	if err != nil {
+	if serverPool == nil || err != nil {
 		log.Errorf("FAILED: Adding system certificates to the pool failed: %s", err)
 		serverPool = x509.NewCertPool()
 	}
