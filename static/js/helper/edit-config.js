@@ -21,7 +21,7 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
 
     var DYNAMIC_CONFIGS = {
         namespace: ['max-write-cache', 'defrag-lwm-pct', 'defrag-sleep', 'defrag-queue-min', 'post-write-queue', 
-                    'fsync-max-sec', 'flush-max-ms', 'enable-osync', 'obj-size-hist-max', 'migrate-order', 
+                    'fsync-max-sec', 'flush-max-ms', 'enable-osync', 'migrate-order', 
                     'migrate-retransmit-ms', 'migrate-sleep', 'low-water-pct', 'high-water-memory-pct', 
                     'high-water-disk-pct', 'evict-hist-buckets', 'evict-tenths-pct', 'stop-writes-pct', 
                     'memory-size', 'default-ttl', 'max-ttl', 'enable-xdr', 'ns-forward-xdr-writes', 
