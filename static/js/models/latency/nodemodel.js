@@ -11,7 +11,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
             this.modelID = this.get("model_id");
             this.address = this.get("address");
             this.clusterID = window.AMCGLOBALS.persistent.clusterID;//this.get("cluster_id");
-			this.colorScale = ["#5ACC44", "#E2BE00", "#ff7f0e", "#d62728", "#000000"];
+			this.colorScale = ["#5ACC44", "#E2BE00", "#ff7f0e", "#d62728", "#1f75fe", "#b5674d", "#926eae", "#ffaacc", "#199ebd", "#fdd9b5", "#1dacd6", "#cd4a4a", "#000000"];
             this.polling = true;
             this.latencyData = null;
 			this.legend;
