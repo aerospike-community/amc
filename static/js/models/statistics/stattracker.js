@@ -108,6 +108,11 @@ define(["underscore", "backbone", "config/app-config", "helper/util", "helper/ti
 		},
 
 		getStatValue: function(cellvalue){
+			if (cellvalue == null) {
+				return ""; //cellvalue
+			}
+
+			cellvalue = cellvalue.toString();
 			var start = cellvalue.indexOf(">");
 			
 			if(start === -1){

@@ -62,7 +62,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "helper/util", 
             }catch(e){
                 console.info(e.toString());
             }
-            console.info("err");
+            // console.info("err");
         },
 
       updateWindow: function(timeWindowSize, fixTimeWindowSize) {

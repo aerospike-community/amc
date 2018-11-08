@@ -199,7 +199,7 @@ define(["underscore", "backbone", "helper/util", "config/app-config", "timechart
 					nodetLatencyContainer.find(".sparkline-chart").first().trigger("click");
 				} else if(window.location.hash.indexOf("latency") !== -1){
 					setTimeout(bindChart, 500);
-					console.info("trying bind");
+					// console.info("trying bind");
 				}
 			}
 			bindChart();

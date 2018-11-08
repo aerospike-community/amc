@@ -44,7 +44,9 @@ define(["jquery", "underscore", "backbone", "d3", "helper/jqgrid-helper", "helpe
                                             columnData = columnData.substring(columnData.indexOf(">")+1,columnData.indexOf("</span>"));
                                         }
            
-                                        if(columnData == modelData[rowID].toString()){
+                                        var newValue = modelData[rowID] != null ? modelData[rowID].toString() : "";
+                                        // if(columnData == modelData[rowID].toString()){
+                                        if(columnData == newValue){
                                             $(container).setCell(rowID,address, modelData[rowID],{'font-weight': 'normal','color': 'black'});
                                         } else {
                                              $(container).setCell(rowID,address, "<span style='background-color:rgba(27, 91, 105, 0.84);padding:3px;padding-left:5px;padding-right:5px;'>"+modelData[rowID]+"</span>",{'font-weight': 'bold','color': '#fffff'});
