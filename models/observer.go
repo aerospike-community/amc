@@ -400,7 +400,7 @@ func (o *ObserverT) findClusterBySeed(clusters []*Cluster, aliases []as.Host, us
 		for _, alias := range aliases {
 			clusterNodes := cluster.nodesCopy()
 			if node := clusterNodes[alias]; node != nil {
-				if !checkUserPass || (cluster.User() == nil || (*cluster.User() == user && *cluster.Password() == password)) {
+				if !checkUserPass || cluster.ValidCurrentUser(user, password) {
 					return cluster
 				}
 			}
@@ -421,12 +421,21 @@ func (o *ObserverT) findClusterBySeedOnly(seed as.Host) *Cluster {
 
 func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	res := map[string]common.Stats{}
-	for _, cluster := range o.sessionClusters(sessionId) {
+	sClusters := o.sessionClusters(sessionId)
+	for _, cluster := range sClusters {
 		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
 	}
 
 	// Add auto clusters to the mix
+	// DO NOT add auto-clusters which are already included in the
+	// cluster.
+L:
 	for _, cluster := range o.AutoClusters() {
+		for _, scluster := range sClusters {
+			if scluster.SameAs(cluster) {
+				continue L
+			}
+		}
 		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
 	}
 

@@ -1395,3 +1395,31 @@ func (c *Cluster) CurrentRestore() *Restore {
 	return nil
 
 }
+
+// SameAs compares nodes between two clusters and returns true
+// if the two clusters have at least one node in common.
+func (c *Cluster) SameAs(other *Cluster) bool {
+	for _, node := range c.Nodes() {
+		for _, oNode := range other.Nodes() {
+			if node.Id() == oNode.Id() || node.Address() == oNode.Address() {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (c *Cluster) ValidCurrentUser(user, password string) bool {
+	cUser := ""
+	if u := c.User(); u != nil {
+		cUser = *u
+	}
+
+	cPass := ""
+	if p := c.Password(); p != nil {
+		cPass = *p
+	}
+
+	return cUser == user && cPass == password
+}
