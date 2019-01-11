@@ -94,7 +94,7 @@ define(["jquery", "underscore", "backbone", "helper/node-table", "helper/jqgrid-
                 try{
                     var diskArr = model.data['disk-arr'];
                     var memoryArr = model.data['memory-arr'];
-                    var clusterVisibility = model.data['cluster_visibility'];
+                    var clusterVisibility = "off"; //model.data['cluster_visibility'];
                     this.pieCharts.disk = GridHelper.jqCustomPieFormatter(this.pieCharts.disk, AppConfig.node.nodeTableDiv, rowID, ViewConfig.tablePieConfig, diskArr, 6);
                     this.pieCharts.memory = GridHelper.jqCustomPieFormatter(this.pieCharts.memory, AppConfig.node.nodeTableDiv, rowID, ViewConfig.tablePieConfig, memoryArr, 7);
                     this.booleanToIcon(AppConfig.node.nodeTableDiv, rowID, clusterVisibility, 5);
