@@ -19,8 +19,8 @@ function($, _, AppConfig, AjaxManager, Notification, Overlay){
 			lookup: ["get-config", ":", "context=", (/^[a-zA-Z0-9_]+/), ";", (/^[a-zA-Z0-9_]+/)]
 		},
 		{
-			syntax: "hist-dump:ns=<NAMESPACE>;hist=<HISTOGRAM>",
-			lookup: ["hist-dump", ":", "ns=", (/^[a-zA-Z0-9_]+/), ";", "hist=", (/^[a-zA-Z0-9_]+/)]
+			syntax: "histogram:namespace=<NAMESPACE>;type=<ttl|object-size|object-size-linear>;set=<SET>",
+			lookup: ["histogram", ":", "namespace=", (/^[a-zA-Z0-9_]+/), ";", "type=", (/^(ttl|object-size|object-size-linear)/), ";", "set=", (/^[a-zA-Z0-9_]+/)]
 		},
 		{
 			syntax: "hist-track-start:[back=<BACK>;slice=<SLICE>;thresholds=<THRESHOLDS>;hist=<HIST>]",
