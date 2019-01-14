@@ -298,8 +298,8 @@ func setClusterNodesConfig(c echo.Context) error {
 		go func(node *models.Node) {
 			defer wg.Done()
 
-			err := node.SetServerConfig("service", config)
-			resChan <- &NodeResult{Name: node.Address(), Err: err}
+			unsetParams, err := node.SetServerConfig("service", config)
+			resChan <- &NodeResult{Node: node, Name: node.Address(), Err: err, UnsetParams: unsetParams}
 		}(node)
 	}
 
@@ -307,13 +307,14 @@ func setClusterNodesConfig(c echo.Context) error {
 	close(resChan)
 
 	for nr := range resChan {
-		if nr.Err != nil {
-			res[nr.Name] = map[string]interface{}{"node_status": "off"}
-		} else {
-			res[nr.Name] = map[string]interface{}{
-				"node_status":      "on",
-				"unset_parameters": []string{},
-			}
+		nodeStatus := nr.Status
+		if nr.Node != nil {
+			nodeStatus = string(nr.Node.Status())
+		}
+
+		res[nr.Name] = map[string]interface{}{
+			"node_status":      nodeStatus,
+			"unset_parameters": nr.UnsetParams,
 		}
 	}
 
@@ -392,8 +393,8 @@ func setClusterNamespaceConfig(c echo.Context) error {
 			go func(node *models.Node, ns *models.Namespace) {
 				defer wg.Done()
 
-				err := ns.SetConfig(config)
-				resChan <- &NodeResult{Name: node.Address(), Status: "on", Err: err}
+				unsetParams, err := ns.SetConfig(config)
+				resChan <- &NodeResult{Node: node, Name: node.Address(), Status: string(node.Status()), Err: err, UnsetParams: unsetParams}
 			}(node, ns)
 		} else {
 			resChan <- &NodeResult{Name: namespaceName, Status: "on", Err: errors.New("Node not found")}
@@ -404,15 +405,20 @@ func setClusterNamespaceConfig(c echo.Context) error {
 	close(resChan)
 
 	for nr := range resChan {
+		nodeStatus := nr.Status
+		if nr.Node != nil {
+			nodeStatus = string(nr.Node.Status())
+		}
+
 		if nr.Err != nil {
 			res[nr.Name] = map[string]interface{}{
-				"node_status":      nr.Status,
-				"namespace_status": "off",
-				"unset_parameters": []string{},
+				"node_status":      nodeStatus,
+				"namespace_status": nodeStatus,
+				"unset_parameters": nr.UnsetParams,
 			}
 		} else {
 			res[nr.Name] = map[string]interface{}{
-				"node_status":      "on",
+				"node_status":      nodeStatus,
 				"namespace_status": "on",
 				"unset_parameters": []string{},
 			}

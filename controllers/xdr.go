@@ -108,8 +108,8 @@ func setClusterXdrNodesConfig(c echo.Context) error {
 		go func(node *models.Node) {
 			defer wg.Done()
 
-			err := node.SetServerConfig("xdr", config)
-			resChan <- &NodeResult{Name: node.Address(), Status: string(node.Status()), Err: err}
+			unsetParams, err := node.SetServerConfig("xdr", config)
+			resChan <- &NodeResult{Name: node.Address(), Status: string(node.Status()), Err: err, UnsetParams: unsetParams}
 		}(node)
 	}
 
@@ -117,13 +117,20 @@ func setClusterXdrNodesConfig(c echo.Context) error {
 	close(resChan)
 
 	for nr := range resChan {
+		nodeStatus := nr.Status
+		if nr.Node != nil {
+			nodeStatus = string(nr.Node.Status())
+		}
+
+		err := ""
 		if nr.Err != nil {
-			res[nr.Name] = map[string]interface{}{"node_status": "off", "error": nr.Err.Error()}
-		} else {
-			res[nr.Name] = map[string]interface{}{
-				"node_status":      "on",
-				"unset_parameters": []string{},
-			}
+			err = nr.Err.Error()
+		}
+
+		res[nr.Name] = map[string]interface{}{
+			"node_status":      nodeStatus,
+			"error":            err,
+			"unset_parameters": nr.UnsetParams,
 		}
 	}
 

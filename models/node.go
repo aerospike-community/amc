@@ -574,23 +574,35 @@ func (n *Node) ConfigAttr(name string) interface{} {
 	return n.latestConfig.Get(name)
 }
 
-func (n *Node) SetServerConfig(context string, config map[string]string) error {
+func (n *Node) SetServerConfig(context string, config map[string]string) ([]string, error) {
 	cmd := "set-config:context=" + context
+	cmds := make([]string, 0, len(config))
+	cmdMap := make(map[string]string, len(config))
 	for parameter, value := range config {
-		cmd += fmt.Sprintf(";%s=%s", parameter, value)
+		cmds = append(cmds, fmt.Sprintf("%s;%s=%s", cmd, parameter, value))
+		cmdMap[fmt.Sprintf("%s;%s=%s", cmd, parameter, value)] = parameter
 	}
 
-	res, err := n.RequestInfo(3, cmd)
+	unsetParams := []string{}
+
+	res, err := n.RequestInfo(3, cmds...)
 	if err != nil {
-		return err
+		return unsetParams, err
 	}
 
-	errMsg, exists := res[cmd]
-	if exists && strings.ToLower(errMsg) == "ok" {
-		return n.update()
+	errMsg := ""
+	for cmd, err := range res {
+		if strings.ToLower(err) != "ok" {
+			errMsg += fmt.Sprintf("%s resulted in error '%s'\n", cmd, err)
+			unsetParams = append(unsetParams, cmdMap[cmd])
+		}
 	}
 
-	return errors.New(errMsg)
+	if len(errMsg) == 0 {
+		return unsetParams, n.update()
+	}
+
+	return unsetParams, errors.New(errMsg)
 }
 
 func (n *Node) setInfo(stats common.Info) {

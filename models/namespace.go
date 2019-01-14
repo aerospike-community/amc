@@ -393,23 +393,34 @@ func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
 	return info
 }
 
-func (ns *Namespace) SetConfig(config common.Info) error {
+func (ns *Namespace) SetConfig(config common.Info) ([]string, error) {
 	cmd := "set-config:context=namespace;id=" + ns.name
+	cmds := make([]string, 0, len(config))
+	cmdMap := make(map[string]string, len(config))
 	for parameter, value := range config {
-		cmd += fmt.Sprintf(";%s=%s", parameter, value)
+		cmds = append(cmds, fmt.Sprintf("%s;%s=%s", cmd, parameter, value))
+		cmdMap[fmt.Sprintf("%s;%s=%s", cmd, parameter, value)] = parameter
 	}
 
-	res, err := ns.node.RequestInfo(3, cmd)
+	unsetParams := []string{}
+	res, err := ns.node.RequestInfo(3, cmds...)
 	if err != nil {
-		return err
+		return unsetParams, err
 	}
 
-	errMsg, exists := res[cmd]
-	if exists && strings.ToLower(errMsg) == "ok" {
-		return ns.node.update()
+	errMsg := ""
+	for cmd, err := range res {
+		if strings.ToLower(err) != "ok" {
+			errMsg += fmt.Sprintf("%s resulted in error '%s'\n", cmd, err)
+			unsetParams = append(unsetParams, cmdMap[cmd])
+		}
 	}
 
-	return errors.New(errMsg)
+	if len(errMsg) == 0 {
+		return unsetParams, ns.node.update()
+	}
+
+	return unsetParams, errors.New(errMsg)
 }
 
 func (ns *Namespace) notifyAboutChanges() {

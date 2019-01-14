@@ -1,15 +1,19 @@
 package controllers
 
-// . "github.com/ahmetalpbalkan/go-linq"
+import (
+	"github.com/citrusleaf/amc/models"
+)
 
 //----------
 // Handlers
 //----------
 
 type NodeResult struct {
-	Name   string
-	Status string
-	Err    error
+	Node        *models.Node
+	Name        string
+	Status      string
+	Err         error
+	UnsetParams []string
 }
 
 func errorMap(err string) map[string]interface{} {
