@@ -249,10 +249,10 @@
 			"revisionTime": "2016-10-16T15:41:25Z"
 		},
 		{
-			"checksumSHA1": "k8VpdOnn6mz3YkjR8w0DLbBRLqs=",
+			"checksumSHA1": "4A7oebYl/zjrwoJ4AanAxJ9rwd8=",
 			"path": "github.com/labstack/echo",
-			"revision": "c05db06020acd892fa8eb8c0c137950da5240c32",
-			"revisionTime": "2017-06-07T15:23:43Z"
+			"revision": "7867fce6ce3e8da711e49256e14410ca46d7ecc0",
+			"revisionTime": "2019-01-14T18:56:17Z"
 		},
 		{
 			"checksumSHA1": "2UtwnYIAEzDKYwU2j5c9WS+Y7dw=",
