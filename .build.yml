@@ -3,7 +3,7 @@ dir: src/github.com/citrusleaf/amc
 
 container:
   - base:
-      - docker.qe.aerospike.com/build/amc:golang-1.8
+      - docker.qe.aerospike.com/build/amc:golang-1.11
 
 environment:
   GOPATH: /work/source
