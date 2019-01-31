@@ -207,11 +207,7 @@ func (ns *Namespace) setAliases() {
 
 	calcStats["stat_write_success"] = stats.TryInt("client_write_success", 0)
 	calcStats["stat_write_reqs"] = calcStats.TryInt("stat_write_success", 0) +
-		stats.TryInt("client_write_error", 0) +
-		stats.TryInt("fail_xdr_forbidden", 0) +
-		stats.TryInt("fail_key_busy", 0) +
-		stats.TryInt("fail_generation", 0) +
-		stats.TryInt("fail_record_too_big", 0)
+		stats.TryInt("client_write_error", 0)
 
 	calcStats["used-bytes-disk"] = stats.TryInt("device_used_bytes", 0)
 	calcStats["total-bytes-disk"] = stats.TryInt("device_total_bytes", 0)
