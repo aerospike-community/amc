@@ -114,6 +114,15 @@ func Server(config *common.Config) {
 	_defaultClientPolicy.ConnectionQueueSize = 1
 
 	e := echo.New()
+	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+		XSSProtection:         "1; mode=block",
+		ContentTypeNosniff:    "nosniff",
+		XFrameOptions:         "SAMEORIGIN",
+		HSTSMaxAge:            3600,
+		HSTSExcludeSubdomains: false,
+		// ContentSecurityPolicy: "default-src 'self';script-src 'self' 'unsafe-eval'; object-src 'self'", // does not work with underscore.js
+	}))
+
 	// Avoid stale connections
 	e.Server.ReadTimeout = 30 * time.Second
 	e.Server.WriteTimeout = 30 * time.Second
