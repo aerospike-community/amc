@@ -76,7 +76,7 @@ var _recordedNodeStats = [...]string{
 	"query_success", "query_reqs",
 
 	"xdr_read_success", "xdr_read_reqs",
-	"xdr_write_success", "xdr_write_reqs",
+	"xdr_client_write_success", "xdr_write_reqs",
 
 	"udf_success", "udf_reqs",
 }

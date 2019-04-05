@@ -208,7 +208,7 @@ var statsNameAliases = map[string][2]string{
 	"write_tps": {"stat_write_reqs", "stat_write_success"},
 
 	"xdr_read_tps":  {"xdr_read_reqs", "xdr_read_success"},
-	"xdr_write_tps": {"xdr_write_reqs", "xdr_write_success"},
+	"xdr_write_tps": {"xdr_write_reqs", "xdr_client_write_success"},
 
 	"scan_tps":  {"scan_reqs", "scan_success"},
 	"query_tps": {"query_reqs", "query_success"},

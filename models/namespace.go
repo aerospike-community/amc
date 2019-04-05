@@ -26,7 +26,7 @@ var _recordedNamespaceStats = []string{
 	"query_success", "query_reqs",
 
 	"xdr_read_success", "xdr_read_reqs",
-	"xdr_write_success", "xdr_write_reqs",
+	"xdr_client_write_success", "xdr_write_reqs",
 
 	"udf_success", "udf_reqs",
 }
@@ -247,10 +247,10 @@ func (ns *Namespace) setAliases() {
 		stats.TryInt("client_udf_error", 0) +
 		stats.TryInt("client_udf_timeout", 0)
 
-	calcStats["xdr_write_success"] = stats.TryInt("xdr_write_success", 0)
-	calcStats["xdr_write_reqs"] = calcStats.TryInt("xdr_write_success", 0) +
-		stats.TryInt("xdr_write_error", 0) +
-		stats.TryInt("xdr_write_timeout", 0)
+	calcStats["xdr_client_write_success"] = stats.TryInt("xdr_client_write_success", 0)
+	calcStats["xdr_write_reqs"] = calcStats.TryInt("xdr_client_write_success", 0) +
+		stats.TryInt("xdr_client_write_error", 0) +
+		stats.TryInt("xdr_client_write_timeout", 0)
 
 	// This does not yet exists on namespace level
 	// calcStats["xdr_read_success"] = stats.TryInt("xdr_read_success", 0)
