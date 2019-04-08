@@ -247,10 +247,10 @@ func (ns *Namespace) setAliases() {
 		stats.TryInt("client_udf_error", 0) +
 		stats.TryInt("client_udf_timeout", 0)
 
-	calcStats["xdr_write_success"] = stats.TryInt("xdr_write_success", 0)
+	calcStats["xdr_write_success"] = stats.TryInt("xdr_write_success", 0) + stats.TryInt("xdr_client_write_success", 0)
 	calcStats["xdr_write_reqs"] = calcStats.TryInt("xdr_write_success", 0) +
-		stats.TryInt("xdr_write_error", 0) +
-		stats.TryInt("xdr_write_timeout", 0)
+		stats.TryInt("xdr_write_error", 0) + stats.TryInt("xdr_client_write_error", 0) +
+		stats.TryInt("xdr_write_timeout", 0) + stats.TryInt("xdr_client_write_timeout", 0)
 
 	// This does not yet exists on namespace level
 	// calcStats["xdr_read_success"] = stats.TryInt("xdr_read_success", 0)
