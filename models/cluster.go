@@ -596,6 +596,15 @@ func (c *Cluster) setUpdatedAt(tm time.Time) {
 	c.lastUpdate.Set(tm)
 }
 
+func (c *Cluster) lastUpdated() (res time.Time) {
+	lastUpdateIfc := c.lastUpdate.Get()
+	if lastUpdateIfc == nil {
+		return res
+	}
+
+	return lastUpdateIfc.(time.Time)
+}
+
 func (c *Cluster) update(wg *sync.WaitGroup) error {
 	// make sure panics do not bring the observer down
 	defer func() {
@@ -905,6 +914,12 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	}
 
 	res := map[string]map[string][]*common.SinglePointValue{}
+
+	// if there are no data points, return immediately
+	if lu := c.lastUpdated(); lu.IsZero() || tm.After(c.lastUpdated()) {
+		return res
+	}
+
 	for _, node := range c.Nodes() {
 		for statName, valueMap := range node.ThroughputSince(tm) {
 			if res[statName] == nil {
