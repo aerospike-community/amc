@@ -205,7 +205,7 @@ func (t *TimeSeries) IncreaseAtTime(amount float64, time time.Time) {
 		t.advance(time)
 		t.pending = amount
 	} else if time.After(t.pendingTime.Add(-t.levels[0].granularity)) {
-		t.pending++
+		t.pending += amount
 	} else {
 		t.increaseAtTime(amount, time)
 	}

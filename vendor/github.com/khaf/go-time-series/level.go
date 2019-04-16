@@ -15,6 +15,8 @@ type level struct {
 	buckets            []*float64
 	bucketSampleCounts []uint8
 
+	firstNonZero time.Time
+
 	typ TSType
 }
 
@@ -77,6 +79,10 @@ func (l *level) increaseAtTime(amount float64, time time.Time) {
 	}
 	v += amount
 
+	if amount > 0 && l.firstNonZero.IsZero() {
+		l.firstNonZero = time
+	}
+
 	l.buckets[index] = &v
 	if l.typ == TSTypeAvg {
 		l.bucketSampleCounts[index]++
@@ -106,7 +112,7 @@ func (l *level) interval(start, end time.Time, latest time.Time) []PointValue {
 		start = l.earliest()
 	}
 	if end.After(l.latest()) {
-		end = l.latest()
+		end = l.latest().Add(-l.granularity)
 	}
 	idx := 0
 	// this is how many time steps start is away from earliest
@@ -144,7 +150,9 @@ func (l *level) interval(start, end time.Time, latest time.Time) []PointValue {
 				count /= float64(l.bucketSampleCounts[(l.oldest+idx)%l.length])
 			}
 
-			res = append(res, PointValue{Time: currentTime, Value: count})
+			if count > 0 || (!l.firstNonZero.IsZero() && currentTime.After(l.firstNonZero)) {
+				res = append(res, PointValue{Time: currentTime, Value: count})
+			}
 		}
 		idx++
 		currentTime = currentTime.Add(l.granularity)
