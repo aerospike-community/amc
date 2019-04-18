@@ -226,7 +226,7 @@ func InitConfig(configFile, configDir string, config *Config) {
 	}
 
 	if config.AMC.UpdateInterval < 1 {
-		config.AMC.UpdateInterval = 1
+		config.AMC.UpdateInterval = 5
 	} else if config.AMC.UpdateInterval > 10 {
 		config.AMC.UpdateInterval = 10
 	}
