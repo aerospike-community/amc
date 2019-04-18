@@ -225,6 +225,12 @@ func InitConfig(configFile, configDir string, config *Config) {
 		config.LogFile = setLogFile(config.AMC.ErrorLog)
 	}
 
+	if config.AMC.UpdateInterval < 1 {
+		config.AMC.UpdateInterval = 1
+	} else if config.AMC.UpdateInterval > 10 {
+		config.AMC.UpdateInterval = 10
+	}
+
 	// Try to load system CA certs, otherwise just make an empty pool
 	serverPool, err := x509.SystemCertPool()
 	if serverPool == nil || err != nil {
