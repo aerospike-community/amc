@@ -1240,31 +1240,56 @@ func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.S
 		if err != nil {
 			continue
 		}
+
+		readTotal, readSucc := 0.0, 0.0
+		writeTotal, writeSucc := 0.0, 0.0
+		zeroValue := float64(0)
+		for stat, nodeMap := range c.LatestThroughput() {
+			switch stat {
+			case "stat_read_reqs":
+				for _, v := range nodeMap {
+					readTotal += *v.Value(&zeroValue)
+				}
+			case "stat_read_success":
+				for _, v := range nodeMap {
+					readSucc += *v.Value(&zeroValue)
+				}
+			case "stat_write_reqs":
+				for _, v := range nodeMap {
+					writeTotal += *v.Value(&zeroValue)
+				}
+			case "stat_write_success":
+				for _, v := range nodeMap {
+					writeSucc += *v.Value(&zeroValue)
+				}
+			}
+		}
+
 		if c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr) == nil {
 			return common.Stats{
 				"dc_name":      []string{dc["DC_Name"].(string)},
 				"discovery":    "available", // TODO: think about this
 				"seednode":     nodeAddr,
 				"xdr_info":     common.Stats{},
-				"cluster_name": nil,
+				"cluster_name": c.Alias(),
 				"namespaces":   []struct{}{},
 				"nodes": common.Stats{
 					nodeAddr: common.Stats{
 						"status":         "off",
 						"access_ip":      host,
-						"cur_throughput": nil,
+						"cur_throughput": readTotal + writeTotal,
 						"ip":             host,
 						"access_port":    port,
 						"xdr_uptime":     nil,
 						"lag":            nil,
 					},
 				}, "read_tps": common.Stats{
-					"total":   "0",
-					"success": "0",
+					"total":   readTotal,
+					"success": readSucc,
 				},
 				"write_tps": common.Stats{
-					"total":   "0",
-					"success": "0",
+					"total":   writeTotal,
+					"success": writeSucc,
 				},
 			}
 		}

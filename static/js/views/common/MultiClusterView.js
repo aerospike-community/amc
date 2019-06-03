@@ -361,10 +361,10 @@ define(["jquery", "underscore", "backbone", "d3", "timechart", "helper/timechart
             var textArcAnchorPoint = Math.PI * textArcOuterRadius;
             var pieIdentity;
 
-            if (data.seednode) {
+            if(data.cluster_name){
+                pieIdentity = "Name: " + data.cluster_name;
+            } else if (data.seednode) {
                 pieIdentity = "Seed: " + data.seednode;
-            } else if(data.clustername){
-                pieIdentity = "Name: " + data.clustername;
             } else if (data.dc_name.length != 0) {
                 pieIdentity = "DC Names: " + data.dc_name.join(", ");
             }
