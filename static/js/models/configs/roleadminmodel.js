@@ -1,9 +1,10 @@
 define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/configs/roleadminview", "helper/AjaxManager"] , function($, _, Backbone, Util, AppConfig, RoleAdminView, AjaxManager) {
 	var UserModel = Backbone.Model.extend({
 		initialize : function(){
-			this.availablePrivileges = { UserAdmin : "user-admin", SystemAdmin : "sys-admin", ReadWrite : "read-write", Read : "read", ReadWriteUdf : "read-write-udf", DataAdmin : "data-admin"};
+			this.availablePrivileges = { UserAdmin : "user-admin", SystemAdmin : "sys-admin", ReadWrite : "read-write", Read : "read", ReadWriteUdf : "read-write-udf", DataAdmin : "data-admin", Write: "write"};
 			this.privilegeMap = {
                 'role-read': this.availablePrivileges.Read,
+                'role-write': this.availablePrivileges.Write,
                 'role-read-write': this.availablePrivileges.ReadWrite,
                 'role-user-admin': this.availablePrivileges.UserAdmin,
                 'role-sys-admin': this.availablePrivileges.SystemAdmin,

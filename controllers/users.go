@@ -258,6 +258,9 @@ func privilegeFromString(s string) *as.Privilege {
 	case "read-write":
 		return &as.Privilege{Code: as.ReadWrite}
 
+	case "write":
+		return &as.Privilege{Code: as.Write}
+
 	case "read-write-udf":
 		return &as.Privilege{Code: as.ReadWriteUDF}
 	}

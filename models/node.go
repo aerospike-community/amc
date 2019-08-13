@@ -233,7 +233,11 @@ func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string,
 	}
 
 	for i := 0; i < reties; i++ {
-		result, err = origNode.RequestInfo(cmd...)
+		client := n.cluster.origClient()
+		timeout := client.Cluster().ClientPolicy().Timeout
+
+		infoPolicy := &as.InfoPolicy{Timeout: timeout}
+		result, err = origNode.RequestInfo(infoPolicy, cmd...)
 		if err == nil {
 			return result, nil
 		}

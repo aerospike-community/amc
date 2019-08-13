@@ -1,13 +1,14 @@
 define(["jquery", "underscore", "backbone", "helper/util", "config/app-config", "views/configs/useradminview", "helper/AjaxManager"] , function($, _, Backbone, Util, AppConfig, UserAdminView, AjaxManager) {
 	var UserModel = Backbone.Model.extend({
 		initialize : function(){
-			this.availableRoles = { UserAdmin : "user-admin", SystemAdmin : "sys-admin", ReadWrite : "read-write", Read : "read", ReadWriteUdf : "read-write-udf", DataAdmin : "data-admin"};
+			this.availableRoles = { UserAdmin : "user-admin", SystemAdmin : "sys-admin", ReadWrite : "read-write", Read : "read", ReadWriteUdf : "read-write-udf", DataAdmin : "data-admin", Write: "write"};
 			this.roleMap = {
                 'role-read': this.availableRoles.Read,
+                'role-write': this.availableRoles.Write,
                 'role-read-write': this.availableRoles.ReadWrite,
                 'role-user-admin': this.availableRoles.UserAdmin,
                 'role-system-admin': this.availableRoles.SystemAdmin,
-                'role-data-admin' : this.availableRoles.DataAdmin
+                'role-data-admin' : this.availableRoles.DataAdmin,
             };
 			this.view = new UserAdminView({model : this});
 			this.fetch();
