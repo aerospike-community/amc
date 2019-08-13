@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,22 +26,9 @@ import (
 var aeroerr error = NewAerospikeError(PARSE_ERROR, "Error parsing peers list.")
 
 func parsePeers(cluster *Cluster, node *Node) (*peerListParser, error) {
-	var cmd string
-	if cluster.clientPolicy.TlsConfig != nil {
-		if cluster.clientPolicy.UseServicesAlternate {
-			cmd = "peers-tls-alt"
-		} else {
-			cmd = "peers-tls-std"
-		}
-	} else {
-		if cluster.clientPolicy.UseServicesAlternate {
-			cmd = "peers-clear-alt"
-		} else {
-			cmd = "peers-clear-std"
-		}
-	}
+	cmd := cluster.clientPolicy.peersString()
 
-	info, err := node.RequestInfo(cmd)
+	info, err := node.RequestInfo(&cluster.infoPolicy, cmd)
 	if err != nil {
 		return nil, err
 	}

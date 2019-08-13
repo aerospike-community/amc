@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package aerospike
 
 import (
 	"crypto/tls"
-	"io"
 	"net"
 	"runtime"
 	"strconv"
@@ -31,14 +30,15 @@ import (
 // DefaultBufferSize specifies the initial size of the connection buffer when it is created.
 // If not big enough (as big as the average record), it will be reallocated to size again
 // which will be more expensive.
-const DefaultBufferSize = 64 * 1024 // 64 KiB
+var DefaultBufferSize = 64 * 1024 // 64 KiB
 
 // Connection represents a connection with a timeout.
 type Connection struct {
 	node *Node
 
-	// timeout
-	timeout time.Duration
+	// timeouts
+	socketTimeout time.Duration
+	deadline      time.Time
 
 	// duration after which connection is considered idle
 	idleTimeout  time.Duration
@@ -58,30 +58,18 @@ func connectionFinalizer(c *Connection) {
 	c.Close()
 }
 
-func errToTimeoutErr(err error) error {
+func errToTimeoutErr(conn *Connection, err error) error {
 	if err, ok := err.(net.Error); ok && err.Timeout() {
-		return NewAerospikeError(TIMEOUT, err.Error())
+		return ErrTimeout
 	}
 	return err
 }
 
-func shouldClose(err error) bool {
-	if err == io.EOF {
-		return true
-	}
-
-	if err, ok := err.(net.Error); ok && err.Timeout() {
-		return true
-	}
-
-	return false
-}
-
-// NewConnection creates a connection on the network and returns the pointer
+// newConnection creates a connection on the network and returns the pointer
 // A minimum timeout of 2 seconds will always be applied.
 // If the connection is not established in the specified timeout,
 // an error will be returned
-func NewConnection(address string, timeout time.Duration) (*Connection, error) {
+func newConnection(address string, timeout time.Duration) (*Connection, error) {
 	newConn := &Connection{dataBuffer: make([]byte, DefaultBufferSize)}
 	runtime.SetFinalizer(newConn, connectionFinalizer)
 
@@ -93,12 +81,12 @@ func NewConnection(address string, timeout time.Duration) (*Connection, error) {
 	conn, err := net.DialTimeout("tcp", address, timeout)
 	if err != nil {
 		Logger.Error("Connection to address `" + address + "` failed to establish with error: " + err.Error())
-		return nil, errToTimeoutErr(err)
+		return nil, errToTimeoutErr(nil, err)
 	}
 	newConn.conn = conn
 
 	// set timeout at the last possible moment
-	if err := newConn.SetTimeout(timeout); err != nil {
+	if err := newConn.SetTimeout(time.Now().Add(timeout), timeout); err != nil {
 		newConn.Close()
 		return nil, err
 	}
@@ -106,13 +94,13 @@ func NewConnection(address string, timeout time.Duration) (*Connection, error) {
 	return newConn, nil
 }
 
-// NewSecureConnection creates a TLS connection on the network and returns the pointer.
+// NewConnection creates a TLS connection on the network and returns the pointer.
 // A minimum timeout of 2 seconds will always be applied.
 // If the connection is not established in the specified timeout,
 // an error will be returned
-func NewSecureConnection(policy *ClientPolicy, host *Host) (*Connection, error) {
+func NewConnection(policy *ClientPolicy, host *Host) (*Connection, error) {
 	address := net.JoinHostPort(host.Name, strconv.Itoa(host.Port))
-	conn, err := NewConnection(address, policy.Timeout)
+	conn, err := newConnection(address, policy.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +110,7 @@ func NewSecureConnection(policy *ClientPolicy, host *Host) (*Connection, error) 
 	}
 
 	// Use version dependent clone function to clone the config
-	tlsConfig := cloneTlsConfig(policy.TlsConfig)
+	tlsConfig := cloneTLSConfig(policy.TlsConfig)
 	tlsConfig.ServerName = host.TLSName
 
 	sconn := tls.Client(conn.conn, tlsConfig)
@@ -135,7 +123,7 @@ func NewSecureConnection(policy *ClientPolicy, host *Host) (*Connection, error) 
 		if err := sconn.VerifyHostname(host.TLSName); err != nil {
 			sconn.Close()
 			Logger.Error("Connection to address `" + address + "` failed to establish with error: " + err.Error())
-			return nil, errToTimeoutErr(err)
+			return nil, errToTimeoutErr(nil, err)
 		}
 	}
 
@@ -148,57 +136,42 @@ func (ctn *Connection) Write(buf []byte) (total int, err error) {
 	// make sure all bytes are written
 	// Don't worry about the loop, timeout has been set elsewhere
 	length := len(buf)
-	var r int
 	for total < length {
-		if r, err = ctn.conn.Write(buf[total:]); err != nil {
+		var r int
+		if err = ctn.updateDeadline(); err != nil {
 			break
 		}
+		r, err = ctn.conn.Write(buf[total:])
 		total += r
+		if err != nil {
+			break
+		}
 	}
 
-	if err == nil {
+	// If all bytes are written, ignore any potential error
+	// The error will bubble up on the next network io if it matters.
+	if total == len(buf) {
 		return total, nil
 	}
 
 	if ctn.node != nil {
 		atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
 	}
+
 	ctn.Close()
-	return total, errToTimeoutErr(err)
-}
 
-// ReadN reads N bytes from connection buffer to the provided Writer.
-func (ctn *Connection) ReadN(buf io.Writer, length int64) (total int64, err error) {
-	// if all bytes are not read, retry until successful
-	// Don't worry about the loop; we've already set the timeout elsewhere
-	total, err = io.CopyN(buf, ctn.conn, length)
-
-	if err == nil && total == length {
-		return total, nil
-	} else if err != nil {
-		if ctn.node != nil {
-			atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
-		}
-
-		if shouldClose(err) {
-			ctn.Close()
-		}
-		return total, errToTimeoutErr(err)
-	}
-
-	if ctn.node != nil {
-		atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
-	}
-	ctn.Close()
-	return total, NewAerospikeError(SERVER_ERROR)
+	return total, errToTimeoutErr(ctn, err)
 }
 
 // Read reads from connection buffer to the provided slice.
 func (ctn *Connection) Read(buf []byte, length int) (total int, err error) {
 	// if all bytes are not read, retry until successful
 	// Don't worry about the loop; we've already set the timeout elsewhere
-	var r int
 	for total < length {
+		var r int
+		if err = ctn.updateDeadline(); err != nil {
+			break
+		}
 		r, err = ctn.conn.Read(buf[total:length])
 		total += r
 		if err != nil {
@@ -206,23 +179,19 @@ func (ctn *Connection) Read(buf []byte, length int) (total int, err error) {
 		}
 	}
 
-	if err == nil && total == length {
+	if total == length {
+		// If all required bytes are read, ignore any potential error.
+		// The error will bubble up on the next network io if it matters.
 		return total, nil
-	} else if err != nil {
-		if ctn.node != nil {
-			atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
-		}
-		if shouldClose(err) {
-			ctn.Close()
-		}
-		return total, errToTimeoutErr(err)
 	}
 
 	if ctn.node != nil {
 		atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
 	}
+
 	ctn.Close()
-	return total, NewAerospikeError(SERVER_ERROR)
+
+	return total, errToTimeoutErr(ctn, err)
 }
 
 // IsConnected returns true if the connection is not closed yet.
@@ -230,26 +199,51 @@ func (ctn *Connection) IsConnected() bool {
 	return ctn.conn != nil
 }
 
-// SetTimeout sets connection timeout for both read and write operations.
-func (ctn *Connection) SetTimeout(timeout time.Duration) error {
-	// Set timeout ONLY if there is or has been a timeout set before
-	if timeout > 0 || ctn.timeout != 0 {
-		ctn.timeout = timeout
-
-		// important: remove deadline when not needed; connections are pooled
-		if ctn.conn != nil {
-			var deadline time.Time
-			if timeout > 0 {
-				deadline = time.Now().Add(timeout)
-			}
-			if err := ctn.conn.SetDeadline(deadline); err != nil {
-				if ctn.node != nil {
-					atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
-				}
-				return err
+// updateDeadline sets connection timeout for both read and write operations.
+// this function is called before each read and write operation. If deadline has passed,
+// the function will return a TIMEOUT error.
+func (ctn *Connection) updateDeadline() error {
+	now := time.Now()
+	var socketDeadline time.Time
+	if ctn.deadline.IsZero() {
+		if ctn.socketTimeout > 0 {
+			socketDeadline = now.Add(ctn.socketTimeout)
+		}
+	} else {
+		if now.After(ctn.deadline) {
+			return NewAerospikeError(TIMEOUT)
+		}
+		if ctn.socketTimeout == 0 {
+			socketDeadline = ctn.deadline
+		} else {
+			tDeadline := now.Add(ctn.socketTimeout)
+			if tDeadline.After(ctn.deadline) {
+				socketDeadline = ctn.deadline
+			} else {
+				socketDeadline = tDeadline
 			}
 		}
+
+		// floor to a millisecond to avoid too short timeouts
+		if socketDeadline.Sub(now) < time.Millisecond {
+			socketDeadline = now.Add(time.Millisecond)
+		}
 	}
+
+	if err := ctn.conn.SetDeadline(socketDeadline); err != nil {
+		if ctn.node != nil {
+			atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
+		}
+		return err
+	}
+
+	return nil
+}
+
+// SetTimeout sets connection timeout for both read and write operations.
+func (ctn *Connection) SetTimeout(deadline time.Time, socketTimeout time.Duration) error {
+	ctn.deadline = deadline
+	ctn.socketTimeout = socketTimeout
 
 	return nil
 }
@@ -261,22 +255,40 @@ func (ctn *Connection) Close() {
 			// deregister
 			if ctn.node != nil {
 				ctn.node.connectionCount.DecrementAndGet()
+				atomic.AddInt64(&ctn.node.stats.ConnectionsClosed, 1)
 			}
 
 			if err := ctn.conn.Close(); err != nil {
 				Logger.Warn(err.Error())
 			}
 			ctn.conn = nil
+			ctn.dataBuffer = nil
 		}
 	})
 }
 
 // Authenticate will send authentication information to the server.
-func (ctn *Connection) Authenticate(user string, password []byte) error {
+// Notice: This method does not support external authentication mechanisms like LDAP.
+// This method is deprecated and will be removed in the future.
+func (ctn *Connection) Authenticate(user string, password string) error {
 	// need to authenticate
 	if user != "" {
-		command := newAdminCommand(ctn.dataBuffer)
-		if err := command.authenticate(ctn, user, password); err != nil {
+		hashedPass, err := hashPassword(password)
+		if err != nil {
+			return err
+		}
+
+		return ctn.authenticateFast(user, hashedPass)
+	}
+	return nil
+}
+
+// authenticateFast will send authentication information to the server.
+func (ctn *Connection) authenticateFast(user string, hashedPass []byte) error {
+	// need to authenticate
+	if len(user) > 0 {
+		command := newLoginCommand(ctn.dataBuffer)
+		if err := command.authenticateInternal(ctn, user, hashedPass); err != nil {
 			if ctn.node != nil {
 				atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
 			}
@@ -288,6 +300,46 @@ func (ctn *Connection) Authenticate(user string, password []byte) error {
 	return nil
 }
 
+// Login will send authentication information to the server.
+func (ctn *Connection) login(sessionToken []byte) error {
+	// need to authenticate
+	if ctn.node.cluster.clientPolicy.RequiresAuthentication() {
+		policy := &ctn.node.cluster.clientPolicy
+
+		switch policy.AuthMode {
+		case AuthModeExternal:
+			var err error
+			command := newLoginCommand(ctn.dataBuffer)
+			if sessionToken == nil {
+				err = command.login(&ctn.node.cluster.clientPolicy, ctn, ctn.node.cluster.Password())
+			} else {
+				err = command.authenticateViaToken(&ctn.node.cluster.clientPolicy, ctn, sessionToken)
+			}
+
+			if err != nil {
+				if ctn.node != nil {
+					atomic.AddInt64(&ctn.node.stats.ConnectionsFailed, 1)
+				}
+				// Socket not authenticated. Do not put back into pool.
+				ctn.Close()
+				return err
+			}
+
+			if command.SessionToken != nil {
+				ctn.node._sessionToken.Store(command.SessionToken)
+				ctn.node._sessionExpiration.Store(command.SessionExpiration)
+			}
+
+			return nil
+
+		case AuthModeInternal:
+			return ctn.authenticateFast(policy.User, ctn.node.cluster.Password())
+		}
+	}
+
+	return nil
+}
+
 // setIdleTimeout sets the idle timeout for the connection.
 func (ctn *Connection) setIdleTimeout(timeout time.Duration) {
 	ctn.idleTimeout = timeout
@@ -295,7 +347,7 @@ func (ctn *Connection) setIdleTimeout(timeout time.Duration) {
 
 // isIdle returns true if the connection has reached the idle deadline.
 func (ctn *Connection) isIdle() bool {
-	return ctn.idleTimeout > 0 && !time.Now().Before(ctn.idleDeadline)
+	return ctn.idleTimeout > 0 && time.Now().After(ctn.idleDeadline)
 }
 
 // refresh extends the idle deadline of the connection.

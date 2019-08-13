@@ -1,4 +1,6 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// +build !app_engine
+
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +21,7 @@ import (
 
 	. "github.com/aerospike/aerospike-client-go/types"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
-	"github.com/yuin/gopher-lua"
+	lua "github.com/yuin/gopher-lua"
 )
 
 type queryAggregateCommand struct {
@@ -41,7 +43,7 @@ func newQueryAggregateCommand(node *Node, policy *QueryPolicy, statement *Statem
 
 func (cmd *queryAggregateCommand) Execute() error {
 	// defer cmd.recordset.signalEnd()
-	err := cmd.execute(cmd)
+	err := cmd.execute(cmd, true)
 	if err != nil {
 		cmd.recordset.sendError(err)
 	}
@@ -121,7 +123,7 @@ func (cmd *queryAggregateCommand) parseRecordResults(ifc command, receiveSize in
 			}
 			name := string(cmd.dataBuffer[:nameSize])
 
-			particleBytesSize := int((opSize - (4 + nameSize)))
+			particleBytesSize := opSize - (4 + nameSize)
 			if err = cmd.readBytes(particleBytesSize); err != nil {
 				err = newNodeError(cmd.node, err)
 				return false, err
@@ -143,10 +145,10 @@ func (cmd *queryAggregateCommand) parseRecordResults(ifc command, receiveSize in
 			if errStr, exists := bins["FAILURE"]; exists {
 				err = NewAerospikeError(QUERY_GENERIC, errStr.(string))
 				return false, err
-			} else {
-				err = NewAerospikeError(QUERY_GENERIC, fmt.Sprintf("QueryAggregate's expected result was not returned. Received: %v", bins))
-				return false, err
 			}
+
+			err = NewAerospikeError(QUERY_GENERIC, fmt.Sprintf("QueryAggregate's expected result was not returned. Received: %v", bins))
+			return false, err
 		}
 
 		// If the channel is full and it blocks, we don't want this command to

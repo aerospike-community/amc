@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,15 @@ import "fmt"
 type ResultCode int
 
 const (
+	// Requested Rack for node/namespace was not defined in the cluster.
+	RACK_NOT_DEFINED ResultCode = -13
+
+	// Cluster has an invalid partition map, usually due to bad configuration.
+	INVALID_CLUSTER_PARTITION_MAP ResultCode = -12
+
+	// Server is not accepting requests.
+	SERVER_NOT_AVAILABLE ResultCode = -11
+
 	// Cluster Name does not match the ClientPolicy.ClusterName value.
 	CLUSTER_NAME_MISMATCH_ERROR ResultCode = -10
 
@@ -70,10 +79,6 @@ const (
 	// exists.
 	KEY_EXISTS_ERROR ResultCode = 5
 
-	// On create-only (write unique) operations on a bin that already
-	// exists.
-	BIN_EXISTS_ERROR ResultCode = 6
-
 	// Expected cluster ID was not received.
 	CLUSTER_KEY_MISMATCH ResultCode = 7
 
@@ -83,11 +88,11 @@ const (
 	// Client or server has timed out.
 	TIMEOUT ResultCode = 9
 
-	// XDS product is not available.
-	NO_XDS ResultCode = 10
+	// Operation not allowed in current configuration.
+	ALWAYS_FORBIDDEN ResultCode = 10
 
-	// Server is not accepting requests.
-	SERVER_NOT_AVAILABLE ResultCode = 11
+	// Partition is unavailable.
+	PARTITION_UNAVAILABLE ResultCode = 11
 
 	// Operation is not supported with configured bin type (single-bin or
 	// multi-bin).
@@ -105,9 +110,6 @@ const (
 	// Unsupported Server Feature (e.g. Scan + UDF)
 	UNSUPPORTED_FEATURE ResultCode = 16
 
-	// Specified bin name does not exist in record.
-	BIN_NOT_FOUND ResultCode = 17
-
 	// Device not keeping up with writes.
 	DEVICE_OVERLOAD ResultCode = 18
 
@@ -117,7 +119,8 @@ const (
 	// Invalid namespace.
 	INVALID_NAMESPACE ResultCode = 20
 
-	// Bin name length greater than 14 characters.
+	// Bin name length greater than 14 characters,
+	// or maximum number of unique bin names are exceeded.
 	BIN_NAME_TOO_LONG ResultCode = 21
 
 	// Operation not allowed at this time.
@@ -279,6 +282,15 @@ func KeepConnection(err error) bool {
 // Return result code as a string.
 func ResultCodeToString(resultCode ResultCode) string {
 	switch ResultCode(resultCode) {
+	case RACK_NOT_DEFINED:
+		return "Requested Rack for node/namespace was not defined in the cluster."
+
+	case INVALID_CLUSTER_PARTITION_MAP:
+		return "Cluster has an invalid partition map, usually due to bad configuration."
+
+	case SERVER_NOT_AVAILABLE:
+		return "Server is not accepting requests."
+
 	case CLUSTER_NAME_MISMATCH_ERROR:
 		return "Cluster Name does not match the ClientPolicy.ClusterName value"
 
@@ -327,9 +339,6 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case KEY_EXISTS_ERROR:
 		return "Key already exists"
 
-	case BIN_EXISTS_ERROR:
-		return "Bin already exists"
-
 	case CLUSTER_KEY_MISMATCH:
 		return "Cluster key mismatch"
 
@@ -339,11 +348,11 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case TIMEOUT:
 		return "Timeout"
 
-	case NO_XDS:
-		return "XDS not available"
+	case ALWAYS_FORBIDDEN:
+		return "Operation not allowed in current configuration."
 
-	case SERVER_NOT_AVAILABLE:
-		return "Server not available"
+	case PARTITION_UNAVAILABLE:
+		return "Partition not available"
 
 	case BIN_TYPE_ERROR:
 		return "Bin type error"
@@ -360,9 +369,6 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case UNSUPPORTED_FEATURE:
 		return "Unsupported Server Feature"
 
-	case BIN_NOT_FOUND:
-		return "Bin not found"
-
 	case DEVICE_OVERLOAD:
 		return "Device overload"
 
@@ -373,7 +379,7 @@ func ResultCodeToString(resultCode ResultCode) string {
 		return "Namespace not found"
 
 	case BIN_NAME_TOO_LONG:
-		return "Bin name length greater than 14 characters"
+		return "Bin name length greater than 14 characters, or maximum number of unique bin names are exceeded"
 
 	case FAIL_FORBIDDEN:
 		return "Operation not allowed at this time"

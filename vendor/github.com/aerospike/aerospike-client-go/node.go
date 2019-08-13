@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
 package aerospike
 
 import (
+	"bufio"
+	"io"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
+	. "github.com/aerospike/aerospike-client-go/internal/atomic"
 	. "github.com/aerospike/aerospike-client-go/logger"
 	. "github.com/aerospike/aerospike-client-go/types"
-	. "github.com/aerospike/aerospike-client-go/types/atomic"
 )
 
 const (
@@ -32,11 +36,15 @@ const (
 
 // Node represents an Aerospike Database Server Node
 type Node struct {
-	cluster *Cluster
-	name    string
-	host    *Host
-	aliases atomic.Value //[]*Host
-	stats   nodeStats
+	cluster            *Cluster
+	name               string
+	host               *Host
+	aliases            atomic.Value //[]*Host
+	stats              nodeStats
+	_sessionToken      atomic.Value //[]byte
+	_sessionExpiration atomic.Value //time.Time
+
+	racks atomic.Value //map[string]int
 
 	// tendConn reserves a connection for tend so that it won't have to
 	// wait in queue for connections, since that will cause starvation
@@ -47,19 +55,19 @@ type Node struct {
 	peersGeneration AtomicInt
 	peersCount      AtomicInt
 
-	connections     connectionQueue //AtomicQueue //ArrayBlockingQueue<*Connection>
+	connections     connectionHeap
 	connectionCount AtomicInt
 	health          AtomicInt //AtomicInteger
 
-	partitionMap        partitionMap
 	partitionGeneration AtomicInt
 	referenceCount      AtomicInt
 	failures            AtomicInt
 	partitionChanged    AtomicBool
+	performLogin        AtomicBool
 
 	active AtomicBool
 
-	supportsFloat, supportsBatchIndex, supportsReplicasAll, supportsGeo, supportsPeers AtomicBool
+	supportsFloat, supportsBatchIndex, supportsReplicas, supportsGeo, supportsPeers, supportsLUTNow, supportsTruncateNamespace AtomicBool
 }
 
 // NewNode initializes a server node with connection parameters.
@@ -72,7 +80,7 @@ func newNode(cluster *Cluster, nv *nodeValidator) *Node {
 
 		// Assign host to first IP alias because the server identifies nodes
 		// by IP address (not hostname).
-		connections:         *newConnectionQueue(cluster.clientPolicy.ConnectionQueueSize), //*NewAtomicQueue(cluster.clientPolicy.ConnectionQueueSize),
+		connections:         *newConnectionHeap(cluster.clientPolicy.ConnectionQueueSize),
 		connectionCount:     *NewAtomicInt(0),
 		peersGeneration:     *NewAtomicInt(-1),
 		partitionGeneration: *NewAtomicInt(-2),
@@ -81,14 +89,18 @@ func newNode(cluster *Cluster, nv *nodeValidator) *Node {
 		active:              *NewAtomicBool(true),
 		partitionChanged:    *NewAtomicBool(false),
 
-		supportsFloat:       *NewAtomicBool(nv.supportsFloat),
-		supportsBatchIndex:  *NewAtomicBool(nv.supportsBatchIndex),
-		supportsReplicasAll: *NewAtomicBool(nv.supportsReplicasAll),
-		supportsGeo:         *NewAtomicBool(nv.supportsGeo),
-		supportsPeers:       *NewAtomicBool(nv.supportsPeers),
+		supportsFloat:             *NewAtomicBool(nv.supportsFloat),
+		supportsBatchIndex:        *NewAtomicBool(nv.supportsBatchIndex),
+		supportsReplicas:          *NewAtomicBool(nv.supportsReplicas),
+		supportsGeo:               *NewAtomicBool(nv.supportsGeo),
+		supportsPeers:             *NewAtomicBool(nv.supportsPeers),
+		supportsLUTNow:            *NewAtomicBool(nv.supportsLUTNow),
+		supportsTruncateNamespace: *NewAtomicBool(nv.supportsTruncateNamespace),
 	}
 
 	newNode.aliases.Store(nv.aliases)
+	newNode._sessionToken.Store(nv.sessionToken)
+	newNode.racks.Store(map[string]int{})
 
 	// this will reset to zero on first aggregation on the cluster,
 	// therefore will only be counted once.
@@ -110,8 +122,15 @@ func (nd *Node) Refresh(peers *peers) error {
 
 	nd.referenceCount.Set(0)
 
+	var infoMap map[string]string
+	var err error
 	if peers.usePeers.Get() {
-		infoMap, err := nd.RequestInfo("node", "peers-generation", "partition-generation")
+		commands := []string{"node", "peers-generation", "partition-generation"}
+		if nd.cluster.clientPolicy.RackAware {
+			commands = append(commands, "racks:")
+		}
+
+		infoMap, err = nd.RequestInfo(&nd.cluster.infoPolicy, commands...)
 		if err != nil {
 			nd.refreshFailed(err)
 			return err
@@ -132,9 +151,12 @@ func (nd *Node) Refresh(peers *peers) error {
 			return err
 		}
 	} else {
-		commands := []string{"node", "partition-generation", nd.cluster.clientPolicy.serviceString()}
+		commands := []string{"node", "partition-generation", nd.cluster.clientPolicy.servicesString()}
+		if nd.cluster.clientPolicy.RackAware {
+			commands = append(commands, "racks:")
+		}
 
-		infoMap, err := nd.RequestInfo(commands...)
+		infoMap, err = nd.RequestInfo(&nd.cluster.infoPolicy, commands...)
 		if err != nil {
 			nd.refreshFailed(err)
 			return err
@@ -155,10 +177,125 @@ func (nd *Node) Refresh(peers *peers) error {
 			return err
 		}
 	}
+
+	if err := nd.updateRackInfo(infoMap); err != nil {
+		// Update rack info should fail if the feature is not supported on the server
+		if aerr, ok := err.(AerospikeError); ok && aerr.ResultCode() == UNSUPPORTED_FEATURE {
+			nd.refreshFailed(err)
+			return err
+		}
+		// Should not fail in other cases
+		Logger.Warn("Updating node rack info failed with error: %s (racks: `%s`)", err, infoMap["racks:"])
+	}
+
 	nd.failures.Set(0)
 	peers.refreshCount.IncrementAndGet()
 	nd.referenceCount.IncrementAndGet()
 	atomic.AddInt64(&nd.stats.TendsSuccessful, 1)
+
+	if err := nd.refreshSessionToken(); err != nil {
+		Logger.Error("Error refreshing session token: %s", err.Error())
+	}
+
+	return nil
+}
+
+// refreshSessionToken refreshes the session token if it has been expired
+func (nd *Node) refreshSessionToken() error {
+	// no session token to refresh
+	if !nd.cluster.clientPolicy.RequiresAuthentication() || nd.cluster.clientPolicy.AuthMode != AuthModeExternal {
+		return nil
+	}
+
+	var deadline time.Time
+	deadlineIfc := nd._sessionExpiration.Load()
+	if deadlineIfc != nil {
+		deadline = deadlineIfc.(time.Time)
+	}
+
+	if deadline.IsZero() || time.Now().Before(deadline) {
+		return nil
+	}
+
+	nd.tendConnLock.Lock()
+	defer nd.tendConnLock.Unlock()
+
+	if err := nd.initTendConn(nd.cluster.clientPolicy.LoginTimeout); err != nil {
+		return err
+	}
+
+	command := newLoginCommand(nd.tendConn.dataBuffer)
+	if err := command.login(&nd.cluster.clientPolicy, nd.tendConn, nd.cluster.Password()); err != nil {
+		// Socket not authenticated. Do not put back into pool.
+		nd.tendConn.Close()
+		return err
+	}
+
+	nd._sessionToken.Store(command.SessionToken)
+	nd._sessionExpiration.Store(command.SessionExpiration)
+
+	return nil
+}
+
+func (nd *Node) updateRackInfo(infoMap map[string]string) error {
+	if !nd.cluster.clientPolicy.RackAware {
+		return nil
+	}
+
+	// Do not raise an error if the server does not support rackaware
+	if strings.HasPrefix(strings.ToUpper(infoMap["racks:"]), "ERROR") {
+		return NewAerospikeError(UNSUPPORTED_FEATURE, "You have set the ClientPolicy.RackAware = true, but the server does not support this feature.")
+	}
+
+	ss := strings.Split(infoMap["racks:"], ";")
+	racks := map[string]int{}
+	for _, s := range ss {
+		in := bufio.NewReader(strings.NewReader(s))
+		_, err := in.ReadString('=')
+		if err != nil {
+			return err
+		}
+
+		ns, err := in.ReadString(':')
+		if err != nil {
+			return err
+		}
+
+		for {
+			_, err = in.ReadString('_')
+			if err != nil {
+				return err
+			}
+
+			rackStr, err := in.ReadString('=')
+			if err != nil {
+				return err
+			}
+
+			rack, err := strconv.Atoi(rackStr[:len(rackStr)-1])
+			if err != nil {
+				return err
+			}
+
+			nodesList, err := in.ReadString(':')
+			if err != nil && err != io.EOF {
+				return err
+			}
+
+			nodes := strings.Split(strings.Trim(nodesList, ":"), ",")
+			for i := range nodes {
+				if nodes[i] == nd.name {
+					racks[ns[:len(ns)-1]] = rack
+				}
+			}
+
+			if err == io.EOF {
+				break
+			}
+		}
+	}
+
+	nd.racks.Store(racks)
 
 	return nil
 }
@@ -212,7 +349,7 @@ func (nd *Node) verifyPartitionGeneration(infoMap map[string]string) error {
 }
 
 func (nd *Node) addFriends(infoMap map[string]string, peers *peers) error {
-	friendString, exists := infoMap[nd.cluster.clientPolicy.serviceString()]
+	friendString, exists := infoMap[nd.cluster.clientPolicy.servicesString()]
 
 	if !exists || len(friendString) == 0 {
 		nd.peersCount.Set(0)
@@ -233,7 +370,7 @@ func (nd *Node) addFriends(infoMap map[string]string, peers *peers) error {
 		hostName := friendInfo[0]
 		port, _ := strconv.Atoi(friendInfo[1])
 
-		if nd.cluster.clientPolicy.IpMap != nil {
+		if len(nd.cluster.clientPolicy.IpMap) > 0 {
 			if alternativeHost, ok := nd.cluster.clientPolicy.IpMap[hostName]; ok {
 				hostName = alternativeHost
 			}
@@ -257,7 +394,7 @@ func (nd *Node) addFriends(infoMap map[string]string, peers *peers) error {
 func (nd *Node) prepareFriend(host *Host, peers *peers) bool {
 	nv := &nodeValidator{}
 	if err := nv.validateNode(nd.cluster, host); err != nil {
-		Logger.Warn("Adding node `%s` failed: ", host, err)
+		Logger.Warn("Adding node `%s` failed: %s", host, err)
 		return false
 	}
 
@@ -308,7 +445,7 @@ func (nd *Node) refreshPeers(peers *peers) {
 	peers.refreshCount.IncrementAndGet()
 }
 
-func (nd *Node) refreshPartitions(peers *peers) {
+func (nd *Node) refreshPartitions(peers *peers, partitions partitionMap) {
 	// Do not refresh peers when node connection has already failed during this cluster tend iteration.
 	// Also, avoid "split cluster" case where this node thinks it's a 1-node cluster.
 	// Unchecked, such a node can dominate the partition map and cause all other
@@ -317,15 +454,14 @@ func (nd *Node) refreshPartitions(peers *peers) {
 		return
 	}
 
-	parser, err := newPartitionParser(nd, _PARTITIONS, nd.cluster.clientPolicy.RequestProleReplicas)
+	parser, err := newPartitionParser(nd, partitions, _PARTITIONS)
 	if err != nil {
 		nd.refreshFailed(err)
 		return
 	}
 
 	if parser.generation != nd.partitionGeneration.Get() {
-		Logger.Info("Node %s partition generation %d changed to %d", nd.GetName(), nd.partitionGeneration.Get(), parser.getGeneration())
-		nd.partitionMap = parser.getPartitionMap()
+		Logger.Info("Node %s partition generation changed from %d to %d", nd.host.String(), nd.partitionGeneration.Get(), parser.getGeneration())
 		nd.partitionChanged.Set(true)
 		nd.partitionGeneration.Set(parser.getGeneration())
 		atomic.AddInt64(&nd.stats.PartitionMapUpdates, 1)
@@ -355,42 +491,106 @@ func (nd *Node) dropIdleConnections() {
 // This method will retry to retrieve a connection in case the connection pool
 // is empty, until timeout is reached.
 func (nd *Node) GetConnection(timeout time.Duration) (conn *Connection, err error) {
-	deadline := time.Now().Add(timeout)
-	if timeout == 0 {
-		deadline = time.Now().Add(time.Second)
+	if timeout <= 0 {
+		timeout = _DEFAULT_TIMEOUT
 	}
+	deadline := time.Now().Add(timeout)
 
-CL:
-	// try to acquire a connection; if the connection pool is empty, retry until
-	// timeout occures. If no timeout is set, will retry indefinitely.
-	conn, err = nd.getConnection(timeout)
-	if err != nil {
-		if err == ErrConnectionPoolEmpty && nd.IsActive() && time.Now().Before(deadline) {
-			// give the scheduler time to breath; affects latency minimally, but throughput drastically
-			time.Sleep(time.Microsecond)
-			goto CL
+	for time.Now().Before(deadline) {
+		conn, err = nd.getConnection(deadline, timeout)
+		if err == nil && conn != nil {
+			return conn, nil
 		}
 
-		return nil, err
+		if err == ErrServerNotAvailable {
+			return nil, err
+		}
+
+		time.Sleep(5 * time.Millisecond)
 	}
 
-	return conn, nil
+	return nil, err
 }
 
 // getConnection gets a connection to the node.
 // If no pooled connection is available, a new connection will be created.
-// This method does not include logic to retry in case the connection pool is empty
-func (nd *Node) getConnection(timeout time.Duration) (conn *Connection, err error) {
-	return nd.getConnectionWithHint(timeout, 0)
+func (nd *Node) getConnection(deadline time.Time, timeout time.Duration) (conn *Connection, err error) {
+	return nd.getConnectionWithHint(deadline, timeout, 0)
+}
+
+// newConnection will make a new connection for the node.
+func (nd *Node) newConnection(overrideThreshold bool) (*Connection, error) {
+	if !nd.active.Get() {
+		return nil, ErrServerNotAvailable
+	}
+
+	// if connection count is limited and enough connections are already created, don't create a new one
+	cc := nd.connectionCount.IncrementAndGet()
+	if nd.cluster.clientPolicy.LimitConnectionsToQueueSize && cc > nd.cluster.clientPolicy.ConnectionQueueSize {
+		nd.connectionCount.DecrementAndGet()
+		atomic.AddInt64(&nd.stats.ConnectionsPoolEmpty, 1)
+
+		return nil, ErrTooManyConnectionsForNode
+	}
+
+	// Check for opening connection threshold
+	if !overrideThreshold && nd.cluster.clientPolicy.OpeningConnectionThreshold > 0 {
+		ct := nd.cluster.connectionThreshold.IncrementAndGet()
+		if ct > nd.cluster.clientPolicy.OpeningConnectionThreshold {
+			nd.cluster.connectionThreshold.DecrementAndGet()
+			nd.connectionCount.DecrementAndGet()
+
+			return nil, ErrTooManyOpeningConnections
+		}
+
+		defer nd.cluster.connectionThreshold.DecrementAndGet()
+	}
+
+	atomic.AddInt64(&nd.stats.ConnectionsAttempts, 1)
+	conn, err := NewConnection(&nd.cluster.clientPolicy, nd.host)
+	if err != nil {
+		nd.connectionCount.DecrementAndGet()
+		atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
+		return nil, err
+	}
+	conn.node = nd
+
+	// need to authenticate
+	if err = conn.login(nd.sessionToken()); err != nil {
+		atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
+
+		// Socket not authenticated. Do not put back into pool.
+		conn.Close()
+		return nil, err
+	}
+
+	atomic.AddInt64(&nd.stats.ConnectionsSuccessful, 1)
+	conn.setIdleTimeout(nd.cluster.clientPolicy.IdleTimeout)
+
+	return conn, nil
+}
+
+// makeConnectionForPool will try to open a connection until deadline.
+// if no deadline is defined, it will only try for _DEFAULT_TIMEOUT.
+func (nd *Node) makeConnectionForPool(hint byte) {
+	conn, err := nd.newConnection(false)
+	if err != nil {
+		Logger.Debug("Error trying to make a connection to the node %s: %s", nd.String(), err.Error())
+		return
+	}
+
+	nd.putConnectionWithHint(conn, hint)
 }
 
 // getConnectionWithHint gets a connection to the node.
 // If no pooled connection is available, a new connection will be created.
-// This method does not include logic to retry in case the connection pool is empty
-func (nd *Node) getConnectionWithHint(timeout time.Duration, hint byte) (conn *Connection, err error) {
+func (nd *Node) getConnectionWithHint(deadline time.Time, timeout time.Duration, hint byte) (conn *Connection, err error) {
+	if !nd.active.Get() {
+		return nil, ErrServerNotAvailable
+	}
+
 	// try to get a valid connection from the connection pool
-	for t := nd.connections.Poll(hint); t != nil; t = nd.connections.Poll(hint) {
-		conn = t //.(*Connection)
+	for conn = nd.connections.Poll(hint); conn != nil; conn = nd.connections.Poll(hint) {
 		if conn.IsConnected() {
 			break
 		}
@@ -399,36 +599,11 @@ func (nd *Node) getConnectionWithHint(timeout time.Duration, hint byte) (conn *C
 	}
 
 	if conn == nil {
-		cc := nd.connectionCount.IncrementAndGet()
-
-		// if connection count is limited and enough connections are already created, don't create a new one
-		if nd.cluster.clientPolicy.LimitConnectionsToQueueSize && cc > nd.cluster.clientPolicy.ConnectionQueueSize {
-			nd.connectionCount.DecrementAndGet()
-			atomic.AddInt64(&nd.stats.ConnectionsPoolEmpty, 1)
-			return nil, ErrConnectionPoolEmpty
-		}
-
-		atomic.AddInt64(&nd.stats.ConnectionsAttempts, 1)
-		if conn, err = NewSecureConnection(&nd.cluster.clientPolicy, nd.host); err != nil {
-			nd.connectionCount.DecrementAndGet()
-			atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
-			return nil, err
-		}
-		conn.node = nd
-
-		// need to authenticate
-		if err = conn.Authenticate(nd.cluster.user, nd.cluster.Password()); err != nil {
-			atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
-
-			// Socket not authenticated. Do not put back into pool.
-			conn.Close()
-			return nil, err
-		}
-
-		atomic.AddInt64(&nd.stats.ConnectionsSuccessful, 1)
+		go nd.makeConnectionForPool(hint)
+		return nil, ErrConnectionPoolEmpty
 	}
 
-	if err = conn.SetTimeout(timeout); err != nil {
+	if err = conn.SetTimeout(deadline, timeout); err != nil {
 		atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
 
 		// Do not put back into pool.
@@ -436,7 +611,6 @@ func (nd *Node) getConnectionWithHint(timeout time.Duration, hint byte) (conn *C
 		return nil, err
 	}
 
-	conn.setIdleTimeout(nd.cluster.clientPolicy.IdleTimeout)
 	conn.refresh()
 
 	return conn, nil
@@ -445,11 +619,13 @@ func (nd *Node) getConnectionWithHint(timeout time.Duration, hint byte) (conn *C
 // PutConnection puts back a connection to the pool.
 // If connection pool is full, the connection will be
 // closed and discarded.
-func (nd *Node) putConnectionWithHint(conn *Connection, hint byte) {
+func (nd *Node) putConnectionWithHint(conn *Connection, hint byte) bool {
 	conn.refresh()
 	if !nd.active.Get() || !nd.connections.Offer(conn, hint) {
 		conn.Close()
+		return false
 	}
+	return true
 }
 
 // PutConnection puts back a connection to the pool.
@@ -504,8 +680,10 @@ func (nd *Node) addAlias(aliasToAdd *Host) {
 
 // Close marks node as inactive and closes all of its pooled connections.
 func (nd *Node) Close() {
-	nd.active.Set(false)
-	atomic.AddInt64(&nd.stats.NodeRemoved, 1)
+	if nd.active.Get() {
+		nd.active.Set(false)
+		atomic.AddInt64(&nd.stats.NodeRemoved, 1)
+	}
 	nd.closeConnections()
 }
 
@@ -516,7 +694,6 @@ func (nd *Node) String() string {
 
 func (nd *Node) closeConnections() {
 	for conn := nd.connections.Poll(0); conn != nil; conn = nd.connections.Poll(0) {
-		// conn.(*Connection).Close()
 		conn.Close()
 	}
 
@@ -535,13 +712,13 @@ func (nd *Node) Equals(other *Node) bool {
 
 // MigrationInProgress determines if the node is participating in a data migration
 func (nd *Node) MigrationInProgress() (bool, error) {
-	values, err := RequestNodeStats(nd)
+	values, err := nd.RequestStats(&nd.cluster.infoPolicy)
 	if err != nil {
 		return false, err
 	}
 
-	// if the migration_progress_send exists and is not `0`, then migration is in progress
-	if migration, exists := values["migrate_progress_send"]; exists && migration != "0" {
+	// if the migrate_partitions_remaining exists and is not `0`, then migration is in progress
+	if migration, exists := values["migrate_partitions_remaining"]; exists && migration != "0" {
 		return true, nil
 	}
 
@@ -579,9 +756,14 @@ func (nd *Node) WaitUntillMigrationIsFinished(timeout time.Duration) (err error)
 // initTendConn sets up a connection to be used for info requests.
 // The same connection will be used for tend.
 func (nd *Node) initTendConn(timeout time.Duration) error {
+	var deadline time.Time
+	if timeout > 0 {
+		deadline = time.Now().Add(timeout)
+	}
+
 	if nd.tendConn == nil || !nd.tendConn.IsConnected() {
 		// Tend connection required a long timeout
-		tendConn, err := nd.GetConnection(timeout)
+		tendConn, err := nd.GetConnection(time.Second)
 		if err != nil {
 			return err
 		}
@@ -590,18 +772,18 @@ func (nd *Node) initTendConn(timeout time.Duration) error {
 	}
 
 	// Set timeout for tend conn
-	return nd.tendConn.SetTimeout(timeout)
+	return nd.tendConn.SetTimeout(deadline, timeout)
 }
 
 // requestInfoWithRetry gets info values by name from the specified database server node.
 // It will try at least N times before returning an error.
-func (nd *Node) requestInfoWithRetry(n int, name ...string) (res map[string]string, err error) {
+func (nd *Node) requestInfoWithRetry(policy *InfoPolicy, n int, name ...string) (res map[string]string, err error) {
 	for i := 0; i < n; i++ {
-		if res, err = nd.requestInfo(10*time.Second, name...); err == nil {
+		if res, err = nd.requestInfo(policy.Timeout, name...); err == nil {
 			return res, nil
 		}
 
-		Logger.Error("Error occured while fetching info from the server node %s: %s", nd.host.String(), err.Error())
+		Logger.Error("Error occurred while fetching info from the server node %s: %s", nd.host.String(), err.Error())
 		time.Sleep(100 * time.Millisecond)
 	}
 
@@ -610,8 +792,8 @@ func (nd *Node) requestInfoWithRetry(n int, name ...string) (res map[string]stri
 }
 
 // RequestInfo gets info values by name from the specified database server node.
-func (nd *Node) RequestInfo(name ...string) (map[string]string, error) {
-	return nd.requestInfo(nd.cluster.clientPolicy.Timeout, name...)
+func (nd *Node) RequestInfo(policy *InfoPolicy, name ...string) (map[string]string, error) {
+	return nd.requestInfo(policy.Timeout, name...)
 }
 
 // RequestInfo gets info values by name from the specified database server node.
@@ -633,11 +815,11 @@ func (nd *Node) requestInfo(timeout time.Duration, name ...string) (map[string]s
 
 // requestRawInfo gets info values by name from the specified database server node.
 // It won't parse the results.
-func (nd *Node) requestRawInfo(name ...string) (*info, error) {
+func (nd *Node) requestRawInfo(policy *InfoPolicy, name ...string) (*info, error) {
 	nd.tendConnLock.Lock()
 	defer nd.tendConnLock.Unlock()
 
-	if err := nd.initTendConn(nd.cluster.clientPolicy.Timeout); err != nil {
+	if err := nd.initTendConn(policy.Timeout); err != nil {
 		return nil, err
 	}
 
@@ -647,4 +829,99 @@ func (nd *Node) requestRawInfo(name ...string) (*info, error) {
 		return nil, err
 	}
 	return response, nil
+}
+
+// RequestStats returns statistics for the specified node as a map
+func (node *Node) RequestStats(policy *InfoPolicy) (map[string]string, error) {
+	infoMap, err := node.RequestInfo(policy, "statistics")
+	if err != nil {
+		return nil, err
+	}
+
+	res := map[string]string{}
+
+	v, exists := infoMap["statistics"]
+	if !exists {
+		return res, nil
+	}
+
+	values := strings.Split(v, ";")
+	for i := range values {
+		kv := strings.Split(values[i], "=")
+		if len(kv) > 1 {
+			res[kv[0]] = kv[1]
+		}
+	}
+
+	return res, nil
+}
+
+// sessionToken returns the session token for the node.
+// It will return nil if the session has expired.
+func (nd *Node) sessionToken() []byte {
+	var deadline time.Time
+	deadlineIfc := nd._sessionExpiration.Load()
+	if deadlineIfc != nil {
+		deadline = deadlineIfc.(time.Time)
+	}
+
+	if deadline.IsZero() || time.Now().After(deadline) {
+		return nil
+	}
+
+	st := nd._sessionToken.Load()
+	if st != nil {
+		return st.([]byte)
+	}
+	return nil
+}
+
+// Rack returns the rack number for the namespace.
+func (nd *Node) Rack(namespace string) (int, error) {
+	racks := nd.racks.Load().(map[string]int)
+	v, exists := racks[namespace]
+
+	if exists {
+		return v, nil
+	}
+
+	return -1, newAerospikeNodeError(nd, RACK_NOT_DEFINED)
+}
+
+// WarmUp fills the node's connection pool with connections.
+// This is necessary on startup for high traffic programs.
+// If the count is <= 0, the connection queue will be filled.
+// If the count is more than the size of the pool, the pool will be filled.
+// Note: One connection per node is reserved for tend operations and is not used for transactions.
+func (nd *Node) WarmUp(count int) (int, error) {
+	var g errgroup.Group
+	cnt := NewAtomicInt(0)
+
+	toAlloc := nd.connections.Cap() - nd.connections.LenAll()
+	if count < toAlloc && count > 0 {
+		toAlloc = count
+	}
+
+	for i := 0; i < toAlloc; i++ {
+		g.Go(func() error {
+			conn, err := nd.newConnection(true)
+			if err != nil {
+				if err == ErrTooManyConnectionsForNode {
+					return nil
+				}
+				return err
+			}
+
+			if nd.putConnectionWithHint(conn, 0) {
+				cnt.IncrementAndGet()
+			} else {
+				conn.Close()
+			}
+
+			return nil
+		})
+	}
+
+	err := g.Wait()
+	return cnt.Get(), err
 }

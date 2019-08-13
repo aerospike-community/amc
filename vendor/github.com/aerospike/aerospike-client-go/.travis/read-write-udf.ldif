@@ -1,0 +1,5 @@
+dn: cn=read-write-udf,dc=aerospike,dc=com
+objectClass: top
+objectClass: posixGroup
+gidNumber: 680
+

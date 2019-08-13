@@ -1,12 +1,300 @@
 # Change History
 
+## May 21 2019: v2.2.0
+  Minor Fixes and improvements release.
+
+  * **Fixes**
+
+    - Fixes an issue where an empty connection pool would cause a lock contention that would in turn lead to high CPU load.
+    - Fixes an issue where in some circumstances connection pool would be depleted of connections.
+    - Fixes an issue where the replica node would not be selected in case of master-node failure in `Policy.ReplicaPolicy.SEQUENCE` for reads.
+
+  * **Improvements**
+
+    - Transactions will not count a lack of connection in the node's connection pool as an iteration anymore.
+
+## April 25 2019: v2.1.1
+  Minor Fixes and improvements release.
+
+  * **Fixes**
+
+    - Fixes an issue where meta tags were ignored in reflection API for `ScanAllObjects`/`QueryObjects`/`BatchGetObjects`. Resolves #260.
+
+  * **Improvements**
+
+    - Tend won't send `rack:` command to the nodes if `ClientPolicy.RackAware` is not set. PR #259, thanks to [Dmitry Maksimov](https://github.com/kolo)
+    - Adds a new GeoJson example.
+
+## April 11 2019: v2.1.0
+  Minor Feature and Improvements release.
+
+  * **New Features**
+
+    - Adds `WarmUp` method for `Client`, `Cluster` and `Node`. This method will fill the connection queue to ensure maximum and smooth performance on start up.
+
+  * **Improvements**
+
+    - Simplify connection Timeout calculation and floor the min timeout to 1ms.
+    - Simplify resetting server timeout for each iteration.
+    - Adds a few pre-defined errors to avoid allocating them during runtime.
+
+  * **Changes**
+
+    - Adds a TLS connection example.
+    - Adds `Cap` method to `connectionHeap`.
+
+## March 19 2019: v2.0.0
+  Major release. There are some breaking changes, both syntactically and semantically.
+  Most changes are minor, and can be fixed with relative ease.
+  The only major issue is that the behavior of the client when a key does not exist has changed. 
+  It used to return no error, but `nil` `Record.Bins`. Now it returns `ErrKeyNotFound` error.
+  This is a significant changes, and you should search your code for all instances of `Bins == nil` and adapt the code accordingly.
+  
+  * **Major**:
+    - Optimizes connection creation out of the transaction pipeline and makes it async.
+    - Put a threshold on the number of connections allowed to open simultaneously. Controlled via `ClientPolicy.OpeningConnectionThreshold`.
+    - Do not clear partition map entry when a node reports that it no longer owns that partition entry.
+    - Uses rolling timeout instead of strict timeout for connections.
+    - Remove `ToValueArray` and `ToValueSlice` methods to discourage such suboptimal use. Changes `QueryAggregate` signature to remove the need for those methods.
+    - Remove unnecessary conversion from BinMap to Bins in reflection API to speedup the command an avoid unnecessary memory allocations.
+    - Use shorter intervals with exponential back-off for tasks.
+
+  * **Breaking**:
+    - `Get`/`Put`/`Touch`/`Operate` and `ExecuteUDF` commands will return an `ErrKeyNotFound` error when the key does not exist in the database. The old behavior used to be not to return an error, but have an empty `Record.Bins`.
+    - Renames `Statement.Addfilter` to `Statement.SetFilter`, change the name and type of `Statement.Filters` to `Statement.Filter`.
+    - Remove `ClientPolicy.RequestProleReplicas`. THe client will always request them.
+    - Removes `ScanPolicy.ServerSocketTimeout` and `QueryPolicy.ServerSocketTimeout` in favor of the already existing `Policy.SocketTimeout`.
+    - Renames `Policy.Timeout` to `Policy.TotalTimeout` to make the naming consistent with other clients.
+    - Moves `atomic` package to internal.
+    - Moves `ParticleType` package to internal.
+    - Moves `RequestNodeInfo` and `RequestNodeStats` to methods on Node object, and adds `InfoPolicy` to the relevant API signatures.
+    - Removes `WaitUntilMigrationIsFinished` from `Scan`/`Query` policies.
+    - Changes `NewConnection` method signature, makes `LoginCommand` private.
+    - Makes `OperationType` private.
+    - Remove long deprecated method for pool management.
+    - Removes unused `ReadN` method in `Connection`.
+    - Embeds Policies as values and not pointers inside `MultiPolicy`, `ScanPolicy`, `QueryPolicy`
+
+  * **Minor**:
+    - Fixes a race condition in the `AdminCommand`.
+    - Synchronize the `XORShift` to avoid race conditions.
+    - Completely removes deprecated LDT code.
+
+## March 11 2019: v1.39.0
+
+  Major improvements Release.
+
+  * **Improvements**
+
+    - Significantly improves `Batch`/`Scan`/`Query`/`UDF`/`QueryAggregate` performance, up to 10x depending on the number of records.
+
+  * **Changes**
+
+    - Removes `BatchPolicy.UseBatchDirect` from the code since it is not supported on the server anymore.
+
+## February 21 2019: v1.38.0
+
+  * **New Features**
+
+    - Support new server `truncate-namespace` command via `Client.Truncate` when `set` is not specified.
+
+  * **Improvements**
+
+    - The client will not clear a partition map entry when a node reports that it no longer owns that partition entry until another node claims ownership.
+    - Adapt UDF test for new server changes. The server will not return an error after `RemoveUDF` if the UDF did not exist.
+    - Improves a few tests and relaxes tolerances in tests to accommodate slower cloud test environments.
+
+  * **Fixes**
+
+    - Fixes a race condition in XOR shift RNG.
+    - Fixes a race condition in the AdminCommand.
+
+
+## December 3 2018: v1.37.0
+
+  * **New Features**
+
+    - Support lut-now parameter for Client.Truncate() in servers that support and require it.
+    - Added support for CDT Map Relative Ops: `MapGetByKeyRelativeIndexRangeOp`, `MapGetByKeyRelativeIndexRangeCountOp`, `MapGetByValueRelativeRankRangeOp`, `MapGetByValueRelativeRankRangeCountOp`, `MapRemoveByKeyRelativeIndexRangeOp`, `MapRemoveByKeyRelativeIndexRangeCountOp`.
+    - Added support for CDT List Relative Ops: `ListGetByValueRelativeRankRangeOp`, `ListGetByValueRelativeRankRangeCountOp`, `ListRemoveByValueRelativeRankRangeOp`, `ListRemoveByValueRelativeRankRangeCountOp`.
+    - Added `INFINITY` and `WILDCARD` values for use in CDT map/list comparators.
+
+  * **Improvements**
+
+    - Increase default `Policy.SocketTimeout` to 30s. If `SocketTimeout` is longer than `Timeout`, `Timeout` will be used instead silently. This change is done for the client to perform more intuitively in cloud environments.
+    - Never return a random node if a node was not found in the partition map.
+    - Return more descriptive error messages on various partition map and other node related errors.
+
+  * **Changes**
+
+    - Remove the ability to force old batch direct protocol on the client because the server will be removing support for the old batch direct protocol.
+    - Update admin message version to 2.
+    - Remove unused error codes.
+    - Remove Go 1.7 and 1.8 from travis tests due to incompatibility with the test framework.
+
+## November 1 2018: v1.36.0
+
+  Feature Release.
+
+  * **New Features**
+
+    - Support rackaware feature. You need to set the `ClientPolicy.RackAware = true`, and set the `ClientPolicy.RackId`. All read operations will try to choose a node on the same rack if `Policy.ReplicaPolicy = PREFER_RACK`. This feature is especially useful when the app/cluster are on the cloud and network throughput over different zones are price differently.
+
+  * **Improvements**
+
+    - Update Operate command documentation.
+    - Improve an expectation in a CDT Map test.
+    - Move UDF object test to the proper file.
+    - Support float64 struct fields when the value of the field has been changed inside lua and set to int - will only affect clusters which support float.
+    - Fixes an issue where key value was sent and cause server PARAMETER_ERROR via the operate command if policy.SendKey was set but no write operations were passed.
+    - Updated README example with clarification.
+
+  * **Fixes**
+
+    - Fixes an issue where multiple operation results for a bin would be appended to the first result if it was a list.
+
+## October 2 2018: v1.35.2
+
+  Improvement release.
+
+  * **Improvements**
+
+    - Do not allocate a partition map on each tend unless needed.
+    - Adds `ConnectionsClosed` stat and sets the connection and dataBuffer to nil in a few places to help the GC.
+    - Use a heap data structure for connection pooling instead of a queue.
+      This allows better management of connections after a surge, since it keeps the unused connection in the bottom of the heap to close.
+      It also helps with performance a bit due to better caching of the data structure in CPU.
+
+## September 18 2018: v1.35.1
+
+  Hot fix release. We recommend updating to this version if you are using authentication.
+
+  * **Fixes**
+
+    - Fixes a regression to avoid hashing passwords per each login, using the cached password.
+
+  * **Changes**
+
+    - Minor code clean up and dead code removal.
+
+
+## August 29 2018: v1.35.0
+
+  * **New Features**
+
+    - Support for external authentication (LDAP).
+    - Support Map and List WriteFlags: `NoFail` and `Partial`.
+    - Support load balancers as seed node.
+
+  * **Changes**
+
+    - Change default Scan/Query `ServerSocketTimeout` to 30s.
+
+  * **Improvements**
+
+    - Adds `QueryPolicy.ServerSocketTimeout` and `QueryPolicy.FailOnClusterChange` for when the queries are automatically converted to scans.
+    - Minor documentation improvements.
+    - Synchronize logging at all situations.
+    - Add -debug switch to allow logging at debug level in tests.
+    - Allow the user to define the namespace for tests to run on.
+
+  * **Fixes**
+
+    - Fix a few go vet errors for Go 1.11.
+    - Fixes minor unsigned length conversions for admin command.
+
+## August 29 2018: v1.34.2
+
+  Fix release.
+
+  * **Fixes**
+
+    - Use pointer receiver for `AerospikeError.SetInDoubt` and `AerospikeError.MarkInDoubt`.
+    - Remove unused variable in truncate test.
+
+  * **Changes**
+
+    - Add Go 1.11 to Travis' test versions.
+    - Use the last error code in MaxRetries timeout errors for Go 1.11.
+
+## August 9 2018: v1.34.1
+
+  Hot fix release. We recommend updating to this version asap, especially if you are using the Strong Consistency feature.
+
+  * **Fixes**
+
+    - Fixes an issue where a race condition was preventing the partition table to form correctly. (CLIENT-1028)
+
+## July 17 2018: v1.34.0
+
+  * **Changes**
+
+    - Removed the LDT code completely.
+    - Adds build tag `app_engine` for compatibility with Google's App Engine. Query Aggregate features are not available in this mode due to lua limitations.
+
+  * **Improvements**
+
+    - Document how to use AerospikeError type in the code.
+    - Allow Task.OnComplete() to be listened to by multiple goroutines. Thanks to [HArmen](https://github.com/alicebob)
+
+  * **Fixes**
+
+    - Fixes an issue where `ClientPolicy.FailIfNotConnected` flag was not respected.
+    - Fixes a merging issue for PartitionMap, and add a naive validation for partition maps. (CLIENT-1027)
+
+## June 11 2018: v1.33.0
+
+  * **New Features**
+
+    - Adds `BatchPolicy.AllowPartialResults` flag to allow the batch command return partial records returned from the cluster.
+    - Adds `INVERTED` flag to the `MapReturnType`. Take a look at INVERTED test in `cdt_map_test.go` to see how to use it.
+    - Adds a lot of new Ordered Map and List operations and brings the client up to date with the latest server API.
+
+  * **Changes**
+
+    - Use the default values for `BasePolicy` in `BatchPolicy` to keep the behavior consistent with the older releases.
+
+  * **Improvements**
+
+    - Adds a recover to the tend goroutine to guarantee the client will recover from internal crashes.
+    - Removes unneeded type casts.
+    - Uses the new stat name for migrations check.
+
+  * **Fixes**
+
+    - Fixes TTL in `GetObject` and `BatchGetObject` reflection API.
+    - Handle extension marker in List headers.
+
+## March 15 2018: v1.32.0
+
+  Major feature release.
+
+  * **New Features**
+  
+    - Support for *Strong Consistency* mode in Aerospike Server v4. You will need to set the `policy.LinearizeRead` to `true`. Adds `AerospikeError.InDoubt()` method.
+    - Set the resulting `Record.Key` value in Batch Operations to the Original User-Provided Key to preserve the original namespace/set/userValue and avoid memory allocation.
+
+  * **Changes**
+
+    - Does not retry on writes by default, and put a 100ms timeout on all transactions by default.
+    - Changed some warn logs to debug level.
+    - Add missing stats counters to improve statistics reports.
+    - Uses sync.Once instead of sync.Mutex for `Connection.close` method.
+    - Added `DefaultBufferSize` for initial buffer size for connections.
+
+  * **Fixes**
+
+    - Fix the tests for object marshalling to account for monotonic time in Go v1.8+.
+    - Stops the ongoing tends on initial connection errors.
+
+
 ## November 29 2017: v1.31.0
 
   Feature release.
 
   * **New Features**
   
-    - Support for newer Batch Protocol. Add `BatchGetComplex` for complex batch queries. Old batch API upgraded to automatically support the new protocol under the hood, unless `BatchPolicy.UseBatchDirect` flag is iet to `true`.
+    - Support for newer Batch Protocol. Add `BatchGetComplex` for complex batch queries. Old batch API upgraded to automatically support the new protocol under the hood, unless `BatchPolicy.UseBatchDirect` flag is set to `true`.
 
   * **Changes**
 

@@ -1,6 +1,6 @@
 // +build go1.8
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ import (
 	"crypto/tls"
 )
 
-func cloneTlsConfig(c *tls.Config) *tls.Config {
+func cloneTLSConfig(c *tls.Config) *tls.Config {
 	return c.Clone()
 }

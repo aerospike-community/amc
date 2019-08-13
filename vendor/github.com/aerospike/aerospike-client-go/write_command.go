@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -77,6 +77,10 @@ func (cmd *writeCommand) parseResult(ifc command, conn *Connection) error {
 	resultCode := cmd.dataBuffer[13] & 0xFF
 
 	if resultCode != 0 {
+		if resultCode == byte(KEY_NOT_FOUND_ERROR) {
+			return ErrKeyNotFound
+		}
+
 		return NewAerospikeError(ResultCode(resultCode))
 	}
 	if err := cmd.emptySocket(conn); err != nil {
@@ -86,5 +90,5 @@ func (cmd *writeCommand) parseResult(ifc command, conn *Connection) error {
 }
 
 func (cmd *writeCommand) Execute() error {
-	return cmd.execute(cmd)
+	return cmd.execute(cmd, false)
 }

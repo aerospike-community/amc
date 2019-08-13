@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ type RegisterTask struct {
 // NewRegisterTask initializes a RegisterTask with fields needed to query server nodes.
 func NewRegisterTask(cluster *Cluster, packageName string) *RegisterTask {
 	return &RegisterTask{
-		baseTask:    newTask(cluster, false),
+		baseTask:    newTask(cluster),
 		packageName: packageName,
 	}
 }
@@ -40,7 +40,7 @@ func (tskr *RegisterTask) IsDone() (bool, error) {
 	done := false
 
 	for _, node := range nodes {
-		responseMap, err := node.requestInfoWithRetry(5, command)
+		responseMap, err := node.requestInfoWithRetry(&tskr.cluster.infoPolicy, 5, command)
 		if err != nil {
 			return false, err
 		}

@@ -1,6 +1,6 @@
 // +build !go1.8
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"crypto/tls"
 )
 
-func cloneTlsConfig(c *tls.Config) *tls.Config {
+func cloneTLSConfig(c *tls.Config) *tls.Config {
 	// .Clone() method is not available in go versions before 1.8
 	return &tls.Config{
 		Certificates:             c.Certificates,
@@ -36,9 +36,9 @@ func cloneTlsConfig(c *tls.Config) *tls.Config {
 		NameToCertificate:        c.NameToCertificate,
 		NextProtos:               c.NextProtos,
 		PreferServerCipherSuites: c.PreferServerCipherSuites,
-		Rand:       c.Rand,
-		RootCAs:    c.RootCAs,
-		ServerName: c.ServerName,
-		Time:       c.Time,
+		Rand:                     c.Rand,
+		RootCAs:                  c.RootCAs,
+		ServerName:               c.ServerName,
+		Time:                     c.Time,
 	}
 }

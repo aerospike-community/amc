@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package types
 
 import (
-	. "github.com/aerospike/aerospike-client-go/types/atomic"
+	. "github.com/aerospike/aerospike-client-go/internal/atomic"
 )
 
 // Pool implements a general purpose fixed-size pool.

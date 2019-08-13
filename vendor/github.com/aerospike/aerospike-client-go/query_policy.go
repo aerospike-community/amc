@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ package aerospike
 
 // QueryPolicy encapsulates parameters for policy attributes used in query operations.
 type QueryPolicy struct {
-	*MultiPolicy
+	MultiPolicy
 }
 
 // NewQueryPolicy generates a new QueryPolicy instance with default values.
 func NewQueryPolicy() *QueryPolicy {
 	return &QueryPolicy{
-		MultiPolicy: NewMultiPolicy(),
+		MultiPolicy: *NewMultiPolicy(),
 	}
 }

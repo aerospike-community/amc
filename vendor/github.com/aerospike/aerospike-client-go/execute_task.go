@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@ import (
 type ExecuteTask struct {
 	*baseTask
 
-	taskId uint64
+	taskID uint64
 	scan   bool
 }
 
 // NewExecuteTask initializes task with fields needed to query server nodes.
 func NewExecuteTask(cluster *Cluster, statement *Statement) *ExecuteTask {
 	return &ExecuteTask{
-		baseTask: newTask(cluster, false),
-		taskId:   statement.TaskId,
+		baseTask: newTask(cluster),
+		taskID:   statement.TaskId,
 		scan:     statement.IsScan(),
 	}
 }
@@ -47,22 +47,26 @@ func (etsk *ExecuteTask) IsDone() (bool, error) {
 		module = "query"
 	}
 
-	command := "jobs:module=" + module + ";cmd=get-job;trid=" + strconv.FormatUint(etsk.taskId, 10)
+	command := "jobs:module=" + module + ";cmd=get-job;trid=" + strconv.FormatUint(etsk.taskID, 10)
 
 	nodes := etsk.cluster.GetNodes()
 
 	for _, node := range nodes {
-		responseMap, err := node.requestInfoWithRetry(5, command)
+		responseMap, err := node.requestInfoWithRetry(&etsk.cluster.infoPolicy, 5, command)
 		if err != nil {
 			return false, err
 		}
 		response := responseMap[command]
 
 		if strings.HasPrefix(response, "ERROR:2") {
-			// Task not found. This could mean task already completed or
-			// task not started yet.  We are going to have to assume that
-			// the task already completed...
-			continue
+			if etsk.retries.Get() > 20 {
+				// Task not found. This could mean task already completed or
+				// task not started yet.  We are going to have to assume that
+				// the task already completed...
+				continue
+			}
+			// Task not found, and number of retries are not enough; assume task is not started yet.
+			return false, nil
 		}
 
 		if strings.HasPrefix(response, "ERROR:") {

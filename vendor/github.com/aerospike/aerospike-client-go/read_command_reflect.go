@@ -1,6 +1,6 @@
 // +build !as_performance
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/aerospike/aerospike-client-go/types"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
 )
 
@@ -53,6 +52,7 @@ func parseObject(
 		}
 	}
 
+	supportsFloat := cmd.cluster.supportsFloat.Get()
 	if opCount > 0 {
 		rv := *cmd.object
 
@@ -73,7 +73,7 @@ func parseObject(
 		iobj := indirect(rv)
 		mappings := objectMappings.getMapping(iobj.Type())
 
-		if err := setObjectMetaFields(iobj, TTL(expiration), generation); err != nil {
+		if err := setObjectMetaFields(iobj, expiration, generation); err != nil {
 			return err
 		}
 
@@ -84,9 +84,9 @@ func parseObject(
 			name := string(cmd.dataBuffer[receiveOffset+8 : receiveOffset+8+nameSize])
 			receiveOffset += 4 + 4 + nameSize
 
-			particleBytesSize := int(opSize - (4 + nameSize))
+			particleBytesSize := opSize - (4 + nameSize)
 			value, _ := bytesToParticle(particleType, cmd.dataBuffer, receiveOffset, particleBytesSize)
-			if err := setObjectField(mappings, iobj, name, value); err != nil {
+			if err := setObjectField(mappings, iobj, name, value, supportsFloat); err != nil {
 				return err
 			}
 
@@ -106,7 +106,7 @@ func setObjectMetaFields(obj reflect.Value, ttl, gen uint32) error {
 	if ttlMap != nil {
 		for i := range ttlMap {
 			f := iobj.FieldByName(ttlMap[i])
-			if err := setValue(f, ttl); err != nil {
+			if err := setValue(f, ttl, true); err != nil {
 				return err
 			}
 		}
@@ -115,7 +115,7 @@ func setObjectMetaFields(obj reflect.Value, ttl, gen uint32) error {
 	if genMap != nil {
 		for i := range genMap {
 			f := iobj.FieldByName(genMap[i])
-			if err := setValue(f, gen); err != nil {
+			if err := setValue(f, gen, true); err != nil {
 				return err
 			}
 		}
@@ -124,7 +124,7 @@ func setObjectMetaFields(obj reflect.Value, ttl, gen uint32) error {
 	return nil
 }
 
-func setObjectField(mappings map[string]string, obj reflect.Value, fieldName string, value interface{}) error {
+func setObjectField(mappings map[string]string, obj reflect.Value, fieldName string, value interface{}, supportsFloat bool) error {
 	if value == nil {
 		return nil
 	}
@@ -133,10 +133,10 @@ func setObjectField(mappings map[string]string, obj reflect.Value, fieldName str
 		fieldName = name
 	}
 	f := obj.FieldByName(fieldName)
-	return setValue(f, value)
+	return setValue(f, value, supportsFloat)
 }
 
-func setValue(f reflect.Value, value interface{}) error {
+func setValue(f reflect.Value, value interface{}, supportsFloat bool) error {
 	// find the name based on tag mapping
 	if f.CanSet() {
 		if value == nil {
@@ -158,7 +158,7 @@ func setValue(f reflect.Value, value interface{}) error {
 			case uint32:
 				f.SetUint(uint64(v))
 			case uint64:
-				f.SetUint(uint64(v))
+				f.SetUint(v)
 			case uint:
 				f.SetUint(uint64(v))
 			default:
@@ -168,9 +168,12 @@ func setValue(f reflect.Value, value interface{}) error {
 			// if value has returned as a float
 			if fv, ok := value.(float64); ok {
 				f.SetFloat(fv)
+			} else if supportsFloat {
+				// an int value has been set in the float - possibly due to a lua UDF
+				f.SetFloat(float64(value.(int)))
 			} else {
 				// otherwise it is an old float64<->int64 marshalling type cast which needs to be set as int
-				f.SetFloat(float64(math.Float64frombits(uint64(value.(int)))))
+				f.SetFloat(math.Float64frombits(uint64(value.(int))))
 			}
 		case reflect.String:
 			rv := reflect.ValueOf(value.(string))
@@ -187,7 +190,7 @@ func setValue(f reflect.Value, value interface{}) error {
 		case reflect.Ptr:
 			switch f.Type().Elem().Kind() {
 			case reflect.Int:
-				tempV := int(value.(int))
+				tempV := value.(int)
 				rv := reflect.ValueOf(&tempV)
 				if rv.Type() != f.Type() {
 					rv = rv.Convert(f.Type())
@@ -201,7 +204,7 @@ func setValue(f reflect.Value, value interface{}) error {
 				}
 				f.Set(rv)
 			case reflect.String:
-				tempV := string(value.(string))
+				tempV := value.(string)
 				rv := reflect.ValueOf(&tempV)
 				if rv.Type() != f.Type() {
 					rv = rv.Convert(f.Type())
@@ -333,7 +336,7 @@ func setValue(f reflect.Value, value interface{}) error {
 							}
 
 							if valMap[alias] != nil {
-								if err := setValue(reflect.Indirect(newObjPtr).FieldByName(fld.Name), valMap[alias]); err != nil {
+								if err := setValue(reflect.Indirect(newObjPtr).FieldByName(fld.Name), valMap[alias], supportsFloat); err != nil {
 									return err
 								}
 							}
@@ -358,7 +361,7 @@ func setValue(f reflect.Value, value interface{}) error {
 			}
 
 			for i := 0; i < theArray.Len(); i++ {
-				if err := setValue(f.Index(i), theArray.Index(i).Interface()); err != nil {
+				if err := setValue(f.Index(i), theArray.Index(i).Interface(), supportsFloat); err != nil {
 					return err
 				}
 			}
@@ -389,7 +392,7 @@ func setValue(f reflect.Value, value interface{}) error {
 						switch newVal.Kind() {
 						case reflect.Map, reflect.Slice, reflect.Array:
 							newVal = reflect.New(f.Type().Elem())
-							if err := setValue(newVal.Elem(), elem); err != nil {
+							if err := setValue(newVal.Elem(), elem, supportsFloat); err != nil {
 								return err
 							}
 							newVal = reflect.Indirect(newVal)
@@ -436,7 +439,7 @@ func setValue(f reflect.Value, value interface{}) error {
 				}
 
 				if valMap[alias] != nil {
-					if err := setValue(f.FieldByName(fld.Name), valMap[alias]); err != nil {
+					if err := setValue(f.FieldByName(fld.Name), valMap[alias], supportsFloat); err != nil {
 						return err
 					}
 				}

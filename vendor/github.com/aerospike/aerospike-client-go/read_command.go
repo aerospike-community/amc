@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +22,6 @@ import (
 	. "github.com/aerospike/aerospike-client-go/types"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
 )
-
-type readCommandLike interface {
-	command
-
-	handleWriteKeyNotFoundError(ResultCode) error
-}
 
 type readCommand struct {
 	singleCommand
@@ -76,7 +70,7 @@ func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
 	// Read header.
 	_, err := conn.Read(cmd.dataBuffer, int(_MSG_TOTAL_HEADER_SIZE))
 	if err != nil {
-		Logger.Warn("parse result error: " + err.Error())
+		Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
 		return err
 	}
 
@@ -104,22 +98,19 @@ func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
 		}
 		_, err = conn.Read(cmd.dataBuffer, receiveSize)
 		if err != nil {
-			Logger.Warn("parse result error: " + err.Error())
+			Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
 			return err
 		}
 
 	}
 
 	if resultCode != 0 {
-		if resultCode == KEY_NOT_FOUND_ERROR && cmd.object == nil {
-			if rcmd, ok := ifc.(readCommandLike); ok {
-				return rcmd.handleWriteKeyNotFoundError(resultCode)
-			}
-			return nil
+		if resultCode == KEY_NOT_FOUND_ERROR {
+			return ErrKeyNotFound
 		}
 
 		if resultCode == UDF_BAD_RESPONSE {
-			cmd.record, _ = cmd.parseRecord(opCount, fieldCount, generation, expiration)
+			cmd.record, _ = cmd.parseRecord(ifc, opCount, fieldCount, generation, expiration)
 			err := cmd.handleUdfError(resultCode)
 			Logger.Warn("UDF execution error: " + err.Error())
 			return err
@@ -135,7 +126,7 @@ func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
 			return nil
 		}
 
-		cmd.record, err = cmd.parseRecord(opCount, fieldCount, generation, expiration)
+		cmd.record, err = cmd.parseRecord(ifc, opCount, fieldCount, generation, expiration)
 		if err != nil {
 			return err
 		}
@@ -156,6 +147,7 @@ func (cmd *readCommand) handleUdfError(resultCode ResultCode) error {
 }
 
 func (cmd *readCommand) parseRecord(
+	ifc command,
 	opCount int,
 	fieldCount int,
 	generation uint32,
@@ -163,6 +155,10 @@ func (cmd *readCommand) parseRecord(
 ) (*Record, error) {
 	var bins BinMap
 	receiveOffset := 0
+
+	type opList []interface{}
+	_, isOperate := ifc.(*operateCommand)
+	var binNamesSet []string
 
 	// There can be fields in the response (setname etc).
 	// But for now, ignore them. Expose them to the API if needed in the future.
@@ -187,7 +183,7 @@ func (cmd *readCommand) parseRecord(
 		name := string(cmd.dataBuffer[receiveOffset+8 : receiveOffset+8+nameSize])
 		receiveOffset += 4 + 4 + nameSize
 
-		particleBytesSize := int(opSize - (4 + nameSize))
+		particleBytesSize := opSize - (4 + nameSize)
 		value, _ := bytesToParticle(particleType, cmd.dataBuffer, receiveOffset, particleBytesSize)
 		receiveOffset += particleBytesSize
 
@@ -195,17 +191,28 @@ func (cmd *readCommand) parseRecord(
 			bins = make(BinMap, opCount)
 		}
 
-		// for operate list command results
-		if prev, exists := bins[name]; exists {
-			if res, ok := prev.([]interface{}); ok {
-				// List already exists.  Add to it.
-				bins[name] = append(res, value)
+		if isOperate {
+			// for operate list command results
+			if prev, exists := bins[name]; exists {
+				if res, ok := prev.(opList); ok {
+					// List already exists.  Add to it.
+					bins[name] = append(res, value)
+				} else {
+					// Make a list to store all values.
+					bins[name] = opList{prev, value}
+					binNamesSet = append(binNamesSet, name)
+				}
 			} else {
-				// Make a list to store all values.
-				bins[name] = []interface{}{prev, value}
+				bins[name] = value
 			}
 		} else {
 			bins[name] = value
+		}
+	}
+
+	if isOperate {
+		for i := range binNamesSet {
+			bins[binNamesSet[i]] = []interface{}(bins[binNamesSet[i]].(opList))
 		}
 	}
 
@@ -217,10 +224,5 @@ func (cmd *readCommand) GetRecord() *Record {
 }
 
 func (cmd *readCommand) Execute() error {
-	return cmd.execute(cmd)
-}
-
-func (cmd *readCommand) handleWriteKeyNotFoundError(resultCode ResultCode) error {
-	// command returns no error if key was not found
-	return nil
+	return cmd.execute(cmd, true)
 }

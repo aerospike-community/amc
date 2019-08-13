@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -72,40 +73,68 @@ func (lgr *logger) SetLevel(level LogPriority) {
 func (lgr *logger) LogAtLevel(level LogPriority, format string, v ...interface{}) {
 	switch level {
 	case DEBUG:
-		lgr.Debug(format, v)
+		lgr.Debug(format, v...)
 	case INFO:
-		lgr.Info(format, v)
+		lgr.Info(format, v...)
 	case WARNING:
-		lgr.Warn(format, v)
+		lgr.Warn(format, v...)
 	case ERR:
-		lgr.Error(format, v)
+		lgr.Error(format, v...)
 	}
 }
 
 // Debug logs a message if log level allows to do so.
 func (lgr *logger) Debug(format string, v ...interface{}) {
+	lgr.mutex.RLock()
+	defer lgr.mutex.RUnlock()
+
 	if lgr.level <= DEBUG {
-		lgr.Logger.Printf(format, v...)
+		if l, ok := lgr.Logger.(*log.Logger); ok {
+			l.Output(2, fmt.Sprintf(format, v...))
+		} else {
+			lgr.Logger.Printf(format, v...)
+		}
 	}
 }
 
 // Info logs a message if log level allows to do so.
 func (lgr *logger) Info(format string, v ...interface{}) {
+	lgr.mutex.RLock()
+	defer lgr.mutex.RUnlock()
+
 	if lgr.level <= INFO {
-		lgr.Logger.Printf(format, v...)
+		if l, ok := lgr.Logger.(*log.Logger); ok {
+			l.Output(2, fmt.Sprintf(format, v...))
+		} else {
+			lgr.Logger.Printf(format, v...)
+		}
 	}
 }
 
 // Warn logs a message if log level allows to do so.
 func (lgr *logger) Warn(format string, v ...interface{}) {
+	lgr.mutex.RLock()
+	defer lgr.mutex.RUnlock()
+
 	if lgr.level <= WARNING {
-		lgr.Logger.Printf(format, v...)
+		if l, ok := lgr.Logger.(*log.Logger); ok {
+			l.Output(2, fmt.Sprintf(format, v...))
+		} else {
+			lgr.Logger.Printf(format, v...)
+		}
 	}
 }
 
 // Error logs a message if log level allows to do so.
 func (lgr *logger) Error(format string, v ...interface{}) {
+	lgr.mutex.RLock()
+	defer lgr.mutex.RUnlock()
+
 	if lgr.level <= ERR {
-		lgr.Logger.Printf(format, v...)
+		if l, ok := lgr.Logger.(*log.Logger); ok {
+			l.Output(2, fmt.Sprintf(format, v...))
+		} else {
+			lgr.Logger.Printf(format, v...)
+		}
 	}
 }

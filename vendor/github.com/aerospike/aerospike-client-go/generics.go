@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ type int64Slice []int64
 func (ts int64Slice) PackList(buf BufferEx) (int, error) {
 	size := 0
 	for _, elem := range ts {
-		n, err := PackInt64(buf, int64(elem))
+		n, err := PackInt64(buf, elem)
 		size += n
 		if err != nil {
 			return size, err
@@ -378,7 +378,7 @@ func (tm stringInt64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -638,7 +638,7 @@ func (tm intInt64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -768,7 +768,7 @@ func (tm intInterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -924,7 +924,7 @@ func (tm int8Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -1054,7 +1054,7 @@ func (tm int8InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -1210,7 +1210,7 @@ func (tm int16Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -1340,7 +1340,7 @@ func (tm int16InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -1496,7 +1496,7 @@ func (tm int32Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -1626,7 +1626,7 @@ func (tm int32InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -1646,7 +1646,7 @@ type int64StringMap map[int64]string
 func (tm int64StringMap) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1672,7 +1672,7 @@ type int64IntMap map[int64]int
 func (tm int64IntMap) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1698,7 +1698,7 @@ type int64Int8Map map[int64]int8
 func (tm int64Int8Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1724,7 +1724,7 @@ type int64Int16Map map[int64]int16
 func (tm int64Int16Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1750,7 +1750,7 @@ type int64Int32Map map[int64]int32
 func (tm int64Int32Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1776,13 +1776,13 @@ type int64Int64Map map[int64]int64
 func (tm int64Int64Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -1802,7 +1802,7 @@ type int64Uint16Map map[int64]uint16
 func (tm int64Uint16Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1828,7 +1828,7 @@ type int64Uint32Map map[int64]uint32
 func (tm int64Uint32Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1854,7 +1854,7 @@ type int64Float32Map map[int64]float32
 func (tm int64Float32Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1880,7 +1880,7 @@ type int64Float64Map map[int64]float64
 func (tm int64Float64Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -1906,13 +1906,13 @@ type int64InterfaceMap map[int64]interface{}
 func (tm int64InterfaceMap) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -2068,7 +2068,7 @@ func (tm uint16Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -2198,7 +2198,7 @@ func (tm uint16InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -2354,7 +2354,7 @@ func (tm uint32Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -2484,7 +2484,7 @@ func (tm uint32InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -2640,7 +2640,7 @@ func (tm float32Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -2770,7 +2770,7 @@ func (tm float32InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -2926,7 +2926,7 @@ func (tm float64Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -3056,7 +3056,7 @@ func (tm float64InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err
@@ -3206,7 +3206,7 @@ type int64Uint64Map map[int64]uint64
 func (tm int64Uint64Map) PackMap(buf BufferEx) (int, error) {
 	size := 0
 	for k, v := range tm {
-		n, err := PackInt64(buf, int64(k))
+		n, err := PackInt64(buf, k)
 		size += n
 		if err != nil {
 			return size, err
@@ -3472,7 +3472,7 @@ func (tm uint64Int64Map) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = PackInt64(buf, int64(v))
+		n, err = PackInt64(buf, v)
 		size += n
 		if err != nil {
 			return size, err
@@ -3628,7 +3628,7 @@ func (tm uint64InterfaceMap) PackMap(buf BufferEx) (int, error) {
 			return size, err
 		}
 
-		n, err = __PackObject(buf, v, false)
+		n, err = packObject(buf, v, false)
 		size += n
 		if err != nil {
 			return size, err

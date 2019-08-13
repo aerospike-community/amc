@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ type IndexTask struct {
 // NewIndexTask initializes a task with fields needed to query server nodes.
 func NewIndexTask(cluster *Cluster, namespace string, indexName string) *IndexTask {
 	return &IndexTask{
-		baseTask:  newTask(cluster, false),
+		baseTask:  newTask(cluster),
 		namespace: namespace,
 		indexName: indexName,
 	}
@@ -46,7 +46,7 @@ func (tski *IndexTask) IsDone() (bool, error) {
 	r := regexp.MustCompile(`\.*load_pct=(\d+)\.*`)
 
 	for _, node := range nodes {
-		responseMap, err := node.requestInfoWithRetry(5, command)
+		responseMap, err := node.requestInfoWithRetry(&tski.cluster.infoPolicy, 5, command)
 		if err != nil {
 			return false, err
 		}
@@ -56,7 +56,7 @@ func (tski *IndexTask) IsDone() (bool, error) {
 			index := strings.Index(response, find)
 
 			if index < 0 {
-				if tski.retries > 2 {
+				if tski.retries.Get() > 20 {
 					complete = true
 				}
 				continue

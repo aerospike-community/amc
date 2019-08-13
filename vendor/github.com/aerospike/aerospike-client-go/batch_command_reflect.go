@@ -1,6 +1,6 @@
 // +build !as_performance
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ func batchParseObject(
 	generation uint32,
 	expiration uint32,
 ) error {
+	supportsFloat := cmd.node.cluster.supportsFloat.Get()
 	for i := 0; i < opCount; i++ {
 		if err := cmd.readBytes(8); err != nil {
 			err = newNodeError(cmd.node, err)
@@ -66,7 +67,7 @@ func batchParseObject(
 		}
 		name := string(cmd.dataBuffer[:nameSize])
 
-		particleBytesSize := int((opSize - (4 + nameSize)))
+		particleBytesSize := opSize - (4 + nameSize)
 		if err := cmd.readBytes(particleBytesSize); err != nil {
 			err = newNodeError(cmd.node, err)
 			return err
@@ -78,7 +79,11 @@ func batchParseObject(
 		}
 
 		iobj := indirect(obj)
-		if err := setObjectField(cmd.resObjMappings, iobj, name, value); err != nil {
+		if err := setObjectField(cmd.resObjMappings, iobj, name, value, supportsFloat); err != nil {
+			return err
+		}
+
+		if err := setObjectMetaFields(obj, expiration, generation); err != nil {
 			return err
 		}
 	}

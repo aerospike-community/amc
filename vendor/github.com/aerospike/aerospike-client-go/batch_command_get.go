@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ type batchCommandGet struct {
 	// pointer to the object that's going to be unmarshalled
 	objects      []*reflect.Value
 	objectsFound []bool
-	isBatchIndex bool
 }
 
 // this method uses reflection.
@@ -76,7 +75,6 @@ func newBatchCommandGet(
 		binNames:         binNames,
 		records:          records,
 		readAttr:         readAttr,
-		isBatchIndex:     !policy.UseBatchDirect && node != nil && node.supportsBatchIndex.Get(),
 	}
 	res.oneShot = false
 	return res
@@ -87,7 +85,6 @@ func (cmd *batchCommandGet) cloneBatchCommand(batch *batchNode, bns *batchNamesp
 	res.node = batch.Node
 	res.batch = batch
 	res.batchNamespace = bns
-	res.isBatchIndex = !cmd.policy.UseBatchDirect && batch.Node.supportsBatchIndex.Get()
 
 	return &res
 }
@@ -97,10 +94,7 @@ func (cmd *batchCommandGet) getPolicy(ifc command) Policy {
 }
 
 func (cmd *batchCommandGet) writeBuffer(ifc command) error {
-	if cmd.isBatchIndex {
-		return cmd.setBatchIndexReadCompat(cmd.policy, cmd.keys, cmd.batch, cmd.binNames, cmd.readAttr)
-	}
-	return cmd.setBatchRead(cmd.policy, cmd.keys, cmd.batchNamespace, cmd.binNames, cmd.readAttr)
+	return cmd.setBatchIndexReadCompat(cmd.policy, cmd.keys, cmd.batch, cmd.binNames, cmd.readAttr)
 }
 
 // On batch operations the key values are not returned from the server
@@ -177,14 +171,9 @@ func (cmd *batchCommandGet) parseRecordResults(ifc command, receiveSize int) (bo
 		}
 
 		var offset int
-		if !cmd.isBatchIndex {
-			offset = cmd.batchNamespace.offsets[cmd.index]
-			cmd.index++
-		} else {
-			offset = batchIndex
-		}
+		offset = batchIndex
 
-		if cmd.isBatchIndex && cmd.indexRecords != nil {
+		if cmd.indexRecords != nil {
 			if len(cmd.indexRecords) > 0 {
 				if bytes.Equal(cmd.key.digest[:], cmd.indexRecords[offset].Key.digest[:]) {
 					if resultCode == 0 {
@@ -194,7 +183,7 @@ func (cmd *batchCommandGet) parseRecordResults(ifc command, receiveSize int) (bo
 					}
 				}
 			} else {
-				return false, NewAerospikeError(PARSE_ERROR, "Unexpected batch key returned: "+string(cmd.key.namespace)+","+Buffer.BytesToHexString(cmd.key.digest[:])+". Expected:"+Buffer.BytesToHexString(cmd.indexRecords[offset].Key.digest[:]))
+				return false, NewAerospikeError(PARSE_ERROR, "Unexpected batch key returned: "+cmd.key.namespace+","+Buffer.BytesToHexString(cmd.key.digest[:])+". Expected:"+Buffer.BytesToHexString(cmd.indexRecords[offset].Key.digest[:]))
 			}
 		} else {
 			if bytes.Equal(cmd.key.digest[:], cmd.keys[offset].digest[:]) {
@@ -213,7 +202,7 @@ func (cmd *batchCommandGet) parseRecordResults(ifc command, receiveSize int) (bo
 					}
 				}
 			} else {
-				return false, NewAerospikeError(PARSE_ERROR, "Unexpected batch key returned: "+string(cmd.key.namespace)+","+Buffer.BytesToHexString(cmd.key.digest[:])+". Expected: "+Buffer.BytesToHexString(cmd.indexRecords[offset].Key.digest[:]))
+				return false, NewAerospikeError(PARSE_ERROR, "Unexpected batch key returned: "+cmd.key.namespace+","+Buffer.BytesToHexString(cmd.key.digest[:])+". Expected: "+Buffer.BytesToHexString(cmd.indexRecords[offset].Key.digest[:]))
 			}
 		}
 	}
@@ -238,7 +227,7 @@ func (cmd *batchCommandGet) parseRecord(key *Key, opCount int, generation, expir
 		}
 		name := string(cmd.dataBuffer[:nameSize])
 
-		particleBytesSize := int(opSize - (4 + nameSize))
+		particleBytesSize := opSize - (4 + nameSize)
 		if err := cmd.readBytes(particleBytesSize); err != nil {
 			return nil, err
 		}
@@ -254,5 +243,5 @@ func (cmd *batchCommandGet) parseRecord(key *Key, opCount int, generation, expir
 }
 
 func (cmd *batchCommandGet) Execute() error {
-	return cmd.execute(cmd)
+	return cmd.execute(cmd, true)
 }

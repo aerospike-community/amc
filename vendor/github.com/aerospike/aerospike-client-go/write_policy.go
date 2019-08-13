@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,12 +57,6 @@ type WritePolicy struct {
 	// > 0: Actual expiration in seconds.
 	Expiration uint32
 
-	// Send user defined key in addition to hash digest on a record put.
-	// If the key is sent on a write, the key will be stored with the record on
-	// the server.
-	// The default is to not send the user defined key.
-	SendKey bool
-
 	// RespondPerEachOp defines for client.Operate() method, return a result for every operation.
 	// Some list operations do not return results by default (ListClearOp() for example).
 	// This can sometimes make it difficult to determine the desired result offset in the returned
@@ -76,19 +70,24 @@ type WritePolicy struct {
 
 	// DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
 	// This prevents deleted records from reappearing after node failures.
-	// Valid for Aerospike Server Enterprise Edition 4+ only.
+	// Valid for Aerospike Server Enterprise Edition 3.10+ only.
 	DurableDelete bool
 }
 
 // NewWritePolicy initializes a new WritePolicy instance with default parameters.
 func NewWritePolicy(generation, expiration uint32) *WritePolicy {
-	return &WritePolicy{
+	res := &WritePolicy{
 		BasePolicy:         *NewPolicy(),
 		RecordExistsAction: UPDATE,
 		GenerationPolicy:   NONE,
 		CommitLevel:        COMMIT_ALL,
 		Generation:         generation,
 		Expiration:         expiration,
-		SendKey:            false,
 	}
+
+	// Writes may not be idempotent.
+	// do not allow retries on writes by default.
+	res.MaxRetries = 0
+
+	return res
 }

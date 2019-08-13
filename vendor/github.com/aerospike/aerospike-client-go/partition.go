@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,10 +47,10 @@ func newPartitionByKey(key *Key) Partition {
 }
 
 // NewPartition generates a partition instance.
-func NewPartition(namespace string, partitionId int) *Partition {
+func NewPartition(namespace string, partitionID int) *Partition {
 	return &Partition{
 		Namespace:   namespace,
-		PartitionId: partitionId,
+		PartitionId: partitionID,
 	}
 }
 

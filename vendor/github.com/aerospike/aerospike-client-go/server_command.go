@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ func (cmd *serverCommand) parseRecordResults(ifc command, receiveSize int) (bool
 				return false, err
 			}
 
-			particleBytesSize := int((opSize - (4 + nameSize)))
+			particleBytesSize := opSize - (4 + nameSize)
 			if err := cmd.readBytes(particleBytesSize); err != nil {
 				return false, err
 			}
@@ -86,5 +86,5 @@ func (cmd *serverCommand) parseRecordResults(ifc command, receiveSize int) (bool
 }
 
 func (cmd *serverCommand) Execute() error {
-	return cmd.execute(cmd)
+	return cmd.execute(cmd, false)
 }

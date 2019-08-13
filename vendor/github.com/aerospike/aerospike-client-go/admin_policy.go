@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,14 +19,30 @@ import "time"
 // AdminPolicy contains attributes used for user administration commands.
 type AdminPolicy struct {
 
-	// User administration command socket timeout in milliseconds.
-	// Default is one second timeout.
+	// User administration command socket timeout.
+	// Default is 2 seconds.
 	Timeout time.Duration
 }
 
 // NewAdminPolicy generates a new AdminPolicy with default values.
 func NewAdminPolicy() *AdminPolicy {
 	return &AdminPolicy{
-		Timeout: 1 * time.Second,
+		Timeout: _DEFAULT_TIMEOUT,
 	}
+}
+
+func (ap *AdminPolicy) deadline() (deadline time.Time) {
+	if ap != nil && ap.Timeout > 0 {
+		deadline = time.Now().Add(ap.Timeout)
+	}
+
+	return deadline
+}
+
+func (ap *AdminPolicy) timeout() time.Duration {
+	if ap != nil && ap.Timeout > 0 {
+		return ap.Timeout
+	}
+
+	return _DEFAULT_TIMEOUT
 }

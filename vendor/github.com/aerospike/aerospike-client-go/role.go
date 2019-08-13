@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Portions may be licensed to Aerospike, Inc. under one or more contributor
 // license agreements.
@@ -41,4 +41,7 @@ const (
 
 	// Read allows read transactions with the database.
 	Read privilegeCode = "read"
+
+	// Write allows write transactions with the database.
+	Write privilegeCode = "write"
 )

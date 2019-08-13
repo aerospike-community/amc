@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 Aerospike, Inc.
+ * Copyright 2013-2019 Aerospike, Inc.
  *
  * Portions may be licensed to Aerospike, Inc. under one or more contributor
  * license agreements.
@@ -17,16 +17,15 @@
 
 package aerospike
 
-// ConsistencyLevel indicates how replicas should be consulted in a read
-// operation to provide the desired consistency guarantee.
+// ConsistencyLevel indicates how duplicates should be consulted in a read operation.
+// Only makes a difference during migrations and only applicable in AP mode.
 type ConsistencyLevel int
 
 const (
-	// CONSISTENCY_ONE indicates only a single replica should be consulted in
-	// the read operation.
+	// CONSISTENCY_ONE indicates that only master should be involved in the read operation.
 	CONSISTENCY_ONE = iota
 
-	// CONSISTENCY_ALL indicates that all replicas should be consulted in
+	// CONSISTENCY_ALL indicates that all duplicates should be consulted in
 	// the read operation.
 	CONSISTENCY_ALL
 )

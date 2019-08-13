@@ -1,6 +1,6 @@
 // +build !as_performance
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import (
 	"errors"
 	"reflect"
 
-	. "github.com/aerospike/aerospike-client-go/types"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
 )
 
@@ -37,6 +36,7 @@ func parseBatchObject(
 	generation uint32,
 	expiration uint32,
 ) error {
+	supportsFloat := cmd.node.cluster.supportsFloat.Get()
 	if opCount > 0 {
 		rv := *cmd.objects[offset]
 
@@ -57,7 +57,7 @@ func parseBatchObject(
 		iobj := indirect(rv)
 		mappings := objectMappings.getMapping(iobj.Type())
 
-		if err := setObjectMetaFields(iobj, TTL(expiration), generation); err != nil {
+		if err := setObjectMetaFields(iobj, expiration, generation); err != nil {
 			return err
 		}
 
@@ -74,7 +74,7 @@ func parseBatchObject(
 			}
 			name := string(cmd.dataBuffer[:nameSize])
 
-			particleBytesSize := int(opSize - (4 + nameSize))
+			particleBytesSize := opSize - (4 + nameSize)
 			if err := cmd.readBytes(particleBytesSize); err != nil {
 				return err
 			}
@@ -82,7 +82,7 @@ func parseBatchObject(
 			if err != nil {
 				return err
 			}
-			if err := setObjectField(mappings, iobj, name, value); err != nil {
+			if err := setObjectField(mappings, iobj, name, value, supportsFloat); err != nil {
 				return err
 			}
 		}

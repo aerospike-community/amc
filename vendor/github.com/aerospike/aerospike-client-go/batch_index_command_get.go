@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ func newBatchIndexCommandGet(
 			policy:           policy,
 			records:          nil,
 			indexRecords:     records,
-			isBatchIndex:     true,
 		},
 		batch,
 	}
@@ -52,7 +51,6 @@ func (cmd *batchIndexCommandGet) cloneBatchIndexCommand(batch *batchNode) comman
 	res.batch = batch
 	res.node = batch.Node
 	res.batchNamespace = nil
-	res.isBatchIndex = true
 
 	return &res
 }
@@ -66,5 +64,5 @@ func (cmd *batchIndexCommandGet) writeBuffer(ifc command) error {
 }
 
 func (cmd *batchIndexCommandGet) Execute() error {
-	return cmd.execute(cmd)
+	return cmd.execute(cmd, true)
 }

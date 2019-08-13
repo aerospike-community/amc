@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,84 +15,20 @@
 package aerospike
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"strconv"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	. "github.com/aerospike/aerospike-client-go/logger"
+	"golang.org/x/sync/errgroup"
 
+	. "github.com/aerospike/aerospike-client-go/internal/atomic"
 	. "github.com/aerospike/aerospike-client-go/types"
-	. "github.com/aerospike/aerospike-client-go/types/atomic"
 )
-
-type partitionMap map[string][][]*Node
-
-// String implements stringer interface for partitionMap
-func (pm partitionMap) clone() partitionMap {
-	// Make shallow copy of map.
-	pmap := make(partitionMap, len(pm))
-	for ns, replArr := range pm {
-		newReplArr := make([][]*Node, len(replArr))
-		for i, nArr := range replArr {
-			newNArr := make([]*Node, len(nArr))
-			copy(newNArr, nArr)
-			newReplArr[i] = newNArr
-		}
-		pmap[ns] = newReplArr
-	}
-	return pmap
-}
-
-// String implements stringer interface for partitionMap
-func (pm partitionMap) merge(partMap partitionMap) {
-	// merge partitions; iterate over the new partition and update the old one
-	for ns, replicaArray := range partMap {
-		if pm[ns] == nil {
-			pm[ns] = make([][]*Node, len(replicaArray))
-		}
-
-		for i, nodeArray := range replicaArray {
-			if pm[ns][i] == nil {
-				pm[ns][i] = make([]*Node, len(nodeArray))
-			}
-
-			for j, node := range nodeArray {
-				if node != nil {
-					pm[ns][i][j] = node
-				}
-			}
-		}
-	}
-}
-
-// String implements stringer interface for partitionMap
-func (pm partitionMap) String() string {
-	res := bytes.Buffer{}
-	for ns, replicaArray := range pm {
-		for i, nodeArray := range replicaArray {
-			for j, node := range nodeArray {
-				res.WriteString(ns)
-				res.WriteString(",")
-				res.WriteString(strconv.Itoa(i))
-				res.WriteString(",")
-				res.WriteString(strconv.Itoa(j))
-				res.WriteString(",")
-				if node != nil {
-					res.WriteString(node.String())
-				} else {
-					res.WriteString("NIL")
-				}
-				res.WriteString("\n")
-			}
-		}
-	}
-	return res.String()
-}
 
 // Cluster encapsulates the aerospike cluster nodes and manages
 // them.
@@ -101,11 +37,11 @@ type Cluster struct {
 	seeds *SyncVal //[]*Host
 
 	// All aliases for all nodes in cluster.
-	// Only accessed within cluster tend thread.
+	// Only accessed within cluster tend goroutine.
 	aliases *SyncVal //map[Host]*Node
 
 	// Map of active nodes in cluster.
-	// Only accessed within cluster tend thread.
+	// Only accessed within cluster tend goroutine.
 	nodesMap *SyncVal //map[string]*Node
 
 	// Active nodes in cluster.
@@ -114,10 +50,11 @@ type Cluster struct {
 	statsLock sync.Mutex
 
 	// Hints for best node for a partition
-	partitionWriteMap    atomic.Value //partitionMap
-	partitionUpdateMutex sync.Mutex
+	partitionWriteMap atomic.Value //partitionMap
 
-	clientPolicy ClientPolicy
+	clientPolicy        ClientPolicy
+	infoPolicy          InfoPolicy
+	connectionThreshold AtomicInt // number of parallel opening connections
 
 	nodeIndex    uint64 // only used via atomic operations
 	replicaIndex uint64 // only used via atomic operations
@@ -128,7 +65,6 @@ type Cluster struct {
 
 	// Aerospike v3.6.0+
 	supportsFloat, supportsBatchIndex, supportsReplicasAll, supportsGeo *AtomicBool
-	requestProleReplicas                                                *AtomicBool
 
 	// User name in UTF-8 encoded bytes.
 	user string
@@ -160,6 +96,7 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 
 	newCluster := &Cluster{
 		clientPolicy: *policy,
+		infoPolicy:   InfoPolicy{Timeout: policy.Timeout},
 		tendChannel:  make(chan struct{}),
 
 		seeds:    NewSyncVal(hosts),
@@ -170,17 +107,20 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 
 		password: NewSyncVal(nil),
 
-		supportsFloat:        NewAtomicBool(false),
-		supportsBatchIndex:   NewAtomicBool(false),
-		supportsReplicasAll:  NewAtomicBool(false),
-		supportsGeo:          NewAtomicBool(false),
-		requestProleReplicas: NewAtomicBool(policy.RequestProleReplicas),
+		supportsFloat:       NewAtomicBool(false),
+		supportsBatchIndex:  NewAtomicBool(false),
+		supportsReplicasAll: NewAtomicBool(false),
+		supportsGeo:         NewAtomicBool(false),
 	}
 
 	newCluster.partitionWriteMap.Store(make(partitionMap))
 
 	// setup auth info for cluster
 	if policy.RequiresAuthentication() {
+		if policy.AuthMode == AuthModeExternal && policy.TlsConfig == nil {
+			return nil, errors.New("External Authentication requires TLS configuration to be set, because it sends clear password on the wire.")
+		}
+
 		newCluster.user = policy.User
 		hashedPass, err := hashPassword(policy.Password)
 		if err != nil {
@@ -204,7 +144,12 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 	newCluster.wgTend.Add(1)
 	go newCluster.clusterBoss(&newCluster.clientPolicy)
 
-	Logger.Debug("New cluster initialized and ready to be used...")
+	if err == nil {
+		Logger.Debug("New cluster initialized and ready to be used...")
+	} else {
+		Logger.Error("New cluster was not initialized successfully, but the client will keep trying to connect to the database. Error: %s", err.Error())
+	}
+
 	return newCluster, err
 }
 
@@ -216,6 +161,15 @@ func (clstr *Cluster) String() string {
 // Maintains the cluster on intervals.
 // All clean up code for cluster is here as well.
 func (clstr *Cluster) clusterBoss(policy *ClientPolicy) {
+	Logger.Info("Starting the cluster tend goroutine...")
+
+	defer func() {
+		if r := recover(); r != nil {
+			Logger.Error("Cluster tend goroutine crashed: %s", debug.Stack())
+			go clstr.clusterBoss(&clstr.clientPolicy)
+		}
+	}()
+
 	defer clstr.wgTend.Done()
 
 	tendInterval := policy.TendInterval
@@ -284,7 +238,6 @@ func (clstr *Cluster) tend() error {
 
 	floatSupport := true
 	batchIndexSupport := true
-	replicasAllSupport := true
 	geoSupport := true
 
 	for _, node := range nodes {
@@ -302,7 +255,7 @@ func (clstr *Cluster) tend() error {
 		go func(node *Node) {
 			defer wg.Done()
 			if err := node.Refresh(peers); err != nil {
-				Logger.Debug("Error occured while refreshing node: %s", node.String())
+				Logger.Debug("Error occurred while refreshing node: %s", node.String())
 			}
 		}(node)
 	}
@@ -321,6 +274,19 @@ func (clstr *Cluster) tend() error {
 			}(node)
 		}
 		wg.Wait()
+	}
+
+	var partitionMap partitionMap
+
+	// Use the following function to allocate memory for the partitionMap on demand.
+	// This will prevent the allocation when the cluster is stable, and make tend a bit faster.
+	pmlock := new(sync.Mutex)
+	setPartitionMap := func(l *sync.Mutex) {
+		l.Lock()
+		defer l.Unlock()
+		if partitionMap == nil {
+			partitionMap = clstr.getPartitions().clone()
+		}
 	}
 
 	// find the first host that connects
@@ -354,7 +320,8 @@ func (clstr *Cluster) tend() error {
 				// Create new node.
 				node := clstr.createNode(&nv)
 				peers.addNode(nv.name, node)
-				node.refreshPartitions(peers)
+				setPartitionMap(pmlock)
+				node.refreshPartitions(peers, partitionMap)
 				break
 			}
 		}(_peer)
@@ -366,7 +333,8 @@ func (clstr *Cluster) tend() error {
 		go func(node *Node) {
 			defer wg.Done()
 			if node.partitionChanged.Get() {
-				node.refreshPartitions(peers)
+				setPartitionMap(pmlock)
+				node.refreshPartitions(peers, partitionMap)
 			}
 		}(node)
 	}
@@ -398,32 +366,26 @@ func (clstr *Cluster) tend() error {
 		Logger.Warn("Some cluster nodes do not support float type. Disabling native float support in the client library...")
 	}
 
-	// Disable prole requests if some nodes don't support it.
-	if clstr.clientPolicy.RequestProleReplicas && !replicasAllSupport {
-		Logger.Warn("Some nodes don't support 'replicas-all'. Will use 'replicas-master' for all nodes.")
-	}
-
 	// set the cluster supported features
 	clstr.supportsFloat.Set(floatSupport)
 	clstr.supportsBatchIndex.Set(batchIndexSupport)
-	clstr.supportsReplicasAll.Set(replicasAllSupport)
-	clstr.requestProleReplicas.Set(clstr.clientPolicy.RequestProleReplicas && replicasAllSupport)
 	clstr.supportsGeo.Set(geoSupport)
 
 	// update all partitions in one go
-	var partitionMap partitionMap
+	updatePartitionMap := false
 	for _, node := range clstr.GetNodes() {
 		if node.partitionChanged.Get() {
-			if partitionMap == nil {
-				partitionMap = clstr.getPartitions().clone()
-			}
-
-			partitionMap.merge(node.partitionMap)
+			updatePartitionMap = true
+			break
 		}
 	}
 
-	if partitionMap != nil {
+	if updatePartitionMap {
 		clstr.setPartitions(partitionMap)
+	}
+
+	if err := clstr.getPartitions().validate(); err != nil {
+		Logger.Debug("Error validating the cluster partition map after tend: %s", err.Error())
 	}
 
 	// only log if node count is changed
@@ -519,6 +481,11 @@ func (clstr *Cluster) waitTillStabilized() error {
 				Logger.Warn(err.Error())
 			}
 
+			// // if there are no errors in connecting to the cluster, then validate the partition table
+			// if err == nil {
+			// 	err = clstr.getPartitions().validate()
+			// }
+
 			// Check to see if cluster has changed since the last Tend().
 			// If not, assume cluster has stabilized and return.
 			if count == len(clstr.GetNodes()) {
@@ -534,10 +501,12 @@ func (clstr *Cluster) waitTillStabilized() error {
 
 	select {
 	case <-time.After(clstr.clientPolicy.Timeout):
-		clstr.Close()
+		if clstr.clientPolicy.FailIfNotConnected {
+			clstr.Close()
+		}
 		return errors.New("Connecting to the cluster timed out.")
 	case err := <-doneCh:
-		if err != nil {
+		if err != nil && clstr.clientPolicy.FailIfNotConnected {
 			clstr.Close()
 		}
 		return err
@@ -554,6 +523,10 @@ func (clstr *Cluster) findAlias(alias *Host) *Node {
 }
 
 func (clstr *Cluster) setPartitions(partMap partitionMap) {
+	if err := partMap.validate(); err != nil {
+		Logger.Error("Partition map error: %s.", err.Error())
+	}
+
 	clstr.partitionWriteMap.Store(partMap)
 }
 
@@ -579,13 +552,9 @@ func (clstr *Cluster) seedNodes() (bool, error) {
 	Logger.Info("Seeding the cluster. Seeds count: %d", len(seedArray))
 
 	// Add all nodes at once to avoid copying entire array multiple times.
-	var wg sync.WaitGroup
-	wg.Add(len(seedArray))
 	for i, seed := range seedArray {
 		go func(index int, seed *Host) {
-			defer wg.Done()
-
-			nodesToAdd := &nodesToAddT{nodesToAdd: map[string]*Node{}}
+			nodesToAdd := make(nodesToAddT, 128)
 			nv := nodeValidator{}
 			err := nv.seedNodes(clstr, seed, nodesToAdd)
 			if err != nil {
@@ -593,7 +562,7 @@ func (clstr *Cluster) seedNodes() (bool, error) {
 				errChan <- err
 				return
 			}
-			clstr.addNodes(nodesToAdd.nodesToAdd)
+			clstr.addNodes(nodesToAdd)
 			successChan <- struct{}{}
 		}(i, seed)
 	}
@@ -614,7 +583,6 @@ L:
 			return true, nil
 		case <-time.After(clstr.clientPolicy.Timeout):
 			// time is up, no seeds found
-			wg.Wait()
 			break L
 		}
 	}
@@ -714,10 +682,10 @@ func (clstr *Cluster) findNodesToRemove(refreshCount int) []*Node {
 }
 
 func (clstr *Cluster) findNodeInPartitionMap(filter *Node) bool {
-	partitions := clstr.getPartitions()
+	partitionMap := clstr.getPartitions()
 
-	for _, replicaArray := range partitions {
-		for _, nodeArray := range replicaArray {
+	for _, partitions := range partitionMap {
+		for _, nodeArray := range partitions.Replicas {
 			for _, node := range nodeArray {
 				// Use reference equality for performance.
 				if node == filter {
@@ -822,46 +790,112 @@ func (clstr *Cluster) getReadNode(partition *Partition, replica ReplicaPolicy, s
 		return clstr.getMasterNode(partition)
 	case MASTER_PROLES:
 		return clstr.getMasterProleNode(partition)
+	case PREFER_RACK:
+		return clstr.getSameRackNode(partition, seq)
 	default:
 		// includes case RANDOM:
 		return clstr.GetRandomNode()
 	}
 }
 
+// getSameRackNode returns either a node on the same rack, or in Replica Sequence
+func (clstr *Cluster) getSameRackNode(partition *Partition, seq *int) (*Node, error) {
+	// RackAware has not been enabled in client policy.
+	if !clstr.clientPolicy.RackAware {
+		return nil, NewAerospikeError(UNSUPPORTED_FEATURE, "ReplicaPolicy is set to PREFER_RACK but ClientPolicy.RackAware is not set.")
+	}
+
+	pmap := clstr.getPartitions()
+	partitions := pmap[partition.Namespace]
+	if partitions == nil {
+		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
+	}
+
+	// CP mode (Strong Consistency) does not support the RackAware feature.
+	if partitions.CPMode {
+		return nil, NewAerospikeError(UNSUPPORTED_FEATURE, "ReplicaPolicy is set to PREFER_RACK but the cluster is in Strong Consistency Mode.")
+	}
+
+	replicaArray := partitions.Replicas
+
+	var seqNode *Node
+	for range replicaArray {
+		index := *seq % len(replicaArray)
+		node := replicaArray[index][partition.PartitionId]
+		*seq++
+
+		if node != nil && node.IsActive() {
+			// assign a node to seqNode in case no node was found on the same rack was found
+			if seqNode == nil {
+				seqNode = node
+			}
+
+			// if the node didn't belong to rack for that namespace, continue
+			nodeRack, err := node.Rack(partition.Namespace)
+			if err != nil {
+				continue
+			}
+
+			if node.IsActive() && nodeRack == clstr.clientPolicy.RackId {
+				return node, nil
+			}
+		}
+	}
+
+	// if no nodes were found belonging to the same rack, and no other node was also found
+	// then the partition table replicas are empty for that namespace
+	if seqNode == nil {
+		return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
+	}
+
+	return seqNode, nil
+}
+
 func (clstr *Cluster) getSequenceNode(partition *Partition, seq *int) (*Node, error) {
 	pmap := clstr.getPartitions()
-	replicaArray := pmap[partition.Namespace]
+	partitions := pmap[partition.Namespace]
+	if partitions == nil {
+		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
+	}
+
+	replicaArray := partitions.Replicas
 
 	if replicaArray != nil {
 		index := *seq % len(replicaArray)
 		node := replicaArray[index][partition.PartitionId]
+		*seq++
 
 		if node != nil && node.IsActive() {
 			return node, nil
 		}
-		*seq++
 	}
 
-	return clstr.GetRandomNode()
+	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
 }
 
 func (clstr *Cluster) getMasterNode(partition *Partition) (*Node, error) {
 	pmap := clstr.getPartitions()
-	replicaArray := pmap[partition.Namespace]
-
-	if replicaArray != nil {
-		node := replicaArray[0][partition.PartitionId]
-		if node != nil && node.IsActive() {
-			return node, nil
-		}
+	partitions := pmap[partition.Namespace]
+	if partitions == nil {
+		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
 	}
 
-	return clstr.GetRandomNode()
+	node := partitions.Replicas[0][partition.PartitionId]
+	if node != nil && node.IsActive() {
+		return node, nil
+	}
+
+	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
 }
 
 func (clstr *Cluster) getMasterProleNode(partition *Partition) (*Node, error) {
 	pmap := clstr.getPartitions()
-	replicaArray := pmap[partition.Namespace]
+	partitions := pmap[partition.Namespace]
+	if partitions == nil {
+		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
+	}
+
+	replicaArray := partitions.Replicas
 
 	if replicaArray != nil {
 		for range replicaArray {
@@ -873,7 +907,7 @@ func (clstr *Cluster) getMasterProleNode(partition *Partition) (*Node, error) {
 		}
 	}
 
-	return clstr.GetRandomNode()
+	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
 }
 
 // GetRandomNode returns a random node on the cluster
@@ -891,7 +925,8 @@ func (clstr *Cluster) GetRandomNode() (*Node, error) {
 			return node, nil
 		}
 	}
-	return nil, NewAerospikeError(INVALID_NODE_ERROR)
+
+	return nil, NewAerospikeError(INVALID_NODE_ERROR, "Cluster is empty.")
 }
 
 // GetNodes returns a list of all nodes in the cluster
@@ -936,7 +971,7 @@ func (clstr *Cluster) GetNodeByName(nodeName string) (*Node, error) {
 	node := clstr.findNodeByName(nodeName)
 
 	if node == nil {
-		return nil, NewAerospikeError(INVALID_NODE_ERROR)
+		return nil, NewAerospikeError(INVALID_NODE_ERROR, "Invalid node name"+nodeName)
 	}
 	return node, nil
 }
@@ -1047,4 +1082,27 @@ func (clstr *Cluster) changePassword(user string, password string, hash []byte) 
 // ClientPolicy returns the client policy that is currently used with the cluster.
 func (clstr *Cluster) ClientPolicy() (res ClientPolicy) {
 	return clstr.clientPolicy
+}
+
+// WarmUp fills the connection pool with connections for all nodes.
+// This is necessary on startup for high traffic programs.
+// If the count is <= 0, the connection queue will be filled.
+// If the count is more than the size of the pool, the pool will be filled.
+// Note: One connection per node is reserved for tend operations and is not used for transactions.
+func (clstr *Cluster) WarmUp(count int) (int, error) {
+	var g errgroup.Group
+	cnt := NewAtomicInt(0)
+	nodes := clstr.GetNodes()
+	for i := range nodes {
+		node := nodes[i]
+		g.Go(func() error {
+			n, err := node.WarmUp(count)
+			cnt.AddAndGet(n)
+
+			return err
+		})
+	}
+
+	err := g.Wait()
+	return cnt.Get(), err
 }

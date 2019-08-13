@@ -1,3 +1,15 @@
+v2.1:
+ ☐ Fix the connection heap size, and remove the % from logic
+
+BREAKING:
+ ☐ Fix Log methods and the way they take params
+
+
+
+
+
+
+
  ☐ write tests for lua packages
    ✔ map @done (16-01-12 14:16)
    ✔ list @done (16-01-12 14:16)

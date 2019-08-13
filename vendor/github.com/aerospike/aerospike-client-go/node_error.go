@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,3 +44,11 @@ func (ne *NodeError) Node() *Node { return ne.node }
 
 // Err returns the error
 func (ne *NodeError) Err() error { return ne.error }
+
+func newInvalidNodeError(clusterSize int, partition *Partition) error {
+	// important to check for clusterSize first, since partition may be nil sometimes
+	if clusterSize == 0 {
+		return NewAerospikeError(INVALID_NODE_ERROR, "Cluster is empty.")
+	}
+	return NewAerospikeError(INVALID_NODE_ERROR, "Node not found for partition "+partition.String()+" in partition table.")
+}

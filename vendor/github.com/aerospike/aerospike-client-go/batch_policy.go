@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,18 +38,6 @@ type BatchPolicy struct {
 	// The downside is extra goroutines will still need to be created (or taken from a goroutine pool).
 	ConcurrentNodes int // = 1
 
-	// Use old batch direct protocol where batch reads are handled by direct low-level batch server
-	// database routines.  The batch direct protocol can be faster when there is a single namespace,
-	// but there is one important drawback.  The batch direct protocol will not proxy to a different
-	// server node when the mapped node has migrated a record to another node (resulting in not
-	// found record).
-	//
-	// This can happen after a node has been added/removed from the cluster and there is a lag
-	// between records being migrated and client partition map update (once per second).
-	//
-	// The new batch index protocol will perform this record proxy when necessary.
-	UseBatchDirect bool // = false
-
 	// Allow batch to be processed immediately in the server's receiving thread when the server
 	// deems it to be appropriate.  If false, the batch will always be processed in separate
 	// transaction goroutines.  This field is only relevant for the new batch index protocol.
@@ -62,6 +50,15 @@ type BatchPolicy struct {
 	// can process the entire batch before moving onto the next command.
 	AllowInline bool //= true
 
+	// AllowPartialResults determines if the results for some nodes should be returned in case
+	// some nodes encounter an error. The result for the unreceived records will be nil.
+	// The returned records will be safe to use, since only fully received data will be parsed
+	// and set.
+	//
+	// This flag is only supported for BatchGet and BatchGetHeader methods. BatchGetComplex always returns
+	// partial results by design.
+	AllowPartialResults bool //= false
+
 	// Send set name field to server for every key in the batch for batch index protocol.
 	// This is only necessary when authentication is enabled and security roles are defined
 	// on a per set basis.
@@ -71,9 +68,10 @@ type BatchPolicy struct {
 // NewBatchPolicy initializes a new BatchPolicy instance with default parameters.
 func NewBatchPolicy() *BatchPolicy {
 	return &BatchPolicy{
-		ConcurrentNodes: 1,
-		UseBatchDirect:  false,
-		AllowInline:     true,
-		SendSetName:     false,
+		BasePolicy:          *NewPolicy(),
+		ConcurrentNodes:     1,
+		AllowInline:         true,
+		AllowPartialResults: false,
+		SendSetName:         false,
 	}
 }

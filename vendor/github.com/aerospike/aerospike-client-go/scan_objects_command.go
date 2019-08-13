@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package aerospike
 
 import . "github.com/aerospike/aerospike-client-go/types"
 
-// . "github.com/aerospike/aerospike-client-go/types/atomic"
+// . "github.com/aerospike/aerospike-client-go/internal/atomic"
 
 type scanObjectsCommand struct {
 	baseMultiCommand
@@ -25,7 +25,7 @@ type scanObjectsCommand struct {
 	namespace string
 	setName   string
 	binNames  []string
-	taskId    uint64
+	taskID    uint64
 }
 
 func newScanObjectsCommand(
@@ -35,7 +35,7 @@ func newScanObjectsCommand(
 	setName string,
 	binNames []string,
 	recordset *Recordset,
-	taskId uint64,
+	taskID uint64,
 ) *scanObjectsCommand {
 	cmd := &scanObjectsCommand{
 		baseMultiCommand: *newMultiCommand(node, recordset),
@@ -43,7 +43,7 @@ func newScanObjectsCommand(
 		namespace:        namespace,
 		setName:          setName,
 		binNames:         binNames,
-		taskId:           taskId,
+		taskID:           taskID,
 	}
 
 	cmd.terminationErrorType = SCAN_TERMINATED
@@ -56,7 +56,7 @@ func (cmd *scanObjectsCommand) getPolicy(ifc command) Policy {
 }
 
 func (cmd *scanObjectsCommand) writeBuffer(ifc command) error {
-	return cmd.setScan(cmd.policy, &cmd.namespace, &cmd.setName, cmd.binNames, cmd.taskId)
+	return cmd.setScan(cmd.policy, &cmd.namespace, &cmd.setName, cmd.binNames, cmd.taskID)
 }
 
 func (cmd *scanObjectsCommand) parseResult(ifc command, conn *Connection) error {
@@ -65,7 +65,7 @@ func (cmd *scanObjectsCommand) parseResult(ifc command, conn *Connection) error 
 
 func (cmd *scanObjectsCommand) Execute() error {
 	defer cmd.recordset.signalEnd()
-	err := cmd.execute(cmd)
+	err := cmd.execute(cmd, true)
 	if err != nil {
 		cmd.recordset.sendError(err)
 	}

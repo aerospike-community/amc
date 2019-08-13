@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"reflect"
 
+	ParticleType "github.com/aerospike/aerospike-client-go/internal/particle_type"
 	. "github.com/aerospike/aerospike-client-go/types"
-	ParticleType "github.com/aerospike/aerospike-client-go/types/particle_type"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
 )
 
@@ -63,9 +63,34 @@ func (upckr *unpacker) UnpackList() ([]interface{}, error) {
 }
 
 func (upckr *unpacker) unpackList(count int) ([]interface{}, error) {
-	out := make([]interface{}, 0, count)
+	if count == 0 {
+		return make([]interface{}, 0), nil
+	}
 
-	for i := 0; i < count; i++ {
+	mark := upckr.offset
+	size := count
+
+	val, err := upckr.unpackObject(false)
+	if err != nil && err != errSkipHeader {
+		return nil, err
+	}
+
+	if val == nil {
+		// Determine if null value is because of an extension type.
+		typ := upckr.buffer[mark] & 0xff
+
+		if typ != 0xc0 { // not nil type
+			// Ignore extension type.
+			size--
+		}
+	}
+
+	out := make([]interface{}, 0, count)
+	if size == count {
+		out = append(out, val)
+	}
+
+	for i := 1; i < count; i++ {
 		obj, err := upckr.unpackObject(false)
 		if err != nil {
 			return nil, err
@@ -132,12 +157,12 @@ func (upckr *unpacker) unpackCDTMap(count int) ([]MapPair, error) {
 
 	for i := 0; i < count; i++ {
 		key, err := upckr.unpackObject(true)
-		if err != nil && err != skipHeaderErr {
+		if err != nil && err != errSkipHeader {
 			return nil, err
 		}
 
 		val, err := upckr.unpackObject(false)
-		if err != nil && err != skipHeaderErr {
+		if err != nil && err != errSkipHeader {
 			return nil, err
 		}
 
@@ -214,7 +239,7 @@ func (upckr *unpacker) unpackBlob(count int, isMapKey bool) (interface{}, error)
 	return val, nil
 }
 
-var skipHeaderErr = errors.New("Skip the unpacker error")
+var errSkipHeader = errors.New("Skip the unpacker error")
 
 func (upckr *unpacker) unpackObject(isMapKey bool) (interface{}, error) {
 	theType := upckr.buffer[upckr.offset] & 0xff
@@ -286,7 +311,7 @@ func (upckr *unpacker) unpackObject(isMapKey bool) (interface{}, error) {
 		if Buffer.Arch64Bits {
 			return int(val), nil
 		}
-		return int64(val), nil
+		return val, nil
 
 	case 0xc4, 0xd9:
 		count := int(upckr.buffer[upckr.offset] & 0xff)
@@ -326,42 +351,42 @@ func (upckr *unpacker) unpackObject(isMapKey bool) (interface{}, error) {
 	case 0xd4:
 		// Skip over type extension with 1 byte
 		upckr.offset += 1 + 1
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xd5:
 		// Skip over type extension with 2 bytes
 		upckr.offset += 1 + 2
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xd6:
 		// Skip over type extension with 4 bytes
 		upckr.offset += 1 + 4
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xd7:
 		// Skip over type extension with 8 bytes
 		upckr.offset += 1 + 8
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xd8:
 		// Skip over type extension with 16 bytes
 		upckr.offset += 1 + 16
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xc7: // Skip over type extension with 8 bit header and bytes
 		count := int(upckr.buffer[upckr.offset] & 0xff)
 		upckr.offset += count + 1 + 1
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xc8: // Skip over type extension with 16 bit header and bytes
 		count := int(Buffer.BytesToInt16(upckr.buffer, upckr.offset))
 		upckr.offset += count + 1 + 2
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	case 0xc9: // Skip over type extension with 32 bit header and bytes
 		count := int(Buffer.BytesToInt32(upckr.buffer, upckr.offset))
 		upckr.offset += count + 1 + 4
-		return nil, skipHeaderErr
+		return nil, errSkipHeader
 
 	default:
 		if (theType & 0xe0) == 0xa0 {
@@ -382,7 +407,7 @@ func (upckr *unpacker) unpackObject(isMapKey bool) (interface{}, error) {
 		}
 
 		if theType >= 0xe0 {
-			return int(int(theType) - 0xe0 - 32), nil
+			return int(theType) - 0xe0 - 32, nil
 		}
 	}
 

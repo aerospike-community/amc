@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,6 @@
 
 package aerospike
 
-import (
-	. "github.com/aerospike/aerospike-client-go/types"
-)
-
 type operateCommand struct {
 	readCommand
 
@@ -32,6 +28,8 @@ func newOperateCommand(cluster *Cluster, policy *WritePolicy, key *Key, operatio
 		readCommand: newReadCommand(cluster, &policy.BasePolicy, key, nil),
 		policy:      policy,
 		operations:  operations,
+
+		hasWrite: hasWriteOp(operations),
 	}
 }
 
@@ -41,16 +39,27 @@ func (cmd *operateCommand) writeBuffer(ifc command) (err error) {
 }
 
 func (cmd *operateCommand) getNode(ifc command) (*Node, error) {
-	return cmd.cluster.getMasterNode(&cmd.partition)
+	if cmd.hasWrite {
+		return cmd.cluster.getMasterNode(&cmd.partition)
+	}
+
+	// this may be affected by Rackaware
+	return cmd.cluster.getReadNode(&cmd.partition, cmd.policy.ReplicaPolicy, &cmd.replicaSequence)
 }
 
 func (cmd *operateCommand) Execute() error {
-	return cmd.execute(cmd)
+	return cmd.execute(cmd, !cmd.hasWrite)
 }
 
-func (cmd *operateCommand) handleWriteKeyNotFoundError(resultCode ResultCode) error {
-	if cmd.hasWrite {
-		return NewAerospikeError(resultCode)
+func hasWriteOp(operations []*Operation) bool {
+	for i := range operations {
+		switch operations[i].opType {
+		case _MAP_READ, _READ, _CDT_READ:
+		default:
+			// All other cases are a type of write
+			return true
+		}
 	}
-	return nil
+
+	return false
 }

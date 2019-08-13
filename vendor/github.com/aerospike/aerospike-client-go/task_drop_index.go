@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ type DropIndexTask struct {
 // NewDropIndexTask initializes a task with fields needed to query server nodes.
 func NewDropIndexTask(cluster *Cluster, namespace string, indexName string) *DropIndexTask {
 	return &DropIndexTask{
-		baseTask:  newTask(cluster, false),
+		baseTask:  newTask(cluster),
 		namespace: namespace,
 		indexName: indexName,
 	}
@@ -40,7 +40,7 @@ func (tski *DropIndexTask) IsDone() (bool, error) {
 	complete := false
 
 	for _, node := range nodes {
-		responseMap, err := node.requestInfoWithRetry(5, command)
+		responseMap, err := node.requestInfoWithRetry(&tski.cluster.infoPolicy, 5, command)
 		if err != nil {
 			return false, err
 		}

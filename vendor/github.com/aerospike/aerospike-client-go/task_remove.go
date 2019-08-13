@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ type RemoveTask struct {
 // NewRemoveTask initializes a RemoveTask with fields needed to query server nodes.
 func NewRemoveTask(cluster *Cluster, packageName string) *RemoveTask {
 	return &RemoveTask{
-		baseTask:    newTask(cluster, false),
+		baseTask:    newTask(cluster),
 		packageName: packageName,
 	}
 }
@@ -39,14 +39,14 @@ func (tskr *RemoveTask) IsDone() (bool, error) {
 	nodes := tskr.cluster.GetNodes()
 	done := false
 
+	find := "filename=" + tskr.packageName
 	for _, node := range nodes {
-		responseMap, err := node.requestInfoWithRetry(5, command)
+		responseMap, err := node.requestInfoWithRetry(&tskr.cluster.infoPolicy, 5, command)
 		if err != nil {
 			return false, err
 		}
 
 		for _, response := range responseMap {
-			find := "filename=" + tskr.packageName
 			index := strings.Index(response, find)
 
 			if index >= 0 {

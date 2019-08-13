@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@ package aerospike
 
 import (
 	"time"
+
+	. "github.com/aerospike/aerospike-client-go/internal/atomic"
+	. "github.com/aerospike/aerospike-client-go/types"
 )
 
 // Task interface defines methods for asynchronous tasks.
@@ -28,51 +31,54 @@ type Task interface {
 
 // baseTask is used to poll for server task completion.
 type baseTask struct {
-	retries        int
-	cluster        *Cluster
-	done           bool
-	onCompleteChan chan error
+	retries AtomicInt
+	cluster *Cluster
 }
 
 // newTask initializes task with fields needed to query server nodes.
-func newTask(cluster *Cluster, done bool) *baseTask {
+func newTask(cluster *Cluster) *baseTask {
 	return &baseTask{
 		cluster: cluster,
-		done:    done,
 	}
 }
 
 // Wait for asynchronous task to complete using default sleep interval.
 func (btsk *baseTask) onComplete(ifc Task) chan error {
-	// create the channel if it doesn't exist yet
-	if btsk.onCompleteChan != nil {
-		// channel and goroutine already exists; just return the channel
-		return btsk.onCompleteChan
-	}
-
-	btsk.onCompleteChan = make(chan error)
+	ch := make(chan error, 1)
 
 	// goroutine will loop every <interval> until IsDone() returns true or error
-	const interval = 1 * time.Second
 	go func() {
 		// always close the channel on return
-		defer close(btsk.onCompleteChan)
+		defer close(ch)
+
+		var interval = 100 * time.Millisecond
 
 		for {
 			select {
 			case <-time.After(interval):
 				done, err := ifc.IsDone()
-				btsk.retries++
+				// Every 5 failed retries increase the interval
+				if btsk.retries.IncrementAndGet()%5 == 0 {
+					interval *= 2
+
+					if interval > 5*time.Second {
+						interval = 5 * time.Second
+					}
+				}
 				if err != nil {
-					btsk.onCompleteChan <- err
+					ae, ok := err.(AerospikeError)
+					if ok && ae.ResultCode() == TIMEOUT {
+						ae.MarkInDoubt()
+					}
+					ch <- ae
 					return
 				} else if done {
-					btsk.onCompleteChan <- nil
+					ch <- nil
 					return
 				}
 			} // select
 		} // for
 	}()
 
-	return btsk.onCompleteChan
+	return ch
 }

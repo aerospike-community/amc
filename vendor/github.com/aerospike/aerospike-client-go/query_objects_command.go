@@ -1,4 +1,4 @@
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ func newQueryObjectsCommand(node *Node, policy *QueryPolicy, statement *Statemen
 
 func (cmd *queryObjectsCommand) Execute() error {
 	defer cmd.recordset.signalEnd()
-	err := cmd.execute(cmd)
+	err := cmd.execute(cmd, true)
 	if err != nil {
 		cmd.recordset.sendError(err)
 	}

@@ -1,6 +1,6 @@
 // +build !as_performance
 
-// Copyright 2013-2017 Aerospike, Inc.
+// Copyright 2013-2019 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,14 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	. "github.com/aerospike/aerospike-client-go/types"
 )
 
 var aerospikeTag = "as"
 
 const (
-	aerospikeMetaTag = "asm"
-	keyTag           = "key"
+	aerospikeMetaTag    = "asm"
+	aerospikeMetaTagGen = "gen"
+	aerospikeMetaTagTTL = "ttl"
 )
 
 // SetAerospikeTag sets the bin tag to the specified tag.
@@ -125,7 +124,7 @@ func fieldAlias(f reflect.StructField) string {
 	return f.Name
 }
 
-func structToMap(s reflect.Value, clusterSupportsFloat bool) map[string]interface{} {
+func structToMap(s reflect.Value, clusterSupportsFloat bool) BinMap {
 	if !s.IsValid() {
 		return nil
 	}
@@ -133,7 +132,7 @@ func structToMap(s reflect.Value, clusterSupportsFloat bool) map[string]interfac
 	typeOfT := s.Type()
 	numFields := s.NumField()
 
-	var binMap map[string]interface{}
+	var binMap BinMap
 	for i := 0; i < numFields; i++ {
 		// skip unexported fields
 		if typeOfT.Field(i).PkgPath != "" {
@@ -144,7 +143,7 @@ func structToMap(s reflect.Value, clusterSupportsFloat bool) map[string]interfac
 			continue
 		}
 
-		// skip transiet fields tagged `-`
+		// skip transient fields tagged `-`
 		alias := fieldAlias(typeOfT.Field(i))
 		if alias == "" {
 			continue
@@ -153,7 +152,7 @@ func structToMap(s reflect.Value, clusterSupportsFloat bool) map[string]interfac
 		binValue := valueToInterface(s.Field(i), clusterSupportsFloat)
 
 		if binMap == nil {
-			binMap = make(map[string]interface{}, numFields)
+			binMap = make(BinMap, numFields)
 		}
 
 		binMap[alias] = binValue
@@ -162,21 +161,9 @@ func structToMap(s reflect.Value, clusterSupportsFloat bool) map[string]interfac
 	return binMap
 }
 
-func marshal(v interface{}, clusterSupportsFloat bool) []*Bin {
+func marshal(v interface{}, clusterSupportsFloat bool) BinMap {
 	s := indirect(reflect.ValueOf(v))
-	numFields := s.NumField()
-	bins := binPool.Get(numFields).([]*Bin)
-
-	binCount := 0
-	n := structToMap(s, clusterSupportsFloat)
-	for k, v := range n {
-		bins[binCount].Name = k
-
-		bins[binCount].Value = NewValue(v)
-		binCount++
-	}
-
-	return bins[:binCount]
+	return structToMap(s, clusterSupportsFloat)
 }
 
 type syncMap struct {
@@ -299,9 +286,9 @@ func cacheObjectTags(objType reflect.Type) {
 			}
 		}
 
-		if tagM == "ttl" {
+		if tagM == aerospikeMetaTagTTL {
 			ttl = append(ttl, f.Name)
-		} else if tagM == "gen" {
+		} else if tagM == aerospikeMetaTagGen {
 			gen = append(gen, f.Name)
 		} else if tagM != "" {
 			panic(fmt.Sprintf("Invalid metadata tag `%s` on struct attribute: %s.%s", tagM, objType.Name(), f.Name))
@@ -309,33 +296,4 @@ func cacheObjectTags(objType reflect.Type) {
 	}
 
 	objectMappings.setMapping(objType, mapping, fields, ttl, gen)
-}
-
-func binMapToBins(bins []*Bin, binMap BinMap) []*Bin {
-	i := 0
-	for k, v := range binMap {
-		bins[i].Name = k
-		bins[i].Value = NewValue(v)
-		i++
-	}
-
-	return bins
-}
-
-// pool Bins so that we won't have to allocate them every time
-var binPool = NewPool(512)
-
-func init() {
-	binPool.New = func(params ...interface{}) interface{} {
-		size := params[0].(int)
-		bins := make([]*Bin, size, size)
-		for i := range bins {
-			bins[i] = &Bin{}
-		}
-		return bins
-	}
-
-	binPool.IsUsable = func(obj interface{}, params ...interface{}) bool {
-		return len(obj.([]*Bin)) >= params[0].(int)
-	}
 }
