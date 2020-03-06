@@ -58,7 +58,7 @@ start() {
     ## &; action" but you can do "{cmd &}; action".
     daemon \
         --pidfile=$pidfile \
-        --user=root \
+        --user=$user \
         " { $exec -config-file=$conffile -config-dir=$confdir &>> $logfile & } ; echo \$! >| $pidfile "
 
     RETVAL=$?
