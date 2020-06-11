@@ -20,7 +20,7 @@ docker pull aerospike/amc
 The latest binaries for Redhat, Ubuntu, Debian, generic Linux and macOS are
 available in the repo's releases section.
 
-See the **[release notes](CHANGELOG.md).
+See the [release notes](CHANGELOG.md).
 
 ## User Guide
 
