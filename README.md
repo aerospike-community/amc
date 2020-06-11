@@ -16,9 +16,15 @@ See [aerospike/amc](https://hub.docker.com/r/aerospike/amc) on Docker Hub.
 docker pull aerospike/amc
 ```
 
+### Releases
+The latest binaries for Redhat, Ubuntu, Debian, generic Linux and macOS are
+available in the repo's releases section.
+
+See the **[release notes](CHANGELOG.md).
+
 ## User Guide
 
-The AMC user guide is available at the [wiki](wiki).
+The AMC user guide is available on the [wiki](https://github.com/aerospike-community/amc/wiki).
 
 ## Community Development
 
@@ -75,7 +81,7 @@ The built files will be in `build/static`
 
 Keep in mind that you don't need to build the UI to be able to develop. The original source files are used for the development.
 
-### MacOS instructions:
+### macOS instructions:
 
 You can find the log file in `/Library/Logs/amc/amc.log`
 Configuration file is in `/Library/amc/amc.conf`
