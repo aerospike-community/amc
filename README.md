@@ -9,6 +9,20 @@ and configuration of a cluster.
 This repo includes both editions of AMC, Community and Enterprise. Going forward
 AMC builds will be AMC Enterprise ones.
 
+## Aerospike Monitoring Stack
+For monitoring and alerting you should consider using the Prometheus and Grafana based [Aerospike Monitoring Stack](https://github.com/aerospike/aerospike-monitoring). This is the monitoring solution being developed by Aerospike.
+
+## AMC Community Development
+
+AMC has been turned over to the community. If you wish to contribute code,
+go ahead and clone this repo, modify the code, and create a pull request.
+
+Active contributors can then ask to become maintainers for the repo.
+The wiki can similarly be modified by any code contributor who has been granted
+pull permissions.
+
+## Installing AMC
+
 ### Docker
 See [aerospike/amc](https://hub.docker.com/r/aerospike/amc) on Docker Hub.
 
@@ -26,14 +40,6 @@ See the [release notes](CHANGELOG.md).
 
 The AMC user guide is available on the [wiki](https://github.com/aerospike-community/amc/wiki).
 
-## Community Development
-
-AMC has been turned over to the community. If you wish to contribute code,
-go ahead and clone this repo, modify the code, and create a pull request.
-
-Active contributors can then ask to become maintainers for the repo.
-The wiki can similarly be modified by any code contributor who has been granted
-pull permissions.
 
 ## Building the Project
 
