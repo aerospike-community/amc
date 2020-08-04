@@ -3,7 +3,7 @@
 set -x
 set -e
 
-cd $GOPATH/src/github.com/citrusleaf/amc
+cd $GOPATH/src/github.com/aerospike-community/amc
 
 edition=$1
 
@@ -13,6 +13,7 @@ version=`git describe --tags $(git rev-list --tags --max-count=1)`
 version_build="$edition-$version"
 
 # build binary
-godep go build -race -a -tags $edition -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=dev" -o amc .
+#godep go build -race -a -tags $edition -ldflags "-X github.com/aerospike-community/amc/common.AMCEdition=$edition -X github.com/aerospike-community/amc/common.AMCBuild=$build -X github.com/aerospike-community/amc/common.AMCVersion=$version -X github.com/aerospike-community/amc/common.AMCEnv=dev" -o amc .
+go build -race -a -tags $edition -ldflags "-X github.com/aerospike-community/amc/common.AMCEdition=$edition -X github.com/aerospike-community/amc/common.AMCBuild=$build -X github.com/aerospike-community/amc/common.AMCVersion=$version -X github.com/aerospike-community/amc/common.AMCEnv=dev" -o amc .
 
-./amc -config-file=$GOPATH/src/github.com/citrusleaf/amc/amc.dev.conf -profile
+./amc -config-file=$GOPATH/src/github.com/aerospike-community/amc/amc.dev.conf -profile
