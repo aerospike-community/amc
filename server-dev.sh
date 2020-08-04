@@ -6,6 +6,7 @@ set -e
 cd $GOPATH/src/github.com/aerospike-community/amc
 
 edition=$1
+edition=enterprise
 
 build=`date -u +%Y%m%d.%H%M%S`
 version=`git describe --tags $(git rev-list --tags --max-count=1)`
