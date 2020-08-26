@@ -67,7 +67,7 @@ Install reflex to watch files and automatically rebuild server code:
 
 ### Getting the Code
 
-`go get github.com/citrusleaf/amc`
+`go get github.com/aerospike-community/amc`
 
 ### Developing the Application Server
 
