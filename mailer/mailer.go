@@ -9,7 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	gomail "gopkg.in/gomail.v2"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 func processTemplate(config *common.Config, tplName string, context interface{}) ([]byte, error) {

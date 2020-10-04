@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/citrusleaf/amc/models"
+	"github.com/aerospike-community/amc/models"
 )
 
 //----------

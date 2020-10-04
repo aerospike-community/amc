@@ -10,8 +10,8 @@ import (
 	// ast "github.com/aerospike/aerospike-client-go/types"
 	"github.com/labstack/echo"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/models"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/models"
 )
 
 func getClusterXdrNodes(c echo.Context) error {

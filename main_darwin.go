@@ -11,8 +11,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/controllers"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/controllers"
 )
 
 var (

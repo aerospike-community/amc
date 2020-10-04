@@ -14,11 +14,12 @@ import (
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/kennygrant/sanitize"
 	version "github.com/mcuadros/go-version"
+
 	// "github.com/sasha-s/go-deadlock"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/mailer"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/mailer"
 )
 
 type Cluster struct {

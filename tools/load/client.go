@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/citrusleaf/amc/tools/load/response"
+	"github.com/aerospike-community/amc/tools/load/response"
 )
 
 var BaseURL string

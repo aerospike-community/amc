@@ -7,7 +7,7 @@ import (
 	// log "github.com/Sirupsen/logrus"
 	// "github.com/satori/go.uuid"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 func (n *Node) AlertsFrom(id int64) []*common.Alert {

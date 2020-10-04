@@ -13,9 +13,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	asl "github.com/aerospike/aerospike-client-go/logger"
+
 	// "github.com/sasha-s/go-deadlock"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 type DebugStatus struct {

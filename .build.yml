@@ -1,5 +1,5 @@
 name: aerospike-console
-dir: src/github.com/citrusleaf/amc
+dir: src/github.com/aerospike-community/amc
 
 container:
   - base:
@@ -8,7 +8,7 @@ container:
 environment:
   GOPATH: /work/source
   BIN: $GOPATH/bin
-  REPO: github.com/citrusleaf/amc
+  REPO: github.com/aerospike-community/amc
   CGO_ENABLED: 0
 
 build:

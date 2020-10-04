@@ -14,9 +14,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/controllers/middleware/sessions"
-	"github.com/citrusleaf/amc/models"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/controllers/middleware/sessions"
+	"github.com/aerospike-community/amc/models"
 )
 
 var (

@@ -12,8 +12,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/rrd"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/rrd"
 )
 
 type NodeStatus string
@@ -173,7 +173,7 @@ func (n *Node) update() error {
 	stats := common.Info(info).ToInfo("statistics").ToStats()
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 
-	log.Debugf("Updating Node: %v, objects: %v, took: %s", n.Id(), stats.TryInt("objects", 0), time.Since(tm))
+	log.Debugf("Updating Node: %v, build: %s, objects: %v, took: %s", n.Id(), n.Build(), stats.TryInt("objects", 0), time.Since(tm))
 
 	return nil
 }

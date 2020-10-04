@@ -8,7 +8,7 @@ import (
 	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/Sirupsen/logrus"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 	timeseries "github.com/khaf/go-time-series"
 )
 

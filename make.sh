@@ -3,7 +3,7 @@
 set -x
 set -e
 
-cd $GOPATH/src/github.com/citrusleaf/amc
+cd $GOPATH/src/github.com/aerospike-community/amc
 
 edition=${1:-enterprise}
 environ=${2:-dev}
@@ -45,7 +45,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/opt/amc/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/aerospike-community/amc/common.AMCEdition=$edition -X github.com/aerospike-community/amc/common.AMCBuild=$build -X github.com/aerospike-community/amc/common.AMCVersion=$version -X github.com/aerospike-community/amc/common.AMCEnv=$environ" -o $BASE_DIR/opt/amc/amc .
 
 		# rpm systemd
 		cp -f deployment/common/amc.service $BASE_DIR/opt/amc/
@@ -101,7 +101,7 @@ case $platform in
 		cp -R mailer/templates $BASE_DIR/mailer/
 
 		# build binary
-		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/citrusleaf/amc/common.AMCEdition=$edition -X github.com/citrusleaf/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/amc .
+		CGO_ENABLED=0 GOOS=$platform go build -a -tags "purego $edition" -ldflags "-X github.com/aerospike-community/amc/common.AMCEdition=$edition -X github.com/aerospike-community/amc/common.AMCBuild=$build -X github.com/citrusleaf/amc/common.AMCVersion=$version -X github.com/citrusleaf/amc/common.AMCEnv=$environ" -o $BASE_DIR/amc .
 
 		# zip
 		fpm --verbose -f -s dir -t tar -n "aerospike-amc-$edition" -v $version -C deployment/release/darwin  -m "$maintainer" --description "$description" --vendor "Aerospike" .
