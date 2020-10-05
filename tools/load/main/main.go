@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/citrusleaf/amc/tools/load"
+	"github.com/aerospike-community/amc/tools/load"
 )
 
 const nconn = 10 // connections per cluster

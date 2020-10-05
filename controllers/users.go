@@ -8,9 +8,10 @@ import (
 	// log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/labstack/echo"
+
 	// ast "github.com/aerospike/aerospike-client-go/types"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 func getClusterCurrentUser(c echo.Context) error {

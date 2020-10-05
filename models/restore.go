@@ -7,13 +7,14 @@ import (
 	"io"
 	"regexp"
 	"strconv"
+
 	// "time"
 	// "sync"
 
 	log "github.com/Sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 type Restore struct {

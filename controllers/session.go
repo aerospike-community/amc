@@ -6,10 +6,10 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/controllers/middleware/sessions"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/controllers/middleware/sessions"
 )
 
 func sessionValidator(f func(c echo.Context) error) func(c echo.Context) error {

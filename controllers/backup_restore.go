@@ -11,7 +11,7 @@ import (
 	// . "github.com/ahmetalpbalkan/go-linq"
 	// log "github.com/Sirupsen/logrus"
 	// ast "github.com/aerospike/aerospike-client-go/types"
-	"github.com/citrusleaf/amc/common"
+	"github.com/aerospike-community/amc/common"
 	"github.com/labstack/echo"
 )
 

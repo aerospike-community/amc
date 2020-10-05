@@ -12,8 +12,8 @@ import (
 
 	ast "github.com/aerospike/aerospike-client-go/types"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/rrd"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/rrd"
 )
 
 var _recordedNamespaceStats = []string{

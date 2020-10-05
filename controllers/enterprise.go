@@ -10,8 +10,8 @@ import (
 	// log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
-	"github.com/citrusleaf/amc/common"
-	"github.com/citrusleaf/amc/models"
+	"github.com/aerospike-community/amc/common"
+	"github.com/aerospike-community/amc/models"
 )
 
 func postClusterFireCmd(c echo.Context) error {
