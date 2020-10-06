@@ -28,7 +28,8 @@ func AMCIsProd() bool {
 }
 
 func AMCIsEnterprise() bool {
-	return AMCEdition == "enterprise"
+	//return AMCEdition == "enterprise"
+	return true
 }
 
 type Config struct {
