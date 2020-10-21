@@ -1120,8 +1120,9 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 		if err != nil {
 			break
 		}
+		histUnit = "msec"
 
-		// log.Debugf("histUnit: %s", histUnit)
+		//log.Debugf("histUnit: %s", histUnit)
 
 		opsCount, err := ip.ReadFloat(',')
 		if err != nil {
@@ -1165,9 +1166,9 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 		timestamp += "-GMT"
 
 		stats := common.Stats{
-			"tps":       opsCount,
-			"timestamp": timestamp,
-			//"histUnit":   histUnit,
+			"tps":        opsCount,
+			"timestamp":  timestamp,
+			"histUnit":   histUnit,
 			"buckets":    buckets,
 			"valBuckets": valBucketsFloat,
 		}
