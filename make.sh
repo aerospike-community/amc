@@ -1,7 +1,7 @@
 #!/bin/sh
 
-set -x
-set -e
+set +x
+set +e
 
 cd $GOPATH/src/github.com/aerospike-community/amc
 
@@ -10,7 +10,8 @@ environ=${2:-dev}
 platform=${3:-linux}
 sysname=$(uname | tr '[:upper:]' '[:lower:]')
 
-maintainer="Khosrow Afroozeh (khosrow@aerospike.com)"
+#maintainer="Khosrow Afroozeh (khosrow@aerospike.com)"
+maintainer="Zohar Elkayam (zelkayam@aerospike.com)"
 description="Aerospike Management Console"
 
 echo "platform is ${platform}"
