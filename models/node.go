@@ -155,7 +155,14 @@ func (n *Node) update() error {
 
 	n.setStatus(nodeStatus.On)
 
-	latencyMap, nodeLatency := n.parseLatencyInfo(info["latency:"])
+	var latencyMap map[string]common.Stats
+	var nodeLatency map[string]common.Stats
+
+	if strings.Compare(n.Build(), "5.1") < 1 {
+		latencyMap, nodeLatency = n.parseLatencyInfo(info["latency:"])
+	} else {
+		latencyMap, nodeLatency = n.parseLatenciesInfo(info["latencies:"])
+	}
 	n.setNodeLatency(nodeLatency)
 
 	nsAggStats := common.Stats{}
@@ -473,7 +480,7 @@ func (n *Node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "get-config:", "cluster-name",
+		"sindex", "udf-list", "latency:", "latencies:", "get-config:", "cluster-name",
 		"service", "service-clear-std", "service-tls-std",
 	}
 
@@ -1018,9 +1025,149 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 			valBucketsFloat[i] *= opsCount
 		}
 
+		histUnit := "msec"
+
 		stats := common.Stats{
 			"tps":        opsCount,
 			"timestamp":  timestamp,
+			"histUnit":   histUnit,
+			"buckets":    buckets,
+			"valBuckets": valBucketsFloat,
+		}
+
+		if res[ns] == nil {
+			res[ns] = common.Stats{
+				op: stats,
+			}
+		} else {
+			res[ns][op] = stats
+		}
+
+		// calc totals
+		if nstats := nodeStats[op]; nstats == nil {
+			nodeStats[op] = stats
+		} else {
+			if timestamp > nstats.TryString("timestamp", "") {
+				nstats["timestamp"] = timestamp
+			}
+
+			nstats["tps"] = nstats.TryFloat("tps", 0) + opsCount
+			nBuckets := nstats["buckets"].([]string)
+			if len(buckets) > len(nBuckets) {
+				nstats["buckets"] = append(nBuckets, buckets[len(nBuckets):]...)
+				nstats["valBuckets"] = append(nstats["valBuckets"].([]float64), make([]float64, len(buckets[len(nBuckets):]))...)
+			}
+
+			nValBuckets := nstats["valBuckets"].([]float64)
+			for i := range buckets {
+				nValBuckets[i] += valBucketsFloat[i]
+			}
+			nstats["valBuckets"] = nValBuckets
+			nodeStats[op] = nstats
+		}
+	}
+
+	for _, nstats := range nodeStats {
+		tps := nstats.TryFloat("tps", 0)
+		if tps == 0 {
+			tps = 1
+		}
+		nValBuckets := nstats["valBuckets"].([]float64)
+		for i := range nValBuckets {
+			nValBuckets[i] /= tps
+		}
+		nstats["valBuckets"] = nValBuckets
+		nstats["timestamp_unix"] = n.ServerTime().Unix()
+	}
+
+	return res, nodeStats
+}
+
+func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
+	//log.Debugf("Latencies: %s", s)
+	ip := common.NewInfoParser(s)
+
+	//old typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
+	//new typical format is {test}-write:msec,0.0,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+	//			        histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
+
+	nodeStats := map[string]common.Stats{}
+	res := map[string]common.Stats{}
+	for {
+		if err := ip.Expect("{"); err != nil {
+			// it's an error string, read to next section
+			if _, err := ip.ReadUntil(';'); err != nil {
+				break
+			}
+			continue
+		}
+
+		ns, err := ip.ReadUntil('}')
+		if err != nil {
+			break
+		}
+
+		if err := ip.Expect("-"); err != nil {
+			break
+		}
+
+		op, err := ip.ReadUntil(':')
+		if err != nil {
+			break
+		}
+
+		histUnit, err := ip.ReadUntil(',')
+		if err != nil {
+			break
+		}
+
+		// log.Debugf("histUnit: %s", histUnit)
+
+		opsCount, err := ip.ReadFloat(',')
+		if err != nil {
+			break
+		}
+
+		valBucketsStr, err := ip.ReadUntil(';')
+		if err != nil && err != io.EOF {
+			break
+		}
+		valBuckets := strings.Split(valBucketsStr, ",")
+		valBucketsFloat := make([]float64, len(valBuckets))
+		bucketNumber := 0
+		for i := range valBuckets {
+			valBucketsFloat[i], _ = strconv.ParseFloat(valBuckets[i], 64)
+			if i > 6 && valBucketsFloat[i] == 0 {
+				bucketNumber = i
+				break
+			}
+		}
+		valBucketsFloat = valBucketsFloat[:bucketNumber]
+
+		buckets := make([]string, bucketNumber)
+		for i := 0; i < bucketNumber; i++ {
+			buckets[i] = fmt.Sprintf(">%d %s", 1<<i, histUnit)
+		}
+
+		// calc precise in-between percents
+		lineAggPct := float64(0)
+		for i := len(valBucketsFloat) - 1; i > 0; i-- {
+			lineAggPct += valBucketsFloat[i]
+			valBucketsFloat[i-1] = math.Max(0, valBucketsFloat[i-1]-lineAggPct)
+		}
+
+		for i := range valBucketsFloat {
+			valBucketsFloat[i] *= opsCount
+		}
+
+		current := time.Now()
+		timestamp := current.Format("15:04:05")
+		timestamp += "-GMT"
+
+		stats := common.Stats{
+			"tps":       opsCount,
+			"timestamp": timestamp,
+			//"histUnit":   histUnit,
 			"buckets":    buckets,
 			"valBuckets": valBucketsFloat,
 		}

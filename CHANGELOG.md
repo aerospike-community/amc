@@ -1,5 +1,11 @@
 # Aerospike Management Console EE Release Notes
 
+## 5.0.0
+Release Date: October, 2020
+
+* First community lead release, no more CE and EE seperation
+* Support asinfo latencies command in 5.1+, the old latency command was removed at 5.2.
+
 ## 4.0.27
 
 Release Date: August 13, 2019
