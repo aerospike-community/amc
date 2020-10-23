@@ -106,7 +106,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
               changeTimestamp(data);
             }
           }
-          
+
           // sum total data
           if(_.isArray(category[1].data)) {
             changeTimestamp(category[1].data);
@@ -241,7 +241,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			function successHandler(response){
 				var updateCounts = response.latency_history.length;
 
-        model.updateTimeZone();
+        		model.updateTimeZone();
 				for(var i = 0; i < updateCounts ; i++){
 					var latencyAvailable = false;
 					var latency = response.latency_history[i];
@@ -370,11 +370,21 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					if(latency[attr].data[i][bucket].pct !== null)
 						pct = latency[attr].data[i][bucket].pct.toFixed(2) + "%";
 
-					that.latencyData[attr][0].data[i].data.push({x : timestamp, y : value, secondary : pct});
-					that.legend.push({color : that.colorScale[i], title : bucket});
+					// console.log("WTF")
+					if(that.latencyData[attr][0].data[i].data.indexOf({x : timestamp, y : value, secondary : pct}) === -1) {
+						that.latencyData[attr][0].data[i].data.push({x : timestamp, y : value, secondary : pct});
+						that.legend.push({color : that.colorScale[i], title : bucket});
+					} else {
+						console.log("Latency item already exists")
+					}
+					
 				}
-				that.latencyData[attr][1].data.push({x : timestamp, y : latency[attr]["ops/sec"], secondary : "100.00%"});
-				that.legend.push({color : "#333", title : "Ops/Sec"});
+				if(that.latencyData[attr][1].data.indexOf({x : timestamp, y : latency[attr]["ops/sec"], secondary : "100.00%"}) === -1) {
+					that.latencyData[attr][1].data.push({x : timestamp, y : latency[attr]["ops/sec"], secondary : "100.00%"});
+					that.legend.push({color : "#333", title : "Ops/Sec"});
+				} else {
+					console.log("Latency total already exists")
+				}
             }
         },
 
