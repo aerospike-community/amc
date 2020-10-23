@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -1084,66 +1085,54 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 }
 
 func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
-	//log.Debugf("Latencies: %s", s)
-	ip := common.NewInfoParser(s)
-
-	//old typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
-	//new typical format is {test}-write:msec,0.0,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
-	//			        histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
-
+	log.Debugf("%s", s)
 	nodeStats := map[string]common.Stats{}
 	res := map[string]common.Stats{}
-	for {
-		if err := ip.Expect("{"); err != nil {
-			// it's an error string, read to next section
-			if _, err := ip.ReadUntil(';'); err != nil {
-				break
-			}
+
+	// old typical format is {test}-read:10:17:37-GMT,ops/sec,>1ms,>8ms,>64ms;10:17:47,29648.2,3.44,0.08,0.00;
+	// new typical format is {test}-write:msec,0.0,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+	//			        histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
+	var myExp = regexp.MustCompile(`\{(?P<namespace>[[:alnum:]]+)\}-(?P<operation>[[:alpha:]]+):(?P<histUnit>[[:alpha:]]+),(?P<ops>[0-9]*\.?[0-9]+),(?P<vals>.*)`)
+
+	rawHists := strings.Split(s, ";")
+	for j := 0; j < len(rawHists); j++ {
+		found := myExp.FindStringSubmatch(rawHists[j])
+
+		// not a ops line or empty ops line
+		if len(found) == 0 {
 			continue
 		}
 
-		ns, err := ip.ReadUntil('}')
-		if err != nil {
-			break
-		}
-
-		if err := ip.Expect("-"); err != nil {
-			break
-		}
-
-		op, err := ip.ReadUntil(':')
-		if err != nil {
-			break
-		}
-
-		histUnit, err := ip.ReadUntil(',')
-		if err != nil {
-			break
-		}
-		histUnit = "msec"
-
-		//log.Debugf("histUnit: %s", histUnit)
-
-		opsCount, err := ip.ReadFloat(',')
-		if err != nil {
-			break
-		}
-
-		valBucketsStr, err := ip.ReadUntil(';')
-		if err != nil && err != io.EOF {
-			break
-		}
-		valBuckets := strings.Split(valBucketsStr, ",")
-		valBucketsFloat := make([]float64, len(valBuckets))
-		bucketNumber := 0
-		for i := range valBuckets {
-			valBucketsFloat[i], _ = strconv.ParseFloat(valBuckets[i], 64)
-			if i > 6 && valBucketsFloat[i] == 0 {
-				bucketNumber = i
-				break
+		result := make(map[string]string)
+		for i, name := range myExp.SubexpNames() {
+			if i != 0 && name != "" {
+				result[name] = found[i]
 			}
 		}
-		valBucketsFloat = valBucketsFloat[:bucketNumber]
+
+		ns := result["namespace"]
+		op := result["operation"]
+		histUnit := result["histUnit"]
+		opsCount, err := strconv.ParseFloat(result["ops"], 64)
+		if err != nil {
+			continue
+		}
+
+		valBucketsStr := result["vals"]
+		valBuckets := strings.Split(valBucketsStr, ",")
+		valBucketsFloat := make([]float64, len(valBuckets))
+
+		for i := range valBuckets {
+			valBucketsFloat[i], _ = strconv.ParseFloat(valBuckets[i], 64)
+		}
+
+		bucketNumber := 0
+		if histUnit == "msec" {
+			bucketNumber = 7 // <1ms  to >64ms
+			valBucketsFloat = valBucketsFloat[:bucketNumber]
+		} else {
+			bucketNumber = len(valBucketsFloat)
+		}
 
 		buckets := make([]string, bucketNumber)
 		for i := 0; i < bucketNumber; i++ {
