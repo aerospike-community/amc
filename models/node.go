@@ -1085,7 +1085,7 @@ func (n *Node) parseLatencyInfo(s string) (map[string]common.Stats, map[string]c
 }
 
 func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string]common.Stats) {
-	log.Debugf("%s", s)
+	// log.Debugf("%s", s)
 	nodeStats := map[string]common.Stats{}
 	res := map[string]common.Stats{}
 

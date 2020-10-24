@@ -386,10 +386,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 						that.latencyData[attr][0].data[i].data.slice(-1)[0].x != timestampUnix) {
 						that.latencyData[attr][0].data[i].data.push({ x: timestampUnix, y: value, secondary: pct });
 						that.legend.push({ color: that.colorScale[i], title: bucket });
-						console.log("Latency item:" + attr + ":" + i + ":" + timestampUnix + ":" + value + ":" + pct)
-
+						console.debug("Latency item:" + attr + ":" + i + ":" + timestampUnix + ":" + value + ":" + pct)
 					} else {
-						console.log("Latency item already exists")
+						console.log("First item or Latency item already exists: " + timestampUnix)
 					}
 
 				}
@@ -397,9 +396,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					that.latencyData[attr][1].data.slice(-1)[0].x != timestampUnix) {
 					that.latencyData[attr][1].data.push({ x: timestampUnix, y: latency[attr]["ops/sec"], secondary: "100.00%" });
 					that.legend.push({ color: "#333", title: "Ops/Sec" });
-					console.log("Latency ops :" + attr + ":" + " :" + timestampUnix + ":" + latency[attr]["ops/sec"])
+					console.debug("Latency ops :" + attr + ":" + " :" + timestampUnix + ":" + latency[attr]["ops/sec"])
 				} else {
-					console.log("Latency total already exists")
+					console.log("First item or Latency total already exists: " + timestampUnix)
 				}
 			}
 		},
