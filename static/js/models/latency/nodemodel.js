@@ -34,13 +34,14 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
       },
 
       initLatencyHistory: function(history) {
-        this.attributes.node_status = history.node_status || "off";
+		this.attributes.node_status = history.node_status || "off";
+		this.attributes.node_build  = history.node_build || "5.0.0.0"
 
         if(history.latency_history != null && history.latency_history.length > 0){
 
-          var latencyHistory = history.latency_history;
+		  var latencyHistory = history.latency_history;
 
-          latencyHistory = this.prependAndFillNullLatencyData(history.latency_history);
+		  latencyHistory = this.prependAndFillNullLatencyData(history.latency_history); 
 
           if(latencyHistory.length > 0){
             this.pushLatencyInfoHistory(this, latencyHistory);
@@ -57,10 +58,10 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
         this.historyInitialized = true;
       },
 
-
       initLatencyHistoryOnError: function() {
         this.historyInitialized = true;
-      },
+	  },
+	  
       getCurrentDate: function() {
         var now = new Date();
         if(this.useLocalTimezone) {
@@ -77,6 +78,11 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
         } else {
           return new Date(timestamp + now.getTimezoneOffset()*60*1000);
         }
+      },
+
+      getDateByUnixTimestamp: function(timestamp) {
+        var now = new Date();
+		return new Date(timestamp);
       },
 
       updateTimeZone: function() {
@@ -140,7 +146,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 				var latencyAvailable = false;
 				var latency = model.attributes.latency;
 
-        model.updateTimeZone();
+        		model.updateTimeZone();
 				if(model.attributes.node_status === "on"){
 					for(var attr in model.attributes.latency){
 						latencyAvailable = true;
@@ -370,10 +376,11 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					if(latency[attr].data[i][bucket].pct !== null)
 						pct = latency[attr].data[i][bucket].pct.toFixed(2) + "%";
 
-					// console.log("WTF")
 					if(that.latencyData[attr][0].data[i].data.indexOf({x : timestamp, y : value, secondary : pct}) === -1) {
 						that.latencyData[attr][0].data[i].data.push({x : timestamp, y : value, secondary : pct});
 						that.legend.push({color : that.colorScale[i], title : bucket});
+						console.log("Latency item:" + attr + ":" + i + ":" +timestamp + ":" + value + ":" + pct)
+
 					} else {
 						console.log("Latency item already exists")
 					}
@@ -382,6 +389,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 				if(that.latencyData[attr][1].data.indexOf({x : timestamp, y : latency[attr]["ops/sec"], secondary : "100.00%"}) === -1) {
 					that.latencyData[attr][1].data.push({x : timestamp, y : latency[attr]["ops/sec"], secondary : "100.00%"});
 					that.legend.push({color : "#333", title : "Ops/Sec"});
+					console.log("Latency ops :" + attr + ":" + " :" +timestamp + ":" + latency[attr]["ops/sec"])
 				} else {
 					console.log("Latency total already exists")
 				}
@@ -417,14 +425,13 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					}
 				}
 
-        model.pushLatencyInfo(model,latency);
+        		model.pushLatencyInfo(model,latency);
 			}
         },
 
-    updateWindow: function(timeWindowSize, fixTimeWindowSize) {
-      this.rowView.updateWindow(this, this.latencyData, timeWindowSize, fixTimeWindowSize);
-    },
-
+		updateWindow: function(timeWindowSize, fixTimeWindowSize) {
+		this.rowView.updateWindow(this, this.latencyData, timeWindowSize, fixTimeWindowSize);
+		},
 
 		prependAndFillNullLatencyData: function(latencyResponse){
 			var that = this;
@@ -488,17 +495,31 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 		getNullInfo : function(timestamp){
 			var that = this;
-			var nullData = {'ops/sec' : null, data : [
-					{'&#x2264;1ms'  : {'pct' : null, 'value' : null}},
-					{'>1ms to &#x2264;8ms'  : {'pct' : null, 'value' : null}},
-					{'>8ms to &#x2264;64ms'  : {'pct' : null, 'value' : null}},
+			if(that.attributes.node_build < "5.1") {
+				var nullData = {'ops/sec' : null, data : [
+						{'&#x2264;1ms'  : {'pct' : null, 'value' : null}},
+						{'>1ms to &#x2264;8ms'  : {'pct' : null, 'value' : null}},
+						{'>8ms to &#x2264;64ms'  : {'pct' : null, 'value' : null}},
+						{'>64ms' : {'pct' : null, 'value' : null}}]
+					};
+				} else {
+					var nullData = {'ops/sec' : null, data : [
+						{'&#x2264;1ms'  : {'pct' : null, 'value' : null}},
+						{'>1ms to &#x2264;2ms'  : {'pct' : null, 'value' : null}},
+						{'>2ms to &#x2264;4ms'  : {'pct' : null, 'value' : null}},
+						{'>4ms to &#x2264;8ms'  : {'pct' : null, 'value' : null}},
+						{'>8ms to &#x2264;16ms'  : {'pct' : null, 'value' : null}},
+						{'>16ms to &#x2264;32ms'  : {'pct' : null, 'value' : null}},
+						{'>32ms to &#x2264;64ms'  : {'pct' : null, 'value' : null}},
+						{'>64ms' : {'pct' : null, 'value' : null}}]
+					};
 
-					{'>64ms' : {'pct' : null, 'value' : null}}]
-				};
+				}
+
 			nullData.timestamp = (timestamp.getHours() < 10 ? ("0" + timestamp.getHours()) : ("" + timestamp.getHours())) + ":";
 			nullData.timestamp += (timestamp.getMinutes() < 10 ? ("0" + timestamp.getMinutes()) : ("" + timestamp.getMinutes())) + ":";
 			nullData.timestamp += (timestamp.getSeconds() < 10 ? ("0" + timestamp.getSeconds()) : ("" + timestamp.getSeconds()));
-      nullData.timestamp_unix = Math.ceil(timestamp/1000);
+      		nullData.timestamp_unix = Math.ceil(timestamp/1000);
 
 			var stackPoint = {};
 
@@ -508,7 +529,6 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 			return stackPoint;
 		}
-
 
     });
 
