@@ -1136,7 +1136,13 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 
 		buckets := make([]string, bucketNumber)
 		for i := 0; i < bucketNumber; i++ {
-			buckets[i] = fmt.Sprintf(">%d %s", 1<<i, histUnit)
+			var histUnitDisplay string
+			if histUnit == "msec" {
+				histUnitDisplay = "ms"
+			} else if histUnit == "usec" {
+				histUnitDisplay = "us"
+			}
+			buckets[i] = fmt.Sprintf(">%d%s", 1<<i, histUnitDisplay)
 		}
 
 		// calc precise in-between percents
@@ -1150,7 +1156,12 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 			valBucketsFloat[i] *= opsCount
 		}
 
-		current := time.Now()
+		location, err := time.LoadLocation("GMT")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		current := time.Now().In(location)
 		timestamp := current.Format("15:04:05")
 		timestamp += "-GMT"
 

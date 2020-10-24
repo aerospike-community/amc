@@ -17,7 +17,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			this.legend;
 			this.latencyAvailable = false;
 			this.latencyDataDate = {};
+			this.latencyDataDateUnix = {};
 			this.lastTimestamp = {};
+			this.lastTimestampUnix = {};
 			this.attrList = ["writes_master", "writes", "reads", "proxy", "udf", "query"];
 			this.rowView = new NodeView(this);
 			this.startEventListeners();
@@ -69,6 +71,10 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			} else {
 				return new Date(now.getTime() + now.getTimezoneOffset() * 60 * 1000);
 			}
+		},
+
+		getCurrentDateUnix: function () {
+			return Math.floor(Date.now() / 1000);
 		},
 
 		getDateByTimestamp: function (timestamp) {
@@ -339,24 +345,24 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			if (_.isEmpty(this.latencyDataDate)) {
 				var currentTime = this.getCurrentDate();
 				for (var attr in latency) {
-					this.latencyDataDate[attr] = this.getCurrentDate();
+					this.latencyDataDate[attr] = currentTime;
+				}
+			}
+
+			if (_.isEmpty(this.latencyDataDateUnix)) {
+				var currentTimeUnix = this.getCurrentDateUnix();
+				for (var attr in latency) {
+					this.latencyDataDateUnix[attr] = currentTimeUnix;
 				}
 			}
 
 			for (var attr in latency) {
 
+				var timestampUnix = latency[attr].timestamp_unix * 1000;
 				var timestamp = this.getDateByTimestamp(latency[attr].timestamp_unix * 1000);
 
-				if (this.lastTimestamp[attr] != null) {
-					if ((timestamp.getTime() - this.lastTimestamp[attr].getTime()) <= -10000) {
-						// TODO dont know the purpose of these
-						// xxx this.latencyDataDate[attr].setDate( this.latencyDataDate[attr].getDate() + 1 );
-						// xxx timestamp = new Date(this.latencyDataDate[attr].getFullYear() + "/" + (this.latencyDataDate[attr].getMonth() + 1) + "/" + this.latencyDataDate[attr].getDate() + " " + latency[attr].timestamp);
-					}
-				}
-
 				this.lastTimestamp[attr] = timestamp;
-				timestamp = +timestamp.getTime();
+				this.lastTimestampUnix[attr] = timestampUnix;
 
 				that.legend = [];
 				for (var i = 0; i < latency[attr].data.length; i++) {
@@ -376,20 +382,22 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					if (latency[attr].data[i][bucket].pct !== null)
 						pct = latency[attr].data[i][bucket].pct.toFixed(2) + "%";
 
-					if (that.latencyData[attr][0].data[i].data.indexOf({ x: timestamp, y: value, secondary: pct }) === -1) {
-						that.latencyData[attr][0].data[i].data.push({ x: timestamp, y: value, secondary: pct });
+					if (that.latencyData[attr][0].data[i].data.length == 0  ||
+						that.latencyData[attr][0].data[i].data.slice(-1)[0].x != timestampUnix) {
+						that.latencyData[attr][0].data[i].data.push({ x: timestampUnix, y: value, secondary: pct });
 						that.legend.push({ color: that.colorScale[i], title: bucket });
-						console.log("Latency item:" + attr + ":" + i + ":" + timestamp + ":" + value + ":" + pct)
+						console.log("Latency item:" + attr + ":" + i + ":" + timestampUnix + ":" + value + ":" + pct)
 
 					} else {
 						console.log("Latency item already exists")
 					}
 
 				}
-				if (that.latencyData[attr][1].data.indexOf({ x: timestamp, y: latency[attr]["ops/sec"], secondary: "100.00%" }) === -1) {
-					that.latencyData[attr][1].data.push({ x: timestamp, y: latency[attr]["ops/sec"], secondary: "100.00%" });
+				if (that.latencyData[attr][1].data.length == 0 ||
+					that.latencyData[attr][1].data.slice(-1)[0].x != timestampUnix) {
+					that.latencyData[attr][1].data.push({ x: timestampUnix, y: latency[attr]["ops/sec"], secondary: "100.00%" });
 					that.legend.push({ color: "#333", title: "Ops/Sec" });
-					console.log("Latency ops :" + attr + ":" + " :" + timestamp + ":" + latency[attr]["ops/sec"])
+					console.log("Latency ops :" + attr + ":" + " :" + timestampUnix + ":" + latency[attr]["ops/sec"])
 				} else {
 					console.log("Latency total already exists")
 				}
@@ -398,26 +406,22 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 		shiftLatencyInfo: function (model, latency) {
 			if (latency !== null) {
-				var currentTime, lastTimestamp, currentLatencyTimestamp;
+				// var currentTime, lastTimestamp, currentLatencyTimestamp;
+				var currentTimeUnix, lastTimestampUnix, currentLatencyTimestampUnix;
 
 				for (var attr in model.latencyData) {
-
-					if (!_.isEmpty(this.latencyDataDate)) {
-						currentTime = this.latencyDataDate[attr];
+					if (!_.isEmpty(this.latencyDataDateUnix)) {
+						currentTimeUnix = this.latencyDataDateUnix[attr];
 					} else {
-						currentTime = this.getCurrentDate();
-					}
-					currentLatencyTimestamp = currentLatencyTimestamp || latency[attr].timestamp;
-					if (lastTimestamp == null) {
-						lastTimestamp = this.getDateByTimestamp(model.latencyData[attr][0].data[0].data[model.latencyData[attr][0].data[0].data.length - 1].x);
-						var hours = (hours = lastTimestamp.getHours()) < 10 ? ("0" + hours) : hours;
-						var minutes = (minutes = lastTimestamp.getMinutes()) < 10 ? ("0" + minutes) : minutes;
-						var seconds = (seconds = lastTimestamp.getSeconds()) < 10 ? ("0" + seconds) : seconds;
-
-						lastTimestamp = hours + ":" + minutes + ":" + seconds;
+						currentTimeUnix = this.getCurrentDateUnix();
 					}
 
-					if (currentLatencyTimestamp !== lastTimestamp) {
+					currentLatencyTimestampUnix = currentLatencyTimestampUnix || latency[attr].timestamp_unix * 1000;
+					if (lastTimestampUnix == null ) {
+						lastTimestampUnix = model.latencyData[attr][0].data[0].data[model.latencyData[attr][0].data[0].data.length - 1].x;
+					}
+
+					if (currentLatencyTimestampUnix !== lastTimestampUnix) {
 						for (var i = 0; i < model.latencyData[attr][0].data.length; i++) {
 							model.latencyData[attr][0].data[i].data.shift();
 						}
