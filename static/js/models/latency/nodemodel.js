@@ -1,5 +1,5 @@
 /******************************************************************************
-*Copyright 2008-2014 by Aerospike, Inc. All rights reserved.
+*Copyright 2008-2020 by Aerospike, Inc. All rights reserved.
 *THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE. THE COPYRIGHT NOTICE
 *ABOVE DOES NOT EVIDENCE ANY ACTUAL OR INTENDED PUBLICATION.
 ******************************************************************************/
@@ -11,7 +11,8 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 			this.modelID = this.get("model_id");
 			this.address = this.get("address");
 			this.clusterID = window.AMCGLOBALS.persistent.clusterID;//this.get("cluster_id");
-			this.colorScale = ["#5ACC44", "#E2BE00", "#ff7f0e", "#d62728", "#1f75fe", "#b5674d", "#926eae", "#ffaacc", "#199ebd", "#fdd9b5", "#1dacd6", "#cd4a4a", "#000000"];
+			this.colorScale = ["#5ACC44", "#E2BE00", "#ff7f0e", "#d62728", "#1f75fe", "#b5674d", "#926eae", "#ffaacc", "#199ebd", 
+							   "#fdd9b5", "#1dacd6", "#cd4a4a", "#566d54", "#f39385", "#e6e6fa", "#b49270", "#000000"];
 			this.polling = true;
 			this.latencyData = null;
 			this.legend;
@@ -37,7 +38,8 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 
 		initLatencyHistory: function (history) {
 			this.attributes.node_status = history.node_status || "off";
-			this.attributes.node_build = history.node_build || "5.0.0.0"
+			this.attributes.node_build = history.node_build || "5.0.0.0";
+			this.attributes.latency_units = history.latency_units || "msec";
 
 			if (history.latency_history != null && history.latency_history.length > 0) {
 
@@ -382,13 +384,13 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					if (latency[attr].data[i][bucket].pct !== null)
 						pct = latency[attr].data[i][bucket].pct.toFixed(2) + "%";
 
-					if (that.latencyData[attr][0].data[i].data.length == 0  ||
+					if (that.latencyData[attr][0].data[i].data.length == 0 ||
 						that.latencyData[attr][0].data[i].data.slice(-1)[0].x != timestampUnix) {
 						that.latencyData[attr][0].data[i].data.push({ x: timestampUnix, y: value, secondary: pct });
 						that.legend.push({ color: that.colorScale[i], title: bucket });
-						console.debug("Latency item:" + attr + ":" + i + ":" + timestampUnix + ":" + value + ":" + pct)
+						console.debug("Latency item:" + attr + ":" + i + ":" + timestampUnix + ":" + value + ":" + pct);
 					} else {
-						console.log("First item or Latency item already exists: " + timestampUnix)
+						console.debug("First item or Latency item already exists: " + timestampUnix);
 					}
 
 				}
@@ -396,9 +398,9 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					that.latencyData[attr][1].data.slice(-1)[0].x != timestampUnix) {
 					that.latencyData[attr][1].data.push({ x: timestampUnix, y: latency[attr]["ops/sec"], secondary: "100.00%" });
 					that.legend.push({ color: "#333", title: "Ops/Sec" });
-					console.debug("Latency ops :" + attr + ":" + " :" + timestampUnix + ":" + latency[attr]["ops/sec"])
+					console.debug("Latency ops :" + attr + ":" + " :" + timestampUnix + ":" + latency[attr]["ops/sec"]);
 				} else {
-					console.log("First item or Latency total already exists: " + timestampUnix)
+					console.debug("First item or Latency total already exists: " + timestampUnix);
 				}
 			}
 		},
@@ -416,7 +418,7 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 					}
 
 					currentLatencyTimestampUnix = currentLatencyTimestampUnix || latency[attr].timestamp_unix * 1000;
-					if (lastTimestampUnix == null ) {
+					if (lastTimestampUnix == null) {
 						lastTimestampUnix = model.latencyData[attr][0].data[0].data[model.latencyData[attr][0].data[0].data.length - 1].x;
 					}
 
@@ -507,18 +509,39 @@ define(["underscore", "backbone", "poller", "config/app-config", "views/latency/
 						{ '>64ms': { 'pct': null, 'value': null } }]
 				};
 			} else {
-				var nullData = {
-					'ops/sec': null, data: [
-						{ '&#x2264;1ms': { 'pct': null, 'value': null } },
-						{ '>1ms to &#x2264;2ms': { 'pct': null, 'value': null } },
-						{ '>2ms to &#x2264;4ms': { 'pct': null, 'value': null } },
-						{ '>4ms to &#x2264;8ms': { 'pct': null, 'value': null } },
-						{ '>8ms to &#x2264;16ms': { 'pct': null, 'value': null } },
-						{ '>16ms to &#x2264;32ms': { 'pct': null, 'value': null } },
-						{ '>32ms to &#x2264;64ms': { 'pct': null, 'value': null } },
-						{ '>64ms': { 'pct': null, 'value': null } }]
-				};
-
+				if (that.attributes.latency_units == "usec") {
+					var nullData = {
+						'ops/sec': null, data: [
+							{ '&#x2264;1us': { 'pct': null, 'value': null } },
+							{ '>1us to &#x2264;2us': { 'pct': null, 'value': null } },
+							{ '>2us to &#x2264;4us': { 'pct': null, 'value': null } },
+							{ '>4us to &#x2264;8us': { 'pct': null, 'value': null } },
+							{ '>8us to &#x2264;16us': { 'pct': null, 'value': null } },
+							{ '>16us to &#x2264;32us': { 'pct': null, 'value': null } },
+							{ '>32us to &#x2264;64us': { 'pct': null, 'value': null } },
+							{ '>64us to &#x2264;128us': { 'pct': null, 'value': null } },
+							{ '>128us to &#x2264;256us': { 'pct': null, 'value': null } },
+							{ '>256us to &#x2264;512us': { 'pct': null, 'value': null } },
+							{ '>512us to &#x2264;1024us': { 'pct': null, 'value': null } },
+							{ '>1024us to &#x2264;2048us': { 'pct': null, 'value': null } },
+							{ '>2048us to &#x2264;4096us': { 'pct': null, 'value': null } },
+							{ '>4096us to &#x2264;8192us': { 'pct': null, 'value': null } },
+							{ '>8192us to &#x2264;16384us': { 'pct': null, 'value': null } },
+							{ '>16384us': { 'pct': null, 'value': null } }]
+					};
+				} else {
+					var nullData = {
+						'ops/sec': null, data: [
+							{ '&#x2264;1ms': { 'pct': null, 'value': null } },
+							{ '>1ms to &#x2264;2ms': { 'pct': null, 'value': null } },
+							{ '>2ms to &#x2264;4ms': { 'pct': null, 'value': null } },
+							{ '>4ms to &#x2264;8ms': { 'pct': null, 'value': null } },
+							{ '>8ms to &#x2264;16ms': { 'pct': null, 'value': null } },
+							{ '>16ms to &#x2264;32ms': { 'pct': null, 'value': null } },
+							{ '>32ms to &#x2264;64ms': { 'pct': null, 'value': null } },
+							{ '>64ms': { 'pct': null, 'value': null } }]
+					};
+				}
 			}
 
 			nullData.timestamp = (timestamp.getHours() < 10 ? ("0" + timestamp.getHours()) : ("" + timestamp.getHours())) + ":";

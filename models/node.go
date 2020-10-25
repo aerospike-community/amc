@@ -715,6 +715,15 @@ func (n *Node) Build() string {
 	return n.InfoAttr("build")
 }
 
+func (n *Node) LatencyUnits() string {
+	res := n.latestConfig.TryString("microsecond-histograms", "")
+	if res == "true" {
+		return "usec"
+	} else {
+		return "msec"
+	}
+}
+
 func (n *Node) Disk() common.Stats {
 	return common.Stats{
 		"used":             n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
@@ -1131,7 +1140,7 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 			bucketNumber = 7 // <1ms  to >64ms
 			valBucketsFloat = valBucketsFloat[:bucketNumber]
 		} else {
-			bucketNumber = len(valBucketsFloat)
+			bucketNumber = 15
 		}
 
 		buckets := make([]string, bucketNumber)

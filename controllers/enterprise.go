@@ -104,6 +104,7 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 	for op, stats := range latestLatency {
 		buckets := stats["buckets"].([]string)
 		valBuckets := stats["valBuckets"].([]float64)
+		histUnit := stats["histUnit"]
 
 		totalOver1ms := 0.0
 		for _, v := range valBuckets {
@@ -149,6 +150,7 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 			"timestamp":      timestamp,
 			"timestamp_unix": stats["timestamp_unix"],
 			"ops/sec":        tps,
+			"units":          histUnit,
 			"data":           data,
 		}
 	}
@@ -206,6 +208,7 @@ func getNodesLatencyHistory(c echo.Context) error {
 		res[node.Address()] = common.Stats{
 			"node_status":     node.Status(),
 			"node_build":      node.Build(),
+			"latency_units":   node.LatencyUnits(),
 			"latency_history": latencyHistory,
 			"address":         node.Address(),
 		}
