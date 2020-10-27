@@ -1,6 +1,8 @@
 # Aerospike Management Console Release Notes
 
 ## 4.1.1
+Release Date: October 27, 2020
+
 * Fix display bug when not enough values return to the latency graph, graph doesn't chart latencies (just total ops).
 * Fix display bug where latency values could be displayed twice in the mouse hover legend sometimes.
 * Change removal of values from the latency graph to use unix timestamp instead of local time.
