@@ -145,11 +145,13 @@ func (n *Node) update() error {
 	}
 
 	// retry 3 times
+	tm1 := time.Now()
 	info, err := n.RequestInfo(3, n.infoKeys()...)
 	if err != nil {
 		n.setStatus(nodeStatus.Off)
 		return err
 	}
+	log.Debugf("Info command 1: %v, took: %s", n.Id(), time.Since(tm1))
 
 	n.setInfo(common.Info(info))
 	n.setConfig(n.InfoAttrs("get-config:").ToInfo("get-config:"))
@@ -159,10 +161,19 @@ func (n *Node) update() error {
 	var latencyMap map[string]common.Stats
 	var nodeLatency map[string]common.Stats
 
-	if strings.Compare(n.Build(), "5.1") < 1 {
-		latencyMap, nodeLatency = n.parseLatencyInfo(info["latency:"])
+	tm2 := time.Now()
+	infoLatency, err := n.RequestInfo(3, n.infoLatencyKeys()...)
+	if err != nil {
+		n.setStatus(nodeStatus.Off)
+		return err
+	}
+	log.Debugf("Info command 2: %v, took: %s", n.Id(), time.Since(tm2))
+
+	build := n.Build()
+	if build == common.NOT_AVAILABLE || strings.Compare(build, "5.1") < 1 {
+		latencyMap, nodeLatency = n.parseLatencyInfo(infoLatency["latency:"])
 	} else {
-		latencyMap, nodeLatency = n.parseLatenciesInfo(info["latencies:"])
+		latencyMap, nodeLatency = n.parseLatenciesInfo(infoLatency["latencies:"])
 	}
 	n.setNodeLatency(nodeLatency)
 
@@ -477,11 +488,25 @@ func (n *Node) SetXDRConfig(name string, value interface{}) error {
 	return nil
 }
 
+func (n *Node) infoLatencyKeys() []string {
+	// latencies introduced in 5.1, latency was removed in version 5.2
+	build := n.Build()
+	res := []string{}
+
+	if strings.Compare(build, "5.1") > 0 {
+		res = append(res, "latencies:")
+	} else {
+		res = append(res, "latency:")
+	}
+
+	return res
+}
+
 func (n *Node) infoKeys() []string {
 	res := []string{"node", "statistics", "features",
 		"cluster-generation", "partition-generation", "build_time",
 		"edition", "version", "build", "build_os", "bins", "jobs:",
-		"sindex", "udf-list", "latency:", "latencies:", "get-config:", "cluster-name",
+		"sindex", "udf-list" /*"latency:", "latencies:",*/, "get-config:", "cluster-name",
 		"service", "service-clear-std", "service-tls-std",
 	}
 
@@ -490,7 +515,7 @@ func (n *Node) infoKeys() []string {
 	}
 
 	// add namespace stat requests
-	for ns, _ := range n.Namespaces() {
+	for ns := range n.Namespaces() {
 		res = append(res, "namespace/"+ns)
 		res = append(res, "sets/"+ns)
 		res = append(res, "get-config:context=namespace;id="+ns)
@@ -1145,13 +1170,7 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 
 		buckets := make([]string, bucketNumber)
 		for i := 0; i < bucketNumber; i++ {
-			var histUnitDisplay string
-			if histUnit == "msec" {
-				histUnitDisplay = "ms"
-			} else if histUnit == "usec" {
-				histUnitDisplay = "us"
-			}
-			buckets[i] = fmt.Sprintf(">%d%s", 1<<i, histUnitDisplay)
+			buckets[i] = fmt.Sprintf(">%d%s", 1<<i, strings.TrimSuffix(histUnit, "ec"))
 		}
 
 		// calc precise in-between percents
