@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -79,6 +79,9 @@ const (
 	// exists.
 	KEY_EXISTS_ERROR ResultCode = 5
 
+	// Bin already exists on a create-only operation.
+	BIN_EXISTS_ERROR ResultCode = 6
+
 	// Expected cluster ID was not received.
 	CLUSTER_KEY_MISMATCH ResultCode = 7
 
@@ -110,6 +113,9 @@ const (
 	// Unsupported Server Feature (e.g. Scan + UDF)
 	UNSUPPORTED_FEATURE ResultCode = 16
 
+	// Bin not found on update-only operation.
+	BIN_NOT_FOUND ResultCode = 17
+
 	// Device not keeping up with writes.
 	DEVICE_OVERLOAD ResultCode = 18
 
@@ -131,6 +137,16 @@ const (
 
 	// Element Already Exists in CDT
 	FAIL_ELEMENT_EXISTS ResultCode = 24
+
+	// Attempt to use an Enterprise feature on a Community server or a server
+	// without the applicable feature key.
+	ENTERPRISE_ONLY ResultCode = 25
+
+	// The operation cannot be applied to the current bin value on the server.
+	OP_NOT_APPLICABLE ResultCode = 26
+
+	// The transaction was not performed because the predexp was false.
+	FILTERED_OUT ResultCode = 27
 
 	// There are no more records left for query.
 	QUERY_END ResultCode = 50
@@ -171,6 +187,9 @@ const (
 	// Security credential is invalid.
 	INVALID_CREDENTIAL ResultCode = 65
 
+	// Login session expired.
+	EXPIRED_SESSION ResultCode = 66
+
 	// Role name is invalid.
 	INVALID_ROLE ResultCode = 70
 
@@ -180,17 +199,20 @@ const (
 	// Privilege is invalid.
 	INVALID_PRIVILEGE ResultCode = 72
 
+	// Invalid IP address whiltelist
+	INVALID_WHITELIST = 73
+
 	// User must be authentication before performing database operations.
 	NOT_AUTHENTICATED ResultCode = 80
 
 	// User does not posses the required role to perform the database operation.
 	ROLE_VIOLATION ResultCode = 81
 
+	// Command not allowed because sender IP address not whitelisted.
+	NOT_WHITELISTED = 82
+
 	// A user defined function returned an error code.
 	UDF_BAD_RESPONSE ResultCode = 100
-
-	// The requested item in a large collection was not found.
-	LARGE_ITEM_NOT_FOUND ResultCode = 125
 
 	// Batch functionality has been disabled.
 	BATCH_DISABLED ResultCode = 150
@@ -339,6 +361,9 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case KEY_EXISTS_ERROR:
 		return "Key already exists"
 
+	case BIN_EXISTS_ERROR:
+		return "Bin already exists"
+
 	case CLUSTER_KEY_MISMATCH:
 		return "Cluster key mismatch"
 
@@ -369,6 +394,9 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case UNSUPPORTED_FEATURE:
 		return "Unsupported Server Feature"
 
+	case BIN_NOT_FOUND:
+		return "Bin not found"
+
 	case DEVICE_OVERLOAD:
 		return "Device overload"
 
@@ -379,7 +407,7 @@ func ResultCodeToString(resultCode ResultCode) string {
 		return "Namespace not found"
 
 	case BIN_NAME_TOO_LONG:
-		return "Bin name length greater than 14 characters, or maximum number of unique bin names are exceeded"
+		return "Bin name length greater than 15 characters, or maximum number of unique bin names are exceeded"
 
 	case FAIL_FORBIDDEN:
 		return "Operation not allowed at this time"
@@ -389,6 +417,15 @@ func ResultCodeToString(resultCode ResultCode) string {
 
 	case FAIL_ELEMENT_EXISTS:
 		return "Element exists"
+
+	case ENTERPRISE_ONLY:
+		return "Enterprise only"
+
+	case OP_NOT_APPLICABLE:
+		return "Operation not applicable"
+
+	case FILTERED_OUT:
+		return "Transaction filtered out by predexp"
 
 	case QUERY_END:
 		return "Query end"
@@ -429,6 +466,9 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case INVALID_CREDENTIAL:
 		return "Invalid credential"
 
+	case EXPIRED_SESSION:
+		return "Login session expired"
+
 	case INVALID_ROLE:
 		return "Invalid role"
 
@@ -438,17 +478,20 @@ func ResultCodeToString(resultCode ResultCode) string {
 	case INVALID_PRIVILEGE:
 		return "Invalid privilege"
 
+	case INVALID_WHITELIST:
+		return "Invalid whitelist"
+
 	case NOT_AUTHENTICATED:
 		return "Not authenticated"
 
 	case ROLE_VIOLATION:
 		return "Role violation"
 
+	case NOT_WHITELISTED:
+		return "Command not whitelisted"
+
 	case UDF_BAD_RESPONSE:
 		return "UDF returned error"
-
-	case LARGE_ITEM_NOT_FOUND:
-		return "Large collection item not found"
 
 	case BATCH_DISABLED:
 		return "Batch functionality has been disabled"

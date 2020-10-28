@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ const (
 	// RTA_DICT        = 15
 	// RTA_APPEND_DICT = 16
 	// RTA_APPEND_LIST = 17
-	// LUA_BLOB        = 18
+	HLL     = 18
 	MAP     = 19
 	LIST    = 20
 	LDT     = 21

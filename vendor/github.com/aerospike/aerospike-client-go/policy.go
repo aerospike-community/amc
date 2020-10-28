@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import (
 type Policy interface {
 	// Retrieves BasePolicy
 	GetBasePolicy() *BasePolicy
+
+	// determines if the command should be compressed
+	compress() bool
 }
 
 // BasePolicy encapsulates parameters for transaction policy attributes
@@ -29,14 +32,21 @@ type Policy interface {
 type BasePolicy struct {
 	Policy
 
+	// PredExps is the optional predicate expression filter in postfix notation. If the predicate
+	// expression exists and evaluates to false, the transaction is ignored.
+	//
+	// Default: nil
+	PredExp []PredExp
+
 	// Priority of request relative to other transactions.
 	// Currently, only used for scans.
 	Priority Priority //= Priority.DEFAULT;
 
-	// How replicas should be consulted in a read operation to provide the desired
-	// consistency guarantee. Default to allowing one replica to be used in the
-	// read operation.
-	ConsistencyLevel ConsistencyLevel //= CONSISTENCY_ONE
+	// ReadModeAP indicates read policy for AP (availability) namespaces.
+	ReadModeAP ReadModeAP //= ONE
+
+	// ReadModeSC indicates read policy for SC (strong consistency) namespaces.
+	ReadModeSC ReadModeSC //= SESSION;
 
 	// TotalTimeout specifies total transaction timeout.
 	//
@@ -110,14 +120,21 @@ type BasePolicy struct {
 	// The default is to not send the user defined key.
 	SendKey bool // = false
 
-	// Force reads to be linearized for server namespaces that support CP mode.
-	// The default is false.
-	LinearizeRead bool
+	// UseCompression tells the server to compress its response using zlib.
+	// Use zlib compression on write or batch read commands when the command buffer size is greater
+	// than 128 bytes. In addition, it directs the server to compress its response on read commands.
+	// The server response compression threshold is also 128 bytes.
+	//
+	// This option will increase CPU and memory usage (for extra compressed buffers), but
+	// decrease the size of data sent over the network.
+	//
+	// Default: false
+	UseCompression bool // = false
 
 	// ReplicaPolicy determines the node to send the read commands containing the key's partition replica type.
 	// Write commands are not affected by this setting, because all writes are directed
 	// to the node containing the key's master partition.
-	// Batch, scan and query are also not affected by replica algorithms.
+	// Scan and query are also not affected by replica algorithms.
 	// Default to sending read commands to the node containing the key's master partition.
 	ReplicaPolicy ReplicaPolicy
 }
@@ -126,7 +143,8 @@ type BasePolicy struct {
 func NewPolicy() *BasePolicy {
 	return &BasePolicy{
 		Priority:            DEFAULT,
-		ConsistencyLevel:    CONSISTENCY_ONE,
+		ReadModeAP:          ReadModeAPOne,
+		ReadModeSC:          ReadModeSCSession,
 		TotalTimeout:        0 * time.Millisecond,
 		SocketTimeout:       30 * time.Second,
 		MaxRetries:          2,
@@ -134,7 +152,7 @@ func NewPolicy() *BasePolicy {
 		SleepMultiplier:     1.0,
 		ReplicaPolicy:       SEQUENCE,
 		SendKey:             false,
-		LinearizeRead:       false,
+		UseCompression:      false,
 	}
 }
 
@@ -167,4 +185,8 @@ func (p *BasePolicy) deadline() time.Time {
 	}
 
 	return deadline
+}
+
+func (p *BasePolicy) compress() bool {
+	return p.UseCompression
 }

@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ type singleCommand struct {
 
 	cluster   *Cluster
 	key       *Key
-	partition Partition
+	partition *Partition
 }
 
-func newSingleCommand(cluster *Cluster, key *Key) singleCommand {
+func newSingleCommand(cluster *Cluster, key *Key, partition *Partition) singleCommand {
 	return singleCommand{
 		baseCommand: baseCommand{},
 		cluster:     cluster,
 		key:         key,
-		partition:   newPartitionByKey(key),
+		partition:   partition,
 	}
 }
 
@@ -52,7 +52,7 @@ func (cmd *singleCommand) emptySocket(conn *Connection) error {
 
 	// Read remaining message bytes.
 	if receiveSize > 0 {
-		if err := cmd.sizeBufferSz(receiveSize); err != nil {
+		if err := cmd.sizeBufferSz(receiveSize, false); err != nil {
 			return err
 		}
 		if _, err := conn.Read(cmd.dataBuffer, receiveSize); err != nil {

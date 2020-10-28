@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	// "github.com/sasha-s/go-sync"
 	// "github.com/satori/go.uuid"
 	// "github.com/jmoiron/sqlx"

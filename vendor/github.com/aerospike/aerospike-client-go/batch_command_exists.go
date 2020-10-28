@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,46 +22,39 @@ import (
 )
 
 type batchCommandExists struct {
-	baseMultiCommand
+	batchCommand
 
-	batchNamespace *batchNamespace
-	batch          *batchNode
-	policy         *BatchPolicy
-	keys           []*Key
-	existsArray    []bool
-	index          int
+	keys        []*Key
+	existsArray []bool
+	index       int
 }
 
 func newBatchCommandExists(
 	node *Node,
-	batchNamespace *batchNamespace,
 	batch *batchNode,
 	policy *BatchPolicy,
 	keys []*Key,
 	existsArray []bool,
 ) *batchCommandExists {
 	res := &batchCommandExists{
-		baseMultiCommand: *newMultiCommand(node, nil),
-		batchNamespace:   batchNamespace,
-		policy:           policy,
-		keys:             keys,
-		existsArray:      existsArray,
+		batchCommand: batchCommand{
+			baseMultiCommand: *newMultiCommand(node, nil),
+			policy:           policy,
+			batch:            batch,
+		},
+		keys:        keys,
+		existsArray: existsArray,
 	}
 	res.oneShot = false
 	return res
 }
 
-func (cmd *batchCommandExists) cloneBatchCommand(batch *batchNode, bns *batchNamespace) command {
+func (cmd *batchCommandExists) cloneBatchCommand(batch *batchNode) batcher {
 	res := *cmd
 	res.node = batch.Node
 	res.batch = batch
-	res.batchNamespace = bns
 
 	return &res
-}
-
-func (cmd *batchCommandExists) getPolicy(ifc command) Policy {
-	return cmd.policy
 }
 
 func (cmd *batchCommandExists) writeBuffer(ifc command) error {
@@ -84,7 +77,11 @@ func (cmd *batchCommandExists) parseRecordResults(ifc command, receiveSize int) 
 		// The only valid server return codes are "ok" and "not found".
 		// If other return codes are received, then abort the batch.
 		if resultCode != 0 && resultCode != KEY_NOT_FOUND_ERROR {
-			return false, NewAerospikeError(resultCode)
+			if resultCode == FILTERED_OUT {
+				cmd.filteredOutCnt++
+			} else {
+				return false, NewAerospikeError(resultCode)
+			}
 		}
 
 		info3 := cmd.dataBuffer[3]
@@ -124,4 +121,8 @@ func (cmd *batchCommandExists) parseRecordResults(ifc command, receiveSize int) 
 
 func (cmd *batchCommandExists) Execute() error {
 	return cmd.execute(cmd, true)
+}
+
+func (cmd *batchCommandExists) generateBatchNodes(cluster *Cluster) ([]*batchNode, error) {
+	return newBatchNodeListKeys(cluster, cmd.policy, cmd.keys, cmd.sequenceAP, cmd.sequenceSC, cmd.batch)
 }

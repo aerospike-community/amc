@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,11 +63,10 @@ type Node struct {
 	referenceCount      AtomicInt
 	failures            AtomicInt
 	partitionChanged    AtomicBool
-	performLogin        AtomicBool
 
 	active AtomicBool
 
-	supportsFloat, supportsBatchIndex, supportsReplicas, supportsGeo, supportsPeers, supportsLUTNow, supportsTruncateNamespace AtomicBool
+	supportsFloat, supportsBatchIndex, supportsReplicas, supportsGeo, supportsPeers, supportsLUTNow, supportsTruncateNamespace, supportsClusterStable, supportsBitwiseOps AtomicBool
 }
 
 // NewNode initializes a server node with connection parameters.
@@ -80,7 +79,7 @@ func newNode(cluster *Cluster, nv *nodeValidator) *Node {
 
 		// Assign host to first IP alias because the server identifies nodes
 		// by IP address (not hostname).
-		connections:         *newConnectionHeap(cluster.clientPolicy.ConnectionQueueSize),
+		connections:         *newConnectionHeap(cluster.clientPolicy.MinConnectionsPerNode, cluster.clientPolicy.ConnectionQueueSize),
 		connectionCount:     *NewAtomicInt(0),
 		peersGeneration:     *NewAtomicInt(-1),
 		partitionGeneration: *NewAtomicInt(-2),
@@ -96,6 +95,8 @@ func newNode(cluster *Cluster, nv *nodeValidator) *Node {
 		supportsPeers:             *NewAtomicBool(nv.supportsPeers),
 		supportsLUTNow:            *NewAtomicBool(nv.supportsLUTNow),
 		supportsTruncateNamespace: *NewAtomicBool(nv.supportsTruncateNamespace),
+		supportsClusterStable:     *NewAtomicBool(nv.supportsClusterStable),
+		supportsBitwiseOps:        *NewAtomicBool(nv.supportsBitwiseOps),
 	}
 
 	newNode.aliases.Store(nv.aliases)
@@ -195,6 +196,10 @@ func (nd *Node) Refresh(peers *peers) error {
 
 	if err := nd.refreshSessionToken(); err != nil {
 		Logger.Error("Error refreshing session token: %s", err.Error())
+	}
+
+	if _, err := nd.fillMinConns(); err != nil {
+		Logger.Error("Error filling up the connection queue to the minimum required")
 	}
 
 	return nil
@@ -509,6 +514,11 @@ func (nd *Node) GetConnection(timeout time.Duration) (conn *Connection, err erro
 		time.Sleep(5 * time.Millisecond)
 	}
 
+	// in case the block didn't run at all
+	if err == nil {
+		err = ErrConnectionPoolEmpty
+	}
+
 	return nil, err
 }
 
@@ -556,7 +566,7 @@ func (nd *Node) newConnection(overrideThreshold bool) (*Connection, error) {
 	conn.node = nd
 
 	// need to authenticate
-	if err = conn.login(nd.sessionToken()); err != nil {
+	if err = conn.login(&nd.cluster.clientPolicy, nd.cluster.Password(), nd.sessionToken()); err != nil {
 		atomic.AddInt64(&nd.stats.ConnectionsFailed, 1)
 
 		// Socket not authenticated. Do not put back into pool.
@@ -685,6 +695,7 @@ func (nd *Node) Close() {
 		atomic.AddInt64(&nd.stats.NodeRemoved, 1)
 	}
 	nd.closeConnections()
+	nd.connections.cleanup()
 }
 
 // String implements stringer interface
@@ -756,18 +767,25 @@ func (nd *Node) WaitUntillMigrationIsFinished(timeout time.Duration) (err error)
 // initTendConn sets up a connection to be used for info requests.
 // The same connection will be used for tend.
 func (nd *Node) initTendConn(timeout time.Duration) error {
-	var deadline time.Time
-	if timeout > 0 {
-		deadline = time.Now().Add(timeout)
+	if timeout <= 0 {
+		timeout = _DEFAULT_TIMEOUT
 	}
+	deadline := time.Now().Add(timeout)
 
 	if nd.tendConn == nil || !nd.tendConn.IsConnected() {
-		// Tend connection required a long timeout
-		tendConn, err := nd.GetConnection(time.Second)
+		var tendConn *Connection
+		var err error
+		if nd.connectionCount.Get() == 0 {
+			// if there are no connections in the pool, create a new connection synchronously.
+			// this will make sure the initial tend will get a connection without multiple retries.
+			tendConn, err = nd.newConnection(true)
+		} else {
+			tendConn, err = nd.GetConnection(timeout)
+		}
+
 		if err != nil {
 			return err
 		}
-
 		nd.tendConn = tendConn
 	}
 
@@ -888,6 +906,18 @@ func (nd *Node) Rack(namespace string) (int, error) {
 	return -1, newAerospikeNodeError(nd, RACK_NOT_DEFINED)
 }
 
+// Rack returns the rack number for the namespace.
+func (nd *Node) hasRack(namespace string, rack int) bool {
+	racks := nd.racks.Load().(map[string]int)
+	v, exists := racks[namespace]
+
+	if !exists {
+		return false
+	}
+
+	return v == rack
+}
+
 // WarmUp fills the node's connection pool with connections.
 // This is necessary on startup for high traffic programs.
 // If the count is <= 0, the connection queue will be filled.
@@ -897,7 +927,7 @@ func (nd *Node) WarmUp(count int) (int, error) {
 	var g errgroup.Group
 	cnt := NewAtomicInt(0)
 
-	toAlloc := nd.connections.Cap() - nd.connections.LenAll()
+	toAlloc := nd.connections.Cap() - nd.connectionCount.Get()
 	if count < toAlloc && count > 0 {
 		toAlloc = count
 	}
@@ -924,4 +954,16 @@ func (nd *Node) WarmUp(count int) (int, error) {
 
 	err := g.Wait()
 	return cnt.Get(), err
+}
+
+// fillMinCounts will fill the connection pool to the minimum required
+// by the ClientPolicy.MinConnectionsPerNode
+func (nd *Node) fillMinConns() (int, error) {
+	if nd.cluster.clientPolicy.MinConnectionsPerNode > 0 {
+		toFill := nd.cluster.clientPolicy.MinConnectionsPerNode - nd.connectionCount.Get()
+		if toFill > 0 {
+			return nd.WarmUp(toFill)
+		}
+	}
+	return 0, nil
 }

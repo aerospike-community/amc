@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strconv"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
 	"github.com/aerospike-community/amc/common"

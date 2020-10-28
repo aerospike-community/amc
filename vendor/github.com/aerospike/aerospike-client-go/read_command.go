@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package aerospike
 
 import (
+	"fmt"
 	"reflect"
 
 	. "github.com/aerospike/aerospike-client-go/logger"
@@ -46,12 +47,20 @@ var objectParser func(
 	expiration uint32,
 ) error
 
-func newReadCommand(cluster *Cluster, policy *BasePolicy, key *Key, binNames []string) readCommand {
+func newReadCommand(cluster *Cluster, policy *BasePolicy, key *Key, binNames []string, partition *Partition) (readCommand, error) {
+	var err error
+	if partition == nil {
+		partition, err = PartitionForRead(cluster, policy, key)
+		if err != nil {
+			return readCommand{}, err
+		}
+	}
+
 	return readCommand{
-		singleCommand: newSingleCommand(cluster, key),
+		singleCommand: newSingleCommand(cluster, key, partition),
 		binNames:      binNames,
 		policy:        policy,
-	}
+	}, nil
 }
 
 func (cmd *readCommand) getPolicy(ifc command) Policy {
@@ -63,15 +72,47 @@ func (cmd *readCommand) writeBuffer(ifc command) error {
 }
 
 func (cmd *readCommand) getNode(ifc command) (*Node, error) {
-	return cmd.cluster.getReadNode(&cmd.partition, cmd.policy.ReplicaPolicy, &cmd.replicaSequence)
+	return cmd.partition.GetNodeRead(cmd.cluster)
+}
+
+func (cmd *readCommand) prepareRetry(ifc command, isTimeout bool) bool {
+	cmd.partition.PrepareRetryRead(isTimeout)
+	return true
 }
 
 func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
-	// Read header.
-	_, err := conn.Read(cmd.dataBuffer, int(_MSG_TOTAL_HEADER_SIZE))
+	// Read proto and check if compressed
+	_, err := conn.Read(cmd.dataBuffer, 8)
 	if err != nil {
 		Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
 		return err
+	}
+
+	if compressedSize := cmd.compressedSize(); compressedSize > 0 {
+		// Read compressed size
+		_, err = conn.Read(cmd.dataBuffer, 8)
+		if err != nil {
+			Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
+			return err
+		}
+
+		if err := cmd.conn.initInflater(true, compressedSize); err != nil {
+			return NewAerospikeError(PARSE_ERROR, fmt.Sprintf("Error setting up zlib inflater for size `%d`: %s", compressedSize, err.Error()))
+		}
+
+		// Read header.
+		_, err = conn.Read(cmd.dataBuffer, int(_MSG_TOTAL_HEADER_SIZE))
+		if err != nil {
+			Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
+			return err
+		}
+	} else {
+		// Read header.
+		_, err = conn.Read(cmd.dataBuffer[8:], int(_MSG_TOTAL_HEADER_SIZE)-8)
+		if err != nil {
+			Logger.Debug("Connection error reading data for ReadCommand: %s", err.Error())
+			return err
+		}
 	}
 
 	// A number of these are commented out because we just don't care enough to read
@@ -93,7 +134,7 @@ func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
 
 	// Read remaining message bytes.
 	if receiveSize > 0 {
-		if err = cmd.sizeBufferSz(receiveSize); err != nil {
+		if err = cmd.sizeBufferSz(receiveSize, false); err != nil {
 			return err
 		}
 		_, err = conn.Read(cmd.dataBuffer, receiveSize)
@@ -107,12 +148,12 @@ func (cmd *readCommand) parseResult(ifc command, conn *Connection) error {
 	if resultCode != 0 {
 		if resultCode == KEY_NOT_FOUND_ERROR {
 			return ErrKeyNotFound
-		}
-
-		if resultCode == UDF_BAD_RESPONSE {
+		} else if resultCode == FILTERED_OUT {
+			return ErrFilteredOut
+		} else if resultCode == UDF_BAD_RESPONSE {
 			cmd.record, _ = cmd.parseRecord(ifc, opCount, fieldCount, generation, expiration)
 			err := cmd.handleUdfError(resultCode)
-			Logger.Warn("UDF execution error: " + err.Error())
+			Logger.Debug("UDF execution error: " + err.Error())
 			return err
 		}
 

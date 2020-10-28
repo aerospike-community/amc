@@ -11,7 +11,7 @@ import (
 	// "time"
 	// "sync"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
 	"github.com/aerospike-community/amc/common"
@@ -76,7 +76,7 @@ func (r *Restore) Execute() error {
 	node := r.cluster.RandomActiveNode()
 	if node == nil {
 		r.UpdateStatus(common.BackupStatusFailed)
-		return errors.New("No active nodes found in the cluster.")
+		return errors.New("No active nodes found in the cluster")
 	}
 
 	// try to connect to the remote address and run the command

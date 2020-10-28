@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,13 +29,18 @@ type deleteCommand struct {
 	existed bool
 }
 
-func newDeleteCommand(cluster *Cluster, policy *WritePolicy, key *Key) *deleteCommand {
+func newDeleteCommand(cluster *Cluster, policy *WritePolicy, key *Key) (*deleteCommand, error) {
+	partition, err := PartitionForWrite(cluster, &policy.BasePolicy, key)
+	if err != nil {
+		return nil, err
+	}
+
 	newDeleteCmd := &deleteCommand{
-		singleCommand: newSingleCommand(cluster, key),
+		singleCommand: newSingleCommand(cluster, key, partition),
 		policy:        policy,
 	}
 
-	return newDeleteCmd
+	return newDeleteCmd, nil
 }
 
 func (cmd *deleteCommand) getPolicy(ifc command) Policy {
@@ -47,7 +52,12 @@ func (cmd *deleteCommand) writeBuffer(ifc command) error {
 }
 
 func (cmd *deleteCommand) getNode(ifc command) (*Node, error) {
-	return cmd.cluster.getMasterNode(&cmd.partition)
+	return cmd.partition.GetNodeWrite(cmd.cluster)
+}
+
+func (cmd *deleteCommand) prepareRetry(ifc command, isTimeout bool) bool {
+	cmd.partition.PrepareRetryWrite(isTimeout)
+	return true
 }
 
 func (cmd *deleteCommand) parseResult(ifc command, conn *Connection) error {
@@ -65,10 +75,20 @@ func (cmd *deleteCommand) parseResult(ifc command, conn *Connection) error {
 
 	resultCode := cmd.dataBuffer[13] & 0xFF
 
-	if resultCode != 0 && ResultCode(resultCode) != KEY_NOT_FOUND_ERROR {
+	switch ResultCode(resultCode) {
+	case 0:
+		cmd.existed = true
+	case KEY_NOT_FOUND_ERROR:
+		cmd.existed = false
+	case FILTERED_OUT:
+		if err := cmd.emptySocket(conn); err != nil {
+			return err
+		}
+		cmd.existed = true
+		return ErrFilteredOut
+	default:
 		return NewAerospikeError(ResultCode(resultCode))
 	}
-	cmd.existed = resultCode == 0
 
 	return cmd.emptySocket(conn)
 }

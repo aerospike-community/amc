@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/toml"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
 
 	_ "github.com/cznic/ql/driver"

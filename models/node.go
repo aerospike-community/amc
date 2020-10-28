@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 
 	"github.com/aerospike-community/amc/common"
@@ -145,13 +145,11 @@ func (n *Node) update() error {
 	}
 
 	// retry 3 times
-	tm1 := time.Now()
 	info, err := n.RequestInfo(3, n.infoKeys()...)
 	if err != nil {
 		n.setStatus(nodeStatus.Off)
 		return err
 	}
-	log.Debugf("Info command 1: %v, took: %s", n.Id(), time.Since(tm1))
 
 	n.setInfo(common.Info(info))
 	n.setConfig(n.InfoAttrs("get-config:").ToInfo("get-config:"))
@@ -161,13 +159,11 @@ func (n *Node) update() error {
 	var latencyMap map[string]common.Stats
 	var nodeLatency map[string]common.Stats
 
-	tm2 := time.Now()
 	infoLatency, err := n.RequestInfo(3, n.infoLatencyKeys()...)
 	if err != nil {
 		n.setStatus(nodeStatus.Off)
 		return err
 	}
-	log.Debugf("Info command 2: %v, took: %s", n.Id(), time.Since(tm2))
 
 	build := n.Build()
 	if build == common.NOT_AVAILABLE || strings.Compare(build, "5.1") < 1 {
@@ -744,9 +740,8 @@ func (n *Node) LatencyUnits() string {
 	res := n.latestConfig.TryString("microsecond-histograms", "")
 	if res == "true" {
 		return "usec"
-	} else {
-		return "msec"
 	}
+	return "msec"
 }
 
 func (n *Node) Disk() common.Stats {
@@ -803,7 +798,7 @@ func (n *Node) Namespaces() map[string]*Namespace {
 func (n *Node) NamespaceList() []string {
 	namespaces := n.Namespaces()
 	res := make([]string, 0, len(namespaces))
-	for ns, _ := range namespaces {
+	for ns := range namespaces {
 		res = append(res, ns)
 	}
 	return common.StrUniq(res)

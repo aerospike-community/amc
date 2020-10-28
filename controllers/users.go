@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
 	"github.com/labstack/echo"
 

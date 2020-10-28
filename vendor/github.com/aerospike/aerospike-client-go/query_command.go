@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,19 @@ package aerospike
 type queryCommand struct {
 	baseMultiCommand
 
-	policy    *QueryPolicy
-	statement *Statement
+	policy      *QueryPolicy
+	writePolicy *WritePolicy
+	statement   *Statement
+	operations  []*Operation
 }
 
-func newQueryCommand(node *Node, policy *QueryPolicy, statement *Statement, recordset *Recordset) *queryCommand {
+func newQueryCommand(node *Node, policy *QueryPolicy, writePolicy *WritePolicy, statement *Statement, operations []*Operation, recordset *Recordset, clusterKey int64, first bool) *queryCommand {
 	return &queryCommand{
-		baseMultiCommand: *newMultiCommand(node, recordset),
+		baseMultiCommand: *newCorrectMultiCommand(node, recordset, statement.Namespace, clusterKey, first),
 		policy:           policy,
+		writePolicy:      writePolicy,
 		statement:        statement,
+		operations:       operations,
 	}
 }
 
@@ -34,7 +38,7 @@ func (cmd *queryCommand) getPolicy(ifc command) Policy {
 }
 
 func (cmd *queryCommand) writeBuffer(ifc command) (err error) {
-	return cmd.setQuery(cmd.policy, cmd.statement, false)
+	return cmd.setQuery(cmd.policy, cmd.writePolicy, cmd.statement, cmd.operations, cmd.writePolicy != nil)
 }
 
 func (cmd *queryCommand) parseResult(ifc command, conn *Connection) error {

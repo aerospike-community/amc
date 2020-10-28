@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,16 @@ type existsCommand struct {
 	replicaSequence int
 }
 
-func newExistsCommand(cluster *Cluster, policy *BasePolicy, key *Key) *existsCommand {
-	return &existsCommand{
-		singleCommand: newSingleCommand(cluster, key),
-		policy:        policy,
+func newExistsCommand(cluster *Cluster, policy *BasePolicy, key *Key) (*existsCommand, error) {
+	partition, err := PartitionForRead(cluster, policy, key)
+	if err != nil {
+		return nil, err
 	}
+
+	return &existsCommand{
+		singleCommand: newSingleCommand(cluster, key, partition),
+		policy:        policy,
+	}, nil
 }
 
 func (cmd *existsCommand) getPolicy(ifc command) Policy {
@@ -47,7 +52,12 @@ func (cmd *existsCommand) writeBuffer(ifc command) error {
 }
 
 func (cmd *existsCommand) getNode(ifc command) (*Node, error) {
-	return cmd.cluster.getReadNode(&cmd.partition, cmd.policy.ReplicaPolicy, &cmd.replicaSequence)
+	return cmd.partition.GetNodeRead(cmd.cluster)
+}
+
+func (cmd *existsCommand) prepareRetry(ifc command, isTimeout bool) bool {
+	cmd.partition.PrepareRetryRead(isTimeout)
+	return true
 }
 
 func (cmd *existsCommand) parseResult(ifc command, conn *Connection) error {
@@ -65,10 +75,21 @@ func (cmd *existsCommand) parseResult(ifc command, conn *Connection) error {
 
 	resultCode := cmd.dataBuffer[13] & 0xFF
 
-	if resultCode != 0 && ResultCode(resultCode) != KEY_NOT_FOUND_ERROR {
+	switch ResultCode(resultCode) {
+	case 0:
+		cmd.exists = true
+	case KEY_NOT_FOUND_ERROR:
+		cmd.exists = false
+	case FILTERED_OUT:
+		if err := cmd.emptySocket(conn); err != nil {
+			return err
+		}
+		cmd.exists = true
+		return ErrFilteredOut
+	default:
 		return NewAerospikeError(ResultCode(resultCode))
 	}
-	cmd.exists = resultCode == 0
+
 	return cmd.emptySocket(conn)
 }
 

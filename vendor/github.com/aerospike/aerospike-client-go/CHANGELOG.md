@@ -1,5 +1,213 @@
 # Change History
 
+## September 10 2020: v3.1.0
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Fixes an issue where initial tend was not adhering to the `ClientPolicy.Timeout`. (CLIENT-1344)
+
+## August 19 2020: v3.0.5
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Corrects the maximum bin name size in error message.
+    - Fixes geo coordinates in predexp tests due to more strict server validation.
+    - Fixes misspelled words and doc links. PR #311, thanks to [Abhay](https://github.com/pnutmath)
+
+## July 7 2020: v3.0.4
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Fixes `Client.SetWhitelist` API.
+    - Fixes an issue where `Whilelist` was not set during `QueryRole`.
+
+## July 3 2020: v3.0.3
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Resolves an issue where batch retry could return some nil records in some situations.
+
+## June 24 2020: v3.0.2
+
+  Minor improvement release.
+
+  * **Fixes**
+
+    - Fixes an issue where if a slice was pre-assigned on a struct, the data would not be allocated to it in reflection API. PR #302, thanks to [gdm85](https://github.com/gdm85)
+    - Fixes an issue where `Node.GetConnection()` could in rare circumstances return no connection without an `error`. This would potentially cause a panic in VERY slow production servers.
+
+  * **Improvements**
+
+    - Converts a few panics to errors in wire protocol encoding/decoding. Resolves issue #304.
+
+## June 17 2020: v3.0.1
+
+  Minor bug fix release.
+
+  * **Fixes**
+
+    - Fixes caching of embedded structs with options in alias. Resolves issue #301.
+
+## June 8 2020: v3.0.0
+
+  Major feature release. There are a few minor breaking API changes. See `ClientPolicy`.
+
+  Note: There has been significant changes to clustering code. We recommend extensive testing before using in production.
+
+  * **New Features**
+
+    - Adds support for Relaxed Strong Consistency mode.
+    - Adds support for whitelists in Roles.
+
+## May 28 2020: v2.12.0
+
+  Minor feature release.
+
+  * **New Features**
+
+    - Adds `MapCreateOp` and `ListCreateOp` in `Context` for CDTs.
+
+## May 27 2020: v2.11.0
+
+  Major feature release.
+
+  * **New Features**
+
+    - Adds HyperLogLog support.
+
+  * **Improvements**
+
+    - Exports `estimateSize` on `Value` Datastructure. PR #299, thanks to [Sainadh Devireddy](https://github.com/sainadh-d)
+    - Adds more detail regarding `ClientPolicy.IdleTimeout` in the documentation, and changes the default value to 55 seconds.
+
+## May 12 2020: v2.10.0
+
+  Minor feature release.
+
+  * **New Features**
+
+    - Adds `ClientPolicy.MinConnectionsPerNode`.
+
+  * **Improvements**
+
+    - Returns distinct error when empty slice is passed to BatchGetObjects. PR #297, thanks to [Mohamed Osama](https://github.com/oss92)
+
+## March 14 2020: v2.9.0
+
+  Minor feature release.
+
+  * **New Features**
+
+    - Supports use of anonymous structs in reflection API. PR #287, thanks to [小马哥](https://github.com/andot)
+
+## March 4 2020: v2.8.2
+
+  Hotfix.
+
+  * **Fixes**
+
+    - Fixes a race condition introduced in the last release.
+
+## March 4 2020: v2.8.1
+
+  Minor fix and improvements.
+
+  * **Improvements**
+
+    - Uses a `sync.Pool` to preserve the connection buffers on close to remove pressure from the allocator and the GC during connection churns.
+
+  * **Fixes**
+
+    - Cleanup the data structure cross refs on Cluster.Close to help GC free the objects.
+
+## February 28 2020: v2.8.0
+
+  Minor feature release.
+
+  * **New Features**
+
+    - Allows `,omitempty` tag to be used in struct tags. It behaves the same as the stdlib json. Note that there should be no whitespace between the comma and the rest of the tag.
+
+## January 30 2020: v2.7.2
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Resolves an issue where an invalid/malformed compressed header could cause a panic by reporting wrong compressed data size. Resolves #280.
+
+## January 20 2020: v2.7.1
+
+  Minor fix release.
+
+  * **Fixes**
+
+    - Fixes an issue where an error was not checked after a read in `multi_command.go` and would cause a panic. Resolves #280.
+
+## December 24 2019: v2.7.0
+
+  Minor feature and fix release.
+
+  * **New Features**
+
+    - Adds support for client/server wire transport compression.
+    - Adds support for descending CDT list order.
+
+  * **Fixes**
+
+    - Fixes an issue where unpacking `Value` objects would cause an infinite loop. PR #273, thanks to [small-egg](https://github.com/small-egg)
+
+## November 25 2019: v2.6.0
+  Minor feature release.
+
+  * **New Features**
+
+    - Supports correct Query/Scans via `Scan/QueryPolicy.FailOnClusterChange`
+
+  * **Fixes**
+
+    - Fixes an issue where the client using multiple seeds via DNS or Load Balancer would fail to connect if more than one of them were unreachable.
+
+## November 8 2019: v2.5.0
+  Major feature release.
+
+  * **New Features**
+
+    - Adds support for predicate expressions in all transactions. See `Policy.Predexp`.
+
+## October 29 2019: v2.4.0
+  Major feature release.
+
+  * **New Features**
+
+    - Adds support for bitwise operations.
+    - Adds support for nested CDTs.
+
+## October 17 2019: v2.3.0
+  Major feature release.
+
+  * **New Features**
+
+    - Adds support for mixed security modes in cluster to enable rolling upgrade with security changes.
+    - Adds support for delete record operation `DeleteOp()` in `Client.Operate()`.
+    - Adds support for write operations in background scan/query.
+    - Adds support for `Scan/QueryPolicy.RecordsPerSecond` field to limit throughput.
+
+## August 13 2019: v2.2.1
+  Minor improvement release.
+
+  * **Improvements**
+
+    - Supports the `Write` role in server v4.6.0.2+
+
 ## May 21 2019: v2.2.0
   Minor Fixes and improvements release.
 

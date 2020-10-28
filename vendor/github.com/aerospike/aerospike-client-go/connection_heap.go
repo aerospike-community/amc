@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,25 @@ func newSingleConnectionHeap(size int) *singleConnectionHeap {
 	}
 }
 
+func (h *singleConnectionHeap) cleanup() {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	for i := range h.data {
+		if h.data[i] != nil {
+			h.data[i].Close()
+		}
+
+		h.data[i] = nil
+	}
+
+	// make sure offer and poll both fail
+	h.data = nil
+	h.full = true
+	h.head = 0
+	h.tail = 0
+}
+
 // Offer adds an item to the heap unless the heap is full.
 // In case the heap is full, the item will not be added to the heap
 // and false will be returned
@@ -65,6 +84,12 @@ func (h *singleConnectionHeap) Offer(conn *Connection) bool {
 // If the heap is empty, nil will be returned.
 func (h *singleConnectionHeap) Poll() (res *Connection) {
 	h.mutex.Lock()
+
+	// the heap has been cleaned up
+	if h.data == nil {
+		return nil
+	}
+
 	// if heap is not empty
 	if (h.tail != h.head) || h.full {
 		res = h.data[h.head]
@@ -129,18 +154,31 @@ func (h *singleConnectionHeap) Len() int {
 // If the heap is empty, nil is returned.
 // if the heap is full, offer will return false
 type connectionHeap struct {
-	size  int
-	heaps []singleConnectionHeap
+	maxSize int
+	minSize int
+	heaps   []singleConnectionHeap
 }
 
-func newConnectionHeap(size int) *connectionHeap {
+// Close cleans up all the data and removes all the references from
+// active objects to ensure GC cleans up everything.
+func (h *connectionHeap) cleanup() {
+	for i := range h.heaps {
+		h.heaps[i].cleanup()
+	}
+}
+
+func newConnectionHeap(minSize, maxSize int) *connectionHeap {
+	if minSize > maxSize {
+		panic("minSize is bigger than maxSize for connection heap")
+	}
+
 	heapCount := runtime.NumCPU()
-	if heapCount > size {
-		heapCount = size
+	if heapCount > maxSize {
+		heapCount = maxSize
 	}
 
 	// will be >= 1
-	perHeapSize := size / heapCount
+	perHeapSize := maxSize / heapCount
 
 	heaps := make([]singleConnectionHeap, heapCount)
 	for i := range heaps {
@@ -148,13 +186,14 @@ func newConnectionHeap(size int) *connectionHeap {
 	}
 
 	// add a heap for the remainder
-	if (perHeapSize*heapCount)-size > 0 {
-		heaps = append(heaps, *newSingleConnectionHeap(size - heapCount*perHeapSize))
+	if (perHeapSize*heapCount)-maxSize > 0 {
+		heaps = append(heaps, *newSingleConnectionHeap(maxSize - heapCount*perHeapSize))
 	}
 
 	return &connectionHeap{
-		size:  size,
-		heaps: heaps,
+		maxSize: maxSize,
+		minSize: minSize,
+		heaps:   heaps,
 	}
 }
 
@@ -188,16 +227,30 @@ func (h *connectionHeap) Poll(hint byte) (res *Connection) {
 }
 
 // DropIdle closes all idle connections.
+// It will only drop connections if there are
+// at least ClientPolicy.MinConnectionPerNode available
 func (h *connectionHeap) DropIdle() {
+	// decide how many conns are allowed to drop
+	// in minSize is 0, up to all connection can
+	// be closed if idle
+	excessCount := h.LenAll() - h.minSize
+	if excessCount <= 0 {
+		return
+	}
+
 	for i := 0; i < len(h.heaps); i++ {
 		for h.heaps[i].DropIdleTail() {
+			excessCount--
+			if excessCount == 0 {
+				return
+			}
 		}
 	}
 }
 
 // Cap returns the total capacity of the connectionHeap
 func (h *connectionHeap) Cap() int {
-	return h.size
+	return h.maxSize
 }
 
 // Len returns the number of connections in a specific sub-heap.

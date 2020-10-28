@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,9 +36,11 @@ func newScanObjectsCommand(
 	binNames []string,
 	recordset *Recordset,
 	taskID uint64,
+	clusterKey int64,
+	first bool,
 ) *scanObjectsCommand {
 	cmd := &scanObjectsCommand{
-		baseMultiCommand: *newMultiCommand(node, recordset),
+		baseMultiCommand: *newCorrectMultiCommand(node, recordset, namespace, clusterKey, first),
 		policy:           policy,
 		namespace:        namespace,
 		setName:          setName,

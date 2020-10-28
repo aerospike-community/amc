@@ -1,6 +1,6 @@
 // +build !app_engine
 
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import (
 	"fmt"
 	"sync"
 
+	. "github.com/aerospike/aerospike-client-go/internal/atomic"
 	lualib "github.com/aerospike/aerospike-client-go/internal/lua"
 	. "github.com/aerospike/aerospike-client-go/types"
 	lua "github.com/yuin/gopher-lua"
 )
 
 //--------------------------------------------------------
-// Query Aggregate functions (Supported by Aerospike 3 servers only)
+// Query Aggregate functions (Supported by Aerospike 3+ servers only)
 //--------------------------------------------------------
 
 // SetLuaPath sets the Lua interpreter path to files
@@ -40,7 +41,7 @@ func SetLuaPath(lpath string) {
 // The caller can concurrently pop records off the channel through the
 // Recordset.Records channel.
 //
-// This method is only supported by Aerospike 3 servers.
+// This method is only supported by Aerospike 3+ servers.
 // If the policy is nil, the default relevant policy will be used.
 func (clnt *Client) QueryAggregate(policy *QueryPolicy, statement *Statement, packageName, functionName string, functionArgs ...Value) (*Recordset, error) {
 	statement.SetAggregateFunction(packageName, functionName, functionArgs, true)
@@ -51,6 +52,16 @@ func (clnt *Client) QueryAggregate(policy *QueryPolicy, statement *Statement, pa
 	if len(nodes) == 0 {
 		return nil, NewAerospikeError(SERVER_NOT_AVAILABLE, "QueryAggregate failed because cluster is empty.")
 	}
+
+	clusterKey := int64(0)
+	if policy.FailOnClusterChange {
+		var err error
+		clusterKey, err = queryValidateBegin(nodes[0], statement.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+	first := NewAtomicBool(true)
 
 	// results channel must be async for performance
 	recSet := newRecordset(policy.RecordQueueSize, len(nodes), statement.TaskId)
@@ -75,7 +86,7 @@ func (clnt *Client) QueryAggregate(policy *QueryPolicy, statement *Statement, pa
 	for _, node := range nodes {
 		// copy policies to avoid race conditions
 		newPolicy := *policy
-		command := newQueryAggregateCommand(node, &newPolicy, statement, recSet)
+		command := newQueryAggregateCommand(node, &newPolicy, statement, recSet, clusterKey, first.CompareAndToggle(true))
 		command.luaInstance = luaInstance
 		command.inputChan = inputChan
 

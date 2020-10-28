@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	// "github.com/satori/go.uuid"
 
 	"github.com/aerospike-community/amc/common"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
 

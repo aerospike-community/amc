@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -128,4 +128,10 @@ func (stmt *Statement) setTaskID() {
 	for stmt.TaskId == 0 {
 		stmt.TaskId = uint64(xornd.Int64())
 	}
+}
+
+// Always set the taskID client-side to a non-zero random value
+func (stmt *Statement) prepare(returnData bool) {
+	stmt.returnData = returnData
+	stmt.setTaskID()
 }

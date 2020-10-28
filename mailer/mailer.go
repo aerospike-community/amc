@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html/template"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	gomail "gopkg.in/gomail.v2"
 
 	"github.com/aerospike-community/amc/common"

@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ import (
 	"crypto/tls"
 	"time"
 )
-
-const defaultIdleTimeout = 14 * time.Second
 
 // ClientPolicy encapsulates parameters for client policy command.
 type ClientPolicy struct {
@@ -45,7 +43,18 @@ type ClientPolicy struct {
 	// Connection idle timeout. Every time a connection is used, its idle
 	// deadline will be extended by this duration. When this deadline is reached,
 	// the connection will be closed and discarded from the connection pool.
-	IdleTimeout time.Duration //= 14 seconds
+	// The value is limited to 24 hours (86400s).
+	//
+	// It's important to set this value to a few seconds less than the server's proto-fd-idle-ms
+	// (default 60000 milliseconds or 1 minute), so the client does not attempt to use a socket
+	// that has already been reaped by the server.
+	//
+	// Connection pools are now implemented by a LIFO stack. Connections at the tail of the
+	// stack will always be the least used. These connections are checked for IdleTimeout
+	// on every tend (usually 1 second).
+	//
+	// Default: 55 seconds
+	IdleTimeout time.Duration //= 55 seconds
 
 	// LoginTimeout specifies the timeout for login operation for external authentication such as LDAP.
 	LoginTimeout time.Duration //= 10 seconds
@@ -53,6 +62,20 @@ type ClientPolicy struct {
 	// ConnectionQueueCache specifies the size of the Connection Queue cache PER NODE.
 	// Note: One connection per node is reserved for tend operations and is not used for transactions.
 	ConnectionQueueSize int //= 256
+
+	// MinConnectionsPerNode specifies the minimum number of synchronous connections allowed per server node.
+	// Preallocate min connections on client node creation.
+	// The client will periodically allocate new connections if count falls below min connections.
+	//
+	// Server proto-fd-idle-ms may also need to be increased substantially if min connections are defined.
+	// The proto-fd-idle-ms default directs the server to close connections that are idle for 60 seconds
+	// which can defeat the purpose of keeping connections in reserve for a future burst of activity.
+	//
+	// If server proto-fd-idle-ms is changed, client ClientPolicy.IdleTimeout should also be
+	// changed to be a few seconds less than proto-fd-idle-ms.
+	//
+	// Default: 0
+	MinConnectionsPerNode int
 
 	// If set to true, will not create a new connection
 	// to the node if there are already `ConnectionQueueSize` active connections.
@@ -117,7 +140,7 @@ func NewClientPolicy() *ClientPolicy {
 	return &ClientPolicy{
 		AuthMode:                    AuthModeInternal,
 		Timeout:                     30 * time.Second,
-		IdleTimeout:                 defaultIdleTimeout,
+		IdleTimeout:                 55 * time.Second,
 		LoginTimeout:                10 * time.Second,
 		ConnectionQueueSize:         256,
 		OpeningConnectionThreshold:  0,
@@ -128,7 +151,7 @@ func NewClientPolicy() *ClientPolicy {
 	}
 }
 
-// RequiresAuthentication returns true if a USer or Password is set for ClientPolicy.
+// RequiresAuthentication returns true if a User or Password is set for ClientPolicy.
 func (cp *ClientPolicy) RequiresAuthentication() bool {
 	return (cp.User != "") || (cp.Password != "")
 }

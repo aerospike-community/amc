@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ var throughput = flag.Int64("g", 0, "Throttle transactions per second to a maxim
 var timeout = flag.Int("T", 0, "Read/Write timeout in milliseconds.")
 var maxRetries = flag.Int("maxRetries", 2, "Maximum number of retries before aborting the current transaction.")
 var connQueueSize = flag.Int("queueSize", 128, "Maximum number of connections to pool.")
-var openingConnectionThreshold = flag.Int("openingConnectionThreshold", 64, "Maximum number of connections allowed to open simultaniously.")
+var openingConnectionThreshold = flag.Int("openingConnectionThreshold", 64, "Maximum number of connections allowed to open simultaneously.")
 var warmUp = flag.Int("warmUp", 128, "Number of connections to open on start up.")
 
 var randBinData = flag.Bool("R", false, "Use dynamically generated random bin values instead of default static fixed bin values.")
@@ -365,7 +365,7 @@ func randBytes(size int, xr *XorRand) []byte {
 }
 
 func incOnError(op, timeout *int, err error) {
-	if ae, ok := err.(ast.AerospikeError); ok && ae.ResultCode() == ast.TIMEOUT {
+	if ae, ok := err.(ast.AerospikeError); ok && (ae.ResultCode() == ast.TIMEOUT || err == ast.ErrConnectionPoolEmpty || err == ast.ErrTooManyConnectionsForNode || err == ast.ErrTooManyOpeningConnections) {
 		*timeout++
 	} else {
 		*op++

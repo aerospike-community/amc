@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ type MapPair struct{ Key, Value interface{} }
 type Value interface {
 
 	// Calculate number of vl.bytes necessary to serialize the value in the wire protocol.
-	estimateSize() (int, error)
+	EstimateSize() (int, error)
 
 	// Serialize the value in the wire protocol.
 	write(cmd BufferEx) (int, error)
@@ -62,7 +62,7 @@ type AerospikeBlob interface {
 }
 
 // tryConcreteValue will return an aerospike value.
-// If the encoder does not exists, it will not try to use reflection.
+// If the encoder does not exist, it will not try to use reflection.
 func tryConcreteValue(v interface{}) Value {
 	switch val := v.(type) {
 	case Value:
@@ -117,7 +117,7 @@ func tryConcreteValue(v interface{}) Value {
 		The following cases will try to avoid using reflection by matching against the
 		internal generic types.
 		If you have custom type aliases in your code, you can use the same aerospike types to cast your type into,
-		to avoid hitting the generics.
+		to avoid hitting the reflection.
 	*/
 	case []string:
 		return NewListerValue(stringSlice(val))
@@ -448,7 +448,7 @@ func NewNullValue() NullValue {
 	return nullValue
 }
 
-func (vl NullValue) estimateSize() (int, error) {
+func (vl NullValue) EstimateSize() (int, error) {
 	return 0, nil
 }
 
@@ -486,7 +486,7 @@ func NewInfinityValue() InfinityValue {
 	return infinityValue
 }
 
-func (vl InfinityValue) estimateSize() (int, error) {
+func (vl InfinityValue) EstimateSize() (int, error) {
 	return 0, nil
 }
 
@@ -524,7 +524,7 @@ func NewWildCardValue() WildCardValue {
 	return wildCardValue
 }
 
-func (vl WildCardValue) estimateSize() (int, error) {
+func (vl WildCardValue) EstimateSize() (int, error) {
 	return 0, nil
 }
 
@@ -572,7 +572,7 @@ func NewBlobValue(object AerospikeBlob) BytesValue {
 	return NewBytesValue(buf)
 }
 
-func (vl BytesValue) estimateSize() (int, error) {
+func (vl BytesValue) EstimateSize() (int, error) {
 	return len(vl), nil
 }
 
@@ -609,7 +609,7 @@ func NewStringValue(value string) StringValue {
 	return StringValue(value)
 }
 
-func (vl StringValue) estimateSize() (int, error) {
+func (vl StringValue) EstimateSize() (int, error) {
 	return len(vl), nil
 }
 
@@ -646,7 +646,7 @@ func NewIntegerValue(value int) IntegerValue {
 	return IntegerValue(value)
 }
 
-func (vl IntegerValue) estimateSize() (int, error) {
+func (vl IntegerValue) EstimateSize() (int, error) {
 	return 8, nil
 }
 
@@ -683,7 +683,7 @@ func NewLongValue(value int64) LongValue {
 	return LongValue(value)
 }
 
-func (vl LongValue) estimateSize() (int, error) {
+func (vl LongValue) EstimateSize() (int, error) {
 	return 8, nil
 }
 
@@ -720,7 +720,7 @@ func NewFloatValue(value float64) FloatValue {
 	return FloatValue(value)
 }
 
-func (vl FloatValue) estimateSize() (int, error) {
+func (vl FloatValue) EstimateSize() (int, error) {
 	return 8, nil
 }
 
@@ -749,8 +749,41 @@ func (vl FloatValue) String() string {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// _BoolValue encapsulates a bool value.
+// This method is only used in bitwise CDT operations internally.
+type _BoolValue bool
+
+func (vb _BoolValue) EstimateSize() (int, error) {
+	return PackBool(nil, bool(vb))
+}
+
+func (vb _BoolValue) write(cmd BufferEx) (int, error) {
+	panic("Unreachable")
+}
+
+func (vb _BoolValue) pack(cmd BufferEx) (int, error) {
+	return PackBool(cmd, bool(vb))
+}
+
+// GetType returns wire protocol value type.
+func (vb _BoolValue) GetType() int {
+	panic("Unreachable")
+}
+
+// GetObject returns original value as an interface{}.
+func (vb _BoolValue) GetObject() interface{} {
+	return bool(vb)
+}
+
+// String implements Stringer interface.
+func (vb _BoolValue) String() string {
+	return (fmt.Sprintf("%v", bool(vb)))
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 // ValueArray encapsulates an array of Value.
-// Supported by Aerospike 3 servers only.
+// Supported by Aerospike 3+ servers only.
 type ValueArray []Value
 
 // NewValueArray generates a ValueArray instance.
@@ -760,7 +793,7 @@ func NewValueArray(array []Value) *ValueArray {
 	return &res
 }
 
-func (va ValueArray) estimateSize() (int, error) {
+func (va ValueArray) EstimateSize() (int, error) {
 	return packValueArray(nil, va)
 }
 
@@ -779,7 +812,7 @@ func (va ValueArray) GetType() int {
 
 // GetObject returns original value as an interface{}.
 func (va ValueArray) GetObject() interface{} {
-	return va
+	return []Value(va)
 }
 
 // String implements Stringer interface.
@@ -790,7 +823,7 @@ func (va ValueArray) String() string {
 ///////////////////////////////////////////////////////////////////////////////
 
 // ListValue encapsulates any arbitrary array.
-// Supported by Aerospike 3 servers only.
+// Supported by Aerospike 3+ servers only.
 type ListValue []interface{}
 
 // NewListValue generates a ListValue instance.
@@ -798,7 +831,7 @@ func NewListValue(list []interface{}) ListValue {
 	return ListValue(list)
 }
 
-func (vl ListValue) estimateSize() (int, error) {
+func (vl ListValue) EstimateSize() (int, error) {
 	return packIfcList(nil, vl)
 }
 
@@ -817,7 +850,7 @@ func (vl ListValue) GetType() int {
 
 // GetObject returns original value as an interface{}.
 func (vl ListValue) GetObject() interface{} {
-	return vl
+	return []interface{}(vl)
 }
 
 // String implements Stringer interface.
@@ -827,8 +860,8 @@ func (vl ListValue) String() string {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// ListValue encapsulates any arbitrary array.
-// Supported by Aerospike 3 servers only.
+// ListerValue encapsulates any arbitrary array.
+// Supported by Aerospike 3+ servers only.
 type ListerValue struct {
 	list ListIter
 }
@@ -842,7 +875,7 @@ func NewListerValue(list ListIter) *ListerValue {
 	return res
 }
 
-func (vl *ListerValue) estimateSize() (int, error) {
+func (vl *ListerValue) EstimateSize() (int, error) {
 	return packList(nil, vl.list)
 }
 
@@ -872,7 +905,7 @@ func (vl *ListerValue) String() string {
 ///////////////////////////////////////////////////////////////////////////////
 
 // MapValue encapsulates an arbitrary map.
-// Supported by Aerospike 3 servers only.
+// Supported by Aerospike 3+ servers only.
 type MapValue map[interface{}]interface{}
 
 // NewMapValue generates a MapValue instance.
@@ -880,7 +913,7 @@ func NewMapValue(vmap map[interface{}]interface{}) MapValue {
 	return MapValue(vmap)
 }
 
-func (vl MapValue) estimateSize() (int, error) {
+func (vl MapValue) EstimateSize() (int, error) {
 	return packIfcMap(nil, vl)
 }
 
@@ -899,7 +932,7 @@ func (vl MapValue) GetType() int {
 
 // GetObject returns original value as an interface{}.
 func (vl MapValue) GetObject() interface{} {
-	return vl
+	return map[interface{}]interface{}(vl)
 }
 
 func (vl MapValue) String() string {
@@ -909,7 +942,7 @@ func (vl MapValue) String() string {
 ///////////////////////////////////////////////////////////////////////////////
 
 // JsonValue encapsulates a Json map.
-// Supported by Aerospike 3 servers only.
+// Supported by Aerospike 3+ servers only.
 type JsonValue map[string]interface{}
 
 // NewMapValue generates a JsonValue instance.
@@ -917,7 +950,7 @@ func NewJsonValue(vmap map[string]interface{}) JsonValue {
 	return JsonValue(vmap)
 }
 
-func (vl JsonValue) estimateSize() (int, error) {
+func (vl JsonValue) EstimateSize() (int, error) {
 	return packJsonMap(nil, vl)
 }
 
@@ -936,7 +969,7 @@ func (vl JsonValue) GetType() int {
 
 // GetObject returns original value as an interface{}.
 func (vl JsonValue) GetObject() interface{} {
-	return vl
+	return map[string]interface{}(vl)
 }
 
 func (vl JsonValue) String() string {
@@ -946,7 +979,7 @@ func (vl JsonValue) String() string {
 ///////////////////////////////////////////////////////////////////////////////
 
 // MapperValue encapsulates an arbitrary map which implements a MapIter interface.
-// Supported by Aerospike 3 servers only.
+// Supported by Aerospike 3+ servers only.
 type MapperValue struct {
 	vmap MapIter
 }
@@ -960,7 +993,7 @@ func NewMapperValue(vmap MapIter) *MapperValue {
 	return res
 }
 
-func (vl *MapperValue) estimateSize() (int, error) {
+func (vl *MapperValue) EstimateSize() (int, error) {
 	return packMap(nil, vl.vmap)
 }
 
@@ -989,7 +1022,7 @@ func (vl *MapperValue) String() string {
 ///////////////////////////////////////////////////////////////////////////////
 
 // GeoJSONValue encapsulates a 2D Geo point.
-// Supported by Aerospike 3.6.1 servers only.
+// Supported by Aerospike 3.6.1 servers and later only.
 type GeoJSONValue string
 
 // NewMapValue generates a GeoJSONValue instance.
@@ -998,7 +1031,7 @@ func NewGeoJSONValue(value string) GeoJSONValue {
 	return res
 }
 
-func (vl GeoJSONValue) estimateSize() (int, error) {
+func (vl GeoJSONValue) EstimateSize() (int, error) {
 	// flags + ncells + jsonstr
 	return 1 + 2 + len(string(vl)), nil
 }
@@ -1030,6 +1063,43 @@ func (vl GeoJSONValue) String() string {
 	return string(vl)
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+// HLLValue encapsulates a HyperLogLog value.
+type HLLValue []byte
+
+// NewHLLValue generates a ByteValue instance.
+func NewHLLValue(bytes []byte) HLLValue {
+	return HLLValue(bytes)
+}
+
+func (vl HLLValue) EstimateSize() (int, error) {
+	return len(vl), nil
+}
+
+func (vl HLLValue) write(cmd BufferEx) (int, error) {
+	return cmd.Write(vl)
+}
+
+func (vl HLLValue) pack(cmd BufferEx) (int, error) {
+	return packBytes(cmd, vl)
+}
+
+// GetType returns wire protocol value type.
+func (vl HLLValue) GetType() int {
+	return ParticleType.HLL
+}
+
+// GetObject returns original value as an interface{}.
+func (vl HLLValue) GetObject() interface{} {
+	return []byte(vl)
+}
+
+// String implements Stringer interface.
+func (vl HLLValue) String() string {
+	return Buffer.BytesToHexString([]byte(vl))
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 func bytesToParticle(ptype int, buf []byte, offset int, length int) (interface{}, error) {
@@ -1058,6 +1128,11 @@ func bytesToParticle(ptype int, buf []byte, offset int, length int) (interface{}
 		ncells := int(Buffer.BytesToInt16(buf, offset+1))
 		headerSize := 1 + 2 + (ncells * 8)
 		return string(buf[offset+headerSize : offset+length]), nil
+
+	case ParticleType.HLL:
+		newObj := make([]byte, length)
+		copy(newObj, buf[offset:offset+length])
+		return newObj, nil
 
 	case ParticleType.BLOB:
 		newObj := make([]byte, length)

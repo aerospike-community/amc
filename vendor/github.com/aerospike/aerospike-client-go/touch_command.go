@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 package aerospike
 
 import (
+	"fmt"
+
+	. "github.com/aerospike/aerospike-client-go/logger"
 	. "github.com/aerospike/aerospike-client-go/types"
 	Buffer "github.com/aerospike/aerospike-client-go/utils/buffer"
 )
@@ -28,13 +31,18 @@ type touchCommand struct {
 	policy *WritePolicy
 }
 
-func newTouchCommand(cluster *Cluster, policy *WritePolicy, key *Key) *touchCommand {
-	newTouchCmd := &touchCommand{
-		singleCommand: newSingleCommand(cluster, key),
+func newTouchCommand(cluster *Cluster, policy *WritePolicy, key *Key) (touchCommand, error) {
+	partition, err := PartitionForWrite(cluster, &policy.BasePolicy, key)
+	if err != nil {
+		return touchCommand{}, err
+	}
+
+	newTouchCmd := touchCommand{
+		singleCommand: newSingleCommand(cluster, key, partition),
 		policy:        policy,
 	}
 
-	return newTouchCmd
+	return newTouchCmd, nil
 }
 
 func (cmd *touchCommand) getPolicy(ifc command) Policy {
@@ -46,15 +54,56 @@ func (cmd *touchCommand) writeBuffer(ifc command) error {
 }
 
 func (cmd *touchCommand) getNode(ifc command) (*Node, error) {
-	return cmd.cluster.getMasterNode(&cmd.partition)
+	return cmd.partition.GetNodeWrite(cmd.cluster)
+}
+
+func (cmd *touchCommand) prepareRetry(ifc command, isTimeout bool) bool {
+	cmd.partition.PrepareRetryWrite(isTimeout)
+	return true
 }
 
 func (cmd *touchCommand) parseResult(ifc command, conn *Connection) error {
 	// Read header.
-	if _, err := conn.Read(cmd.dataBuffer, int(_MSG_TOTAL_HEADER_SIZE)); err != nil {
+	_, err := conn.Read(cmd.dataBuffer, 8)
+	if err != nil {
 		return err
 	}
 
+	if compressedSize := cmd.compressedSize(); compressedSize > 0 {
+		// Read compressed size
+		_, err = conn.Read(cmd.dataBuffer, compressedSize)
+		if err != nil {
+			Logger.Debug("Connection error reading data for TouchCommand: %s", err.Error())
+			return err
+		}
+
+		// Read compressed size
+		_, err = conn.Read(cmd.dataBuffer, 8)
+		if err != nil {
+			Logger.Debug("Connection error reading data for TouchCommand: %s", err.Error())
+			return err
+		}
+
+		if err := cmd.conn.initInflater(true, compressedSize); err != nil {
+			return NewAerospikeError(PARSE_ERROR, fmt.Sprintf("Error setting up zlib inflater for size `%d`: %s", compressedSize, err.Error()))
+		}
+
+		// Read header.
+		_, err = conn.Read(cmd.dataBuffer, int(_MSG_TOTAL_HEADER_SIZE))
+		if err != nil {
+			Logger.Debug("Connection error reading data for TouchCommand: %s", err.Error())
+			return err
+		}
+	} else {
+		// Read header.
+		_, err = conn.Read(cmd.dataBuffer[8:], int(_MSG_TOTAL_HEADER_SIZE)-8)
+		if err != nil {
+			Logger.Debug("Connection error reading data for TouchCommand: %s", err.Error())
+			return err
+		}
+	}
+
+	// Read header.
 	header := Buffer.BytesToInt64(cmd.dataBuffer, 0)
 
 	// Validate header to make sure we are at the beginning of a message
@@ -67,6 +116,8 @@ func (cmd *touchCommand) parseResult(ifc command, conn *Connection) error {
 	if resultCode != 0 {
 		if resultCode == byte(KEY_NOT_FOUND_ERROR) {
 			return ErrKeyNotFound
+		} else if ResultCode(resultCode) == FILTERED_OUT {
+			return ErrFilteredOut
 		}
 
 		return NewAerospikeError(ResultCode(resultCode))

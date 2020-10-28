@@ -1,4 +1,4 @@
-// Copyright 2013-2019 Aerospike, Inc.
+// Copyright 2013-2020 Aerospike, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package aerospike
 import (
 	"errors"
 	"fmt"
+	"net"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -34,18 +35,18 @@ import (
 // them.
 type Cluster struct {
 	// Initial host nodes specified by user.
-	seeds *SyncVal //[]*Host
+	seeds SyncVal //[]*Host
 
 	// All aliases for all nodes in cluster.
 	// Only accessed within cluster tend goroutine.
-	aliases *SyncVal //map[Host]*Node
+	aliases SyncVal //map[Host]*Node
 
 	// Map of active nodes in cluster.
 	// Only accessed within cluster tend goroutine.
-	nodesMap *SyncVal //map[string]*Node
+	nodesMap SyncVal //map[string]*Node
 
 	// Active nodes in cluster.
-	nodes     *SyncVal              //[]*Node
+	nodes     SyncVal               //[]*Node
 	stats     map[string]*nodeStats //host => stats
 	statsLock sync.Mutex
 
@@ -70,11 +71,16 @@ type Cluster struct {
 	user string
 
 	// Password in hashed format in bytes.
-	password *SyncVal // []byte
+	password SyncVal // []byte
 }
 
 // NewCluster generates a Cluster instance.
 func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
+	// Validate the policy params
+	if policy.MinConnectionsPerNode > policy.ConnectionQueueSize {
+		panic("minimum number of connections specified in the ClientPolicy is bigger than total connection pool size")
+	}
+
 	// Default TLS names when TLS enabled.
 	newHosts := make([]*Host, 0, len(hosts))
 	if policy.TlsConfig != nil && !policy.TlsConfig.InsecureSkipVerify {
@@ -99,13 +105,13 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 		infoPolicy:   InfoPolicy{Timeout: policy.Timeout},
 		tendChannel:  make(chan struct{}),
 
-		seeds:    NewSyncVal(hosts),
-		aliases:  NewSyncVal(make(map[Host]*Node)),
-		nodesMap: NewSyncVal(make(map[string]*Node)),
-		nodes:    NewSyncVal([]*Node{}),
+		seeds:    *NewSyncVal(hosts),
+		aliases:  *NewSyncVal(make(map[Host]*Node)),
+		nodesMap: *NewSyncVal(make(map[string]*Node)),
+		nodes:    *NewSyncVal([]*Node{}),
 		stats:    map[string]*nodeStats{},
 
-		password: NewSyncVal(nil),
+		password: *NewSyncVal(nil),
 
 		supportsFloat:       NewAtomicBool(false),
 		supportsBatchIndex:  NewAtomicBool(false),
@@ -126,7 +132,7 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 		if err != nil {
 			return nil, err
 		}
-		newCluster.password = NewSyncVal(hashedPass)
+		newCluster.password = *NewSyncVal(hashedPass)
 	}
 
 	// try to seed connections for first use
@@ -155,7 +161,7 @@ func NewCluster(policy *ClientPolicy, hosts []*Host) (*Cluster, error) {
 
 // String implements the stringer interface
 func (clstr *Cluster) String() string {
-	return fmt.Sprintf("%v", clstr.nodes)
+	return fmt.Sprintf("%v", clstr.GetNodes())
 }
 
 // Maintains the cluster on intervals.
@@ -534,6 +540,25 @@ func (clstr *Cluster) getPartitions() partitionMap {
 	return clstr.partitionWriteMap.Load().(partitionMap)
 }
 
+// discoverSeeds will lookup the seed hosts and convert seed hosts
+// to IP addresses.
+func discoverSeedIPs(seeds []*Host) (res []*Host) {
+	for _, seed := range seeds {
+		addresses, err := net.LookupHost(seed.Name)
+		if err != nil {
+			continue
+		}
+
+		for i := range addresses {
+			h := *seed
+			h.Name = addresses[i]
+			res = append(res, &h)
+		}
+	}
+
+	return res
+}
+
 // Adds seeds to the cluster
 func (clstr *Cluster) seedNodes() (bool, error) {
 	// Must copy array reference for copy on write semantics to work.
@@ -544,7 +569,9 @@ func (clstr *Cluster) seedNodes() (bool, error) {
 
 		return seeds_copy, nil
 	})
-	seedArray := seedArrayIfc.([]*Host)
+
+	// discover seed IPs from DNS or Load Balancers
+	seedArray := discoverSeedIPs(seedArrayIfc.([]*Host))
 
 	successChan := make(chan struct{}, len(seedArray))
 	errChan := make(chan error, len(seedArray))
@@ -782,134 +809,6 @@ func (clstr *Cluster) IsConnected() bool {
 	return (len(nodeArray) > 0) && !clstr.closed.Get()
 }
 
-func (clstr *Cluster) getReadNode(partition *Partition, replica ReplicaPolicy, seq *int) (*Node, error) {
-	switch replica {
-	case SEQUENCE:
-		return clstr.getSequenceNode(partition, seq)
-	case MASTER:
-		return clstr.getMasterNode(partition)
-	case MASTER_PROLES:
-		return clstr.getMasterProleNode(partition)
-	case PREFER_RACK:
-		return clstr.getSameRackNode(partition, seq)
-	default:
-		// includes case RANDOM:
-		return clstr.GetRandomNode()
-	}
-}
-
-// getSameRackNode returns either a node on the same rack, or in Replica Sequence
-func (clstr *Cluster) getSameRackNode(partition *Partition, seq *int) (*Node, error) {
-	// RackAware has not been enabled in client policy.
-	if !clstr.clientPolicy.RackAware {
-		return nil, NewAerospikeError(UNSUPPORTED_FEATURE, "ReplicaPolicy is set to PREFER_RACK but ClientPolicy.RackAware is not set.")
-	}
-
-	pmap := clstr.getPartitions()
-	partitions := pmap[partition.Namespace]
-	if partitions == nil {
-		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
-	}
-
-	// CP mode (Strong Consistency) does not support the RackAware feature.
-	if partitions.CPMode {
-		return nil, NewAerospikeError(UNSUPPORTED_FEATURE, "ReplicaPolicy is set to PREFER_RACK but the cluster is in Strong Consistency Mode.")
-	}
-
-	replicaArray := partitions.Replicas
-
-	var seqNode *Node
-	for range replicaArray {
-		index := *seq % len(replicaArray)
-		node := replicaArray[index][partition.PartitionId]
-		*seq++
-
-		if node != nil && node.IsActive() {
-			// assign a node to seqNode in case no node was found on the same rack was found
-			if seqNode == nil {
-				seqNode = node
-			}
-
-			// if the node didn't belong to rack for that namespace, continue
-			nodeRack, err := node.Rack(partition.Namespace)
-			if err != nil {
-				continue
-			}
-
-			if node.IsActive() && nodeRack == clstr.clientPolicy.RackId {
-				return node, nil
-			}
-		}
-	}
-
-	// if no nodes were found belonging to the same rack, and no other node was also found
-	// then the partition table replicas are empty for that namespace
-	if seqNode == nil {
-		return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
-	}
-
-	return seqNode, nil
-}
-
-func (clstr *Cluster) getSequenceNode(partition *Partition, seq *int) (*Node, error) {
-	pmap := clstr.getPartitions()
-	partitions := pmap[partition.Namespace]
-	if partitions == nil {
-		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
-	}
-
-	replicaArray := partitions.Replicas
-
-	if replicaArray != nil {
-		index := *seq % len(replicaArray)
-		node := replicaArray[index][partition.PartitionId]
-		*seq++
-
-		if node != nil && node.IsActive() {
-			return node, nil
-		}
-	}
-
-	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
-}
-
-func (clstr *Cluster) getMasterNode(partition *Partition) (*Node, error) {
-	pmap := clstr.getPartitions()
-	partitions := pmap[partition.Namespace]
-	if partitions == nil {
-		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
-	}
-
-	node := partitions.Replicas[0][partition.PartitionId]
-	if node != nil && node.IsActive() {
-		return node, nil
-	}
-
-	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
-}
-
-func (clstr *Cluster) getMasterProleNode(partition *Partition) (*Node, error) {
-	pmap := clstr.getPartitions()
-	partitions := pmap[partition.Namespace]
-	if partitions == nil {
-		return nil, NewAerospikeError(PARTITION_UNAVAILABLE, "Invalid namespace in partition table:", partition.Namespace)
-	}
-
-	replicaArray := partitions.Replicas
-
-	if replicaArray != nil {
-		for range replicaArray {
-			index := int(atomic.AddUint64(&clstr.replicaIndex, 1) % uint64(len(replicaArray)))
-			node := replicaArray[index][partition.PartitionId]
-			if node != nil && node.IsActive() {
-				return node, nil
-			}
-		}
-	}
-
-	return nil, newInvalidNodeError(len(clstr.GetNodes()), partition)
-}
-
 // GetRandomNode returns a random node on the cluster
 func (clstr *Cluster) GetRandomNode() (*Node, error) {
 	// Must copy array reference for copy on write semantics to work.
@@ -995,6 +894,10 @@ func (clstr *Cluster) Close() {
 
 		// wait until tend is over
 		clstr.wgTend.Wait()
+
+		// remove node references from the partition table
+		// to allow GC to work its magic. Leaks otherwise.
+		clstr.getPartitions().cleanup()
 	}
 }
 
