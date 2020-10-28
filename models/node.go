@@ -159,7 +159,8 @@ func (n *Node) update() error {
 	var latencyMap map[string]common.Stats
 	var nodeLatency map[string]common.Stats
 
-	if strings.Compare(n.Build(), "5.1") < 1 {
+	build := n.Build()
+	if build == common.NOT_AVAILABLE || strings.Compare(build, "5.1") < 1 {
 		latencyMap, nodeLatency = n.parseLatencyInfo(info["latency:"])
 	} else {
 		latencyMap, nodeLatency = n.parseLatenciesInfo(info["latencies:"])
@@ -484,6 +485,19 @@ func (n *Node) infoKeys() []string {
 		"sindex", "udf-list", "latency:", "latencies:", "get-config:", "cluster-name",
 		"service", "service-clear-std", "service-tls-std",
 	}
+
+	// TODO: find a way t not send latency command to 5.2 and after
+	// // latencies introduced in 5.1, latency was removed in version 5.2
+	// build := n.Build()
+
+	// if build != common.NOT_AVAILABLE && strings.Compare(build, "5.1") > 0 {
+	// 	for i := range res {
+	// 		if res[14] == "latency:" || res[i] == "latency:" {
+	// 			res[i] = "latencies:"
+	// 			break
+	// 		}
+	// 	}
+	// }
 
 	if n.Enterprise() {
 		res = append(res, "get-dc-config", "get-config:context=xdr", "statistics/xdr")
@@ -1145,13 +1159,7 @@ func (n *Node) parseLatenciesInfo(s string) (map[string]common.Stats, map[string
 
 		buckets := make([]string, bucketNumber)
 		for i := 0; i < bucketNumber; i++ {
-			var histUnitDisplay string
-			if histUnit == "msec" {
-				histUnitDisplay = "ms"
-			} else if histUnit == "usec" {
-				histUnitDisplay = "us"
-			}
-			buckets[i] = fmt.Sprintf(">%d%s", 1<<i, histUnitDisplay)
+			buckets[i] = fmt.Sprintf(">%d%s", 1<<i, strings.TrimSuffix(histUnit, "ec"))
 		}
 
 		// calc precise in-between percents
