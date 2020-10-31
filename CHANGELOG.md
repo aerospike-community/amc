@@ -1,5 +1,13 @@
 # Aerospike Management Console Release Notes
 
+## 4.1.2 
+Release Date: October 31, 2020
+
+* Fix error messages in pre and post 5.1 becuase of the latency-latencies (https://github.com/aerospike-community/amc/issues/21).
+* Convert use of Vendor packages to Go Modules.
+* Update packacges and some cleanup.
+
+
 ## 4.1.1
 Release Date: October 27, 2020
 
