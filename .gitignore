@@ -7,3 +7,5 @@ deployment/release/amc/opt/amc/static
 deployment/release/amc/opt/amc/mailer
 amc
 *.todo
+amc.db.old
+amc.db
