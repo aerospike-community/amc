@@ -10,10 +10,9 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/toml"
-	log "github.com/sirupsen/logrus"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
-
-	_ "github.com/cznic/ql/driver"
+	log "github.com/sirupsen/logrus"
+	_ "modernc.org/ql/driver"
 )
 
 var AMCVersion string
