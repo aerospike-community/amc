@@ -8,7 +8,7 @@ import (
 	"time"
 
 	// "github.com/sasha-s/go-deadlock"
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 
 	ast "github.com/aerospike/aerospike-client-go/types"
 

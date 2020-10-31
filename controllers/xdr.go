@@ -5,10 +5,10 @@ import (
 	"strings"
 	"sync"
 
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	// as "github.com/aerospike/aerospike-client-go"
 	// ast "github.com/aerospike/aerospike-client-go/types"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/models"

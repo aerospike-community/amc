@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	// log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
+	// log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v4"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/models"

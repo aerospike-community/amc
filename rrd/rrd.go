@@ -6,10 +6,11 @@ import (
 	"time"
 
 	// "github.com/sasha-s/go-deadlock"
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
-	timeseries "github.com/khaf/go-time-series"
+	timeseries "github.com/aerospike-community/amc/go-time-series"
+	//timeseries "github.com/khaf/go-time-series"
 )
 
 type Bucket struct {

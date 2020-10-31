@@ -9,10 +9,10 @@ import (
 	"fmt"
 
 	// . "github.com/ahmetalpbalkan/go-linq"
-	// log "github.com/Sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	// ast "github.com/aerospike/aerospike-client-go/types"
 	"github.com/aerospike-community/amc/common"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func postInitiateBackup(c echo.Context) error {

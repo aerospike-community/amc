@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/controllers/middleware/sessions"

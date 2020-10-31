@@ -2,7 +2,7 @@
 
 package controllers
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 func registerEnterprise(e *echo.Echo) {
 	e.GET("/aerospike/service/clusters/:clusterUuid/get-current-user", sessionValidator(getClusterCurrentUser))

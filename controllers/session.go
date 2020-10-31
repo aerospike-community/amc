@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/aerospike-community/amc/common"

@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"runtime/debug"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/controllers"

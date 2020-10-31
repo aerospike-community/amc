@@ -22,7 +22,7 @@ import (
 
 	"testing"
 
-	"github.com/aerospike/aerospike-console/common"
+	"github.com/aerospike-community/amc/common"
 )
 
 func TestRRD(t *testing.T) {
