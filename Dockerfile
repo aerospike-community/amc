@@ -1,22 +1,19 @@
-################################################################################
-# build/golang:1.7
-################################################################################
+FROM debian:stretch-slim 
 
-# Base Image
-FROM golang:1.7
+ARG AMC_VERSION=4.1.2
 
-# Dependencies
-RUN apt-get update
-RUN apt-get install -y build-essential
+RUN apt update -y \
+    && apt -y install wget \
+    && wget https://github.com/aerospike-community/amc/releases/download/${AMC_VERSION}/aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb --no-check-certificate \
+    && dpkg -i aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb \
+    && rm aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb \
+    && dpkg -r wget ca-certificates \
+    && dpkg --purge wget ca-certificates \
+    && apt-get purge -y \
+    && apt autoremove -y 
 
-RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs
+COPY ./deployment/common/amc.docker.sh /opt/amc/amc.docker.sh
 
-RUN npm install grunt -g
+EXPOSE 8081
 
-RUN apt-get install -y ruby ruby-dev rubygems gcc make
-RUN gem install --no-ri --no-rdoc fpm
-RUN apt-get install -y rpm
-
-RUN apt-get install -y zip tar gzip
+ENTRYPOINT [ "/opt/amc/amc.docker.sh", "amc" ]
