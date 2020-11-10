@@ -23,7 +23,19 @@ pull permissions.
 
 ## Installing AMC
 
-### Docker
+## Docker
+Building the Docker image manually
+```bash
+docker image build . -t aerospike/amc
+```
+
+Running the Docker comtainer
+```bash
+docker run -d --name amc -p 8081:8081 aerospike/amc
+```
+
+### Docker Hub [Not Updated]
+Note: the Docker Hub version is currently not update - please use the Docker instructions above.
 See [aerospike/amc](https://hub.docker.com/r/aerospike/amc) on Docker Hub.
 
 ```bash
