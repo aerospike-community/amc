@@ -29,7 +29,7 @@ Building the Docker image manually
 docker image build . -t aerospike/amc
 ```
 
-Running the Docker comtainer
+Running the Docker container
 ```bash
 docker run -d --name amc -p 8081:8081 aerospike/amc
 ```
