@@ -3,7 +3,7 @@ FROM debian:stretch-slim
 ARG AMC_VERSION=4.1.2
 
 RUN apt update -y \
-    && apt -y install wget \
+    && apt -y install wget procps \
     && wget https://github.com/aerospike-community/amc/releases/download/${AMC_VERSION}/aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb --no-check-certificate \
     && dpkg -i aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb \
     && rm aerospike-amc-enterprise-${AMC_VERSION}_amd64.deb \
