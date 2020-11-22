@@ -54,7 +54,7 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 	highWatermark := latestState.TryInt("high-water-disk-pct", 100)
 
 	status := common.AlertStatusGreen
-	if usedDisk >= highWatermark {
+	if highWatermark > 0 && usedDisk >= highWatermark {
 		status = common.AlertStatusYellow
 	}
 
@@ -146,7 +146,7 @@ func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 	highWatermark := latestState.TryInt("high-water-memory-pct", 100)
 
 	status := common.AlertStatusGreen
-	if usedMem > highWatermark {
+	if highWatermark > 0 && usedMem > highWatermark {
 		status = common.AlertStatusYellow
 	}
 
