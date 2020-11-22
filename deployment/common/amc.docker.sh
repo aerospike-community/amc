@@ -23,13 +23,13 @@ start_amc(){
   status=$(check_amc_status)
   if [ $status -eq 0 ] ; then
       rm -f $PIDFILE
-      ${CMD}
   fi
+  exec ${CMD}
 }
 
-if [ "$1" = 'amc' ]; then
+if [ "$1" = "amc" ]; then
     start_amc
+else
+    # the command isn't amc so run the command the user specified
+    exec "$@"
 fi
-
-# the command isn't amc so run the command the user specified
-exec "$@"
