@@ -57,7 +57,7 @@ The AMC user guide is available on the [wiki](https://github.com/aerospike-commu
 
 ### Environment setup
 
-You need to install Go and setup your GOPATH.
+You need to install Go 1.15+ and setup your GOPATH.
 
 Download: https://golang.org/dl/
 
@@ -65,13 +65,13 @@ You can find instructions here:
 
 https://golang.org/doc/install
 
-You also need to install `npm`
+You also need to install `npm`, we recommend using `nvm`:
+
+Install nvm: `curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.1/install.sh | bash`
+
+Install npm: `nvm install --lts`
 
 After getting and installing `npm`, install grunt: `npm install -g grunt`
-
-You need `godep` to be able to manage dependencies and build the app server:
-
-`go get github.com/tools/godep`
 
 Install reflex to watch files and automatically rebuild server code:
 
@@ -92,7 +92,7 @@ You can have a look inside the `./server-dev.sh` to find out the details. The co
 ```shell
 $ cd static
 $ npm install
-$ grunt build
+$ grunt
 ```
 
 The built files will be in `build/static`
