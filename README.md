@@ -69,7 +69,7 @@ You also need to install `npm`, we recommend using `nvm`:
 
 Install nvm: `curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.1/install.sh | bash`
 
-Install npm: `nvm install --lts`
+Install node (lts) and latest npm: `nvm install --lts`
 
 After getting and installing `npm`, install grunt: `npm install -g grunt`
 
