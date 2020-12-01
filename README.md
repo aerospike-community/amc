@@ -73,22 +73,25 @@ Install node (lts) and latest npm: `nvm install --lts`
 
 After getting and installing `npm`, install grunt: `npm install -g grunt`
 
-Install reflex to watch files and automatically rebuild server code:
-
-`go get github.com/cespare/reflex`
-
 ### Getting the Code
 
 `go get github.com/aerospike-community/amc`
 
 ### Developing the Application Server
+Use `./server-dev.sh` to manually run the server. This will automatically pass a dev config file to the app server.
 
-You can have a look inside the `./server-dev.sh` to find out the details. The command inside this file will pass a dev config file to the app server.
+#### Auto run changes
+Use reflex to watch the changing files and rerun the server when needed.
 
+1. Install reflex to watch files and automatically rebuild server code:
+`go get github.com/cespare/reflex`
+
+2. Run reflex:
 `reflex -R node_modules -R static -R build -R deployment -R vendor -r '\.go$' ./server-dev.sh enterprise`
 
 ### Building the UI
-
+Keep in mind that you don't need to build the UI to be able to develop. The original source files are used for the development.
+For deployment, manually rebuild the static UI:
 ```shell
 $ cd static
 $ npm install
@@ -96,8 +99,6 @@ $ grunt
 ```
 
 The built files will be in `build/static`
-
-Keep in mind that you don't need to build the UI to be able to develop. The original source files are used for the development.
 
 ### macOS instructions:
 
