@@ -1,5 +1,12 @@
 # Aerospike Management Console Release Notes
 
+## 4.1.3 
+Release Date: December 7, 2020
+
+* Minor fix for HWM=0 in 4.9 versions.
+* Updated Docker file (for manual image building).
+
+
 ## 4.1.2 
 Release Date: October 31, 2020
 
