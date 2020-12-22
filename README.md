@@ -1,3 +1,7 @@
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/aerospike-community/amc)](https://github.com/aerospike-community/amc/releases/latest)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/aerospike-community/amc)
+[![AMC](https://goreportcard.com/badge/github.com/aerospike-community/amc)](https://goreportcard.com/report/github.com/aerospike-community/amc)
+
 # AMC: Aerospike Management Console
 
 The Aerospike Management Console (AMC) is a web-based tool to monitor/manage an
