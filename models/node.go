@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	as "github.com/aerospike/aerospike-client-go"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/rrd"
@@ -506,8 +506,18 @@ func (n *Node) infoKeys() []string {
 		"service", "service-clear-std", "service-tls-std",
 	}
 
-	if n.Enterprise() {
-		res = append(res, "get-dc-config", "get-config:context=xdr", "statistics/xdr")
+	build := n.Build()
+
+	if build != common.NOT_AVAILABLE {
+		if strings.Compare(build, "5.0") > 0 {
+			if n.Enterprise() {
+				res = append(res, "get-config:context=xdr")
+			}
+		} else {
+			if n.Enterprise() {
+				res = append(res, "get-dc-config", "get-config:context=xdr", "statistics/xdr")
+			}
+		}
 	}
 
 	// add namespace stat requests
