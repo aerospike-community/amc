@@ -2,6 +2,7 @@
 [![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/aerospike-community/amc)](#)
 [![AMC](https://goreportcard.com/badge/github.com/aerospike-community/amc)](https://goreportcard.com/report/github.com/aerospike-community/amc)
 [![GitHub](https://img.shields.io/github/license/aerospike-community/amc)](#)
+[![GitHub all releases](https://img.shields.io/github/downloads/aerospike-community/amc/total)](https://github.com/aerospike-community/amc/releases/latest)
 
 # AMC: Aerospike Management Console
 
