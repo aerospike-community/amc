@@ -580,14 +580,14 @@ L:
 				clientPolicy.LimitConnectionsToQueueSize = true
 				clientPolicy.ConnectionQueueSize = 1
 
-				c, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				_, err = o.Register(sessionId, clientPolicy, "", seedHost)
 				if err == nil {
 					// c.update(nil)
 					continue
 				}
 
 				clientPolicy.UseServicesAlternate = true
-				c, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				_, err = o.Register(sessionId, clientPolicy, "", seedHost)
 				if err == nil {
 					// c.update(nil)
 					continue

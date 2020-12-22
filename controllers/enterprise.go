@@ -110,11 +110,6 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 		}
 
 		tps := stats.TryFloat("tps", 0)
-		tpsCalc := tps
-		if tpsCalc == 0 {
-			tpsCalc = 1
-		}
-
 		timestamp := stats["timestamp"].(string)
 		timestamp = timestamp[:8]
 
