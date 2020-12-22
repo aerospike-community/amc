@@ -58,7 +58,7 @@ type Node struct {
 	nsAggCalcStats    common.SyncStats
 
 	// statsHistory is allocated on new and never written to.
-	// hence it does not need syncronization.
+	// hence it does not need synchronization.
 	statsHistory   map[string]*rrd.Bucket
 	latencyHistory *rrd.SimpleBucket
 

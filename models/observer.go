@@ -646,7 +646,7 @@ func findAliases(address, tlsName string, port int) []as.Host {
 	// IP addresses do not need a lookup
 	ip := net.ParseIP(address)
 	if ip != nil {
-		return []as.Host{as.Host{Name: ip.String(), Port: port, TLSName: tlsName}}
+		return []as.Host{{Name: ip.String(), Port: port, TLSName: tlsName}}
 	}
 
 	addresses, err := net.LookupHost(address)

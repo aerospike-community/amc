@@ -12,8 +12,8 @@ import (
 	"runtime/debug"
 	"syscall"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/sevlyar/go-daemon"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/controllers"

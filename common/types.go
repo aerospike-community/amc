@@ -24,13 +24,13 @@ type NullTime struct {
 	valid bool // Valid is true if Time is not NULL
 }
 
-// Scan implements the Scanner interface.
+// Set - sets the time
 func (nt *NullTime) Set(t time.Time) {
 	nt.time = t
 	nt.valid = true
 }
 
-// Scan implements the Scanner interface.
+// Valid - check if Time is not NULL
 func (nt *NullTime) Valid() bool {
 	return nt.valid
 }
