@@ -99,7 +99,7 @@ func (s Info) GetMulti(names ...string) Info {
 	return res
 }
 
-// Value MUST exist, and MUST be an int64 or a convertible string.
+// Int - Value MUST exist, and MUST be an int64 or a convertible string.
 // Panics if the above constraints are not met
 func (s Info) Int(name string, aliases ...string) int64 {
 	value, err := strconv.ParseInt(s.Get(name, aliases...).(string), 10, 64)
@@ -110,7 +110,7 @@ func (s Info) Int(name string, aliases ...string) int64 {
 	return value
 }
 
-// Value should be an int64 or a convertible string; otherwise defValue is returned
+// TryInt - Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Info) TryInt(name string, defValue int64, aliases ...string) int64 {
 	field := s.Get(name, aliases...)
@@ -122,7 +122,7 @@ func (s Info) TryInt(name string, defValue int64, aliases ...string) int64 {
 	return defValue
 }
 
-// Value MUST exist, and MUST be an float64 or a convertible string.
+// Float - Value MUST exist, and MUST be an float64 or a convertible string.
 // Panics if the above constraints are not met
 func (s Info) Float(name string, aliases ...string) float64 {
 	value, err := strconv.ParseFloat(s.Get(name, aliases...).(string), 64)
@@ -132,7 +132,7 @@ func (s Info) Float(name string, aliases ...string) float64 {
 	return value
 }
 
-// Value should be an float64 or a convertible string; otherwise defValue is returned
+// TryFloat - Value should be an float64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Info) TryFloat(name string, defValue float64, aliases ...string) float64 {
 	field := s.Get(name, aliases...)
@@ -144,7 +144,7 @@ func (s Info) TryFloat(name string, defValue float64, aliases ...string) float64
 	return defValue
 }
 
-// Value should be a string; otherwise defValue is returned
+// TryString - Value should be a string; otherwise defValue is returned
 // this function never panics
 func (s Info) TryString(name string, defValue string, aliases ...string) string {
 	field := s.Get(name, aliases...)
@@ -154,7 +154,7 @@ func (s Info) TryString(name string, defValue string, aliases ...string) string 
 	return defValue
 }
 
-// Value should be an float64, int64 or a convertible string; otherwise defValue is returned
+// TryNumericValue - Value should be an float64, int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Info) TryNumericValue(name string, defVal interface{}, aliases ...string) interface{} {
 	field := s.Get(name, aliases...)
@@ -203,18 +203,18 @@ func addValues(v1, v2 interface{}) interface{} {
 	return nil
 }
 
-// Value should be an float64 or a convertible string; otherwise defValue is returned
+// AggregateInfo - Value should be an float64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func AggregateInfo(s Info, other Info) Stats {
 	res := make(Stats, len(other))
-	for k, _ := range s {
+	for k := range s {
 		v := s.TryNumericValue(k, nil)
 		if v != nil {
 			res[k] = v
 		}
 	}
 
-	for k, _ := range other {
+	for k := range other {
 		sValue := res[k]
 		oValue := other.TryNumericValue(k, 0)
 		if val := addValues(sValue, oValue); val != nil {
@@ -225,7 +225,7 @@ func AggregateInfo(s Info, other Info) Stats {
 	return res
 }
 
-// Value should be an stats or a convertible string; otherwise nil is returns
+// ToInfo - Value should be an stats or a convertible string; otherwise nil is returns
 // this function never panics
 func (s Info) ToInfo(name string) Info {
 	res := Info{}
@@ -245,7 +245,7 @@ func (s Info) ToInfo(name string) Info {
 	return res
 }
 
-// Value should be an stats or a convertible string; otherwise nil is returns
+// ToInfoMap - Value should be an stats or a convertible string; otherwise nil is returns
 // this function never panics
 func (s Info) ToInfoMap(name string, alias string, delim string) map[string]Info {
 	infoMap := map[string]Info{}
@@ -277,7 +277,7 @@ func (s Info) ToInfoMap(name string, alias string, delim string) map[string]Info
 	return infoMap
 }
 
-// Value should be an stats or a convertible string; otherwise nil is returns
+// ToStatsMap - Value should be an stats or a convertible string; otherwise nil is returns
 // this function never panics
 func (s Info) ToStatsMap(name string, alias string, delim string) map[string]Stats {
 	statsMap := map[string]Stats{}
@@ -309,7 +309,7 @@ func (s Info) ToStatsMap(name string, alias string, delim string) map[string]Sta
 	return statsMap
 }
 
-// Value should be an stats or a convertible string; otherwise nil is returns
+// ToStats - Value should be an stats or a convertible string; otherwise nil is returns
 // this function never panics
 func (s Info) ToStats() Stats {
 	res := Stats{}
@@ -339,7 +339,7 @@ func (s Stats) Clone() Stats {
 	return res
 }
 
-// Value should be an float64 or a convertible string
+// AggregateStats - Value should be an float64 or a convertible string
 // this function never panics
 func (s Stats) AggregateStats(other Stats) {
 	for k, v := range other {
@@ -407,7 +407,7 @@ func (s Stats) Del(names ...string) {
 	}
 }
 
-// Value should be an int64 or a convertible string; otherwise defValue is returned
+// TryInt - Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Stats) TryInt(name string, defValue int64, aliases ...string) int64 {
 	field := s.Get(name, aliases...)
@@ -422,13 +422,13 @@ func (s Stats) TryInt(name string, defValue int64, aliases ...string) int64 {
 	return defValue
 }
 
-// Value should be an int64, and should exist; otherwise panics
+// Int - Value should be an int64, and should exist; otherwise panics
 func (s Stats) Int(name string, aliases ...string) int64 {
 	field := s.Get(name, aliases...)
 	return field.(int64)
 }
 
-// Value should be an float64 or a convertible string; otherwise defValue is returned
+// TryFloat - Value should be an float64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Stats) TryFloat(name string, defValue float64, aliases ...string) float64 {
 	field := s.Get(name, aliases...)
@@ -443,7 +443,7 @@ func (s Stats) TryFloat(name string, defValue float64, aliases ...string) float6
 	return defValue
 }
 
-// Value should be an int64 or a convertible string; otherwise defValue is returned
+// TryString - Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s Stats) TryString(name string, defValue string, aliases ...string) string {
 	field := s.Get(name, aliases...)
@@ -500,7 +500,7 @@ func (s *SyncInfo) GetMulti(names ...string) Info {
 	return s._Info.GetMulti(names...)
 }
 
-// Value MUST exist, and MUST be an int64 or a convertible string.
+// Int - Value MUST exist, and MUST be an int64 or a convertible string.
 // Panics if the above constraints are not met
 func (s *SyncInfo) Int(name string, aliases ...string) int64 {
 	s.mutex.RLock()
@@ -509,7 +509,7 @@ func (s *SyncInfo) Int(name string, aliases ...string) int64 {
 	return s._Info.Int(name, aliases...)
 }
 
-// Value should be an int64 or a convertible string; otherwise defValue is returned
+// TryInt - Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s *SyncInfo) TryInt(name string, defValue int64, aliases ...string) int64 {
 	s.mutex.RLock()
@@ -518,7 +518,7 @@ func (s *SyncInfo) TryInt(name string, defValue int64, aliases ...string) int64 
 	return s._Info.TryInt(name, defValue, aliases...)
 }
 
-// Value MUST exist, and MUST be an float64 or a convertible string.
+// Float - Value MUST exist, and MUST be an float64 or a convertible string.
 // Panics if the above constraints are not met
 func (s *SyncInfo) Float(name string, aliases ...string) float64 {
 	s.mutex.RLock()
@@ -527,7 +527,7 @@ func (s *SyncInfo) Float(name string, aliases ...string) float64 {
 	return s._Info.Float(name, aliases...)
 }
 
-// Value should be an float64 or a convertible string; otherwise defValue is returned
+// TryFloat - Value should be an float64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s *SyncInfo) TryFloat(name string, defValue float64, aliases ...string) float64 {
 	s.mutex.RLock()
@@ -536,7 +536,7 @@ func (s *SyncInfo) TryFloat(name string, defValue float64, aliases ...string) fl
 	return s._Info.TryFloat(name, defValue, aliases...)
 }
 
-// Value should be a string; otherwise defValue is returned
+// TryString - Value should be a string; otherwise defValue is returned
 // this function never panics
 func (s *SyncInfo) TryString(name string, defValue string, aliases ...string) string {
 	s.mutex.RLock()
@@ -545,7 +545,7 @@ func (s *SyncInfo) TryString(name string, defValue string, aliases ...string) st
 	return s._Info.TryString(name, defValue, aliases...)
 }
 
-// Value should be an float64, int64 or a convertible string; otherwise defValue is returned
+// TryNumericValue - Value should be an float64, int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s *SyncInfo) TryNumericValue(name string, defVal interface{}, aliases ...string) interface{} {
 	s.mutex.RLock()
@@ -561,7 +561,7 @@ func (s *SyncInfo) ToInfo(name string) Info {
 	return s._Info.ToInfo(name)
 }
 
-// Value should be an stats or a convertible string; otherwise nil is returns
+// ToInfoMap - Value should be an stats or a convertible string; otherwise nil is returns
 // this function never panics
 func (s *SyncInfo) ToInfoMap(name string, alias string, delim string) map[string]Info {
 	s.mutex.RLock()
@@ -659,7 +659,7 @@ func (s *SyncStats) Del(names ...string) {
 	s._Stats.Del(names...)
 }
 
-// Value MUST exist, and MUST be an int64 or a convertible string.
+// Int - Value MUST exist, and MUST be an int64 or a convertible string.
 // Panics if the above constraints are not met
 func (s *SyncStats) Int(name string, aliases ...string) int64 {
 	s.mutex.RLock()
@@ -668,7 +668,7 @@ func (s *SyncStats) Int(name string, aliases ...string) int64 {
 	return s._Stats.Int(name, aliases...)
 }
 
-// Value should be an int64 or a convertible string; otherwise defValue is returned
+// TryInt - Value should be an int64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s *SyncStats) TryInt(name string, defValue int64, aliases ...string) int64 {
 	s.mutex.RLock()
@@ -677,7 +677,7 @@ func (s *SyncStats) TryInt(name string, defValue int64, aliases ...string) int64
 	return s._Stats.TryInt(name, defValue, aliases...)
 }
 
-// Value should be an float64 or a convertible string; otherwise defValue is returned
+// TryFloat - Value should be an float64 or a convertible string; otherwise defValue is returned
 // this function never panics
 func (s *SyncStats) TryFloat(name string, defValue float64, aliases ...string) float64 {
 	s.mutex.RLock()
@@ -686,7 +686,7 @@ func (s *SyncStats) TryFloat(name string, defValue float64, aliases ...string) f
 	return s._Stats.TryFloat(name, defValue, aliases...)
 }
 
-// Value should be a string; otherwise defValue is returned
+// TryString - Value should be a string; otherwise defValue is returned
 // this function never panics
 func (s *SyncStats) TryString(name string, defValue string, aliases ...string) string {
 	s.mutex.RLock()
@@ -695,7 +695,7 @@ func (s *SyncStats) TryString(name string, defValue string, aliases ...string) s
 	return s._Stats.TryString(name, defValue, aliases...)
 }
 
-// Value should be an float64 or a convertible string
+// AggregateStatsTo - Value should be an float64 or a convertible string
 // this function never panics
 func (s *SyncStats) AggregateStatsTo(other Stats) {
 	s.mutex.RLock()

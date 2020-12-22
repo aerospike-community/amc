@@ -2,10 +2,12 @@ package sessions
 
 import "github.com/gorilla/sessions"
 
+// CookieStore used for storing session cookies
 type CookieStore interface {
 	Store
 }
 
+// NewCookieStore used for cookieStore
 // Keys are defined in pairs to allow key rotation, but the common case is to set a single
 // authentication key and optionally an encryption key.
 //

@@ -12,7 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
 	log "github.com/sirupsen/logrus"
-	_ "modernc.org/ql/driver"
+	// _ "modernc.org/ql/driver"
 )
 
 var AMCVersion string
@@ -26,6 +26,8 @@ func AMCIsProd() bool {
 	return AMCEnv == "prod"
 }
 
+// AMCIsEnterprise was originally for knowing if this is the EE version of AMC.
+// It is now always true
 func AMCIsEnterprise() bool {
 	//return AMCEdition == "enterprise"
 	return true

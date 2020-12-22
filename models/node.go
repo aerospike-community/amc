@@ -244,7 +244,7 @@ func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string,
 
 	origNode := n.origNode()
 	if origNode == nil {
-		return map[string]string{}, errors.New(fmt.Sprintf("Failed to request info. Node %s is not active.", *n.origHost))
+		return map[string]string{}, fmt.Errorf("Failed to request info. Node %q is not active", *n.origHost)
 	}
 
 	for i := 0; i < reties; i++ {

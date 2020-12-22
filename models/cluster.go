@@ -156,7 +156,7 @@ func (c *Cluster) AddNode(address string, port int) error {
 	// In case ALL nodes are removed
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	client.Cluster().AddSeeds([]*as.Host{host})
 
@@ -173,11 +173,11 @@ func (c *Cluster) AddNode(address string, port int) error {
 func (c *Cluster) RemoveNodeByAddress(address string) error {
 	node := c.FindNodeByAddress(address)
 	if node == nil {
-		return errors.New(fmt.Sprintf("Node %s not found.", address))
+		return fmt.Errorf("Node %s not found", address)
 	}
 
 	if node.Status() == nodeStatus.On {
-		return errors.New(fmt.Sprintf("Node %s is active. Only inactive nodes can be removed.", address))
+		return fmt.Errorf("Node %s is active. Only inactive nodes can be removed", address)
 	}
 
 	oldNodes := c.nodesCopy()
@@ -284,7 +284,7 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 
 	err := client.ChangePassword(nil, user, newPass)
@@ -299,7 +299,7 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 func (c *Cluster) ChangeUserPassword(user, pass string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 
 	return client.ChangePassword(nil, user, pass)
@@ -308,7 +308,7 @@ func (c *Cluster) ChangeUserPassword(user, pass string) error {
 func (c *Cluster) CreateUser(user, password string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.CreateUser(nil, user, password, roles)
 }
@@ -316,7 +316,7 @@ func (c *Cluster) CreateUser(user, password string, roles []string) error {
 func (c *Cluster) DropUser(user string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.DropUser(nil, user)
 }
@@ -324,7 +324,7 @@ func (c *Cluster) DropUser(user string) error {
 func (c *Cluster) GrantRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.GrantRoles(nil, user, roles)
 }
@@ -332,7 +332,7 @@ func (c *Cluster) GrantRoles(user string, roles []string) error {
 func (c *Cluster) RevokeRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.RevokeRoles(nil, user, roles)
 }
@@ -340,7 +340,7 @@ func (c *Cluster) RevokeRoles(user string, roles []string) error {
 func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.CreateRole(nil, role, privileges, nil)
 }
@@ -348,7 +348,7 @@ func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 func (c *Cluster) DropRole(role string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.DropRole(nil, role)
 }
@@ -356,7 +356,7 @@ func (c *Cluster) DropRole(role string) error {
 func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.GrantPrivileges(nil, role, privileges)
 }
@@ -364,7 +364,7 @@ func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.RevokePrivileges(nil, role, privileges)
 }
@@ -372,7 +372,7 @@ func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error
 func (c *Cluster) CreateUDF(name, body string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	_, err := client.RegisterUDF(nil, []byte(body), name, as.LUA)
 	return err
@@ -381,7 +381,7 @@ func (c *Cluster) CreateUDF(name, body string) error {
 func (c *Cluster) DropUDF(udf string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	_, err := client.RemoveUDF(nil, udf)
 	return err
@@ -390,7 +390,7 @@ func (c *Cluster) DropUDF(udf string) error {
 func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	_, err := client.CreateIndex(nil, namespace, setName, indexName, binName, as.IndexType(indexType))
 	return err
@@ -399,7 +399,7 @@ func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType 
 func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 	return client.DropIndex(nil, namespace, setName, indexName)
 }
@@ -686,7 +686,7 @@ func (c *Cluster) checkHealth() error {
 func (c *Cluster) updateUsers() error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 
 	user := c.User()
@@ -780,7 +780,7 @@ func (c *Cluster) registerNode(h *as.Host, n *Node) {
 func (c *Cluster) updateCluster() error {
 	client := c.origClient()
 	if client == nil {
-		return errors.New(fmt.Sprintf("Cluster %s has been decommissioned.", c.Id()))
+		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
 	}
 
 	for _, n := range client.GetNodes() {
@@ -853,7 +853,7 @@ func (c *Cluster) versionSupported(oldest string) error {
 
 	for ver, nodeList := range verList {
 		if version.Compare(ver, oldest, "<") {
-			return errors.New(fmt.Sprintf("Database cluster is not supported. Latest supported version is: `v%s`. Nodes [%s] are at `v%s`", oldest, strings.Join(nodeList, ", "), ver))
+			return fmt.Errorf("Database cluster is not supported. Latest supported version is: `v%s`. Nodes [%s] are at `v%s`", oldest, strings.Join(nodeList, ", "), ver)
 		}
 	}
 
@@ -1339,7 +1339,7 @@ func (c *Cluster) Backup(
 	ScanPriority int) (*Backup, error) {
 
 	if c.CurrentBackup() != nil && c.CurrentBackup().Status == common.BackupStatusInProgress {
-		return nil, errors.New("Another backup operation already exists and is in progress.")
+		return nil, errors.New("Another backup operation already exists and is in progress")
 	}
 
 	newBackup := &Backup{
@@ -1391,7 +1391,7 @@ func (c *Cluster) Restore(
 	IgnoreGenerationNum bool) (*Restore, error) {
 
 	if c.CurrentRestore() != nil && c.CurrentRestore().Status == common.BackupStatusInProgress {
-		return nil, errors.New("Another backup operation already exists and is in progress.")
+		return nil, errors.New("Another backup operation already exists and is in progress")
 	}
 
 	newRestore := &Restore{

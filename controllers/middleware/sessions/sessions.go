@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered!")
+	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered")
 )
 
 type Store interface {
@@ -37,8 +37,8 @@ type Options struct {
 	HttpOnly bool
 }
 
-// Wraps thinly gorilla-session methods.
 // Session stores the values and optional configuration for a session.
+// Wraps thinly gorilla-session methods.
 type Session interface {
 	// Get returns the session value associated to the given key.
 	Get(key interface{}) interface{}
@@ -161,7 +161,7 @@ func (s *session) HasChanged() bool {
 	return s.hasChanged
 }
 
-// shortcut to get session
+// Default - shortcut to get session
 func Default(c echo.Context) Session {
 	ses, ok := c.Get(DefaultKey).(Session)
 	if !ok {

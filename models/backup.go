@@ -73,7 +73,7 @@ func (b *Backup) Execute() error {
 	node := b.cluster.RandomActiveNode()
 	if node == nil {
 		b.UpdateStatus(common.BackupStatusFailed)
-		return errors.New("No active nodes found in the cluster.")
+		return errors.New("No active nodes found in the cluster")
 	}
 
 	// try to connect to the remote address and run the command
@@ -148,9 +148,8 @@ func (b *Backup) followProgress(session *ssh.Session, reader io.Reader) {
 				b.UpdateStatus(common.BackupStatusFailed)
 				// b.UpdateError(err.Error())
 				return
-			} else {
-				break
 			}
+			break
 		}
 	}
 

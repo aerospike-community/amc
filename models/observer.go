@@ -370,7 +370,7 @@ func (o *ObserverT) NodeHasBeenDiscovered(sessionId string, alias string) *Clust
 	return nil
 }
 
-// Checks for the cluster; If the cluster exists in the session, it won't check the user/pass since it has already been checked
+// FindClusterBySeed Checks for the cluster; If the cluster exists in the session, it won't check the user/pass since it has already been checked
 // Otherwise, will search for the cluster in all the list and check user/pass in case the cluster exists
 func (o *ObserverT) FindClusterBySeed(sid string, host *as.Host, user, password string) *Cluster {
 	hostAddrs := strings.Split(host.Name, ",")
@@ -548,7 +548,7 @@ L:
 
 	go func() {
 		// try adding the newly discovered clusters to the mix in the observer
-		for seed, _ := range res {
+		for seed := range res {
 			o.xdrSeeds <- seed
 		}
 		o.xdrSeeds <- ""

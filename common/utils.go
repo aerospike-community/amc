@@ -134,7 +134,7 @@ func MaxInt64(a, b int64) int64 {
 	return b
 }
 
-// parseTimeStrict parses a formatted string and returns the time value it
+// ParseTimeStrict parses a formatted string and returns the time value it
 // represents. The output is identical to time.Parse except it returns an
 // error for strings that don't format to the input value.
 //

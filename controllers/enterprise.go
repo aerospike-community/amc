@@ -44,11 +44,11 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 		if len(autoClusters) == 0 {
 			invalidateSession(c)
 			return c.JSON(http.StatusUnauthorized, errorMap("invalid session : None"))
-		} else {
-			// there are auto clusters; validate and create a new session
-			// update the session cookie
-			sid = manageSession(c)
 		}
+		// there are auto clusters; validate and create a new session
+		// update the session cookie
+		sid = manageSession(c)
+
 	}
 
 	clusters, _ := _observer.MonitoringClusters(sid)
@@ -79,10 +79,8 @@ func getMultiClusterView(c echo.Context) error {
 		if len(autoClusters) <= 0 {
 			invalidateSession(c)
 			return c.JSON(http.StatusOK, errorMap("invalid session : None"))
-		} else {
-			// there are auto clusters; automatically create a session
-			sid = manageSession(c)
-		}
+		} // there are auto clusters; automatically create a session
+		sid = manageSession(c)
 	}
 
 	return c.JSON(http.StatusOK, _observer.DatacenterInfo(sid))

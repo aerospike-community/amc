@@ -252,7 +252,7 @@ func (t *TimeSeries) Recent(duration time.Duration) (float64, error) {
 	return t.Range(now.Add(-duration), now)
 }
 
-// Recent returns the sum over [now-duration, now).
+// RecentValues returns the sum over [now-duration, now).
 func (t *TimeSeries) RecentValues(duration time.Duration) ([]PointValue, error) {
 	now := t.clock.Now()
 	return t.RangeValues(now.Add(-duration), now)
