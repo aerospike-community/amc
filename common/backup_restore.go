@@ -33,21 +33,26 @@ var (
 	}
 )
 
+// BackupRestoreType type
 type BackupRestoreType string
 
+// BackupRestoreType
 const (
 	BackupRestoreTypeBackup  BackupRestoreType = "backup"
 	BackupRestoreTypeRestore BackupRestoreType = "restore"
 )
 
+// BackupRestoreStatus type
 type BackupRestoreStatus string
 
+// BackupRestoreStatus
 const (
 	BackupStatusInProgress BackupRestoreStatus = "In Progress"
 	BackupStatusFailed     BackupRestoreStatus = "Failure"
 	BackupStatusFinished   BackupRestoreStatus = "Success"
 )
 
+// BackupRestore struct
 type BackupRestore struct {
 	Type      BackupRestoreType
 	Id        string
@@ -77,6 +82,7 @@ type BackupRestore struct {
 	_persisted bool
 }
 
+// NewBackupRestore - Create new backup/restore
 func NewBackupRestore(
 	Type BackupRestoreType,
 	ClusterId string,
@@ -118,6 +124,7 @@ func NewBackupRestore(
 	}
 }
 
+// Save - save backup
 func (br *BackupRestore) Save() error {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -166,6 +173,7 @@ func (br *BackupRestore) Save() error {
 	return nil
 }
 
+// UpdateStatus - update status
 func (br *BackupRestore) UpdateStatus(status BackupRestoreStatus) error {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -195,6 +203,7 @@ func (br *BackupRestore) UpdateStatus(status BackupRestoreStatus) error {
 	return nil
 }
 
+// UpdateProgress - update progrss
 func (br *BackupRestore) UpdateProgress(percent int) error {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -220,6 +229,7 @@ func (br *BackupRestore) UpdateProgress(percent int) error {
 	return nil
 }
 
+// UpdateError - update on error
 func (br *BackupRestore) UpdateError(errorMsg string) error {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -247,6 +257,7 @@ func (br *BackupRestore) UpdateError(errorMsg string) error {
 	return nil
 }
 
+// SuccessfulBackups - return list of successful backups
 func SuccessfulBackups() ([]*BackupRestore, error) {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()

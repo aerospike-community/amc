@@ -7,14 +7,17 @@ import (
 	"strings"
 )
 
+// InfoParser struct
 type InfoParser struct {
 	*bufio.Reader
 }
 
+// NewInfoParser - new info parser
 func NewInfoParser(s string) *InfoParser {
 	return &InfoParser{bufio.NewReader(strings.NewReader(s))}
 }
 
+// Expect expect a value, assert if not expected value
 func (ip *InfoParser) Expect(s string) error {
 	bytes := make([]byte, len(s))
 	v, err := ip.Read(bytes)
@@ -27,6 +30,7 @@ func (ip *InfoParser) Expect(s string) error {
 	return nil
 }
 
+// ReadUntil - read until delimiter
 func (ip *InfoParser) ReadUntil(delim byte) (string, error) {
 	v, err := ip.ReadBytes(delim)
 
@@ -42,6 +46,7 @@ func (ip *InfoParser) ReadUntil(delim byte) (string, error) {
 	return string(v[:len(v)-1]), err
 }
 
+// ReadFloat - read float
 func (ip *InfoParser) ReadFloat(delim byte) (float64, error) {
 	s, err := ip.ReadUntil(delim)
 	if err != nil {

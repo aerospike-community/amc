@@ -15,8 +15,10 @@ import (
 
 const _alertFields = "Id, Type, ClusterId, NodeAddress, Namespace, Description, Created, LastOccured, Resolved, Recurrence, Status"
 
+// AlertType - type
 type AlertType int
 
+// Alert Types
 const (
 	AlertTypeNodeStatus          AlertType = 0
 	AlertTypeNodeVisibility      AlertType = 1
@@ -32,14 +34,17 @@ const (
 	AlertTypeNamespaceMemoryPctStopWrites    AlertType = 10
 )
 
+// AlertStatus - type
 type AlertStatus string
 
+// Alert colors
 const (
 	AlertStatusRed    AlertStatus = "red"
 	AlertStatusYellow AlertStatus = "yellow"
 	AlertStatusGreen  AlertStatus = "green"
 )
 
+// Alert structure
 type Alert struct {
 	Id          int64
 	Type        AlertType
@@ -56,6 +61,7 @@ type Alert struct {
 
 var _dbGlobalMutex sync.RWMutex
 
+// AlertBucket structure
 type AlertBucket struct {
 	alertQueue []*Alert
 	pos        int
@@ -74,12 +80,14 @@ func (a AlertsById) Len() int           { return len(a) }
 func (a AlertsById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a AlertsById) Less(i, j int) bool { return a[i].Id < a[j].Id }
 
+// NewAlertBucket - new alert bucket
 func NewAlertBucket(size int) *AlertBucket {
 	return &AlertBucket{
 		alertQueue: make([]*Alert, size),
 	}
 }
 
+// DrainNewAlerts - frain the news alerts
 func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 	ad.mutex.Lock()
 	defer ad.mutex.Unlock()
@@ -93,6 +101,7 @@ func (ad *AlertBucket) DrainNewAlerts() []*Alert {
 	return res
 }
 
+// Recurring - recurring alert
 func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 	ad.mutex.Lock()
 	defer ad.mutex.Unlock()
@@ -113,6 +122,7 @@ func (ad *AlertBucket) Recurring(alert *Alert) *Alert {
 	return nil
 }
 
+// Register - register alert
 func (ad *AlertBucket) Register(alert *Alert) (recurring bool) {
 	if recurrAlert := ad.Recurring(alert); recurrAlert != nil {
 		if alert.Status == AlertStatusGreen && recurrAlert.Status != AlertStatusGreen {
@@ -197,6 +207,7 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 	}
 }
 
+// ResolveAlert - clear alert
 func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -229,6 +240,7 @@ func (ad *AlertBucket) ResolveAlert(alert *Alert) {
 	}
 }
 
+// AlertsFrom - get alert from table
 func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
@@ -257,6 +269,7 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 	return res
 }
 
+// RedAlertsFrom - get red alerts
 func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, id int64) int {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()

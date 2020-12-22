@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// SplitHostPort - convert aerospike host string to basic parts
 func SplitHostPort(addr string) (host string, port int, err error) {
 	addr = strings.Trim(addr, "\t\n\r ")
 	if len(addr) == 0 {
@@ -33,6 +34,7 @@ func SplitHostPort(addr string) (host string, port int, err error) {
 	return addr[:index], port, nil
 }
 
+// Round - convert float to rounded int
 func Round(val float64, roundOn float64, places int) (newVal float64) {
 	var round float64
 	pow := math.Pow(10, float64(places))
@@ -47,6 +49,7 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	return
 }
 
+// DeleteEmpty - remove empty item from slice
 func DeleteEmpty(s []string) []string {
 	var r []string
 	for _, str := range s {
@@ -57,6 +60,7 @@ func DeleteEmpty(s []string) []string {
 	return r
 }
 
+// StrDiff - compare slices into added and remove slices
 func StrDiff(o, n []string) (added, removed []string) {
 	for _, sn := range n {
 		exists := false
@@ -87,6 +91,7 @@ func StrDiff(o, n []string) (added, removed []string) {
 	return added, removed
 }
 
+// Comma - convert integer into comma string
 func Comma(v int64, sep string) string {
 	sign := ""
 
@@ -118,15 +123,18 @@ func Comma(v int64, sep string) string {
 	return sign + strings.Join(parts[j:], sep)
 }
 
+// SortStrings - sort slice (?)
 func SortStrings(s []string) []string {
 	sort.Strings(s)
 	return s
 }
 
+// ToNullString - convert string into sql.NullString
 func ToNullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
 
+// MaxInt64 - Max function for Int64
 func MaxInt64(a, b int64) int64 {
 	if a > b {
 		return a
