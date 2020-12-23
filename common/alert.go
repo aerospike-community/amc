@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	// "github.com/sasha-s/go-sync"
-	// "github.com/satori/go.uuid"
+	// "github.com/satori/go.uuID"
 	// "github.com/jmoiron/sqlx"
 )
 
@@ -46,9 +46,9 @@ const (
 
 // Alert structure
 type Alert struct {
-	Id          int64
+	ID          int64
 	Type        AlertType
-	ClusterId   string
+	ClusterID   string
 	NodeAddress string
 	Namespace   sql.NullString
 	Desc        string
@@ -72,13 +72,13 @@ type AlertBucket struct {
 	mutex sync.RWMutex
 }
 
-// AlertsById implements sort.Interface for []*Alert based on
+// AlertsByID implements sort.Interface for []*Alert based on
 // the Age field.
-type AlertsById []*Alert
+type AlertsByID []*Alert
 
-func (a AlertsById) Len() int           { return len(a) }
-func (a AlertsById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a AlertsById) Less(i, j int) bool { return a[i].Id < a[j].Id }
+func (a AlertsByID) Len() int           { return len(a) }
+func (a AlertsByID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a AlertsByID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
 // NewAlertBucket - new alert bucket
 func NewAlertBucket(size int) *AlertBucket {
@@ -176,7 +176,7 @@ func (ad *AlertBucket) saveAlert(alert *Alert) {
 		return
 	}
 
-	if _, err := tx.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)", _alertFields), alert.Id, alert.Type, alert.ClusterId, alert.NodeAddress, alert.Namespace, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
+	if _, err := tx.Exec(fmt.Sprintf("INSERT INTO alerts (%s) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)", _alertFields), alert.ID, alert.Type, alert.ClusterID, alert.NodeAddress, alert.Namespace, alert.Desc, alert.Created, alert.LastOccured, alert.Resolved, alert.Recurrence, string(alert.Status)); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 
@@ -198,7 +198,7 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 		return
 	}
 
-	if _, err := tx.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ?1 WHERE Id = ?2", alert.LastOccured, alert.Id); err != nil {
+	if _, err := tx.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ?1 WHERE ID = ?2", alert.LastOccured, alert.ID); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 
@@ -270,11 +270,11 @@ func (ad *AlertBucket) AlertsFrom(nodeAddress string, id int64) []*Alert {
 }
 
 // RedAlertsFrom - get red alerts
-func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, id int64) int {
+func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, ID int64) int {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
 
-	row := db.QueryRow("SELECT count(*) FROM alerts where Id > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", id, nodeAddress, "red")
+	row := db.QueryRow("SELECT count(*) FROM alerts where ID > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", ID, nodeAddress, "red")
 
 	var count int
 	if err := row.Scan(&count); err != nil {
@@ -286,14 +286,14 @@ func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, id int64) int {
 }
 
 func (a *Alert) fromSQLRow(row *sql.Row) error {
-	return row.Scan(&a.Id, &a.Type, &a.ClusterId, &a.NodeAddress, &a.Namespace, &a.Desc, &a.Created, &a.LastOccured, &a.Resolved, &a.Recurrence, &a.Status)
+	return row.Scan(&a.ID, &a.Type, &a.ClusterID, &a.NodeAddress, &a.Namespace, &a.Desc, &a.Created, &a.LastOccured, &a.Resolved, &a.Recurrence, &a.Status)
 }
 
 func fromSQLRows(rows *sql.Rows) ([]*Alert, error) {
 	res := []*Alert{}
 	for rows.Next() {
 		alert := Alert{}
-		if err := rows.Scan(&alert.Id, &alert.Type, &alert.ClusterId, &alert.NodeAddress, &alert.Namespace, &alert.Desc, &alert.Created, &alert.LastOccured, &alert.Resolved, &alert.Recurrence, &alert.Status); err != nil {
+		if err := rows.Scan(&alert.ID, &alert.Type, &alert.ClusterID, &alert.NodeAddress, &alert.Namespace, &alert.Desc, &alert.Created, &alert.LastOccured, &alert.Resolved, &alert.Recurrence, &alert.Status); err != nil {
 			return res, err
 		}
 		res = append(res, &alert)

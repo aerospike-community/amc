@@ -30,7 +30,7 @@ func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 
 	alert := common.Alert{
 		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ClusterId:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceAvailablePct,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -62,7 +62,7 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 
 	alert := common.Alert{
 		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ClusterId:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceDiskPctHighWatermark,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -93,7 +93,7 @@ func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 
 	alert := common.Alert{
 		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ClusterId:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceDiskPctStopWrites,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -125,7 +125,7 @@ func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 
 	alert := common.Alert{
 		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ClusterId:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceMemoryPctStopWrites,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -157,7 +157,7 @@ func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 
 	alert := common.Alert{
 		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ClusterId:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceMemoryPctHighWatermark,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),

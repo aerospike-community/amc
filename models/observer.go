@@ -171,8 +171,8 @@ func (o *ObserverT) observe(config *common.Config) {
 	}
 }
 
-func (o *ObserverT) sessionClusters(sessionId string) []*Cluster {
-	clustersIfc := o.sessions.Get(sessionId)
+func (o *ObserverT) sessionClusters(sessionID string) []*Cluster {
+	clustersIfc := o.sessions.Get(sessionID)
 
 	if clustersIfc == nil {
 		return nil
@@ -185,7 +185,7 @@ func (o *ObserverT) sessionClusters(sessionId string) []*Cluster {
 }
 
 // AppendCluster add cluster for monitoring
-func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
+func (o *ObserverT) AppendCluster(sessionID string, cluster *Cluster) {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
@@ -200,12 +200,12 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	}
 
 	if !cExists {
-		log.Info("Appending cluster " + cluster.Id() + " to the models...")
+		log.Info("Appending cluster " + cluster.ID() + " to the models...")
 		clusters = append(clusters, cluster)
 		o.clusters.Set(clusters)
 	}
 
-	sessionClusters := o.sessionClusters(sessionId)
+	sessionClusters := o.sessionClusters(sessionID)
 
 	// make sure the cluster is not already included in the session
 	for _, c := range sessionClusters {
@@ -214,10 +214,10 @@ func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 		}
 	}
 
-	log.Info("Appending cluster " + cluster.Id() + " to session " + sessionId)
+	log.Info("Appending cluster " + cluster.ID() + " to session " + sessionID)
 
 	sessionClusters = append(sessionClusters, cluster)
-	o.sessions.Set(sessionId, sessionClusters)
+	o.sessions.Set(sessionID, sessionClusters)
 }
 
 func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
@@ -226,14 +226,14 @@ func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
 
 	// Remove cluster from the session
 	sessions := o.sessions.Clone()
-	for sessionId, s := range sessions {
-		newClusters := make([]*Cluster, 0, len(sessions[sessionId].([]*Cluster)))
+	for sessionID, s := range sessions {
+		newClusters := make([]*Cluster, 0, len(sessions[sessionID].([]*Cluster)))
 		for _, c := range s.([]*Cluster) {
 			if c != cluster {
 				newClusters = append(newClusters, c)
 			}
 		}
-		sessions[sessionId] = newClusters
+		sessions[sessionID] = newClusters
 	}
 	o.sessions.SetStats(sessions)
 
@@ -246,23 +246,23 @@ func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
 	}
 	o.clusters.Set(newClusters)
 
-	log.Info("Automatically removed idle cluster " + cluster.Id() + " from session all sessions")
+	log.Info("Automatically removed idle cluster " + cluster.ID() + " from session all sessions")
 }
 
 // RemoveCluster - remove cluster from observer
-func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
+func (o *ObserverT) RemoveCluster(sessionID string, cluster *Cluster) int {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
 	// Remove cluster from the session
-	sessionClusters := o.sessionClusters(sessionId)
+	sessionClusters := o.sessionClusters(sessionID)
 	newClusters := make([]*Cluster, 0, len(sessionClusters))
 	for _, c := range sessionClusters {
 		if c != cluster {
 			newClusters = append(newClusters, c)
 		}
 	}
-	o.sessions.Set(sessionId, newClusters)
+	o.sessions.Set(sessionID, newClusters)
 
 	// check if cluster exists in any session
 	if !cluster.permanent.Get().(bool) {
@@ -291,17 +291,17 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 		}
 	}
 
-	log.Info("Removing cluster " + cluster.Id() + " from session " + sessionId)
-	remainingClusters := o.sessionClusters(sessionId)
+	log.Info("Removing cluster " + cluster.ID() + " from session " + sessionID)
+	remainingClusters := o.sessionClusters(sessionID)
 	if len(remainingClusters) == 0 {
 		// remove session
-		o.sessions.Del(sessionId)
+		o.sessions.Del(sessionID)
 	}
 	return len(remainingClusters)
 }
 
 // Register - register cluster to observer
-func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {
+func (o *ObserverT) Register(sessionID string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {
 	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
 	if err != nil {
 		return nil, err
@@ -317,20 +317,20 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias st
 		}
 	}
 
-	o.AppendCluster(sessionId, cluster)
+	o.AppendCluster(sessionID, cluster)
 
 	return cluster, nil
 }
 
 // SessionExists - check if session exist in observer
-func (o *ObserverT) SessionExists(sessionId string) bool {
-	_, exists := o.sessions.ExistsGet(sessionId)
+func (o *ObserverT) SessionExists(sessionID string) bool {
+	_, exists := o.sessions.ExistsGet(sessionID)
 	return exists
 }
 
-// MonitoringClusters - get list of monitored cluster by sessionId
-func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
-	clusters, sessionExists := o.sessions.ExistsGet(sessionId)
+// MonitoringClusters - get list of monitored cluster by sessionID
+func (o *ObserverT) MonitoringClusters(sessionID string) ([]*Cluster, bool) {
+	clusters, sessionExists := o.sessions.ExistsGet(sessionID)
 	if clusters == nil {
 		return nil, sessionExists
 	}
@@ -354,10 +354,10 @@ func (o *ObserverT) AutoClusters() []*Cluster {
 	return clusters
 }
 
-// FindClusterById - get cluster by id
-func (o *ObserverT) FindClusterById(id string) *Cluster {
+// FindClusterByID - get cluster by id
+func (o *ObserverT) FindClusterByID(id string) *Cluster {
 	for _, cluster := range o.clustersRef() {
-		if cluster.Id() == id {
+		if cluster.ID() == id {
 			return cluster
 		}
 	}
@@ -365,8 +365,8 @@ func (o *ObserverT) FindClusterById(id string) *Cluster {
 }
 
 // NodeHasBeenDiscovered - check if a node has been discoverd
-func (o *ObserverT) NodeHasBeenDiscovered(sessionId string, alias string) *Cluster {
-	for _, cluster := range o.sessionClusters(sessionId) {
+func (o *ObserverT) NodeHasBeenDiscovered(sessionID string, alias string) *Cluster {
+	for _, cluster := range o.sessionClusters(sessionID) {
 		client := cluster.origClient()
 		if client == nil || client.Cluster() == nil {
 			continue
@@ -435,11 +435,11 @@ func (o *ObserverT) findClusterBySeedOnly(seed as.Host) *Cluster {
 // DatacenterInfo -
 // Add auto clusters to the mix
 // DO NOT add auto-clusters which are already included in the cluster.
-func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
+func (o *ObserverT) DatacenterInfo(sessionID string) common.Stats {
 	res := map[string]common.Stats{}
-	sClusters := o.sessionClusters(sessionId)
+	sClusters := o.sessionClusters(sessionID)
 	for _, cluster := range sClusters {
-		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
+		res[cluster.ID()] = cluster.DatacenterInfo(sessionID)
 	}
 
 	// Add auto clusters to the mix
@@ -451,7 +451,7 @@ L:
 				continue L
 			}
 		}
-		res[cluster.Id()] = cluster.DatacenterInfo(sessionId)
+		res[cluster.ID()] = cluster.DatacenterInfo(sessionID)
 	}
 
 	for _, v := range res {
@@ -594,14 +594,14 @@ L:
 				clientPolicy.LimitConnectionsToQueueSize = true
 				clientPolicy.ConnectionQueueSize = 1
 
-				_, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				_, err = o.Register(sessionID, clientPolicy, "", seedHost)
 				if err == nil {
 					// c.update(nil)
 					continue
 				}
 
 				clientPolicy.UseServicesAlternate = true
-				_, err = o.Register(sessionId, clientPolicy, "", seedHost)
+				_, err = o.Register(sessionID, clientPolicy, "", seedHost)
 				if err == nil {
 					// c.update(nil)
 					continue

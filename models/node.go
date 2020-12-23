@@ -194,7 +194,7 @@ func (n *Node) update() error {
 	stats := common.Info(info).ToInfo("statistics").ToStats()
 	n.setStats(stats, nsAggStats, nsAggCalcStats)
 
-	log.Debugf("Updating Node: %v, build: %s, objects: %v, took: %s", n.Id(), n.Build(), stats.TryInt("objects", 0), time.Since(tm))
+	log.Debugf("Updating Node: %v, build: %s, objects: %v, took: %s", n.ID(), n.Build(), stats.TryInt("objects", 0), time.Since(tm))
 
 	return nil
 }
@@ -935,8 +935,8 @@ func (n *Node) Port() uint16 {
 	return uint16(h.Port)
 }
 
-// Id - get node ID
-func (n *Node) Id() string {
+// ID - get node ID
+func (n *Node) ID() string {
 	return n.InfoAttr("node")
 }
 

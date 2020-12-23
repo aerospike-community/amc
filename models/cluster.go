@@ -160,7 +160,7 @@ func (c *Cluster) AddNode(address string, port int) error {
 	// In case ALL nodes are removed
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	client.Cluster().AddSeeds([]*as.Host{host})
 
@@ -298,7 +298,7 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 
 	err := client.ChangePassword(nil, user, newPass)
@@ -314,7 +314,7 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 func (c *Cluster) ChangeUserPassword(user, pass string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 
 	return client.ChangePassword(nil, user, pass)
@@ -324,7 +324,7 @@ func (c *Cluster) ChangeUserPassword(user, pass string) error {
 func (c *Cluster) CreateUser(user, password string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.CreateUser(nil, user, password, roles)
 }
@@ -333,7 +333,7 @@ func (c *Cluster) CreateUser(user, password string, roles []string) error {
 func (c *Cluster) DropUser(user string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.DropUser(nil, user)
 }
@@ -342,7 +342,7 @@ func (c *Cluster) DropUser(user string) error {
 func (c *Cluster) GrantRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.GrantRoles(nil, user, roles)
 }
@@ -351,7 +351,7 @@ func (c *Cluster) GrantRoles(user string, roles []string) error {
 func (c *Cluster) RevokeRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.RevokeRoles(nil, user, roles)
 }
@@ -360,7 +360,7 @@ func (c *Cluster) RevokeRoles(user string, roles []string) error {
 func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.CreateRole(nil, role, privileges, nil)
 }
@@ -369,7 +369,7 @@ func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 func (c *Cluster) DropRole(role string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.DropRole(nil, role)
 }
@@ -378,7 +378,7 @@ func (c *Cluster) DropRole(role string) error {
 func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.GrantPrivileges(nil, role, privileges)
 }
@@ -387,7 +387,7 @@ func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.RevokePrivileges(nil, role, privileges)
 }
@@ -396,7 +396,7 @@ func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error
 func (c *Cluster) CreateUDF(name, body string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	_, err := client.RegisterUDF(nil, []byte(body), name, as.LUA)
 	return err
@@ -406,7 +406,7 @@ func (c *Cluster) CreateUDF(name, body string) error {
 func (c *Cluster) DropUDF(udf string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	_, err := client.RemoveUDF(nil, udf)
 	return err
@@ -416,7 +416,7 @@ func (c *Cluster) DropUDF(udf string) error {
 func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	_, err := client.CreateIndex(nil, namespace, setName, indexName, binName, as.IndexType(indexType))
 	return err
@@ -426,7 +426,7 @@ func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType 
 func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 	return client.DropIndex(nil, namespace, setName, indexName)
 }
@@ -519,8 +519,8 @@ func (c *Cluster) SeedAddress() string {
 	return c.seeds.Get().([]*as.Host)[0].String()
 }
 
-// Id - get cluster uuid
-func (c *Cluster) Id() string {
+// ID - get cluster uuid
+func (c *Cluster) ID() string {
 	return c.uuid
 }
 
@@ -680,7 +680,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	c.updateUsers()
 	c.checkHealth()
 	c.updateRedAlertCount()
-	log.Debugf("Updating stats for cluster %s took: %s", c.Id(), time.Since(t))
+	log.Debugf("Updating stats for cluster %s took: %s", c.ID(), time.Since(t))
 
 	c.setUpdatedAt(time.Now())
 
@@ -696,7 +696,7 @@ func (c *Cluster) SendEmailNotifications() {
 		return
 	}
 
-	clusterName := c.Id()
+	clusterName := c.ID()
 	if alias := c.Alias(); alias != nil {
 		clusterName = *alias
 	}
@@ -732,7 +732,7 @@ func (c *Cluster) checkHealth() error {
 func (c *Cluster) updateUsers() error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 
 	user := c.User()
@@ -827,13 +827,13 @@ func (c *Cluster) registerNode(h *as.Host, n *Node) {
 func (c *Cluster) updateCluster() error {
 	client := c.origClient()
 	if client == nil {
-		return fmt.Errorf("Cluster %s has been decommissioned", c.Id())
+		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
 
 	for _, n := range client.GetNodes() {
 		node := c.FindNodeByAddress(n.GetHost().String())
 		if node == nil {
-			node = c.FindNodeById(n.GetName())
+			node = c.FindNodeByID(n.GetName())
 		}
 
 		if node != nil {
@@ -987,10 +987,10 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	return res
 }
 
-// FindNodeById - get node by id
-func (c *Cluster) FindNodeById(id string) *Node {
+// FindNodeByID - get node by id
+func (c *Cluster) FindNodeByID(ID string) *Node {
 	for _, node := range c.Nodes() {
-		if node.Id() == id {
+		if node.ID() == ID {
 			return node
 		}
 	}
@@ -1211,7 +1211,7 @@ func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 }
 
 // DatacenterInfo - get XDR DC info
-func (c *Cluster) DatacenterInfo(sessionId string) common.Stats {
+func (c *Cluster) DatacenterInfo(sessionID string) common.Stats {
 	xdrInfo := map[string]common.Stats{}
 	datacenterList := []string{}
 	nodeStats := common.Stats{}
@@ -1222,24 +1222,24 @@ func (c *Cluster) DatacenterInfo(sessionId string) common.Stats {
 			datacenterList = append(datacenterList, dcName)
 
 			for _, nodeAddr := range dcStats["Nodes"].([]string) {
-				remoteNodeStats[nodeAddr] = c.discoverDatacenter(sessionId, dcStats)
-				oldCluster := c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr)
+				remoteNodeStats[nodeAddr] = c.discoverDatacenter(sessionID, dcStats)
+				oldCluster := c.observer.NodeHasBeenDiscovered(sessionID, nodeAddr)
 				if oldCluster == nil {
 					xdrInfo[nodeAddr] = common.Stats{"shipping_namespaces": dcStats["namespaces"].([]string)}
 				} else {
-					snIfc := xdrInfo[oldCluster.Id()]["shipping_namespaces"]
+					snIfc := xdrInfo[oldCluster.ID()]["shipping_namespaces"]
 					if snIfc == nil {
 						snIfc = []string{}
 					}
-					if xdrInfo[oldCluster.Id()] == nil {
-						xdrInfo[oldCluster.Id()] = common.Stats{}
+					if xdrInfo[oldCluster.ID()] == nil {
+						xdrInfo[oldCluster.ID()] = common.Stats{}
 					}
-					xdrInfo[oldCluster.Id()]["shipping_namespaces"] = common.StrUniq(append(snIfc.([]string), dcStats["namespaces"].([]string)...))
+					xdrInfo[oldCluster.ID()]["shipping_namespaces"] = common.StrUniq(append(snIfc.([]string), dcStats["namespaces"].([]string)...))
 				}
 			}
 		}
 
-		nodeStats[node.Id()] = common.Stats{
+		nodeStats[node.ID()] = common.Stats{
 			"status":         node.Status(),
 			"access_ip":      node.Host(),
 			"access_port":    node.Port(),
@@ -1297,7 +1297,7 @@ func (c *Cluster) DatacenterInfo(sessionId string) common.Stats {
 	}
 }
 
-func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.Stats {
+func (c *Cluster) discoverDatacenter(sessionID string, dc common.Stats) common.Stats {
 	for _, nodeAddr := range dc["Nodes"].([]string) {
 		host, port, err := common.SplitHostPort(nodeAddr)
 		if err != nil {
@@ -1328,7 +1328,7 @@ func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.S
 			}
 		}
 
-		if c.observer.NodeHasBeenDiscovered(sessionId, nodeAddr) == nil {
+		if c.observer.NodeHasBeenDiscovered(sessionID, nodeAddr) == nil {
 			return common.Stats{
 				"dc_name":      []string{dc["DC_Name"].(string)},
 				"discovery":    "available", // TODO: think about this
@@ -1367,7 +1367,7 @@ func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 		alerts = append(alerts, node.AlertsFrom(id)...)
 	}
 
-	cid := c.Id()
+	cid := c.ID()
 	for _, alert := range alerts {
 		alert.ClusterId = cid
 	}
@@ -1410,7 +1410,7 @@ func (c *Cluster) Backup(
 	newBackup := &Backup{
 		BackupRestore: common.NewBackupRestore(
 			common.BackupRestoreTypeBackup,
-			c.Id(),
+			c.ID(),
 			Namespace,
 			DestinationAddress,
 			Username,
@@ -1464,7 +1464,7 @@ func (c *Cluster) Restore(
 	newRestore := &Restore{
 		BackupRestore: common.NewBackupRestore(
 			common.BackupRestoreTypeRestore,
-			c.Id(),
+			c.ID(),
 			Namespace,
 			DestinationAddress,
 			Username,
@@ -1510,7 +1510,7 @@ func (c *Cluster) CurrentRestore() *Restore {
 func (c *Cluster) SameAs(other *Cluster) bool {
 	for _, node := range c.Nodes() {
 		for _, oNode := range other.Nodes() {
-			if node.Id() == oNode.Id() || node.Address() == oNode.Address() {
+			if node.ID() == oNode.ID() || node.Address() == oNode.Address() {
 				return true
 			}
 		}

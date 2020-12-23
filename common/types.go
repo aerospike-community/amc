@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-// JsonRawString - Value should be a string
-type JsonRawString string
+// JSONRawString - Value should be a string
+type JSONRawString string
 
 // MarshalJSON returns *m as the JSON encoding of m.
-func (m *JsonRawString) MarshalJSON() ([]byte, error) {
+func (m *JSONRawString) MarshalJSON() ([]byte, error) {
 	return []byte(*m), nil
 }
 

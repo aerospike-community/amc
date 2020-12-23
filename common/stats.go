@@ -39,8 +39,8 @@ func (spv *SinglePointValue) Timestamp(mult int64) *int64 {
 	return spv.timestamp
 }
 
-// TimestampJson - return timestamp at unix time
-func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
+// TimestampJSON - return timestamp at unix time
+func (spv *SinglePointValue) TimestampJSON(defVal *time.Time) *int64 {
 	if spv == nil {
 		if defVal != nil {
 			val := defVal.Unix() * 1000
