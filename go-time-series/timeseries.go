@@ -78,13 +78,16 @@ var defaultGranularities = []Granularity{
 	{time.Hour, 24},
 }
 
+// TSType type
 type TSType int
 
+// TSType
 const (
 	TSTypeSum TSType = iota
 	TSTypeAvg
 )
 
+// PointValue struct
 type PointValue struct {
 	Time  time.Time
 	Value float64
@@ -133,6 +136,7 @@ func WithGranularities(g []Granularity) Option {
 	}
 }
 
+// TimeSeries struct
 type TimeSeries struct {
 	clock       Clock
 	levels      []level

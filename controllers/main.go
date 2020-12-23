@@ -95,6 +95,7 @@ func getAMCVersion(c echo.Context) error {
 	return c.JSONBlob(http.StatusOK, []byte(fmt.Sprintf(`{"amc_version": "%s", "amc_type": "%s"}`, common.AMCVersion, common.AMCEdition)))
 }
 
+// ShutdownServer - shutdown server
 func ShutdownServer() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -103,6 +104,7 @@ func ShutdownServer() {
 	}
 }
 
+// Server - init server using config
 func Server(config *common.Config) {
 	_observer = models.New(config)
 

@@ -15,13 +15,21 @@ import (
 	// _ "modernc.org/ql/driver"
 )
 
+// AMCVersion - AMC Version
 var AMCVersion string
+
+// AMCBuild - AMC Build
 var AMCBuild string
+
+// AMCEdition - AMC Edition (EE)
 var AMCEdition string
+
+// AMCEnv - AMC Environment (dev/prod)
 var AMCEnv string
 
 var db *sql.DB
 
+// AMCIsProd - check if prod
 func AMCIsProd() bool {
 	return AMCEnv == "prod"
 }
@@ -33,6 +41,7 @@ func AMCIsEnterprise() bool {
 	return true
 }
 
+// Config struct
 type Config struct {
 	AMC struct {
 		UpdateInterval           int    `toml:"update_interval"`
@@ -101,6 +110,7 @@ type Config struct {
 	LogFile *os.File
 }
 
+// AppendAlertEmails - send email
 func (c *Config) AppendAlertEmails(emails []string) error {
 	c.Mailer.mutex.Lock()
 	defer c.Mailer.mutex.Unlock()
@@ -115,6 +125,7 @@ func (c *Config) AppendAlertEmails(emails []string) error {
 	return nil
 }
 
+// DeleteAlertEmails - delete email
 func (c *Config) DeleteAlertEmails(emails []string) error {
 	c.Mailer.mutex.Lock()
 	defer c.Mailer.mutex.Unlock()
@@ -140,6 +151,7 @@ func (c *Config) DeleteAlertEmails(emails []string) error {
 	return nil
 }
 
+// AlertEmails ?
 func (c *Config) AlertEmails() []string {
 	c.Mailer.mutex.RLock()
 	defer c.Mailer.mutex.RUnlock()
@@ -150,6 +162,7 @@ func (c *Config) AlertEmails() []string {
 	return res
 }
 
+// FromAddress - parse from address
 func (c *Config) FromAddress() string {
 	c.Mailer.mutex.RLock()
 	defer c.Mailer.mutex.RUnlock()
@@ -165,14 +178,17 @@ func (c *Config) FromAddress() string {
 	return fromUser
 }
 
+// ServerPool - return serverPool
 func (c *Config) ServerPool() *x509.CertPool {
 	return c.serverPool
 }
 
+// ClientPool - return clientPool
 func (c *Config) ClientPool() []tls.Certificate {
 	return c.clientPool
 }
 
+// LogLevel - return log.Level
 func (c *Config) LogLevel() log.Level {
 	switch strings.ToLower(c.AMC.LogLevel) {
 	case "debug":
@@ -188,6 +204,7 @@ func (c *Config) LogLevel() log.Level {
 	}
 }
 
+// AeroLogLevel - return aslog.LogPriority
 func (c *Config) AeroLogLevel() aslog.LogPriority {
 	switch strings.ToLower(c.AMC.LogLevel) {
 	case "debug":
@@ -203,6 +220,7 @@ func (c *Config) AeroLogLevel() aslog.LogPriority {
 	}
 }
 
+// InitConfig - init the config struct
 func InitConfig(configFile, configDir string, config *Config) {
 	// to print everything out regarding reading the config in app init
 	log.SetLevel(log.DebugLevel)
@@ -271,6 +289,7 @@ func InitConfig(configFile, configDir string, config *Config) {
 	setLogLevel(config.AMC.LogLevel)
 }
 
+// SetupDatabase - create memsql tables
 func SetupDatabase(filepath string) {
 	var schema = []string{`
 		CREATE TABLE IF NOT EXISTS alerts (

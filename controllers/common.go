@@ -8,6 +8,7 @@ import (
 // Handlers
 //----------
 
+// NodeResult strunct
 type NodeResult struct {
 	Node        *models.Node
 	Name        string

@@ -11,11 +11,13 @@ import (
 const NOT_SUPPORTED = "N/S"
 const NOT_AVAILABLE = "N/A"
 
+// SinglePointValue struct
 type SinglePointValue struct {
 	timestamp *int64
 	value     *float64
 }
 
+// NewSinglePointValue - create new PointValue for graphs
 func NewSinglePointValue(timestamp *int64, value *float64) *SinglePointValue {
 	return &SinglePointValue{
 		timestamp: timestamp,
@@ -23,6 +25,7 @@ func NewSinglePointValue(timestamp *int64, value *float64) *SinglePointValue {
 	}
 }
 
+// Timestamp - get timestamp for graph
 func (spv *SinglePointValue) Timestamp(mult int64) *int64 {
 	if spv == nil {
 		return nil
@@ -36,6 +39,7 @@ func (spv *SinglePointValue) Timestamp(mult int64) *int64 {
 	return spv.timestamp
 }
 
+// TimestampJson - return timestamp at unix time
 func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 	if spv == nil {
 		if defVal != nil {
@@ -53,6 +57,7 @@ func (spv *SinglePointValue) TimestampJson(defVal *time.Time) *int64 {
 	return spv.timestamp
 }
 
+// Value - return SinglePointValue value or default
 func (spv *SinglePointValue) Value(defVal *float64) *float64 {
 	if spv == nil || spv.value == nil {
 		return defVal
@@ -61,9 +66,13 @@ func (spv *SinglePointValue) Value(defVal *float64) *float64 {
 	return spv.value
 }
 
+// Info - map type
 type Info map[string]string
+
+// Stats - map type
 type Stats map[string]interface{}
 
+// Clone - clone Info object
 func (s Info) Clone() Info {
 	res := make(Info, len(s))
 	for k, v := range s {
@@ -72,6 +81,7 @@ func (s Info) Clone() Info {
 	return res
 }
 
+// Get - get info value from Info object
 func (s Info) Get(name string, aliases ...string) interface{} {
 	if val, exists := s[name]; exists {
 		return val
@@ -86,6 +96,7 @@ func (s Info) Get(name string, aliases ...string) interface{} {
 	return nil
 }
 
+// GetMulti - get info value(s) from Info object
 func (s Info) GetMulti(names ...string) Info {
 	res := make(Info, len(names))
 	for _, name := range names {
@@ -331,6 +342,7 @@ func (s Info) ToStats() Stats {
 	return res
 }
 
+// Clone - clone Stats
 func (s Stats) Clone() Stats {
 	res := make(Stats, len(s))
 	for k, v := range s {
@@ -349,6 +361,7 @@ func (s Stats) AggregateStats(other Stats) {
 	}
 }
 
+// ToStringValues - conver Stats to string
 func (s Stats) ToStringValues() map[string]interface{} {
 	res := make(map[string]interface{}, len(s))
 	for k, sv := range s {
@@ -369,6 +382,7 @@ func (s Stats) ToStringValues() map[string]interface{} {
 	return res
 }
 
+// Get - get item from Stats
 func (s Stats) Get(name string, aliases ...string) interface{} {
 	if val, exists := s[name]; exists {
 		return val
@@ -383,11 +397,13 @@ func (s Stats) Get(name string, aliases ...string) interface{} {
 	return nil
 }
 
+// ExistsGet - get item from stats if exists
 func (s Stats) ExistsGet(name string) (interface{}, bool) {
 	val, exists := s[name]
 	return val, exists
 }
 
+// GetMulti - get item(s) from stats
 func (s Stats) GetMulti(names ...string) Stats {
 	res := make(Stats, len(names))
 	for _, name := range names {
@@ -401,6 +417,7 @@ func (s Stats) GetMulti(names ...string) Stats {
 	return res
 }
 
+// Del - delete item from Stats
 func (s Stats) Del(names ...string) {
 	for _, name := range names {
 		delete(s, name)
@@ -456,22 +473,24 @@ func (s Stats) TryString(name string, defValue string, aliases ...string) string
 }
 
 /**********************************************************************
-
-					Type SyncInfo
-
+*					Type SyncInfo
 ***********************************************************************/
+
+// SyncInfo struct
 type SyncInfo struct {
 	_Info Info
 
 	mutex sync.RWMutex
 }
 
+// NewSyncInfo - return sync info
 func NewSyncInfo(info Info) *SyncInfo {
 	return &SyncInfo{
 		_Info: info,
 	}
 }
 
+// SetInfo - set sync info
 func (s *SyncInfo) SetInfo(info Info) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -479,6 +498,7 @@ func (s *SyncInfo) SetInfo(info Info) {
 	s._Info = info
 }
 
+// Clone - clone sync info
 func (s *SyncInfo) Clone() Info {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -486,6 +506,7 @@ func (s *SyncInfo) Clone() Info {
 	return s._Info.Clone()
 }
 
+// Get SyncInfo
 func (s *SyncInfo) Get(name string, aliases ...string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -493,6 +514,7 @@ func (s *SyncInfo) Get(name string, aliases ...string) interface{} {
 	return s._Info.Get(name, aliases...)
 }
 
+// GetMulti SyncInfo
 func (s *SyncInfo) GetMulti(names ...string) Info {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -554,6 +576,7 @@ func (s *SyncInfo) TryNumericValue(name string, defVal interface{}, aliases ...s
 	return s._Info.TryNumericValue(name, defVal, aliases...)
 }
 
+// ToInfo Syncinfo to info
 func (s *SyncInfo) ToInfo(name string) Info {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -570,6 +593,7 @@ func (s *SyncInfo) ToInfoMap(name string, alias string, delim string) map[string
 	return s._Info.ToInfoMap(name, alias, delim)
 }
 
+// ToStatsMap Syncinfo to statsMap
 func (s *SyncInfo) ToStatsMap(name string, alias string, delim string) map[string]Stats {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -578,22 +602,24 @@ func (s *SyncInfo) ToStatsMap(name string, alias string, delim string) map[strin
 }
 
 /**********************************************************************
-
 					Type SyncStats
-
 ***********************************************************************/
+
+// SyncStats strunct
 type SyncStats struct {
 	_Stats Stats
 
 	mutex sync.RWMutex
 }
 
+// NewSyncStats - create new SyncStats
 func NewSyncStats(stats Stats) *SyncStats {
 	return &SyncStats{
 		_Stats: stats,
 	}
 }
 
+// SetStats SyncStats set stats
 func (s *SyncStats) SetStats(info Stats) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -601,6 +627,7 @@ func (s *SyncStats) SetStats(info Stats) {
 	s._Stats = info
 }
 
+// Set - SyncStats set value
 func (s *SyncStats) Set(name string, value interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -608,6 +635,7 @@ func (s *SyncStats) Set(name string, value interface{}) {
 	s._Stats[name] = value
 }
 
+// Clone - SyncStats clone
 func (s *SyncStats) Clone() Stats {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -615,6 +643,7 @@ func (s *SyncStats) Clone() Stats {
 	return s._Stats.Clone()
 }
 
+// Exists - SyncStats check if key exists
 func (s *SyncStats) Exists(name string) bool {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -623,6 +652,7 @@ func (s *SyncStats) Exists(name string) bool {
 	return exists
 }
 
+// CloneInto - SyncStats clone info
 func (s *SyncStats) CloneInto(res Stats) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -632,6 +662,7 @@ func (s *SyncStats) CloneInto(res Stats) {
 	}
 }
 
+// Get - SyncStats get value
 func (s *SyncStats) Get(name string, aliases ...string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -639,6 +670,7 @@ func (s *SyncStats) Get(name string, aliases ...string) interface{} {
 	return s._Stats.Get(name, aliases...)
 }
 
+// ExistsGet - SyncStats get stat if exists
 func (s *SyncStats) ExistsGet(name string) (interface{}, bool) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -646,6 +678,7 @@ func (s *SyncStats) ExistsGet(name string) (interface{}, bool) {
 	return s._Stats.ExistsGet(name)
 }
 
+// GetMulti - SyncStats - get multi keys
 func (s *SyncStats) GetMulti(names ...string) Stats {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -653,6 +686,7 @@ func (s *SyncStats) GetMulti(names ...string) Stats {
 	return s._Stats.GetMulti(names...)
 }
 
+// Del - SyncStats - delete stat
 func (s *SyncStats) Del(names ...string) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -711,18 +745,22 @@ func (s *SyncStats) AggregateStatsTo(other Stats) {
 // StatsBy is the type of a "less" function that defines the ordering of its Stats arguments.
 type StatsBy func(fieldName string, p1, p2 Stats) bool
 
+// ByFloatField - sort by float field
 var ByFloatField = func(fieldName string, p1, p2 Stats) bool {
 	return p1.TryFloat(fieldName, 0) < p2.TryFloat(fieldName, 0)
 }
 
+// ByIntField - sort by int field
 var ByIntField = func(fieldName string, p1, p2 Stats) bool {
 	return p1.TryInt(fieldName, 0) < p2.TryInt(fieldName, 0)
 }
 
+// ByStringField - sort by string field
 var ByStringField = func(fieldName string, p1, p2 Stats) bool {
 	return p1.TryString(fieldName, "") < p2.TryString(fieldName, "")
 }
 
+// Sort - stats sorter
 func (by StatsBy) Sort(fieldName string, statsList []Stats) {
 	ps := &statsSorter{
 		fieldName: fieldName,
@@ -732,6 +770,7 @@ func (by StatsBy) Sort(fieldName string, statsList []Stats) {
 	sort.Sort(ps)
 }
 
+// SortReverse - stats reverse sorter
 func (by StatsBy) SortReverse(fieldName string, statsList []Stats) {
 	ps := &statsSorter{
 		fieldName: fieldName,

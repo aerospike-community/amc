@@ -10,15 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Session key
 const (
 	DefaultKey  = "session_key"
 	errorFormat = "[sessions] ERROR! %s\n"
 )
 
+// ErrDefaultSessionMiddlewareNotRegistered - default error message
 var (
 	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered")
 )
 
+// Store interface
 type Store interface {
 	sessions.Store
 	Options(Options)
@@ -62,6 +65,7 @@ type Session interface {
 	Save() error
 }
 
+// Sessions - sessions handler
 func Sessions(name string, store Store) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
