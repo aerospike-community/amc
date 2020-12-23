@@ -17,8 +17,13 @@ import (
 	"github.com/aerospike-community/amc/rrd"
 )
 
+// NodeStatus type
 type NodeStatus string
+
+// NodeVisibilityStatus type
 type NodeVisibilityStatus string
+
+// XDRStatus type
 type XDRStatus string
 
 var nodeStatus = struct {
@@ -39,6 +44,7 @@ var nodeVisibilityStatus = struct {
 	"on", "off",
 }
 
+// Node type struct
 type Node struct {
 	cluster   *Cluster
 	_origNode common.SyncValue //*as.Node
@@ -237,6 +243,7 @@ func (n *Node) applyNsSetStatsToAggregate(stats map[string]map[string]common.Sta
 	return stats
 }
 
+// RequestInfo get node info
 func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string, err error) {
 	if len(cmd) == 0 {
 		return map[string]string{}, nil
@@ -262,6 +269,7 @@ func (n *Node) RequestInfo(reties int, cmd ...string) (result map[string]string,
 	return result, err
 }
 
+// updateNamespaceNames update namsespaces names
 func (n *Node) updateNamespaceNames() error {
 	namespaceListMap, err := n.RequestInfo(3, "namespaces")
 	if err != nil {
@@ -285,6 +293,7 @@ func (n *Node) updateNamespaceNames() error {
 	return nil
 }
 
+// LatestLatency get latest latency
 func (n *Node) LatestLatency() map[string]common.Stats {
 	res := n.latestNodeLatency.Get()
 	if res == nil {
@@ -293,6 +302,7 @@ func (n *Node) LatestLatency() map[string]common.Stats {
 	return res.(map[string]common.Stats)
 }
 
+// LatencySince - get latency since time
 func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 	tm := n.ServerTime().Add(-time.Minute * 30)
 	// if len(tms) > 0 {
@@ -314,6 +324,7 @@ func (n *Node) LatencySince(tms string) []map[string]common.Stats {
 	return vsTyped
 }
 
+// LatestThroughput - get latest throughput for bucket
 func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string]*common.SinglePointValue, len(n.statsHistory))
@@ -340,6 +351,7 @@ func (n *Node) LatestThroughput() map[string]map[string]*common.SinglePointValue
 	return res
 }
 
+// ThroughputSince - get throughput since time for bucket
 func (n *Node) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	// statsHistory is not written to, so it doesn't need synchronization
 	res := make(map[string]map[string][]*common.SinglePointValue, len(n.statsHistory))
@@ -445,18 +457,22 @@ func (n *Node) updateHistory() {
 // 	return t2, nil
 // }
 
+// XdrEnabled - is XDR enabled?
 func (n *Node) XdrEnabled() bool {
 	return n.StatsAttr("xdr_uptime") != nil
 }
 
+// XdrConfig - get XDR config
 func (n *Node) XdrConfig() common.Stats {
 	return n.InfoAttrs("get-config:context=xdr").ToInfo("get-config:context=xdr").ToStats()
 }
 
+// XdrStats - get XDR statistics
 func (n *Node) XdrStats() common.Stats {
 	return n.InfoAttrs("statistics/xdr").ToInfo("statistics/xdr").ToStats()
 }
 
+// XdrStatus - get XDR status
 func (n *Node) XdrStatus() XDRStatus {
 	if n.latestConfig.TryString("enable-xdr", "") != "true" {
 		return xdrStatus.Off
@@ -464,10 +480,12 @@ func (n *Node) XdrStatus() XDRStatus {
 	return xdrStatus.On
 }
 
+// SwitchXDR - switch XDR on for a node
 func (n *Node) SwitchXDR(on bool) error {
 	return n.SetXDRConfig("enable-xdr", on)
 }
 
+// SetXDRConfig - set XDR configuration
 func (n *Node) SetXDRConfig(name string, value interface{}) error {
 	cmd := fmt.Sprintf("set-config:context=xdr;%s=%v", name, value)
 
@@ -530,11 +548,13 @@ func (n *Node) infoKeys() []string {
 	return res
 }
 
+// NamespaceByName get namespace id by name
 func (n *Node) NamespaceByName(ns string) *Namespace {
 	res := n.Namespaces()
 	return res[ns]
 }
 
+// setStats - set stats values and aliases
 func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	// alias stats
 	stats["queue"] = stats.TryInt("tsvc_queue", 0)
@@ -594,15 +614,18 @@ func (n *Node) setStats(stats, nsStats, nsCalcStats common.Stats) {
 	n.nsAggCalcStats.SetStats(nsCalcStats)
 }
 
+// setConfig - set config
 func (n *Node) setConfig(stats common.Info) {
 	lc := stats.ToStats()
 	n.latestConfig.SetStats(lc)
 }
 
+// setNodeLatency set node latest latency
 func (n *Node) setNodeLatency(stats map[string]common.Stats) {
 	n.latestNodeLatency.Set(stats)
 }
 
+// ConfigAttrs - get config attributes
 func (n *Node) ConfigAttrs(names ...string) common.Stats {
 	var res common.Stats
 	if len(names) == 0 {
@@ -613,10 +636,12 @@ func (n *Node) ConfigAttrs(names ...string) common.Stats {
 	return res
 }
 
+// ConfigAttr - get config attribute
 func (n *Node) ConfigAttr(name string) interface{} {
 	return n.latestConfig.Get(name)
 }
 
+// SetServerConfig - set server config for node
 func (n *Node) SetServerConfig(context string, config map[string]string) ([]string, error) {
 	cmd := "set-config:context=" + context
 	cmds := make([]string, 0, len(config))
@@ -653,6 +678,7 @@ func (n *Node) setInfo(stats common.Info) {
 	n.latestInfo.SetInfo(stats)
 }
 
+// InfoAttrs - get node info attribute
 func (n *Node) InfoAttrs(names ...string) common.Info {
 	var res common.Info
 	if len(names) == 0 {
@@ -663,6 +689,7 @@ func (n *Node) InfoAttrs(names ...string) common.Info {
 	return res
 }
 
+// InfoAttr - get info attribute
 func (n *Node) InfoAttr(name string) string {
 	res := n.latestInfo.Get(name)
 	if res != nil {
@@ -671,6 +698,7 @@ func (n *Node) InfoAttr(name string) string {
 	return common.NOT_AVAILABLE
 }
 
+// InfoAttrFirstValidValueAmong - get attribute if not error value
 func (n *Node) InfoAttrFirstValidValueAmong(names ...string) string {
 	for _, name := range names {
 		res := n.latestInfo.Get(name)
@@ -689,6 +717,7 @@ func (n *Node) InfoAttrFirstValidValueAmong(names ...string) string {
 	return common.NOT_AVAILABLE
 }
 
+// AnyAttrs - get attribute(s) from any stat structure
 func (n *Node) AnyAttrs(names ...string) common.Stats {
 	var res common.Stats
 	res = make(common.Stats, len(names))
@@ -708,6 +737,7 @@ func (n *Node) AnyAttrs(names ...string) common.Stats {
 	return res
 }
 
+// StatsAttrs - set stat attribute(s)
 func (n *Node) StatsAttrs(names ...string) common.Stats {
 	var res common.Stats
 	if len(names) == 0 {
@@ -718,18 +748,22 @@ func (n *Node) StatsAttrs(names ...string) common.Stats {
 	return res
 }
 
+// StatsAttr - get stat attribute
 func (n *Node) StatsAttr(name string) interface{} {
 	return n.stats.Get(name)
 }
 
+// Status - get node status
 func (n *Node) Status() NodeStatus {
 	return n.status.Get().(NodeStatus)
 }
 
+// Enterprise - check if EE
 func (n *Node) Enterprise() bool {
 	return strings.Contains(strings.ToLower(n.latestInfo.TryString("edition", "")), "enterprise")
 }
 
+// VisibilityStatus - check if node is active, enable/disable visibility
 func (n *Node) VisibilityStatus() NodeVisibilityStatus {
 	res := nodeVisibilityStatus.On
 	if n.Status() == nodeStatus.On && !n.valid() {
@@ -738,14 +772,17 @@ func (n *Node) VisibilityStatus() NodeVisibilityStatus {
 	return res
 }
 
+// setStatus - get node status
 func (n *Node) setStatus(status NodeStatus) {
 	n.status.Set(status)
 }
 
+// Build - get node build
 func (n *Node) Build() string {
 	return n.InfoAttr("build")
 }
 
+// LatencyUnits - get latency units (ms/us)
 func (n *Node) LatencyUnits() string {
 	res := n.latestConfig.TryString("microsecond-histograms", "")
 	if res == "true" {
@@ -754,6 +791,7 @@ func (n *Node) LatencyUnits() string {
 	return "msec"
 }
 
+// Disk - build disk stats
 func (n *Node) Disk() common.Stats {
 	return common.Stats{
 		"used":             n.nsAggCalcStats.TryInt("used-bytes-disk", 0),
@@ -764,6 +802,7 @@ func (n *Node) Disk() common.Stats {
 	}
 }
 
+// Memory - build memory stats
 func (n *Node) Memory() common.Stats {
 	return common.Stats{
 		"used":               n.nsAggCalcStats.TryInt("used-bytes-memory", 0),
@@ -774,6 +813,7 @@ func (n *Node) Memory() common.Stats {
 	}
 }
 
+// DataCenters - build DC list
 func (n *Node) DataCenters() map[string]common.Stats {
 	if exists := n.latestInfo.Get("get-dc-config"); exists == nil {
 		return nil
@@ -797,6 +837,7 @@ func (n *Node) DataCenters() map[string]common.Stats {
 	return dcs
 }
 
+// Namespaces - get namespace
 func (n *Node) Namespaces() map[string]*Namespace {
 	res := n.namespaces.Get()
 	if res == nil {
@@ -805,6 +846,7 @@ func (n *Node) Namespaces() map[string]*Namespace {
 	return res.(map[string]*Namespace)
 }
 
+// NamespaceList - get list of namespaces in the node
 func (n *Node) NamespaceList() []string {
 	namespaces := n.Namespaces()
 	res := make([]string, 0, len(namespaces))
@@ -814,10 +856,12 @@ func (n *Node) NamespaceList() []string {
 	return common.StrUniq(res)
 }
 
+// Jobs - get jobs from node
 func (n *Node) Jobs() map[string]common.Stats {
 	return n.latestInfo.ToStatsMap("jobs:", "trid", ":")
 }
 
+// Indexes - get sindex stat
 func (n *Node) Indexes(namespace string) map[string]common.Info {
 	indexes := n.latestInfo.ToInfoMap("sindex", "indexname", ":")
 	if namespace == "" {
@@ -834,6 +878,7 @@ func (n *Node) Indexes(namespace string) map[string]common.Info {
 	return result
 }
 
+// NamespaceIndexes - get sindex by namespace
 func (n *Node) NamespaceIndexes() map[string][]string {
 	indexes := n.latestInfo.ToInfoMap("sindex", "indexname", ":")
 	result := map[string][]string{}
@@ -850,10 +895,12 @@ func (n *Node) NamespaceIndexes() map[string][]string {
 	return result
 }
 
+// UDFs - get UDF modules list
 func (n *Node) UDFs() map[string]common.Stats {
 	return n.latestInfo.ToStatsMap("udf-list", "filename", ",")
 }
 
+// Address - get node ip address
 func (n *Node) Address() string {
 	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		return s
@@ -862,6 +909,7 @@ func (n *Node) Address() string {
 	return h.Name + ":" + strconv.Itoa(h.Port)
 }
 
+// Host - get node hostname
 func (n *Node) Host() string {
 	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		host, _, err := common.SplitHostPort(s)
@@ -874,6 +922,7 @@ func (n *Node) Host() string {
 	return h.Name
 }
 
+// Port - get node port
 func (n *Node) Port() uint16 {
 	if s := n.InfoAttrFirstValidValueAmong("service-tls-std", "service-clear-std", "service"); s != common.NOT_AVAILABLE {
 		_, port, err := common.SplitHostPort(s)
@@ -886,18 +935,22 @@ func (n *Node) Port() uint16 {
 	return uint16(h.Port)
 }
 
+// Id - get node ID
 func (n *Node) Id() string {
 	return n.InfoAttr("node")
 }
 
+// ClusterName - get cluster name
 func (n *Node) ClusterName() string {
 	return n.InfoAttr("cluster-name")
 }
 
+// Bins - get count of bins
 func (n *Node) Bins() common.Stats {
 	return parseBinInfo(n.InfoAttr("bins"))
 }
 
+// MigrationStats - get migration stats from node
 func (n *Node) MigrationStats() common.Info {
 	return n.InfoAttrs("migrate_msgs_sent", "migrate_msgs_recv", "migrate_progress_send",
 		"migrate_progress_recv", "migrate_tx_objs", "migrate_rx_objs")
@@ -979,6 +1032,7 @@ func (n *Node) setServerTimeDelta(tm int64) {
 	}
 }
 
+// ServerTime - get server time
 func (n *Node) ServerTime() time.Time {
 	serverTimeDelta := n.serverTimeDelta.Get().(time.Duration)
 	return time.Now().Add(serverTimeDelta)

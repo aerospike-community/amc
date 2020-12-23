@@ -19,6 +19,7 @@ import (
 	"github.com/aerospike-community/amc/common"
 )
 
+// DebugStatus type struct
 type DebugStatus struct {
 	On        bool
 	StartTime time.Time
@@ -26,6 +27,7 @@ type DebugStatus struct {
 	Initiator string
 }
 
+// ObserverT type struct
 type ObserverT struct {
 	sessions common.SyncStats // map[string][]*Cluster
 	config   *common.Config
@@ -40,6 +42,7 @@ type ObserverT struct {
 	xdrSeeds chan string
 }
 
+// New - add monitoring server to the cluster
 func New(config *common.Config) *ObserverT {
 	var err error
 	o := &ObserverT{
@@ -120,6 +123,7 @@ func (o *ObserverT) removeIdleClusters() {
 	}
 }
 
+// Clusters - get list of clusters observed
 func (o *ObserverT) Clusters() []*Cluster {
 	c := o.clusters.Get().([]*Cluster)
 
@@ -180,6 +184,7 @@ func (o *ObserverT) sessionClusters(sessionId string) []*Cluster {
 	return res
 }
 
+// AppendCluster add cluster for monitoring
 func (o *ObserverT) AppendCluster(sessionId string, cluster *Cluster) {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
@@ -244,6 +249,7 @@ func (o *ObserverT) removeClusterFromAllSessions(cluster *Cluster) {
 	log.Info("Automatically removed idle cluster " + cluster.Id() + " from session all sessions")
 }
 
+// RemoveCluster - remove cluster from observer
 func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
@@ -294,6 +300,7 @@ func (o *ObserverT) RemoveCluster(sessionId string, cluster *Cluster) int {
 	return len(remainingClusters)
 }
 
+// Register - register cluster to observer
 func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias string, hosts ...*as.Host) (*Cluster, error) {
 	client, err := as.NewClientWithPolicyAndHost(policy, hosts...)
 	if err != nil {
@@ -315,11 +322,13 @@ func (o *ObserverT) Register(sessionId string, policy *as.ClientPolicy, alias st
 	return cluster, nil
 }
 
+// SessionExists - check if session exist in observer
 func (o *ObserverT) SessionExists(sessionId string) bool {
 	_, exists := o.sessions.ExistsGet(sessionId)
 	return exists
 }
 
+// MonitoringClusters - get list of monitored cluster by sessionId
 func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
 	clusters, sessionExists := o.sessions.ExistsGet(sessionId)
 	if clusters == nil {
@@ -328,6 +337,7 @@ func (o *ObserverT) MonitoringClusters(sessionId string) ([]*Cluster, bool) {
 	return clusters.([]*Cluster), sessionExists
 }
 
+// AutoClusters - Add automatic clusters which have been required to show up in the UI
 func (o *ObserverT) AutoClusters() []*Cluster {
 	clusters := []*Cluster{}
 
@@ -344,6 +354,7 @@ func (o *ObserverT) AutoClusters() []*Cluster {
 	return clusters
 }
 
+// FindClusterById - get cluster by id
 func (o *ObserverT) FindClusterById(id string) *Cluster {
 	for _, cluster := range o.clustersRef() {
 		if cluster.Id() == id {
@@ -353,6 +364,7 @@ func (o *ObserverT) FindClusterById(id string) *Cluster {
 	return nil
 }
 
+// NodeHasBeenDiscovered - check if a node has been discoverd
 func (o *ObserverT) NodeHasBeenDiscovered(sessionId string, alias string) *Cluster {
 	for _, cluster := range o.sessionClusters(sessionId) {
 		client := cluster.origClient()
@@ -420,6 +432,9 @@ func (o *ObserverT) findClusterBySeedOnly(seed as.Host) *Cluster {
 	return nil
 }
 
+// DatacenterInfo -
+// Add auto clusters to the mix
+// DO NOT add auto-clusters which are already included in the cluster.
 func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	res := map[string]common.Stats{}
 	sClusters := o.sessionClusters(sessionId)
@@ -428,8 +443,7 @@ func (o *ObserverT) DatacenterInfo(sessionId string) common.Stats {
 	}
 
 	// Add auto clusters to the mix
-	// DO NOT add auto-clusters which are already included in the
-	// cluster.
+	// DO NOT add auto-clusters which are already included in the cluster.
 L:
 	for _, cluster := range o.AutoClusters() {
 		for _, scluster := range sClusters {
@@ -604,10 +618,12 @@ L:
 	}
 }
 
+// Config - return config
 func (o *ObserverT) Config() *common.Config {
 	return o.config
 }
 
+// StartDebug - start debug
 func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugStatus {
 	log.SetLevel(log.DebugLevel)
 	asl.Logger.SetLevel(asl.DEBUG)
@@ -622,6 +638,7 @@ func (o *ObserverT) StartDebug(initiator string, duration time.Duration) DebugSt
 	return debug
 }
 
+// StopDebug - stop debug
 func (o *ObserverT) StopDebug() DebugStatus {
 	log.SetLevel(o.config.LogLevel())
 	asl.Logger.SetLevel(o.config.AeroLogLevel())
@@ -633,6 +650,7 @@ func (o *ObserverT) StopDebug() DebugStatus {
 	return debug
 }
 
+// DebugStatus - check debug status
 func (o *ObserverT) DebugStatus() DebugStatus {
 	return o.debug.Get().(DebugStatus)
 }

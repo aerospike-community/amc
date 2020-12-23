@@ -14,12 +14,14 @@ import (
 	"github.com/aerospike-community/amc/common"
 )
 
+// Backup type struct
 type Backup struct {
 	*common.BackupRestore
 
 	cluster *Cluster
 }
 
+// Execute - execute backup
 func (b *Backup) Execute() error {
 	conf := b.cluster.observer.Config().AMC
 

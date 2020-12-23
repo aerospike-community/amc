@@ -22,6 +22,7 @@ import (
 	"github.com/aerospike-community/amc/mailer"
 )
 
+// Cluster type struct
 type Cluster struct {
 	observer *ObserverT
 	client   common.SyncValue //*as.Client
@@ -72,6 +73,7 @@ type Cluster struct {
 	// mutex deadlock.RWMutex
 }
 
+// newCluster - create new Cluster struct
 func newCluster(observer *ObserverT, client *as.Client, alias, user, password string, seeds []*as.Host) *Cluster {
 	newCluster := Cluster{
 		observer:       observer,
@@ -112,6 +114,7 @@ func (c *Cluster) setPermanent(v bool) {
 	c.permanent.Set(v)
 }
 
+// ShowInUI - get show in UI flag
 func (c *Cluster) ShowInUI() bool {
 	return c.showInUI.Get().(bool)
 }
@@ -135,6 +138,7 @@ func (c *Cluster) shouldAutoRemove() bool {
 	return c.observer.config.AMC.InactiveDurBeforeRemoval > 0 && time.Since(lastPing) > time.Duration(c.observer.config.AMC.InactiveDurBeforeRemoval)*time.Second
 }
 
+// AddNode - Add node to cluster struct
 func (c *Cluster) AddNode(address string, port int) error {
 	nodes := c.nodesCopy()
 
@@ -170,6 +174,7 @@ func (c *Cluster) AddNode(address string, port int) error {
 	return nil
 }
 
+// RemoveNodeByAddress - remove node by address from cluster struct
 func (c *Cluster) RemoveNodeByAddress(address string) error {
 	node := c.FindNodeByAddress(address)
 	if node == nil {
@@ -192,10 +197,12 @@ func (c *Cluster) RemoveNodeByAddress(address string) error {
 	return nil
 }
 
+// UpdateInterval - get update interval for cluster
 func (c *Cluster) UpdateInterval() int {
 	return c.updateInterval.Get().(int)
 }
 
+// SetUpdateInterval - set update interval
 func (c *Cluster) SetUpdateInterval(val int) {
 	c.updateInterval.Set(val)
 
@@ -204,6 +211,7 @@ func (c *Cluster) SetUpdateInterval(val int) {
 	}
 }
 
+// OffNodes - turn off node for cluster
 func (c *Cluster) OffNodes() []string {
 	res := []string{}
 	for _, node := range c.Nodes() {
@@ -215,6 +223,7 @@ func (c *Cluster) OffNodes() []string {
 	return res
 }
 
+// RandomActiveNode check if there is a node active
 func (c *Cluster) RandomActiveNode() *Node {
 	for _, node := range c.Nodes() {
 		if node.Status() == nodeStatus.On {
@@ -225,6 +234,7 @@ func (c *Cluster) RandomActiveNode() *Node {
 	return nil
 }
 
+// Status - check cluster status and connectivity
 func (c *Cluster) Status() string {
 	if client := c.origClient(); client != nil && client.IsConnected() {
 		return "on"
@@ -232,6 +242,7 @@ func (c *Cluster) Status() string {
 	return "off"
 }
 
+// Disk - get total disk stats for cluster
 func (c *Cluster) Disk() common.Stats {
 	result := common.Stats{
 		"used": c.aggNodeCalcStats.TryInt("used-bytes-disk", 0),
@@ -247,6 +258,7 @@ func (c *Cluster) Disk() common.Stats {
 	return result
 }
 
+// Memory - get total memory stats for cluster
 func (c *Cluster) Memory() common.Stats {
 	result := common.Stats{
 		"used": c.aggNodeCalcStats.TryInt("used-bytes-memory", 0),
@@ -262,6 +274,7 @@ func (c *Cluster) Memory() common.Stats {
 	return result
 }
 
+// Users - get user list
 func (c *Cluster) Users() []*as.UserRoles {
 	oldUsers := c.users.Get().([]*as.UserRoles)
 	res := make([]*as.UserRoles, len(oldUsers))
@@ -269,6 +282,7 @@ func (c *Cluster) Users() []*as.UserRoles {
 	return res
 }
 
+// UpdatePassword - update password
 func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 	if currentPass == newPass {
 		return errors.New("New password cannot be same as current password")
@@ -296,6 +310,7 @@ func (c *Cluster) UpdatePassword(user, currentPass, newPass string) error {
 	return err
 }
 
+// ChangeUserPassword - change user password
 func (c *Cluster) ChangeUserPassword(user, pass string) error {
 	client := c.origClient()
 	if client == nil {
@@ -305,6 +320,7 @@ func (c *Cluster) ChangeUserPassword(user, pass string) error {
 	return client.ChangePassword(nil, user, pass)
 }
 
+// CreateUser - create user
 func (c *Cluster) CreateUser(user, password string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
@@ -313,6 +329,7 @@ func (c *Cluster) CreateUser(user, password string, roles []string) error {
 	return client.CreateUser(nil, user, password, roles)
 }
 
+// DropUser - drop user
 func (c *Cluster) DropUser(user string) error {
 	client := c.origClient()
 	if client == nil {
@@ -321,6 +338,7 @@ func (c *Cluster) DropUser(user string) error {
 	return client.DropUser(nil, user)
 }
 
+// GrantRoles - grant role to user
 func (c *Cluster) GrantRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
@@ -329,6 +347,7 @@ func (c *Cluster) GrantRoles(user string, roles []string) error {
 	return client.GrantRoles(nil, user, roles)
 }
 
+// RevokeRoles - revoke role to user
 func (c *Cluster) RevokeRoles(user string, roles []string) error {
 	client := c.origClient()
 	if client == nil {
@@ -337,6 +356,7 @@ func (c *Cluster) RevokeRoles(user string, roles []string) error {
 	return client.RevokeRoles(nil, user, roles)
 }
 
+// CreateRole - create role
 func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
@@ -345,6 +365,7 @@ func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	return client.CreateRole(nil, role, privileges, nil)
 }
 
+// DropRole - drop role
 func (c *Cluster) DropRole(role string) error {
 	client := c.origClient()
 	if client == nil {
@@ -353,6 +374,7 @@ func (c *Cluster) DropRole(role string) error {
 	return client.DropRole(nil, role)
 }
 
+// AddPrivileges - grant privs to role
 func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
@@ -361,6 +383,7 @@ func (c *Cluster) AddPrivileges(role string, privileges []as.Privilege) error {
 	return client.GrantPrivileges(nil, role, privileges)
 }
 
+// RemovePrivileges - revoke privs from role
 func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error {
 	client := c.origClient()
 	if client == nil {
@@ -369,6 +392,7 @@ func (c *Cluster) RemovePrivileges(role string, privileges []as.Privilege) error
 	return client.RevokePrivileges(nil, role, privileges)
 }
 
+// CreateUDF - register UDF module
 func (c *Cluster) CreateUDF(name, body string) error {
 	client := c.origClient()
 	if client == nil {
@@ -378,6 +402,7 @@ func (c *Cluster) CreateUDF(name, body string) error {
 	return err
 }
 
+// DropUDF - remove UDF module
 func (c *Cluster) DropUDF(udf string) error {
 	client := c.origClient()
 	if client == nil {
@@ -387,6 +412,7 @@ func (c *Cluster) DropUDF(udf string) error {
 	return err
 }
 
+// CreateIndex - create sindex
 func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType string) error {
 	client := c.origClient()
 	if client == nil {
@@ -396,6 +422,7 @@ func (c *Cluster) CreateIndex(namespace, setName, indexName, binName, indexType 
 	return err
 }
 
+// DropIndex - drop sindex
 func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
 	client := c.origClient()
 	if client == nil {
@@ -404,6 +431,7 @@ func (c *Cluster) DropIndex(namespace, setName, indexName string) error {
 	return client.DropIndex(nil, namespace, setName, indexName)
 }
 
+// Nodes - add nodes to cluster
 func (c *Cluster) Nodes() (nodes []*Node) {
 	cNodes := c.nodes.Get().(map[as.Host]*Node)
 	for _, node := range cNodes {
@@ -413,6 +441,7 @@ func (c *Cluster) Nodes() (nodes []*Node) {
 	return nodes
 }
 
+// nodesCopy - copy nodes
 func (c *Cluster) nodesCopy() map[as.Host]*Node {
 	cNodes := c.nodes.Get().(map[as.Host]*Node)
 	nodes := make(map[as.Host]*Node, len(cNodes))
@@ -423,6 +452,7 @@ func (c *Cluster) nodesCopy() map[as.Host]*Node {
 	return nodes
 }
 
+// NodeBuilds - get builds of nodes
 func (c *Cluster) NodeBuilds() (builds []string) {
 	for _, node := range c.Nodes() {
 		builds = append(builds, node.Build())
@@ -431,6 +461,7 @@ func (c *Cluster) NodeBuilds() (builds []string) {
 	return common.SortStrings(common.StrUniq(builds))
 }
 
+// NamespaceList - get namespace list
 func (c *Cluster) NamespaceList() (result []string) {
 	for _, node := range c.Nodes() {
 		for _, ns := range node.NamespaceList() {
@@ -441,6 +472,7 @@ func (c *Cluster) NamespaceList() (result []string) {
 	return common.SortStrings(common.StrUniq(result))
 }
 
+// NamespaceIndexes - get namespace sindexes
 func (c *Cluster) NamespaceIndexes() map[string][]string {
 	result := map[string][]string{}
 	for _, node := range c.Nodes() {
@@ -456,6 +488,7 @@ func (c *Cluster) NamespaceIndexes() map[string][]string {
 	return result
 }
 
+// NodeList - get node list
 func (c *Cluster) NodeList() []string {
 	clusterNodes := c.Nodes()
 	nodes := make([]string, 0, len(clusterNodes))
@@ -466,6 +499,7 @@ func (c *Cluster) NodeList() []string {
 	return common.SortStrings(nodes)
 }
 
+// NodeCompatibility - get node compatibilty
 func (c *Cluster) NodeCompatibility() string {
 	versionList := map[string][]string{}
 	for _, node := range c.Nodes() {
@@ -480,14 +514,17 @@ func (c *Cluster) NodeCompatibility() string {
 	return "compatible"
 }
 
+// SeedAddress - get see addresses
 func (c *Cluster) SeedAddress() string {
 	return c.seeds.Get().([]*as.Host)[0].String()
 }
 
+// Id - get cluster uuid
 func (c *Cluster) Id() string {
 	return c.uuid
 }
 
+// User - get user name
 func (c *Cluster) User() *string {
 	user := c.user.Get()
 	if user == nil || user.(string) == "" {
@@ -497,6 +534,7 @@ func (c *Cluster) User() *string {
 	return &u
 }
 
+// Password - get user password
 func (c *Cluster) Password() *string {
 	pass := c.password.Get()
 	if pass == nil || pass.(string) == "" {
@@ -506,6 +544,7 @@ func (c *Cluster) Password() *string {
 	return &p
 }
 
+// Name - get cluster name
 func (c *Cluster) Name() *string {
 	for _, node := range c.Nodes() {
 		if cName := node.ClusterName(); cName != "" && cName != "null" {
@@ -516,6 +555,7 @@ func (c *Cluster) Name() *string {
 	return nil
 }
 
+// Alias - get cluster alias
 func (c *Cluster) Alias() *string {
 	alias := c.alias.Get()
 	if alias != nil && len(alias.(string)) > 0 {
@@ -530,6 +570,7 @@ func (c *Cluster) Alias() *string {
 	return nil
 }
 
+// SetAlias - set cluster alias
 func (c *Cluster) SetAlias(alias string) {
 	alias = strings.Trim(alias, " \t")
 	if len(alias) == 0 {
@@ -540,6 +581,7 @@ func (c *Cluster) SetAlias(alias string) {
 	c.alias.Set(alias)
 }
 
+// Roles - get roles
 func (c *Cluster) Roles() []*as.Role {
 	oldRoles := c.roles.Get().([]*as.Role)
 
@@ -552,6 +594,7 @@ func (c *Cluster) Roles() []*as.Role {
 	return res
 }
 
+// RoleNames - get role names
 func (c *Cluster) RoleNames() []string {
 	oldRoles := c.roles.Get().([]*as.Role)
 
@@ -574,10 +617,12 @@ func (c *Cluster) close() {
 	}
 }
 
+// IsSet - check if client is set
 func (c *Cluster) IsSet() bool {
 	return c.client.Get() != nil
 }
 
+// SecurityEnabled - check if security enabled
 func (c *Cluster) SecurityEnabled() bool {
 	user := c.User()
 	return user != nil && len(*user) > 0
@@ -642,6 +687,7 @@ func (c *Cluster) update(wg *sync.WaitGroup) error {
 	return nil
 }
 
+// SendEmailNotifications - send email notification for alert
 func (c *Cluster) SendEmailNotifications() {
 	newAlerts := c.alerts.DrainNewAlerts()
 
@@ -723,6 +769,7 @@ func (c *Cluster) updateUsers() error {
 	return nil
 }
 
+// RequestInfoAll - get all info attributes
 func (c *Cluster) RequestInfoAll(cmd string) (map[*Node]string, error) {
 	type nodeCommand struct {
 		Node *Node
@@ -860,6 +907,7 @@ func (c *Cluster) versionSupported(oldest string) error {
 	return nil
 }
 
+// BuildDetails - get build details for all nodes
 func (c *Cluster) BuildDetails() map[string]interface{} {
 	result := map[string]interface{}{}
 
@@ -880,6 +928,7 @@ func (c *Cluster) BuildDetails() map[string]interface{} {
 	return result
 }
 
+// LatestThroughput - get latest throughput for graph
 func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointValue {
 	res := map[string]map[string]*common.SinglePointValue{}
 	for _, node := range c.Nodes() {
@@ -897,6 +946,7 @@ func (c *Cluster) LatestThroughput() map[string]map[string]*common.SinglePointVa
 	return res
 }
 
+// ServerTime - get server time
 func (c *Cluster) ServerTime() time.Time {
 	var tm time.Time
 	for _, node := range c.Nodes() {
@@ -908,6 +958,7 @@ func (c *Cluster) ServerTime() time.Time {
 	return tm
 }
 
+// ThroughputSince - get throughput info since time
 func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.SinglePointValue {
 	// if no tm specified, return for the last 30 mins
 	if tm.IsZero() {
@@ -936,6 +987,7 @@ func (c *Cluster) ThroughputSince(tm time.Time) map[string]map[string][]*common.
 	return res
 }
 
+// FindNodeById - get node by id
 func (c *Cluster) FindNodeById(id string) *Node {
 	for _, node := range c.Nodes() {
 		if node.Id() == id {
@@ -946,6 +998,7 @@ func (c *Cluster) FindNodeById(id string) *Node {
 	return nil
 }
 
+// FindNodeByAddress - get node by ip address
 func (c *Cluster) FindNodeByAddress(address string) *Node {
 	for _, node := range c.Nodes() {
 		if node.Address() == address {
@@ -956,6 +1009,7 @@ func (c *Cluster) FindNodeByAddress(address string) *Node {
 	return nil
 }
 
+// FindNodesByAddress - get node(s) by ip address
 func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 	res := make([]*Node, 0, len(addresses))
 	for _, addr := range addresses {
@@ -967,6 +1021,7 @@ func (c *Cluster) FindNodesByAddress(addresses ...string) []*Node {
 	return res
 }
 
+// NamespaceInfo - get namespace info
 func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 	res := make(map[string]common.Stats, len(namespaces))
 	nodes := c.Nodes()
@@ -1015,6 +1070,7 @@ func (c *Cluster) NamespaceInfo(namespaces []string) map[string]common.Stats {
 	return res
 }
 
+// NamespaceInfoPerNode - get namespace info per node
 func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string]interface{} {
 	res := make(map[string]interface{}, len(nodeAddrs))
 	for _, nodeAddress := range nodeAddrs {
@@ -1065,10 +1121,12 @@ func (c *Cluster) NamespaceInfoPerNode(ns string, nodeAddrs []string) map[string
 
 }
 
+// CurrentUserPrivileges - get current user privs
 func (c *Cluster) CurrentUserPrivileges() []string {
 	return c.currentUserPrivileges.Get().([]string)
 }
 
+// NamespaceIndexInfo - get namespace sindex info
 func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
 	for _, node := range c.Nodes() {
 		if node.Status() == "on" {
@@ -1079,6 +1137,7 @@ func (c *Cluster) NamespaceIndexInfo(namespace string) map[string]common.Info {
 	return map[string]common.Info{}
 }
 
+// NamespaceSetsInfo - get namespace sets info
 func (c *Cluster) NamespaceSetsInfo(namespace string) []common.Stats {
 	attrs := []string{
 		"delete", "deleting", "disable-eviction", "enable-xdr",
@@ -1115,6 +1174,7 @@ func (c *Cluster) updateJobs() {
 	c.jobs.Set(res)
 }
 
+// Jobs - get scan jobs
 func (c *Cluster) Jobs() []common.Stats {
 	res := c.jobs.Get()
 	if res == nil {
@@ -1124,6 +1184,7 @@ func (c *Cluster) Jobs() []common.Stats {
 	return res.([]common.Stats)
 }
 
+// NamespaceDeviceInfo - get namespace device info
 func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 	storageTypes := map[string][]string{}
 	storageDevices := map[string][]string{}
@@ -1149,6 +1210,7 @@ func (c *Cluster) NamespaceDeviceInfo(namespace string) common.Stats {
 	}
 }
 
+// DatacenterInfo - get XDR DC info
 func (c *Cluster) DatacenterInfo(sessionId string) common.Stats {
 	xdrInfo := map[string]common.Stats{}
 	datacenterList := []string{}
@@ -1298,6 +1360,7 @@ func (c *Cluster) discoverDatacenter(sessionId string, dc common.Stats) common.S
 	return nil
 }
 
+// AlertsFrom - get alerts by node id
 func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 	alerts := []*common.Alert{}
 	for _, node := range c.Nodes() {
@@ -1321,10 +1384,12 @@ func (c *Cluster) updateRedAlertCount() {
 	c.redAlertCount.Set(count)
 }
 
+// RedAlertCount - count red alerts
 func (c *Cluster) RedAlertCount() int {
 	return c.redAlertCount.Get().(int)
 }
 
+// Backup - backup cluster
 func (c *Cluster) Backup(
 	Namespace string,
 	DestinationAddress string,
@@ -1373,6 +1438,7 @@ func (c *Cluster) Backup(
 	return newBackup, newBackup.Execute()
 }
 
+// CurrentBackup - get current backup settings
 func (c *Cluster) CurrentBackup() *Backup {
 	if b := c.activeBackup.Get(); b != nil {
 		return b.(*Backup)
@@ -1380,6 +1446,7 @@ func (c *Cluster) CurrentBackup() *Backup {
 	return nil
 }
 
+// Restore - restore
 func (c *Cluster) Restore(
 	Namespace string,
 	DestinationAddress string,
@@ -1429,6 +1496,7 @@ func (c *Cluster) Restore(
 	return newRestore, newRestore.Execute()
 }
 
+// CurrentRestore - get current resotre info
 func (c *Cluster) CurrentRestore() *Restore {
 	if r := c.activeRestore.Get(); r != nil {
 		return r.(*Restore)
@@ -1451,6 +1519,7 @@ func (c *Cluster) SameAs(other *Cluster) bool {
 	return false
 }
 
+// ValidCurrentUser - check if current value is valid
 func (c *Cluster) ValidCurrentUser(user, password string) bool {
 	cUser := ""
 	if u := c.User(); u != nil {
