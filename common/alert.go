@@ -198,7 +198,7 @@ func (ad *AlertBucket) updateRecurrence(alert *Alert) {
 		return
 	}
 
-	if _, err := tx.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ?1 WHERE ID = ?2", alert.LastOccured, alert.ID); err != nil {
+	if _, err := tx.Exec("UPDATE alerts SET Recurrence = Recurrence + 1, LastOccured = ?1 WHERE Id = ?2", alert.LastOccured, alert.ID); err != nil {
 		log.Errorf("Error registering the alert in the DB: %s", err.Error())
 	}
 
