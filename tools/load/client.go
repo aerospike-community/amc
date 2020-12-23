@@ -16,8 +16,10 @@ import (
 	"github.com/aerospike-community/amc/tools/load/response"
 )
 
+// BaseURL string
 var BaseURL string
 
+// Client type struct
 type Client struct {
 	IP       string
 	Port     string
@@ -33,6 +35,7 @@ type Client struct {
 	nerr       int
 }
 
+// Connect - connect aerospike
 func (c *Client) Connect() error {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -72,11 +75,13 @@ func (c *Client) Connect() error {
 	return nil
 }
 
+// Start - start http get request
 func (c *Client) Start(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go c.makeRequests(wg)
 }
 
+// Stop - stop client
 func (c *Client) Stop() {
 	c.done <- "stop"
 }
@@ -156,6 +161,7 @@ func (c *Client) makeAnyRequest() {
 	}
 }
 
+// Basic - basic command
 func (c *Client) Basic() {
 	resp, err := c.client.Get(c.toURL("basic"))
 	if resp != nil && resp.Body != nil {

@@ -33,6 +33,7 @@ func processTemplate(config *common.Config, tplName string, context interface{})
 	return data.Bytes(), nil
 }
 
+// SendMail - send email
 func SendMail(config *common.Config, tplName, subject string, context interface{}) error {
 	body, err := processTemplate(config, tplName, context)
 	if err != nil {

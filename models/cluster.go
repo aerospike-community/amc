@@ -499,7 +499,7 @@ func (c *Cluster) NodeList() []string {
 	return common.SortStrings(nodes)
 }
 
-// NodeCompatibility - get node compatibilty
+// NodeCompatibility - get node compatibility
 func (c *Cluster) NodeCompatibility() string {
 	versionList := map[string][]string{}
 	for _, node := range c.Nodes() {

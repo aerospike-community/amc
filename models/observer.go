@@ -364,7 +364,7 @@ func (o *ObserverT) FindClusterByID(id string) *Cluster {
 	return nil
 }
 
-// NodeHasBeenDiscovered - check if a node has been discoverd
+// NodeHasBeenDiscovered - check if a node has been discovered
 func (o *ObserverT) NodeHasBeenDiscovered(sessionID string, alias string) *Cluster {
 	for _, cluster := range o.sessionClusters(sessionID) {
 		client := cluster.origClient()
