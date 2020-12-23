@@ -11,6 +11,7 @@ import (
 	"github.com/aerospike-community/amc/common"
 )
 
+// SimpleBucket type struct
 type SimpleBucket struct {
 	beginTime  *int64
 	resolution int
@@ -24,6 +25,7 @@ type SimpleBucket struct {
 	mutex sync.RWMutex
 }
 
+// NewSimpleBucket - create simple bucket
 func NewSimpleBucket(resolution, size int) *SimpleBucket {
 	if !common.AMCIsProd() {
 		// log.Info("creating bucket...")
@@ -34,10 +36,12 @@ func NewSimpleBucket(resolution, size int) *SimpleBucket {
 	}
 }
 
+// Size - get bucket size
 func (b *SimpleBucket) Size() int {
 	return len(b.values)
 }
 
+// Add - add to bucket
 func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -75,6 +79,7 @@ func (b *SimpleBucket) Add(timestamp int64, val interface{}) {
 	b.lastValue = val
 }
 
+// ValuesSince - get values since time
 func (b *SimpleBucket) ValuesSince(tm time.Time) []interface{} {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
@@ -111,6 +116,7 @@ func (b *SimpleBucket) ValuesSince(tm time.Time) []interface{} {
 	return res
 }
 
+// LastValue - get last value
 func (b *SimpleBucket) LastValue() interface{} {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
