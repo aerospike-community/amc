@@ -5,13 +5,15 @@ import (
 	"time"
 )
 
-type JsonRawString string
+// JSONRawString - Value should be a string
+type JSONRawString string
 
 // MarshalJSON returns *m as the JSON encoding of m.
-func (m *JsonRawString) MarshalJSON() ([]byte, error) {
+func (m *JSONRawString) MarshalJSON() ([]byte, error) {
 	return []byte(*m), nil
 }
 
+// IndexType - Value should be a string
 type IndexType string
 
 var indexType = struct {
@@ -19,18 +21,19 @@ var indexType = struct {
 	NUMERIC IndexType
 }{"string", "numeric"}
 
+// NullTime to store time and nullibility
 type NullTime struct {
 	time  time.Time
 	valid bool // Valid is true if Time is not NULL
 }
 
-// Scan implements the Scanner interface.
+// Set - sets the time
 func (nt *NullTime) Set(t time.Time) {
 	nt.time = t
 	nt.valid = true
 }
 
-// Scan implements the Scanner interface.
+// Valid - check if Time is not NULL
 func (nt *NullTime) Valid() bool {
 	return nt.valid
 }

@@ -9,3 +9,10 @@ amc
 *.todo
 amc.db.old
 amc.db
+
+aerospike-amc-enterprise-*.deb
+aerospike-amc-enterprise-*.rpm
+aerospike-amc-enterprise-*.tar.gz
+
+.71e384d8029d70a336275f921ad8b1f595c99da7
+.05294f73cd9a9a4b5633cc6b9b64eb362bddcae1

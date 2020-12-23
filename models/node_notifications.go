@@ -10,10 +10,12 @@ import (
 	"github.com/aerospike-community/amc/common"
 )
 
+// AlertsFrom - alert from node
 func (n *Node) AlertsFrom(id int64) []*common.Alert {
 	return n.alerts().AlertsFrom(n.Address(), id)
 }
 
+// CheckStatus - check status of last state
 func (n *Node) CheckStatus(latestState common.Stats) {
 
 	messages := common.Info{
@@ -24,8 +26,8 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 	switch n.Status() {
 	case nodeStatus.Off:
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeStatus,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(messages["red"], n.Address()),
@@ -38,8 +40,8 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 	case nodeStatus.On:
 		if latestState.TryString("status", string(nodeStatus.Off)) == string(nodeStatus.Off) {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeStatus,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
@@ -53,6 +55,7 @@ func (n *Node) CheckStatus(latestState common.Stats) {
 	n.setAlertState("status", string(n.Status()))
 }
 
+// CheckClusterVisibility - check if node available
 func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 
 	messages := common.Info{
@@ -63,8 +66,8 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 	switch n.VisibilityStatus() {
 	case nodeVisibilityStatus.Off:
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeVisibility,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(messages["red"], n.Address()),
@@ -77,8 +80,8 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 	case nodeVisibilityStatus.On:
 		if latestState.TryString("visibility", string(nodeVisibilityStatus.Off)) == string(nodeVisibilityStatus.Off) {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeVisibility,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
@@ -92,6 +95,7 @@ func (n *Node) CheckClusterVisibility(latestState common.Stats) {
 	n.setAlertState("visibility", string(n.VisibilityStatus()))
 }
 
+// CheckTransactionQueue - alert on transaction queue
 func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 	queueLimit := 10000
 
@@ -114,8 +118,8 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 	switch queueAlert {
 	case "on":
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeTransQueue,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(messages["yellow"], n.Address(), queueLimit),
@@ -128,8 +132,8 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 	case "off":
 		if latestState.TryString("queueAlert", "on") == "on" {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeTransQueue,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address(), queueLimit),
@@ -142,6 +146,7 @@ func (n *Node) CheckTransactionQueue(latestState common.Stats) {
 	n.setAlertState("queueAlert", string(queueAlert))
 }
 
+// CheckFileDescriptors - check number of file descriptors
 func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 	messages := common.Info{
 		"red":    "Client connections to node <strong>%s</strong> above 95%% of limit",
@@ -176,8 +181,8 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 		}
 
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeFileDescriptors,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(msg, n.Address()),
@@ -190,8 +195,8 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 	case "off":
 		if latestState.TryString("fdAlert", "on") == "on" {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeFileDescriptors,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
@@ -204,6 +209,7 @@ func (n *Node) CheckFileDescriptors(latestState common.Stats) {
 	n.setAlertState("fdAlert", string(fdAlert))
 }
 
+// CheckDiskSpace - check available free disk
 func (n *Node) CheckDiskSpace(latestState common.Stats) {
 	messages := common.Info{
 		"red":    "Free disk space on node <strong>%s</strong> below 5%%",
@@ -230,8 +236,8 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 		}
 
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeDisk,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(msg, n.Address()),
@@ -244,8 +250,8 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 	case "off":
 		if latestState.TryString("diskSpaceAlert", "on") == "on" {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeDisk,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),
@@ -258,6 +264,7 @@ func (n *Node) CheckDiskSpace(latestState common.Stats) {
 	n.setAlertState("diskSpaceAlert", string(diskSpaceAlert))
 }
 
+// CheckMemory - check available memory
 func (n *Node) CheckMemory(latestState common.Stats) {
 	messages := common.Info{
 		"red":    "Free Memory on node <strong>%s</strong> below 5%%",
@@ -284,8 +291,8 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 		}
 
 		alert := common.Alert{
-			Id:          time.Now().UnixNano(),
-			ClusterId:   n.cluster.Id(),
+			ID:          time.Now().UnixNano(),
+			ClusterID:   n.cluster.ID(),
 			Type:        common.AlertTypeNodeDisk,
 			NodeAddress: n.Address(),
 			Desc:        fmt.Sprintf(msg, n.Address()),
@@ -298,8 +305,8 @@ func (n *Node) CheckMemory(latestState common.Stats) {
 	case "off":
 		if latestState.TryString("memSpaceAlert", "on") == "on" {
 			alert := common.Alert{
-				Id:          time.Now().UnixNano(),
-				ClusterId:   n.cluster.Id(),
+				ID:          time.Now().UnixNano(),
+				ClusterID:   n.cluster.ID(),
 				Type:        common.AlertTypeNodeDisk,
 				NodeAddress: n.Address(),
 				Desc:        fmt.Sprintf(messages["green"], n.Address()),

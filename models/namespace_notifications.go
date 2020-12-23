@@ -10,6 +10,7 @@ import (
 	"github.com/aerospike-community/amc/common"
 )
 
+// CheckAvailablePct - check namespace available percents
 func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 
 	messages := common.Info{
@@ -28,8 +29,8 @@ func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 	}
 
 	alert := common.Alert{
-		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ID:          time.Now().UnixNano(),
+		ClusterID:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceAvailablePct,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -43,6 +44,7 @@ func (ns *Namespace) CheckAvailablePct(latestState common.Stats) {
 	// ns.node.setAlertState(ns.name+".AvailablePct", string(status))
 }
 
+// CheckDiskPctHighWatermark - check disk high water mark
 func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 
 	messages := common.Info{
@@ -59,8 +61,8 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 	}
 
 	alert := common.Alert{
-		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ID:          time.Now().UnixNano(),
+		ClusterID:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceDiskPctHighWatermark,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -74,6 +76,7 @@ func (ns *Namespace) CheckDiskPctHighWatermark(latestState common.Stats) {
 	// ns.node.setAlertState(ns.name+".AvailablePct", string(status))
 }
 
+// CheckDiskPctStopWrites - check disk stop writes limit
 func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 
 	messages := common.Info{
@@ -89,8 +92,8 @@ func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 	}
 
 	alert := common.Alert{
-		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ID:          time.Now().UnixNano(),
+		ClusterID:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceDiskPctStopWrites,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -104,6 +107,7 @@ func (ns *Namespace) CheckDiskPctStopWrites(latestState common.Stats) {
 	// ns.node.setAlertState(ns.name+".AvailablePct", string(status))
 }
 
+// CheckMemoryPctStopWrites - check memory stop writes limit
 func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 
 	messages := common.Info{
@@ -120,8 +124,8 @@ func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 	}
 
 	alert := common.Alert{
-		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ID:          time.Now().UnixNano(),
+		ClusterID:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceMemoryPctStopWrites,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),
@@ -135,6 +139,7 @@ func (ns *Namespace) CheckMemoryPctStopWrites(latestState common.Stats) {
 	// ns.node.setAlertState(ns.name+".AvailablePct", string(status))
 }
 
+// CheckMemoryPctHighWatermark - check memory high water mark
 func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 
 	messages := common.Info{
@@ -151,8 +156,8 @@ func (ns *Namespace) CheckMemoryPctHighWatermark(latestState common.Stats) {
 	}
 
 	alert := common.Alert{
-		Id:          time.Now().UnixNano(),
-		ClusterId:   ns.node.cluster.Id(),
+		ID:          time.Now().UnixNano(),
+		ClusterID:   ns.node.cluster.ID(),
 		Type:        common.AlertTypeNamespaceMemoryPctHighWatermark,
 		NodeAddress: ns.node.Address(),
 		Namespace:   common.ToNullString(ns.name),

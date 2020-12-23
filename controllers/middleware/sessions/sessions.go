@@ -10,15 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Session key
 const (
 	DefaultKey  = "session_key"
 	errorFormat = "[sessions] ERROR! %s\n"
 )
 
+// ErrDefaultSessionMiddlewareNotRegistered - default error message
 var (
-	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered!")
+	ErrDefaultSessionMiddlewareNotRegistered = errors.New("Default session middleware not registered")
 )
 
+// Store interface
 type Store interface {
 	sessions.Store
 	Options(Options)
@@ -37,8 +40,8 @@ type Options struct {
 	HttpOnly bool
 }
 
-// Wraps thinly gorilla-session methods.
 // Session stores the values and optional configuration for a session.
+// Wraps thinly gorilla-session methods.
 type Session interface {
 	// Get returns the session value associated to the given key.
 	Get(key interface{}) interface{}
@@ -62,6 +65,7 @@ type Session interface {
 	Save() error
 }
 
+// Sessions - sessions handler
 func Sessions(name string, store Store) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -161,7 +165,7 @@ func (s *session) HasChanged() bool {
 	return s.hasChanged
 }
 
-// shortcut to get session
+// Default - shortcut to get session
 func Default(c echo.Context) Session {
 	ses, ok := c.Get(DefaultKey).(Session)
 	if !ok {

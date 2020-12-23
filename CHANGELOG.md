@@ -1,4 +1,8 @@
 # Aerospike Management Console Release Notes
+## 4.1.4 [future version]
+Release Date: TBD
+
+* Cleanup code, add comments, fix lint error messages.
 
 ## 4.1.3 
 Release Date: December 7, 2020
