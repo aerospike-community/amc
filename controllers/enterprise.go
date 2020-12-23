@@ -15,8 +15,8 @@ import (
 )
 
 func postClusterFireCmd(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -39,16 +39,16 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 	// UI clusters only
 	autoClusters := _observer.AutoClusters()
 
-	sid, err := sessionId(c)
+	sid, err := sessionID(c)
 	if err != nil || !_observer.SessionExists(sid) {
 		if len(autoClusters) == 0 {
 			invalidateSession(c)
 			return c.JSON(http.StatusUnauthorized, errorMap("invalid session : None"))
-		} else {
-			// there are auto clusters; validate and create a new session
-			// update the session cookie
-			sid = manageSession(c)
 		}
+		// there are auto clusters; validate and create a new session
+		// update the session cookie
+		sid = manageSession(c)
+
 	}
 
 	clusters, _ := _observer.MonitoringClusters(sid)
@@ -63,7 +63,7 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 		result[i] = map[string]interface{}{
 			"username":     cluster.User(),
 			"cluster_name": cluster.Alias(),
-			"cluster_id":   cluster.Id(),
+			"cluster_id":   cluster.ID(),
 			"roles":        cluster.RoleNames(),
 			"seed_node":    cluster.SeedAddress(),
 		}
@@ -73,16 +73,14 @@ func getCurrentMonitoringClusters(c echo.Context) error {
 }
 
 func getMultiClusterView(c echo.Context) error {
-	sid, err := sessionId(c)
+	sid, err := sessionID(c)
 	if err != nil {
 		autoClusters := _observer.AutoClusters()
 		if len(autoClusters) <= 0 {
 			invalidateSession(c)
 			return c.JSON(http.StatusOK, errorMap("invalid session : None"))
-		} else {
-			// there are auto clusters; automatically create a session
-			sid = manageSession(c)
-		}
+		} // there are auto clusters; automatically create a session
+		sid = manageSession(c)
 	}
 
 	return c.JSON(http.StatusOK, _observer.DatacenterInfo(sid))
@@ -112,20 +110,15 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 		}
 
 		tps := stats.TryFloat("tps", 0)
-		tpsCalc := tps
-		if tpsCalc == 0 {
-			tpsCalc = 1
-		}
-
 		timestamp := stats["timestamp"].(string)
 		timestamp = timestamp[:8]
 
-		data := make([]map[common.JsonRawString]interface{}, 0, len(buckets)+1)
+		data := make([]map[common.JSONRawString]interface{}, 0, len(buckets)+1)
 
 		if len(buckets) > 0 {
 			pct := math.Max(0, 100.0-totalOver1ms)
-			data = append(data, map[common.JsonRawString]interface{}{
-				common.JsonRawString(LTE + buckets[0][1:]): common.Stats{
+			data = append(data, map[common.JSONRawString]interface{}{
+				common.JSONRawString(LTE + buckets[0][1:]): common.Stats{
 					"value": math.Max(0, tps*pct/100),
 					"pct":   math.Max(0, pct),
 				},
@@ -137,8 +130,8 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 			if i < len(buckets)-1 {
 				title += " to " + LTE + buckets[i+1][1:]
 			}
-			data = append(data, map[common.JsonRawString]interface{}{
-				common.JsonRawString(title): common.Stats{
+			data = append(data, map[common.JSONRawString]interface{}{
+				common.JSONRawString(title): common.Stats{
 					"value": valBuckets[i] * tps / 100.0,
 					// "pct":   common.Round(valBuckets[i], 0.01, 2),
 					"pct": valBuckets[i],
@@ -160,8 +153,8 @@ func transformLatency(latestLatency map[string]common.Stats) common.Stats {
 
 // TODO: Remove this later
 func getNodeLatencyHistory(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -185,8 +178,8 @@ func getNodeLatencyHistory(c echo.Context) error {
 }
 
 func getNodesLatencyHistory(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -218,8 +211,8 @@ func getNodesLatencyHistory(c echo.Context) error {
 }
 
 func getNodeLatency(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -242,8 +235,8 @@ func getNodeLatency(c echo.Context) error {
 }
 
 func getClusterNodeAllConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -264,8 +257,8 @@ func getClusterNodeAllConfig(c echo.Context) error {
 }
 
 func setClusterNodesConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -325,8 +318,8 @@ func setClusterNodesConfig(c echo.Context) error {
 }
 
 func getClusterNamespaceAllConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -356,8 +349,8 @@ func getClusterNamespaceAllConfig(c echo.Context) error {
 }
 
 func setClusterNamespaceConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -432,8 +425,8 @@ func setClusterNamespaceConfig(c echo.Context) error {
 }
 
 func postAddClusterNodes(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("cluster not found"))
 	}
@@ -521,8 +514,8 @@ func postSwitchNodeOff(c echo.Context) error {
 		"status":  "failure",
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		res["error"] = "Cluster not found"
 		return c.JSON(http.StatusNotFound, res)

@@ -1,5 +1,6 @@
 package common
 
+// StrUniq is checking for uniqe strings
 func StrUniq(l []string) []string {
 	if len(l) == 0 {
 		return nil
@@ -11,7 +12,7 @@ func StrUniq(l []string) []string {
 	}
 
 	result := make([]string, 0, len(set))
-	for k, _ := range set {
+	for k := range set {
 		result = append(result, k)
 	}
 

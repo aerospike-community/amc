@@ -13,6 +13,7 @@ import (
 	//timeseries "github.com/khaf/go-time-series"
 )
 
+// Bucket type struct
 type Bucket struct {
 	// this flag determines if the values passed to the bucket are total counts,
 	// and should be converted to deltas
@@ -31,6 +32,7 @@ type Bucket struct {
 	mutex sync.RWMutex
 }
 
+// NewBucket - new RDD bucket
 func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
 	ts, err := timeseries.NewTimeSeries(timeseries.TSTypeAvg,
 		timeseries.WithGranularities(
@@ -52,6 +54,7 @@ func NewBucket(resolution, size int, rollingTotal bool) *Bucket {
 	}
 }
 
+// Add - add item to bucket
 func (b *Bucket) Add(timestamp int64, val float64) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -98,10 +101,12 @@ func (b *Bucket) Add(timestamp int64, val float64) {
 	*b.lastValue = val
 }
 
+// Skip - do nothing
 func (b *Bucket) Skip(tm int64) {
 	// nothing to do
 }
 
+// SetResolution - set bucket resolution
 func (b *Bucket) SetResolution(resolution int) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -132,6 +137,7 @@ func (b *Bucket) SetResolution(resolution int) {
 	b.resolution = float64(resolution)
 }
 
+// ValuesSince - get bucket values simce time
 func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
@@ -177,6 +183,7 @@ func (b *Bucket) ValuesSince(tm time.Time) []*common.SinglePointValue {
 	return res
 }
 
+// LastValue - get bucket last value
 func (b *Bucket) LastValue() *common.SinglePointValue {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()

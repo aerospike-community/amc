@@ -31,6 +31,7 @@ var _recordedNamespaceStats = []string{
 	"udf_success", "udf_reqs",
 }
 
+// Namespace type struct
 type Namespace struct {
 	node *Node
 
@@ -46,6 +47,7 @@ type Namespace struct {
 	latencyHistory *rrd.SimpleBucket
 }
 
+// NewNamespace - create new namespace strunct
 func NewNamespace(node *Node, name string) *Namespace {
 	ns := &Namespace{
 		node:           node,
@@ -67,6 +69,7 @@ func (ns *Namespace) setUpdateInterval(val int) {
 	}
 }
 
+// ServerTime - return server time
 func (ns *Namespace) ServerTime() time.Time {
 	if v := ns.latestStats.TryInt("current_time", 0); v != 0 {
 		return time.Unix(v+ast.CITRUSLEAF_EPOCH, 0)
@@ -108,6 +111,7 @@ func (ns *Namespace) setInfo(stats common.Info) {
 	ns.latestStats.SetStats(stats.ToInfo("namespace/" + ns.name).ToStats())
 }
 
+// InfoAttrs - get namespace attribute
 func (ns *Namespace) InfoAttrs(names ...string) common.Info {
 	var res common.Info
 	if len(names) == 0 {
@@ -118,10 +122,12 @@ func (ns *Namespace) InfoAttrs(names ...string) common.Info {
 	return res
 }
 
+// InfoAttr - get latency info attribute
 func (ns *Namespace) InfoAttr(name string) string {
 	return ns.latestInfo.TryString(name, "")
 }
 
+// StatsAttrs - get namespace stat attribute
 func (ns *Namespace) StatsAttrs(names ...string) common.Stats {
 	var res common.Stats
 	if len(names) == 0 {
@@ -140,6 +146,7 @@ func (ns *Namespace) StatsAttrs(names ...string) common.Stats {
 	return res
 }
 
+// StatsAttr - get namespace stat attribute
 func (ns *Namespace) StatsAttr(name string) interface{} {
 	if val := ns.latestStats.Get(name); val != nil {
 		return val
@@ -147,11 +154,13 @@ func (ns *Namespace) StatsAttr(name string) interface{} {
 	return ns.calcStats.Get(name)
 }
 
+// aggStats - aggregate stat attribute
 func (ns *Namespace) aggStats(agg, calcAgg common.Stats) {
 	ns.latestStats.AggregateStatsTo(agg)
 	ns.calcStats.AggregateStatsTo(calcAgg)
 }
 
+// Disk - get disk space stat struct
 func (ns *Namespace) Disk() common.Stats {
 	return common.Stats{
 		"used-bytes-disk":  ns.calcStats.TryInt("used-bytes-disk", 0),
@@ -160,6 +169,7 @@ func (ns *Namespace) Disk() common.Stats {
 	}
 }
 
+// DiskPercent - get disk perecent stat struct
 func (ns *Namespace) DiskPercent() common.Stats {
 	return common.Stats{
 		"free-pct-disk":       strconv.Itoa(int(ns.calcStats.TryInt("free-pct-disk", 0))),
@@ -167,6 +177,7 @@ func (ns *Namespace) DiskPercent() common.Stats {
 	}
 }
 
+// Memory - get memory stat struct
 func (ns *Namespace) Memory() common.Stats {
 	return common.Stats{
 		"used-bytes-memory":  ns.calcStats.TryInt("used-bytes-memory", 0),
@@ -175,6 +186,7 @@ func (ns *Namespace) Memory() common.Stats {
 	}
 }
 
+// MemoryPercent - get memory stat perecent struct
 func (ns *Namespace) MemoryPercent() common.Stats {
 	return common.Stats{
 		"free-pct-memory":       strconv.Itoa(int(ns.calcStats.TryInt("free-pct-memory", 0))),
@@ -182,10 +194,12 @@ func (ns *Namespace) MemoryPercent() common.Stats {
 	}
 }
 
+// IndexStats - get index stat
 func (ns *Namespace) IndexStats(name string) common.Stats {
 	return ns.indexInfo.ToInfo("sindex/" + ns.name + "/" + name).ToStats()
 }
 
+// updateHistory - update history stat for graph
 func (ns *Namespace) updateHistory() {
 	tm := ns.ServerTime().Unix()
 
@@ -195,6 +209,7 @@ func (ns *Namespace) updateHistory() {
 	}
 }
 
+// setAliases - set calcStats
 func (ns *Namespace) setAliases() {
 	stats := ns.latestStats
 	calcStats := common.Stats{}
@@ -340,6 +355,7 @@ func (ns *Namespace) setAliases() {
 	ns.calcStats.SetStats(calcStats)
 }
 
+// SetsInfo - get Sets stats
 func (ns *Namespace) SetsInfo() map[string]common.Stats {
 	res := ns.latestInfo.ToStatsMap("sets/"+ns.name, "set", ":")
 	for k, v := range res {
@@ -358,6 +374,7 @@ func (ns *Namespace) SetsInfo() map[string]common.Stats {
 	return res
 }
 
+// Stats - get general stats
 func (ns *Namespace) Stats() common.Stats {
 	nsStats := ns.StatsAttrs("master-objects", "master_tombstones", "prole-objects", "prole_tombstones")
 	res := common.Stats{
@@ -385,11 +402,13 @@ func (ns *Namespace) Stats() common.Stats {
 	return res
 }
 
+// ConfigAttrs - get config attribution
 func (ns *Namespace) ConfigAttrs(names ...string) common.Stats {
 	info := ns.latestInfo.ToInfo("get-config:context=namespace;id=" + ns.name).ToStats()
 	return info
 }
 
+// SetConfig - set config attribution
 func (ns *Namespace) SetConfig(config common.Info) ([]string, error) {
 	cmd := "set-config:context=namespace;id=" + ns.name
 	cmds := make([]string, 0, len(config))

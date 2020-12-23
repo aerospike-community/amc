@@ -15,8 +15,8 @@ import (
 )
 
 func getClusterXdrNodes(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -48,8 +48,8 @@ func getClusterXdrNodes(c echo.Context) error {
 }
 
 func getClusterXdrNodeAllStats(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -71,8 +71,8 @@ func getClusterXdrNodeAllStats(c echo.Context) error {
 }
 
 func setClusterXdrNodesConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -144,8 +144,8 @@ func postSwitchXDR(c echo.Context, on bool) error {
 		"status":  "failure",
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		res["error"] = "Cluster not found"
 		return c.JSON(http.StatusNotFound, res)
@@ -189,8 +189,8 @@ func postSwitchXDROff(c echo.Context) error {
 }
 
 func getClusterXdrNodesAllConfig(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}

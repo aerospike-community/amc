@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/controllers/middleware/sessions"
@@ -14,7 +14,7 @@ import (
 
 func sessionValidator(f func(c echo.Context) error) func(c echo.Context) error {
 	return func(c echo.Context) error {
-		sid, err := sessionId(c)
+		sid, err := sessionID(c)
 		if err != nil || !_observer.SessionExists(sid) {
 			invalidateSession(c)
 			return c.JSON(http.StatusUnauthorized, errorMap("invalid session : None"))
@@ -24,7 +24,7 @@ func sessionValidator(f func(c echo.Context) error) func(c echo.Context) error {
 	}
 }
 
-func sessionId(c echo.Context) (string, error) {
+func sessionID(c echo.Context) (string, error) {
 	session := sessions.Default(c)
 	id := session.Get("id")
 
@@ -36,7 +36,7 @@ func sessionId(c echo.Context) (string, error) {
 }
 
 func manageSession(c echo.Context) string {
-	id, err := sessionId(c)
+	id, err := sessionID(c)
 	if err != nil || id == "" {
 		return setSession(c)
 	}

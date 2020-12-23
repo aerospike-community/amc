@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/aerospike/aerospike-client-go v3.1.0+incompatible
+	github.com/aerospike/aerospike-client-go v4.0.0+incompatible
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/gorilla/context v1.1.1

@@ -1,6 +1,6 @@
 FROM debian:stretch-slim 
 
-ARG AMC_VERSION=4.1.2
+ARG AMC_VERSION=4.1.3
 
 RUN apt update -y \
     && apt -y install wget procps \
