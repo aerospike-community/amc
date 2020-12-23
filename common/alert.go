@@ -274,7 +274,7 @@ func (ad *AlertBucket) RedAlertsFrom(nodeAddress string, ID int64) int {
 	_dbGlobalMutex.Lock()
 	defer _dbGlobalMutex.Unlock()
 
-	row := db.QueryRow("SELECT count(*) FROM alerts where ID > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", ID, nodeAddress, "red")
+	row := db.QueryRow("SELECT count(*) FROM alerts where Id > ?1 AND NodeAddress = ?2 AND Status = ?3 AND Resolved IS NULL", ID, nodeAddress, "red")
 
 	var count int
 	if err := row.Scan(&count); err != nil {

@@ -16,8 +16,8 @@ import (
 )
 
 func postInitiateBackup(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -78,14 +78,14 @@ func postInitiateBackup(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"backup_id": backup.Id,
+		"backup_id": backup.ID,
 		"status":    strings.ToLower(string(backup.Status)),
 	})
 }
 
 func getBackupProgress(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -96,7 +96,7 @@ func getBackupProgress(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		backup.Id: map[string]interface{}{
+		backup.ID: map[string]interface{}{
 			"destination_location":     backup.DestinationPath,
 			"destination_node_address": backup.DestinationAddress,
 			"namespace":                backup.Namespace,
@@ -109,8 +109,8 @@ func getBackupProgress(c echo.Context) error {
 }
 
 func getSuccessfulBackups(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -137,8 +137,8 @@ func getSuccessfulBackups(c echo.Context) error {
 }
 
 func getAvailableBackups(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -170,8 +170,8 @@ func getAvailableBackups(c echo.Context) error {
 }
 
 func postInitiateRestore(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -216,8 +216,8 @@ func postInitiateRestore(c echo.Context) error {
 }
 
 func getRestoreProgress(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}

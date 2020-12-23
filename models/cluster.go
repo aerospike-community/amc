@@ -1369,7 +1369,7 @@ func (c *Cluster) AlertsFrom(id int64) []*common.Alert {
 
 	cid := c.ID()
 	for _, alert := range alerts {
-		alert.ClusterId = cid
+		alert.ClusterID = cid
 	}
 
 	return alerts

@@ -12,7 +12,9 @@ import (
 	"github.com/BurntSushi/toml"
 	aslog "github.com/aerospike/aerospike-client-go/logger"
 	log "github.com/sirupsen/logrus"
-	// _ "modernc.org/ql/driver"
+
+	// ql tools for sql
+	_ "modernc.org/ql/driver"
 )
 
 // AMCVersion - AMC Version

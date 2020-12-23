@@ -15,21 +15,21 @@ import (
 )
 
 func getClusterCurrentUser(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"cluster_id": clusterUuid,
+		"cluster_id": clusterUUID,
 		"username":   cluster.User(),
 	})
 }
 
 func postClusterChangePassword(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		invalidateSession(c)
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
@@ -48,8 +48,8 @@ func postClusterChangePassword(c echo.Context) error {
 }
 
 func getClusterUserRoles(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -62,8 +62,8 @@ func getClusterUserRoles(c echo.Context) error {
 }
 
 func getClusterAllUsers(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -110,8 +110,8 @@ func getClusterAllUsers(c echo.Context) error {
 }
 
 func getClusterAllRoles(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -158,8 +158,8 @@ func postClusterAddUser(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid user/password."))
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -177,8 +177,8 @@ func postClusterAddUser(c echo.Context) error {
 }
 
 func postClusterDropUser(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -208,8 +208,8 @@ func postClusterUpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid user name"))
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -305,8 +305,8 @@ func postClusterAddRole(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid role name or privileges."))
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -325,8 +325,8 @@ func postClusterAddRole(c echo.Context) error {
 }
 
 func postClusterDropRole(c echo.Context) error {
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
@@ -355,8 +355,8 @@ func postClusterUpdateRole(c echo.Context) error {
 		return c.JSON(http.StatusOK, errorMap("Invalid role name or privileges."))
 	}
 
-	clusterUuid := c.Param("clusterUuid")
-	cluster := _observer.FindClusterById(clusterUuid)
+	clusterUUID := c.Param("clusterUUID")
+	cluster := _observer.FindClusterByID(clusterUUID)
 	if cluster == nil {
 		return c.JSON(http.StatusOK, errorMap("Cluster not found"))
 	}
