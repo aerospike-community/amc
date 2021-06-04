@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	as "github.com/aerospike/aerospike-client-go"
+	as "github.com/aerospike/aerospike-client-go/v5"
 	"github.com/kennygrant/sanitize"
 	version "github.com/mcuadros/go-version"
 	log "github.com/sirupsen/logrus"
@@ -362,7 +362,7 @@ func (c *Cluster) CreateRole(role string, privileges []as.Privilege) error {
 	if client == nil {
 		return fmt.Errorf("Cluster %s has been decommissioned", c.ID())
 	}
-	return client.CreateRole(nil, role, privileges, nil)
+	return client.CreateRole(nil, role, privileges, nil, 0, 0)
 }
 
 // DropRole - drop role

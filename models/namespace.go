@@ -10,7 +10,7 @@ import (
 	// "github.com/sasha-s/go-deadlock"
 	// log "github.com/sirupsen/logrus"
 
-	ast "github.com/aerospike/aerospike-client-go/types"
+	ast "github.com/aerospike/aerospike-client-go/v5/types"
 
 	"github.com/aerospike-community/amc/common"
 	"github.com/aerospike-community/amc/rrd"

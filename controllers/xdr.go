@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	// log "github.com/sirupsen/logrus"
-	// as "github.com/aerospike/aerospike-client-go"
-	// ast "github.com/aerospike/aerospike-client-go/types"
+	// as "github.com/aerospike/aerospike-client-go/v5"
+	// ast "github.com/aerospike/aerospike-client-go/v5/types"
 	"github.com/labstack/echo/v4"
 
 	"github.com/aerospike-community/amc/common"

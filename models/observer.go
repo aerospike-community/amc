@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	as "github.com/aerospike/aerospike-client-go"
-	asl "github.com/aerospike/aerospike-client-go/logger"
+	as "github.com/aerospike/aerospike-client-go/v5"
+	asl "github.com/aerospike/aerospike-client-go/v5/logger"
 	log "github.com/sirupsen/logrus"
 
 	// "github.com/sasha-s/go-deadlock"

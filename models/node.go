@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	as "github.com/aerospike/aerospike-client-go"
+	as "github.com/aerospike/aerospike-client-go/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/aerospike-community/amc/common"
