@@ -5,7 +5,6 @@
 [![GitHub all releases](https://img.shields.io/github/downloads/aerospike-community/amc/total)](https://github.com/aerospike-community/amc/releases/latest)
 
 # AMC: Aerospike Management Console
-
 The Aerospike Management Console (AMC) is a web-based tool to monitor/manage an
 Aerospike cluster. It provides live updates to the current status of a cluster.
 
@@ -18,8 +17,12 @@ AMC builds will be AMC Enterprise ones.
 ## Aerospike Monitoring Stack
 For monitoring and alerting you should consider using the Prometheus and Grafana based [Aerospike Monitoring Stack](https://github.com/aerospike/aerospike-monitoring). This is the monitoring solution being developed by Aerospike.
 
-## AMC Community Development
+## Supported Aerospike Versions
+AMC is using Aerospike Go Client v5 which support Aerospike server version 4.9+. 
 
+For using AMC with earlier versions, please use an [earlier version](https://github.com/aerospike-community/amc/releases/tag/4.1.3).
+
+## AMC Community Development
 AMC has been turned over to the community. If you wish to contribute code,
 go ahead and clone this repo, modify the code, and create a pull request.
 
