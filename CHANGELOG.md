@@ -1,8 +1,10 @@
 # Aerospike Management Console Release Notes
-## 4.1.4 [future version]
-Release Date: TBD
+## 5.0.0 
+Release Date: June 6, 2021
 
+* Upgrade Go to 1.16.
 * Cleanup code, add comments, fix lint error messages.
+* Upgrade Aerospike Go Client to 5.0.2 - this is a breaking change and might break the usage with Aerospike versions pre 4.9.
 
 ## 4.1.3 
 Release Date: December 7, 2020
