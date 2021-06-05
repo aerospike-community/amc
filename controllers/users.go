@@ -6,10 +6,10 @@ import (
 	"time"
 
 	// log "github.com/sirupsen/logrus"
-	as "github.com/aerospike/aerospike-client-go"
+	as "github.com/aerospike/aerospike-client-go/v5"
 	"github.com/labstack/echo/v4"
 
-	// ast "github.com/aerospike/aerospike-client-go/types"
+	// ast "github.com/aerospike/aerospike-client-go/v5/types"
 
 	"github.com/aerospike-community/amc/common"
 )

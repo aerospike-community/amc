@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	// "crypto/x509"
+	"errors"
 	"math"
 	"net/http"
 	"sort"
@@ -11,8 +12,8 @@ import (
 	"time"
 
 	// . "github.com/ahmetalpbalkan/go-linq"
-	as "github.com/aerospike/aerospike-client-go"
-	ast "github.com/aerospike/aerospike-client-go/types"
+	as "github.com/aerospike/aerospike-client-go/v5"
+	ast "github.com/aerospike/aerospike-client-go/v5/types"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
@@ -94,7 +95,8 @@ func postGetClusterID(c echo.Context) error {
 		cluster, err = _observer.Register(sid, &clientPolicy, strings.Trim(form.ClusterAlias, " \t"), seedHost)
 		if err != nil {
 			if common.AMCIsEnterprise() {
-				if aerr, ok := err.(ast.AerospikeError); ok && aerr.ResultCode() == ast.NOT_AUTHENTICATED {
+				aerr := new(as.AerospikeError)
+				if errors.As(err, &aerr); aerr.Matches(ast.NOT_AUTHENTICATED) {
 					// create output
 					response := map[string]interface{}{
 						"security_enabled": true,

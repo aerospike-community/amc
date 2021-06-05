@@ -10,7 +10,7 @@ import (
 
 	// . "github.com/ahmetalpbalkan/go-linq"
 	// log "github.com/sirupsen/logrus"
-	// ast "github.com/aerospike/aerospike-client-go/types"
+	// ast "github.com/aerospike/aerospike-client-go/v5/types"
 	"github.com/aerospike-community/amc/common"
 	"github.com/labstack/echo/v4"
 )

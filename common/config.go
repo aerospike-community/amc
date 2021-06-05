@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/toml"
-	aslog "github.com/aerospike/aerospike-client-go/logger"
+	aslog "github.com/aerospike/aerospike-client-go/v5/logger"
 	log "github.com/sirupsen/logrus"
 
 	// ql tools for sql
