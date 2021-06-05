@@ -393,7 +393,7 @@ func setClusterNamespaceConfig(c echo.Context) error {
 				resChan <- &NodeResult{Node: node, Name: node.Address(), Status: string(node.Status()), Err: err, UnsetParams: unsetParams}
 			}(node, ns)
 		} else {
-			resChan <- &NodeResult{Name: namespaceName, Status: "on", Err: errors.New("Node not found")}
+			resChan <- &NodeResult{Name: namespaceName, Status: "on", Err: errors.New("node not found")}
 		}
 	}
 

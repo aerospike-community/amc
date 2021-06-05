@@ -252,7 +252,7 @@ func Server(config *common.Config) {
 			}
 		}
 
-		e.TLSServer.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+		e.TLSServer.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
 		e.TLSServer.TLSConfig = tlsConfig
 		e.TLSServer.Addr = config.AMC.Bind
 		// redirect all http requests to https

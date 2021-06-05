@@ -78,7 +78,7 @@ func postGetClusterID(c echo.Context) error {
 			clientPolicy.User = strings.Trim(form.Username, " \t")
 			clientPolicy.Password = form.Password
 
-			if len(seedHost.TLSName) > 0 || form.EncryptOnly == true {
+			if len(seedHost.TLSName) > 0 || form.EncryptOnly {
 				// Setup TLS Config
 				tlsConfig := &tls.Config{
 					Certificates:             _observer.Config().ClientPool(),

@@ -157,7 +157,6 @@ func (b *Backup) followProgress(session *ssh.Session, reader io.Reader) {
 
 	b.UpdateProgress(100)
 	b.UpdateStatus(common.BackupStatusFinished)
-	return
 }
 
 // func (b *Backup) Notify() {

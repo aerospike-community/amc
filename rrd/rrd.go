@@ -10,7 +10,6 @@ import (
 
 	"github.com/aerospike-community/amc/common"
 	timeseries "github.com/aerospike-community/amc/go-time-series"
-	//timeseries "github.com/khaf/go-time-series"
 )
 
 // Bucket type struct
