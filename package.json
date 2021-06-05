@@ -1,6 +1,6 @@
 {
   "name": "amc",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "AMC client integrated with the new go server",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
