@@ -9,8 +9,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kennygrant/sanitize v1.2.4
-	github.com/labstack/echo/v4 v4.3.0
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
@@ -18,9 +17,7 @@ require (
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
-	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
-	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
-	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
